@@ -1,0 +1,43 @@
+[package]
+name = "arcana"
+version = "0.1.0"
+edition = "2021"
+authors = ["Mavs"]
+
+[dependencies]
+bevy = { version = "0.18.1", default-features = false, features = [
+    "bevy_asset",
+    "bevy_color",
+    "bevy_core_pipeline",
+    "bevy_picking",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_state",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_ui_render",
+    "bevy_window",
+    "bevy_winit",
+    "default_font",
+    "png",
+    "serialize",
+    "tonemapping_luts",
+    "x11",
+    "zstd_rust",
+]}
+bevy_egui = "0.39.0"
+bevy_kira_audio = { version = "0.25.0", features = ["ogg", "wav"] }
+bevy_renet = "4.0.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+postcard = { version = "1.0", features = ["use-std"] }
+rand = "0.9.2"
+rfd = "0.17.2"
+strum = { version = "0.28.0", features = ["derive"] }
+strum_macros = "0.28.0"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
