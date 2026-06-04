@@ -102,7 +102,6 @@ impl Plugin for GamePlugin {
         app
             // Utilities
             .add_systems(Update, (check_keys_menu,))
-            .add_systems(PostUpdate, on_resize_message)
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::Settings), setup_game_settings)

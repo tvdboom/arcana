@@ -86,7 +86,7 @@ pub fn spawn_label(
     settings: &Settings,
     assets: &WorldAssets,
 ) {
-    parent.spawn(add_text(title, "bold", BUTTON_TEXT_SIZE, assets));
+    parent.spawn((add_text(title, "bold", BUTTON_TEXT_SIZE, assets), TextColor(BUTTON_TEXT_COLOR)));
 
     parent
         .spawn(Node {
@@ -113,6 +113,8 @@ pub fn spawn_label(
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::Center,
                             margin: UiRect::all(percent(1.)),
+                            border: UiRect::all(Val::Px(2.)),
+                            border_radius: BorderRadius::all(Val::Px(4.)),
                             ..default()
                         },
                         BackgroundColor(if match_setting(item, settings) {
@@ -120,6 +122,7 @@ pub fn spawn_label(
                         } else {
                             NORMAL_BUTTON_COLOR
                         }),
+                        BorderColor::all(BUTTON_BORDER_COLOR),
                         item.clone(),
                     ))
                     .observe(recolor_label::<Over>(HOVERED_BUTTON_COLOR))
@@ -130,7 +133,10 @@ pub fn spawn_label(
                     .observe(cursor::<Out>(SystemCursorIcon::Default))
                     .observe(on_click_label_button)
                     .with_children(|parent| {
-                        parent.spawn(add_text(item.to_title(), "bold", SUBTITLE_TEXT_SIZE, assets));
+                        parent.spawn((
+                            add_text(item.to_title(), "bold", SUBTITLE_TEXT_SIZE, assets),
+                            TextColor(BUTTON_TEXT_COLOR),
+                        ));
                     });
             }
         });

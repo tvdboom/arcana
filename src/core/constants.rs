@@ -1,10 +1,12 @@
-use bevy::prelude::{Color};
+use bevy::prelude::Color;
 
 /// Menu
 pub const SUBTITLE_TEXT_SIZE: f32 = 2.;
 pub const TITLE_TEXT_SIZE: f32 = 4.;
 pub const BUTTON_TEXT_SIZE: f32 = 3.;
-pub const NORMAL_BUTTON_COLOR: Color = Color::srgb(0.15, 0.15, 0.15);
-pub const HOVERED_BUTTON_COLOR: Color = Color::srgb_u8(59, 66, 82);
-pub const PRESSED_BUTTON_COLOR: Color = Color::srgb_u8(95, 131, 175);
-pub const DISABLED_BUTTON_COLOR: Color = Color::srgb(0.8, 0.5, 0.5);
+pub const NORMAL_BUTTON_COLOR: Color = Color::srgba_u8(10, 18, 45, 230);
+pub const HOVERED_BUTTON_COLOR: Color = Color::srgb_u8(20, 45, 110);
+pub const PRESSED_BUTTON_COLOR: Color = Color::srgb_u8(35, 85, 175);
+pub const DISABLED_BUTTON_COLOR: Color = Color::srgb_u8(70, 30, 30);
+pub const BUTTON_BORDER_COLOR: Color = Color::srgb_u8(170, 140, 55);
+pub const BUTTON_TEXT_COLOR: Color = Color::srgb_u8(230, 205, 145);

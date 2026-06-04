@@ -3,8 +3,6 @@ use std::fmt::Debug;
 use crate::core::assets::WorldAssets;
 use bevy::prelude::*;
 
-#[derive(Component)]
-pub struct TextSize(pub f32);
 
 /// Change the background color of an entity
 pub fn recolor<E: Debug + Clone + Reflect>(
@@ -21,8 +19,8 @@ pub fn recolor<E: Debug + Clone + Reflect>(
 pub fn add_root_node(block: bool) -> (Node, Pickable) {
     (
         Node {
-            width: percent(100.),
-            height: percent(105.),
+            width: Val::Vw(100.),
+            height: Val::Vh(100.),
             position_type: PositionType::Absolute,
             flex_direction: FlexDirection::Column,
             align_content: AlignContent::Center,

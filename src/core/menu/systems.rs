@@ -17,10 +17,13 @@ pub fn setup_menu(
     app_state: Res<State<AppState>>,
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
-    window: Single<&Window>,
 ) {
     commands
-        .spawn((add_root_node(true), ImageNode::new(assets.image("bg")), MenuCmp))
+        .spawn((
+            add_root_node(true),
+            ImageNode::new(assets.image("bg")).with_mode(NodeImageMode::Stretch),
+            MenuCmp,
+        ))
         .with_children(|parent| {
             parent
                 .spawn(Node {
@@ -29,7 +32,7 @@ pub fn setup_menu(
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     flex_direction: FlexDirection::Column,
-                    margin: UiRect::ZERO.with_top(percent(10.)),
+                    margin: UiRect::top(percent(12.)),
                     ..default()
                 })
                 .with_children(|parent| match app_state.get() {
@@ -47,13 +50,12 @@ pub fn setup_menu(
                                 flex_direction: FlexDirection::Column,
                                 align_items: AlignItems::Center,
                                 justify_content: JustifyContent::Center,
-                                margin: UiRect::ZERO.with_top(percent(-7.)),
                                 ..default()
                             },))
                             .with_children(|parent| {
                                 spawn_label(
                                     parent,
-                                    "Color",
+                                    "Language",
                                     vec![SettingsBtn::English, SettingsBtn::Spanish],
                                     &settings,
                                     &assets,
@@ -112,7 +114,7 @@ pub fn setup_game_settings(
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                margin: UiRect::ZERO.with_top(percent(-3.)),
+                margin: UiRect::ZERO.with_top(percent(30.)),
                 ..default()
             },))
             .with_children(|parent| {

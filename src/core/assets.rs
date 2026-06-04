@@ -90,7 +90,7 @@ impl FromWorld for WorldAssets {
             ("defeat", assets.load("images/bg/defeat.png")),
         ]);
 
-        let mut atlas: HashMap<&'static str, AtlasInfo> = HashMap::new();
+        let atlas: HashMap<&'static str, AtlasInfo> = HashMap::new();
 
         let textures = HashMap::new();
 

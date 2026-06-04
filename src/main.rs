@@ -55,7 +55,8 @@ fn main() {
             }),
     )
     .add_plugins(AudioPlugin)
-    .add_plugins(GamePlugin);
+    .add_plugins(GamePlugin)
+    .insert_resource(ClearColor(Color::srgb_u8(5, 8, 20)));
 
     #[cfg(target_os = "windows")]
     app.add_systems(Startup, set_window_icon);

@@ -1,13 +1,5 @@
-use crate::core::menu::utils::TextSize;
 use crate::core::states::{AppState, GameState};
 use bevy::prelude::*;
-use bevy::window::WindowResized;
-
-pub fn on_resize_message(
-    mut resize_msg: MessageReader<WindowResized>,
-    mut text: Query<(&mut TextFont, &TextSize)>,
-) {
-}
 
 pub fn check_keys_menu(
     app_state: Res<State<AppState>>,
@@ -37,20 +29,6 @@ pub fn check_keys_menu(
             AppState::Game if *game_state.get() == GameState::EndGame => {
                 next_app_state.set(AppState::MainMenu)
             },
-            _ => (),
-        }
-    }
-}
-
-pub fn check_keys_game(
-    keyboard: Res<ButtonInput<KeyCode>>,
-    game_state: Res<State<GameState>>,
-    mut next_game_state: ResMut<NextState<GameState>>,
-) {
-    if keyboard.just_released(KeyCode::Space) {
-        match game_state.get() {
-            GameState::Combat => next_game_state.set(GameState::CombatPaused),
-            GameState::CombatPaused => next_game_state.set(GameState::Combat),
             _ => (),
         }
     }

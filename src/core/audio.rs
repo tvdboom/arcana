@@ -145,7 +145,8 @@ pub fn update_audio(
 
         for (mut bgcolor, setting) in &mut settings_btn {
             if matches!(setting, SettingsBtn::Mute | SettingsBtn::Sound | SettingsBtn::Music) {
-                bgcolor.0 = if (*setting == SettingsBtn::Mute && settings.audio == AudioSettings::Mute)
+                bgcolor.0 = if (*setting == SettingsBtn::Mute
+                    && settings.audio == AudioSettings::Mute)
                     || (*setting == SettingsBtn::Sound && settings.audio == AudioSettings::Sfx)
                     || (*setting == SettingsBtn::Music && settings.audio == AudioSettings::Music)
                 {

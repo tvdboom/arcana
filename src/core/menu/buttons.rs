@@ -2,15 +2,13 @@ use crate::core::assets::WorldAssets;
 use crate::core::constants::*;
 use crate::core::menu::systems::StartNewCharacterMsg;
 use crate::core::menu::utils::{add_text, recolor};
+#[cfg(not(target_arch = "wasm32"))]
+use crate::core::persistence::{LoadCharacterMsg, SaveCharacterMsg};
 use crate::core::states::{AppState, GameState};
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
-#[cfg(not(target_arch = "wasm32"))]
-use {
-    crate::core::persistence::{LoadCharacterMsg, SaveCharacterMsg},
-};
 
 #[derive(Component)]
 pub struct MenuCmp;
@@ -56,12 +54,16 @@ pub fn on_click_menu_button(
         MenuBtn::LoadCharacter => {
             load_game_msg.write(LoadCharacterMsg);
         },
-        MenuBtn::Back => match *game_state.get() {
-            GameState::ChooseClass => {
-                next_game_state.set(GameState::ChooseRace);
-            },
-            GameState::ChooseSubClass => {
-                next_game_state.set(GameState::ChooseClass);
+        MenuBtn::Back => match *app_state.get() {
+            AppState::Settings => next_app_state.set(AppState::MainMenu),
+            AppState::Game => match *game_state.get() {
+                GameState::ChooseClass => {
+                    next_game_state.set(GameState::ChooseRace);
+                },
+                GameState::ChooseSubClass => {
+                    next_game_state.set(GameState::ChooseClass);
+                },
+                _ => unreachable!(),
             },
             _ => unreachable!(),
         },
@@ -90,11 +92,7 @@ pub fn on_click_menu_button(
     }
 }
 
-pub fn spawn_menu_button(
-    parent: &mut ChildSpawnerCommands,
-    btn: MenuBtn,
-    assets: &WorldAssets,
-) {
+pub fn spawn_menu_button(parent: &mut ChildSpawnerCommands, btn: MenuBtn, assets: &WorldAssets) {
     parent
         .spawn((
             Node {
@@ -103,9 +101,12 @@ pub fn spawn_menu_button(
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 margin: UiRect::all(percent(1.)),
+                border: UiRect::all(Val::Px(2.)),
+                border_radius: BorderRadius::all(Val::Px(4.)),
                 ..default()
             },
             BackgroundColor(NORMAL_BUTTON_COLOR),
+            BorderColor::all(BUTTON_BORDER_COLOR),
             btn.clone(),
         ))
         .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
@@ -117,6 +118,9 @@ pub fn spawn_menu_button(
         .observe(cursor::<Release>(SystemCursorIcon::Default))
         .observe(on_click_menu_button)
         .with_children(|parent| {
-            parent.spawn(add_text(btn.to_title(), "bold", BUTTON_TEXT_SIZE, assets));
+            parent.spawn((
+                add_text(btn.to_title(), "bold", BUTTON_TEXT_SIZE, assets),
+                TextColor(BUTTON_TEXT_COLOR),
+            ));
         });
 }
