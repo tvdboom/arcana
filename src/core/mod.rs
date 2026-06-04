@@ -1,64 +1,128 @@
+mod assets;
+mod audio;
+mod camera;
+mod constants;
+mod menu;
+#[cfg(not(target_arch = "wasm32"))]
+mod persistence;
+mod player;
+mod settings;
+mod states;
+mod systems;
+mod utils;
+
+use crate::core::assets::WorldAssets;
+use crate::core::audio::*;
+use crate::core::camera::*;
+use crate::core::menu::buttons::MenuCmp;
+use crate::core::menu::systems::*;
+#[cfg(not(target_arch = "wasm32"))]
+use crate::core::persistence::{
+    load_game, run_autosave, save_game, LoadCharacterMsg, SaveCharacterMsg,
+};
+use crate::core::settings::Settings;
+use crate::core::states::{AppState, GameState};
+use crate::core::systems::*;
+use crate::core::utils::despawn;
 use bevy::prelude::*;
-use bevy_egui::EguiPlugin;
-use bevy_kira_audio::AudioPlugin;
-use bevy_renet::{RenetClientPlugin, RenetServerPlugin};
-use bevy_renet::netcode::{NetcodeClientPlugin, NetcodeServerPlugin};
-
-pub mod states;
-pub mod player;
-pub mod pet;
-pub mod persistence;
-pub mod audio;
-pub mod localization;
-pub mod compat;
-pub mod network;
-pub mod systems;
-pub mod ui;
-pub mod rules;
-
-use crate::core::states::AppState;
-use crate::core::audio::AudioSystemPlugin;
-use crate::core::localization::Localizer;
-use crate::core::persistence::PersistenceManager;
-use crate::core::systems::network_sync::NetworkSyncPlugin;
-use crate::core::ui::menu::MenuUiPlugin;
-use crate::core::ui::planning::PlanningUiPlugin;
-use crate::core::ui::combat::CombatUiPlugin;
-use crate::core::ui::duels::DuelsUiPlugin;
+use bevy::time::common_conditions::on_timer;
+use std::time::Duration;
+use strum::IntoEnumIterator;
 
 pub struct GamePlugin;
 
-impl Plugin for GamePlugin {
-    fn build(&self, app: &mut App) {
-        // Add external dependencies plugins
-        app.add_plugins(EguiPlugin::default())
-            .add_plugins(AudioPlugin)
-            .add_plugins((
-                RenetServerPlugin,
-                NetcodeServerPlugin,
-                RenetClientPlugin,
-                NetcodeClientPlugin,
-            ));
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+struct InGameSet;
 
-        // Insert App State
-        app.init_state::<AppState>();
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+struct InPlayingSet;
 
-        // Insert resources
-        app.init_resource::<Localizer>();
-        app.add_systems(Startup, setup_localizer_language);
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+struct InCombatSet;
 
-        // Add custom plugins
-        app.add_plugins((
-            AudioSystemPlugin,
-            NetworkSyncPlugin,
-            MenuUiPlugin,
-            PlanningUiPlugin,
-            CombatUiPlugin,
-            DuelsUiPlugin,
-        ));
-    }
+macro_rules! configure_stages {
+    ($app:expr, $set:ident, $run_if:expr) => {
+        $app.configure_sets(First, $set.run_if($run_if))
+            .configure_sets(PreUpdate, $set.run_if($run_if))
+            .configure_sets(Update, $set.run_if($run_if))
+            .configure_sets(PostUpdate, $set.run_if($run_if))
+            .configure_sets(Last, $set.run_if($run_if));
+    };
 }
 
-fn setup_localizer_language(mut localizer: ResMut<Localizer>) {
-    localizer.set_language(PersistenceManager::load_settings().language);
+impl Plugin for GamePlugin {
+    fn build(&self, app: &mut App) {
+        app
+            // States
+            .init_state::<AppState>()
+            .init_state::<GameState>()
+            // Messages
+            .add_message::<PlayAudioMsg>()
+            .add_message::<PauseAudioMsg>()
+            .add_message::<StopAudioMsg>()
+            .add_message::<MuteAudioMsg>()
+            .add_message::<ChangeAudioMsg>()
+            .add_message::<StartNewCharacterMsg>()
+            // Resources
+            .init_resource::<WorldAssets>()
+            .init_resource::<PlayingAudio>()
+            .init_resource::<Settings>();
+
+        // Sets
+        configure_stages!(app, InGameSet, in_state(AppState::Game));
+        configure_stages!(
+            app,
+            InPlayingSet,
+            in_state(GameState::Playing).and_then(in_state(AppState::Game))
+        );
+        configure_stages!(
+            app,
+            InCombatSet,
+            in_state(GameState::Combat).and_then(in_state(AppState::Game))
+        );
+
+        app
+            // Camera
+            .add_systems(Startup, setup_camera)
+            // Audio
+            .add_systems(Startup, setup_audio)
+            .add_systems(OnEnter(GameState::Playing), play_music)
+            .add_systems(
+                Update,
+                (toggle_audio, update_audio, play_audio, pause_audio, stop_audio, mute_audio),
+            );
+
+        // Menu
+        for state in AppState::iter().filter(|s| *s != AppState::Game) {
+            app.add_systems(OnEnter(state), setup_menu)
+                .add_systems(OnExit(state), despawn::<MenuCmp>);
+        }
+        app.add_systems(Update, start_new_game_message.run_if(not(in_state(AppState::Game))));
+
+        app
+            // Utilities
+            .add_systems(Update, (check_keys_menu,))
+            .add_systems(PostUpdate, on_resize_message)
+            .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
+            .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)
+            .add_systems(OnEnter(GameState::Settings), setup_game_settings)
+            .add_systems(OnExit(GameState::Settings), despawn::<MenuCmp>);
+
+        #[cfg(not(target_arch = "wasm32"))]
+        app
+            // Persistence
+            .add_message::<SaveCharacterMsg>()
+            .add_message::<LoadCharacterMsg>()
+            .add_systems(
+                Update,
+                (
+                    load_game,
+                    (
+                        save_game,
+                        run_autosave.run_if(on_timer(Duration::from_secs(10))).in_set(InPlayingSet),
+                    )
+                        .in_set(InPlayingSet),
+                ),
+            );
+    }
 }

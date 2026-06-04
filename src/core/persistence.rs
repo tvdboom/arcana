@@ -1,117 +1,107 @@
-use std::fs::{create_dir_all, File};
+use std::env::current_dir;
+use std::fs::File;
+use std::io;
 use std::io::{Read, Write};
-use std::path::PathBuf;
 
+use crate::core::audio::ChangeAudioMsg;
+use crate::core::player::Player;
+use crate::core::settings::Settings;
+use crate::core::states::{AppState, GameState};
+use crate::TITLE;
+use bevy::prelude::*;
+use bincode::config::standard;
+use bincode::serde::{decode_from_slice, encode_to_vec};
+use rfd::FileDialog;
 use serde::{Deserialize, Serialize};
 
-use crate::core::localization::Language;
-use crate::core::player::Character;
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct GameSettings {
-    pub audio_mode: AudioMode,
-    pub auto_save: bool,
-    pub language: Language,
+#[derive(Serialize, Deserialize)]
+pub struct SaveAll {
+    pub settings: Settings,
+    pub player: Player,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum AudioMode {
-    Mute,
-    SfxOnly,
-    #[default]
-    SfxAndMusic,
+#[derive(Message)]
+pub struct LoadCharacterMsg;
+
+#[derive(Message)]
+pub struct SaveCharacterMsg(pub bool);
+
+fn save_to_bin(file_path: &str, data: &SaveAll) -> io::Result<()> {
+    let mut file = File::create(file_path)?;
+
+    let buffer = encode_to_vec(data, standard()).expect("Failed to serialize data.");
+    file.write_all(&buffer)?;
+
+    Ok(())
 }
 
-pub struct PersistenceManager;
+fn load_from_bin(file_path: &str) -> io::Result<SaveAll> {
+    let mut file = File::open(file_path)?;
 
-impl PersistenceManager {
-    fn save_dir() -> PathBuf {
-        let mut path = PathBuf::from(".");
-        path.push("saves");
-        let _ = create_dir_all(&path);
-        path
-    }
+    let mut buffer = vec![];
+    file.read_to_end(&mut buffer)?;
 
-    pub fn list_saves() -> Vec<String> {
-        let dir = Self::save_dir();
-        let mut saves = Vec::new();
-        if let Ok(entries) = std::fs::read_dir(dir) {
-            for entry in entries.flatten() {
-                if let Ok(file_type) = entry.file_type() {
-                    if file_type.is_file() {
-                        if let Some(name) = entry.file_name().to_str() {
-                            if name.ends_with(".json") && name != "settings.json" {
-                                saves.push(name.replace(".json", ""));
-                            }
-                        }
-                    }
-                }
-            }
+    let (data, _) = decode_from_slice(&buffer, standard()).expect("Failed to deserialize data.");
+    Ok(data)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn load_game(
+    mut commands: Commands,
+    mut load_game_msg: MessageReader<LoadCharacterMsg>,
+    mut change_audio_msg: MessageWriter<ChangeAudioMsg>,
+    mut next_app_state: ResMut<NextState<AppState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    for _ in load_game_msg.read() {
+        if let Some(file_path) = FileDialog::new().pick_file() {
+            let file_path_str = file_path.to_string_lossy().to_string();
+            let mut data = load_from_bin(&file_path_str).expect("Failed to load the game.");
+
+            change_audio_msg.write(ChangeAudioMsg(Some(data.settings.audio)));
+
+            commands.insert_resource(data.settings);
+            commands.insert_resource(data.player);
+
+            next_game_state.set(GameState::default());
+            next_app_state.set(AppState::Game);
         }
-        saves
     }
+}
 
-    pub fn save_character(character: &Character) -> Result<(), String> {
-        let mut path = Self::save_dir();
-        path.push(format!("{}.json", character.name));
-        
-        let serialized = serde_json::to_string_pretty(character)
-            .map_err(|e| format!("Failed to serialize character: {}", e))?;
-        
-        let mut file = File::create(path)
-            .map_err(|e| format!("Failed to create save file: {}", e))?;
-            
-        file.write_all(serialized.as_bytes())
-            .map_err(|e| format!("Failed to write save file: {}", e))?;
-            
-        Ok(())
-    }
+#[cfg(not(target_arch = "wasm32"))]
+pub fn save_game(
+    mut save_game_msg: MessageReader<SaveCharacterMsg>,
+    settings: Res<Settings>,
+    player: Res<Player>,
+) {
+    for msg in save_game_msg.read() {
+        let file_path = if msg.0 {
+            let mut path = current_dir().expect("Failed to get current directory.");
+            path.push(TITLE.to_lowercase());
+            Some(path)
+        } else {
+            FileDialog::new().save_file()
+        };
 
-    pub fn load_character(name: &str) -> Result<Character, String> {
-        let mut path = Self::save_dir();
-        path.push(format!("{}.json", name));
-        
-        let mut file = File::open(path)
-            .map_err(|e| format!("Failed to open save file: {}", e))?;
-            
-        let mut contents = String::new();
-        file.read_to_string(&mut contents)
-            .map_err(|e| format!("Failed to read save file: {}", e))?;
-            
-        let character: Character = serde_json::from_str(&contents)
-            .map_err(|e| format!("Failed to deserialize character: {}", e))?;
-            
-        Ok(character)
-    }
-
-    pub fn save_settings(settings: &GameSettings) -> Result<(), String> {
-        let mut path = Self::save_dir();
-        path.push("settings.json");
-        
-        let serialized = serde_json::to_string_pretty(settings)
-            .map_err(|e| format!("Failed to serialize settings: {}", e))?;
-            
-        let mut file = File::create(path)
-            .map_err(|e| format!("Failed to create settings file: {}", e))?;
-            
-        file.write_all(serialized.as_bytes())
-            .map_err(|e| format!("Failed to write settings file: {}", e))?;
-            
-        Ok(())
-    }
-
-    pub fn load_settings() -> GameSettings {
-        let mut path = Self::save_dir();
-        path.push("settings.json");
-        
-        if let Ok(mut file) = File::open(path) {
-            let mut contents = String::new();
-            if file.read_to_string(&mut contents).is_ok() {
-                if let Ok(settings) = serde_json::from_str::<GameSettings>(&contents) {
-                    return settings;
-                }
+        if let Some(mut file_path) = file_path {
+            if !file_path.extension().map(|e| e == "bin").unwrap_or(false) {
+                file_path.set_extension("bin");
             }
+
+            let file_path_str = file_path.to_string_lossy().to_string();
+            let data = SaveAll {
+                settings: settings.clone(),
+                player: player.clone(),
+            };
+
+            save_to_bin(&file_path_str, &data).expect("Failed to save the game.");
         }
-        GameSettings::default()
+    }
+}
+
+pub fn run_autosave(settings: Res<Settings>, mut save_game_msg: MessageWriter<SaveCharacterMsg>) {
+    if settings.autosave {
+        save_game_msg.write(SaveCharacterMsg(true));
     }
 }
