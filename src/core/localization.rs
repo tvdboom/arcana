@@ -64,8 +64,8 @@ pub fn format_race_description(
     let mut modifier_strs = Vec::new();
     for attr in Attribute::iter() {
         let val = race.modifier(attr);
-        if val != 0.0 {
-            let sign = if val > 0.0 {
+        if val != 0 {
+            let sign = if val > 0 {
                 "+"
             } else {
                 ""

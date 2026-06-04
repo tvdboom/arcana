@@ -1,3 +1,4 @@
+use crate::core::menu::buttons::DisabledButton;
 use std::fmt::Debug;
 
 use crate::core::assets::WorldAssets;
@@ -6,10 +7,12 @@ use bevy::prelude::*;
 /// Change the background color of an entity
 pub fn recolor<E: Debug + Clone + Reflect>(
     color: Color,
-) -> impl Fn(On<Pointer<E>>, Query<&mut BackgroundColor>) {
+) -> impl Fn(On<Pointer<E>>, Query<(&mut BackgroundColor, Option<&DisabledButton>)>) {
     move |ev, mut bgcolor_q| {
-        if let Ok(mut bgcolor) = bgcolor_q.get_mut(ev.entity) {
-            bgcolor.0 = color;
+        if let Ok((mut bgcolor, disabled)) = bgcolor_q.get_mut(ev.entity) {
+            if disabled.is_none() {
+                bgcolor.0 = color;
+            }
         };
     }
 }

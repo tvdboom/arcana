@@ -15,7 +15,7 @@ use crate::core::utils::cursor;
 pub struct PlayingAudio(pub HashMap<&'static str, Handle<AudioInstance>>);
 
 impl PlayingAudio {
-    pub const DEFAULT_VOLUME: f32 = 10.;
+    pub const DEFAULT_VOLUME: f32 = 1.;
     pub const TWEEN: AudioTween = AudioTween::new(Duration::from_secs(2), AudioEasing::OutPowi(2));
 }
 

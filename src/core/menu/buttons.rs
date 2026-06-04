@@ -34,7 +34,7 @@ pub struct DisabledButton;
 pub fn on_click_menu_button(
     event: On<Pointer<Click>>,
     btn_q: Query<(Option<&DisabledButton>, &MenuBtn)>,
-    mut start_new_game_msg: MessageWriter<StartNewCharacterMsg>,
+    mut start_new_char_msg: MessageWriter<StartNewCharacterMsg>,
     #[cfg(not(target_arch = "wasm32"))] mut load_game_msg: MessageWriter<LoadCharacterMsg>,
     #[cfg(not(target_arch = "wasm32"))] mut save_game_msg: MessageWriter<SaveCharacterMsg>,
     app_state: Res<State<AppState>>,
@@ -50,7 +50,7 @@ pub fn on_click_menu_button(
 
     match btn {
         MenuBtn::NewCharacter => {
-            start_new_game_msg.write(StartNewCharacterMsg);
+            start_new_char_msg.write(StartNewCharacterMsg);
         },
         #[cfg(not(target_arch = "wasm32"))]
         MenuBtn::LoadCharacter => {
@@ -59,6 +59,12 @@ pub fn on_click_menu_button(
         MenuBtn::Back => match *app_state.get() {
             AppState::Settings => next_app_state.set(AppState::MainMenu),
             AppState::Game => match *game_state.get() {
+                GameState::ChooseRace => {
+                    next_game_state.set(GameState::CreateCharacter);
+                },
+                GameState::CreateCharacter => {
+                    next_app_state.set(AppState::MainMenu);
+                },
                 GameState::ChooseClass => {
                     next_game_state.set(GameState::ChooseRace);
                 },

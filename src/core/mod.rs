@@ -25,6 +25,7 @@ use crate::core::menu::systems::*;
 use crate::core::persistence::{
     load_game, run_autosave, save_game, LoadCharacterMsg, SaveCharacterMsg,
 };
+use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::states::{AppState, GameState};
 use crate::core::systems::*;
@@ -71,8 +72,9 @@ impl Plugin for GamePlugin {
             // Resources
             .init_resource::<WorldAssets>()
             .init_resource::<PlayingAudio>()
+            .init_resource::<Localization>()
             .init_resource::<Settings>()
-            .init_resource::<Localization>();
+            .init_resource::<Player>();
 
         // Sets
         configure_stages!(app, InGameSet, in_state(AppState::Game));
@@ -110,6 +112,17 @@ impl Plugin for GamePlugin {
             .add_systems(
                 Update,
                 (check_keys_menu, update_localized_text.run_if(resource_changed::<Settings>)),
+            )
+            .add_systems(OnEnter(GameState::CreateCharacter), setup_character_creation)
+            .add_systems(OnExit(GameState::CreateCharacter), despawn::<MenuCmp>)
+            .add_systems(
+                Update,
+                (
+                    handle_name_input,
+                    update_character_creation_continue_btn,
+                    update_attribute_buttons,
+                )
+                    .run_if(in_state(GameState::CreateCharacter)),
             )
             .add_systems(OnEnter(GameState::ChooseRace), setup_race_selection)
             .add_systems(OnExit(GameState::ChooseRace), despawn::<MenuCmp>)

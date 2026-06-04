@@ -4,10 +4,10 @@ use strum_macros::EnumIter;
 
 #[derive(EnumIter, Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Class {
-    #[default]
     Druid,
     Mage,
     Rogue,
+    #[default]
     Warrior,
 }
 
