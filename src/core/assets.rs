@@ -86,8 +86,18 @@ impl FromWorld for WorldAssets {
             ("music", assets.load("images/icons/music.png")),
             // Background
             ("bg", assets.load("images/bg/bg.png")),
+            ("bg2", assets.load("images/bg/bg2.png")),
             ("victory", assets.load("images/bg/victory.png")),
             ("defeat", assets.load("images/bg/defeat.png")),
+            // UI Borders
+            ("border", assets.load("images/ui/border.png")),
+            ("border_hover", assets.load("images/ui/border hover.png")),
+            ("stone", assets.load("images/ui/stone.png")),
+            // Races
+            ("dwarf", assets.load("images/races/dwarf.png")),
+            ("elf", assets.load("images/races/elf.png")),
+            ("human", assets.load("images/races/human.png")),
+            ("orc", assets.load("images/races/orc.png")),
         ]);
 
         let atlas: HashMap<&'static str, AtlasInfo> = HashMap::new();

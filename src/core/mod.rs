@@ -11,6 +11,7 @@ mod settings;
 mod states;
 mod systems;
 mod utils;
+mod races;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::*;
@@ -105,6 +106,8 @@ impl Plugin for GamePlugin {
         app
             // Utilities
             .add_systems(Update, (check_keys_menu, update_localized_text.run_if(resource_changed::<Settings>)))
+            .add_systems(OnEnter(GameState::ChooseRace), setup_race_selection)
+            .add_systems(OnExit(GameState::ChooseRace), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::Settings), setup_game_settings)

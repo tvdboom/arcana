@@ -56,3 +56,15 @@ pub fn add_text(
         },
     )
 }
+
+/// Change the image of an entity on event
+pub fn reimage<E: Debug + Clone + Reflect>(
+    image_handle: Handle<Image>,
+) -> impl Fn(On<Pointer<E>>, Query<&mut ImageNode>) {
+    move |ev, mut image_q| {
+        if let Ok(mut image_node) = image_q.get_mut(ev.entity) {
+            image_node.image = image_handle.clone();
+            image_node.image_mode = NodeImageMode::Stretch;
+        };
+    }
+}

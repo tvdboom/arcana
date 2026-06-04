@@ -16,5 +16,21 @@
   "music": "Música",
   "true": "Sí",
   "false": "No",
-  "created_by": "Creado por Mavs"
+  "created_by": "Creado por Mavs",
+  "choose race": "Elige una raza",
+  "dwarf": "Enano",
+  "dwarf_desc": "Robustos y resistentes habitantes de las profundidades montañosas, maestros artesanos y guerreros.",
+  "elf": "Elfo",
+  "elf_desc": "Elegantes y sabios guardianes de los bosques ancestrales, diestros en magia y arquería.",
+  "human": "Humano",
+  "human_desc": "Versátiles y ambiciosos constructores de imperios, adaptables a cualquier camino que elijan.",
+  "orc": "Orco",
+  "orc_desc": "Feroces y poderosos guerreros de los páramos salvajes, que valoran la fuerza y el honor en el combate.",
+  "modifiers": "Modificadores",
+  "strength": "Fuerza",
+  "dexterity": "Destreza",
+  "constitution": "Constitución",
+  "intelligence": "Inteligencia",
+  "wisdom": "Sabiduría",
+  "charisma": "Carisma"
 }

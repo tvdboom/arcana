@@ -16,5 +16,21 @@
   "music": "Music",
   "true": "On",
   "false": "Off",
-  "created_by": "Created by Mavs"
+  "created_by": "Created by Mavs",
+  "choose race": "Choose a race",
+  "dwarf": "Dwarf",
+  "dwarf_desc": "Sturdy and resilient dwellers of the deep mountains, master craftsmen and warriors.",
+  "elf": "Elf",
+  "elf_desc": "Graceful and wise guardians of the ancient forests, skilled in magic and archery.",
+  "human": "Human",
+  "human_desc": "Versatile and ambitious builders of empires, adaptable to any path they choose.",
+  "orc": "Orc",
+  "orc_desc": "Fierce and powerful warriors of the wild wastes, valuing strength and honor in battle.",
+  "modifiers": "Modifiers",
+  "strength": "Strength",
+  "dexterity": "Dexterity",
+  "constitution": "Constitution",
+  "intelligence": "Intelligence",
+  "wisdom": "Wisdom",
+  "charisma": "Charisma"
 }

@@ -91,7 +91,7 @@ pub fn spawn_label(
     let title = localization.get(key, settings.language);
     parent.spawn((
         add_text(title, "bold", BUTTON_TEXT_SIZE, assets),
-        TextColor(SETTINGS_LABEL_COLOR),
+        TextColor(BUTTON_TEXT_COLOR),
         LocalizedText(key.to_string()),
     ));
 
@@ -143,7 +143,7 @@ pub fn spawn_label(
                     .observe(on_click_label_button)
                     .with_children(|parent| {
                         parent.spawn((
-                            add_text(label, "bold", SUBTITLE_TEXT_SIZE, assets),
+                            add_text(label, "bold", LABEL_TEXT_SIZE, assets),
                             TextColor(BUTTON_TEXT_COLOR),
                             LocalizedText(key),
                         ));
