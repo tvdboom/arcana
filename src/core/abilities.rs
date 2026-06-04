@@ -9,4 +9,10 @@ pub enum Ability {
     Regrowth,
     Heal,
     ShieldBash,
+    Shadowbolt,
+    Frostbolt,
+    Bite,
+    Maul,
+    PoisonBite,
+    Swoop,
 }

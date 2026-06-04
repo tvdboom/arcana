@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use crate::core::assets::WorldAssets;
-use crate::core::audio::ChangeAudioMsg;
+use crate::core::audio::{ChangeAudioMsg, PlayAudioMsg};
 use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::utils::add_text;
@@ -52,7 +52,9 @@ pub fn on_click_label_button(
     mut btn_q: Query<(&mut BackgroundColor, &SettingsBtn)>,
     mut settings: ResMut<Settings>,
     mut change_audio_msg: MessageWriter<ChangeAudioMsg>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
+    play_audio_msg.write(PlayAudioMsg::new("button"));
     match btn_q.get(event.entity).unwrap().1 {
         SettingsBtn::English => settings.language = Language::English,
         SettingsBtn::Spanish => settings.language = Language::Spanish,

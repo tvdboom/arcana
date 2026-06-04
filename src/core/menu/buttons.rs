@@ -1,4 +1,5 @@
 use crate::core::assets::WorldAssets;
+use crate::core::audio::PlayAudioMsg;
 use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::systems::StartNewCharacterMsg;
@@ -41,12 +42,15 @@ pub fn on_click_menu_button(
     game_state: Res<State<GameState>>,
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     let (disabled, btn) = btn_q.get(event.entity).unwrap();
 
     if disabled.is_some() {
         return;
     }
+
+    play_audio_msg.write(PlayAudioMsg::new("button"));
 
     match btn {
         MenuBtn::NewCharacter => {
@@ -70,6 +74,9 @@ pub fn on_click_menu_button(
                 },
                 GameState::ChooseSubClass => {
                     next_game_state.set(GameState::ChooseClass);
+                },
+                GameState::Settings => {
+                    next_game_state.set(GameState::Playing);
                 },
                 _ => unreachable!(),
             },
@@ -112,9 +119,11 @@ pub fn spawn_menu_button(
 
     let (width, height) = match btn {
         MenuBtn::Back => (Val::Px(200.), Val::Px(45.)),
-        MenuBtn::NewCharacter | MenuBtn::LoadCharacter | MenuBtn::Settings | MenuBtn::Quit => {
-            (Val::Px(420.), Val::Px(75.))
-        },
+        MenuBtn::NewCharacter
+        | MenuBtn::LoadCharacter
+        | MenuBtn::Settings
+        | MenuBtn::Quit
+        | MenuBtn::Continue => (Val::Px(420.), Val::Px(75.)),
         _ => (Val::Px(300.), Val::Px(55.)),
     };
 

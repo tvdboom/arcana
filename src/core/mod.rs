@@ -6,8 +6,10 @@ pub mod classes;
 mod constants;
 pub mod localization;
 mod menu;
+pub mod perks;
 #[cfg(not(target_arch = "wasm32"))]
 mod persistence;
+mod pets;
 mod player;
 mod races;
 mod settings;
@@ -128,6 +130,8 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::ChooseRace), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::ChooseClass), setup_class_selection)
             .add_systems(OnExit(GameState::ChooseClass), despawn::<MenuCmp>)
+            .add_systems(OnEnter(GameState::ChooseSubClass), setup_subclass_selection)
+            .add_systems(OnExit(GameState::ChooseSubClass), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::Settings), setup_game_settings)

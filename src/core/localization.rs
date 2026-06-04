@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use crate::core::classes::Class;
+use crate::core::classes::{Ajah, Class};
+use crate::core::pets::Pet;
 use crate::core::player::Attribute;
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
@@ -53,6 +54,14 @@ pub struct LocalizedRaceDesc(pub Race);
 #[derive(Component)]
 pub struct LocalizedClassDesc(pub Class);
 
+/// Marks a text entity with the ajah description so it can be updated with modifiers on language change.
+#[derive(Component)]
+pub struct LocalizedAjahDesc(pub Ajah);
+
+/// Marks a text entity with the pet description so it can be updated on language change.
+#[derive(Component)]
+pub struct LocalizedPetDesc(pub Pet);
+
 pub fn format_race_description(
     race: Race,
     language: Language,
@@ -94,11 +103,40 @@ pub fn format_class_description(
     let starting_ability = class.starting_ability();
     let ability_key = starting_ability.to_lowername();
     let ability_name = localization.get(&ability_key, language);
-    let ability_desc = localization.get(&format!("{}_desc", ability_key), language);
+
+    let starting_perk = class.starting_perk();
+    let perk_key = starting_perk.to_lowername();
+    let perk_name = localization.get(&perk_key, language);
 
     let starting_ability_label = localization.get("starting_ability", language);
+    let starting_perk_label = localization.get("starting_perk", language);
 
-    format!("{}\n\n{}: {} - {}", desc, starting_ability_label, ability_name, ability_desc)
+    format!(
+        "{}\n\n{}: {}\n{}: {}",
+        desc, starting_ability_label, ability_name, starting_perk_label, perk_name
+    )
+}
+
+pub fn format_ajah_description(
+    ajah: Ajah,
+    language: Language,
+    localization: &Localization,
+) -> String {
+    let ajah_key = ajah.to_lowername();
+    let desc = localization.get(&format!("{}_desc", ajah_key), language);
+
+    let special_ability = ajah.special_ability();
+    let ability_key = special_ability.to_lowername();
+    let ability_name = localization.get(&ability_key, language);
+
+    let special_ability_label = localization.get("special_ability", language);
+
+    format!("{}\n\n{}: {}", desc, special_ability_label, ability_name)
+}
+
+pub fn format_pet_description(pet: Pet, language: Language, localization: &Localization) -> String {
+    let pet_key = pet.to_lowername();
+    localization.get(&format!("{}_desc", pet_key), language)
 }
 
 /// Updates all LocalizedText and LocalizedRaceDesc entities whenever the Settings resource changes.
@@ -111,6 +149,19 @@ pub fn update_localized_text(
         (&mut Text, &LocalizedClassDesc),
         (Without<LocalizedText>, Without<LocalizedRaceDesc>),
     >,
+    mut ajah_desc_q: Query<
+        (&mut Text, &LocalizedAjahDesc),
+        (Without<LocalizedText>, Without<LocalizedRaceDesc>, Without<LocalizedClassDesc>),
+    >,
+    mut pet_desc_q: Query<
+        (&mut Text, &LocalizedPetDesc),
+        (
+            Without<LocalizedText>,
+            Without<LocalizedRaceDesc>,
+            Without<LocalizedClassDesc>,
+            Without<LocalizedAjahDesc>,
+        ),
+    >,
 ) {
     for (mut text, loc) in &mut text_q {
         text.0 = localization.get(&loc.0, settings.language);
@@ -122,5 +173,13 @@ pub fn update_localized_text(
 
     for (mut text, desc) in &mut class_desc_q {
         text.0 = format_class_description(desc.0, settings.language, &localization);
+    }
+
+    for (mut text, desc) in &mut ajah_desc_q {
+        text.0 = format_ajah_description(desc.0, settings.language, &localization);
+    }
+
+    for (mut text, desc) in &mut pet_desc_q {
+        text.0 = format_pet_description(desc.0, settings.language, &localization);
     }
 }

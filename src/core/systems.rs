@@ -1,8 +1,8 @@
 use crate::core::audio::PlayAudioMsg;
+use crate::core::menu::systems::StartNewCharacterMsg;
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
 use bevy::prelude::*;
-use crate::core::menu::systems::StartNewCharacterMsg;
 
 pub fn check_keys_menu(
     app_state: Res<State<AppState>>,

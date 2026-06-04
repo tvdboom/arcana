@@ -100,6 +100,7 @@ pub fn setup_audio(mut commands: Commands, assets: Local<WorldAssets>) {
             parent.spawn((ImageNode::new(assets.image("sound")), MusicBtnCmp)).observe(
                 |_: On<Pointer<Click>>, mut commands: Commands| {
                     commands.queue(|w: &mut World| {
+                        w.write_message(PlayAudioMsg::new("button"));
                         w.write_message(ChangeAudioMsg(None));
                     })
                 },
@@ -203,6 +204,8 @@ pub fn play_audio(
                     {
                         new_sound = true; // Audio finished playing
                     }
+                } else {
+                    new_sound = true; // Handle exists but instance was cleaned up / finished
                 }
             } else if msg.is_background {
                 if settings.audio != AudioSettings::Sfx {

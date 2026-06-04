@@ -100,9 +100,27 @@ impl FromWorld for WorldAssets {
             ("orc", assets.load("images/races/orc.png")),
             // Classes
             ("warrior", assets.load("images/classes/warrior_human.png")),
+            ("warrior_human", assets.load("images/classes/warrior_human.png")),
             ("mage", assets.load("images/classes/mage_human.png")),
+            ("mage_human", assets.load("images/classes/mage_human.png")),
             ("rogue", assets.load("images/classes/rogue_human.png")),
+            ("rogue_human", assets.load("images/classes/rogue_human.png")),
+            ("rogue_elf", assets.load("images/classes/rogue_elf.png")),
+            ("rogue_dwarf", assets.load("images/classes/rogue_dwarf.png")),
+            ("rogue_orc", assets.load("images/classes/rogue_orc.png")),
             ("druid", assets.load("images/classes/druid_human.png")),
+            ("druid_human", assets.load("images/classes/druid_human.png")),
+            ("druid_elf", assets.load("images/classes/druid_elf.png")),
+            ("druid_dwarf", assets.load("images/classes/druid_dwarf.png")),
+            ("druid_orc", assets.load("images/classes/druid_orc.png")),
+            ("black", assets.load("images/classes/mage_black.png")),
+            ("red", assets.load("images/classes/mage_red.png")),
+            ("green", assets.load("images/classes/mage_green.png")),
+            ("white", assets.load("images/classes/mage_white.png")),
+            ("wolf", assets.load("images/pets/wolf.png")),
+            ("snake", assets.load("images/pets/snake.png")),
+            ("eagle", assets.load("images/pets/eagle.png")),
+            ("bear", assets.load("images/pets/bear.png")),
         ]);
 
         let atlas: HashMap<&'static str, AtlasInfo> = HashMap::new();

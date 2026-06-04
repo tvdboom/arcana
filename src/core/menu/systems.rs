@@ -3,12 +3,13 @@ use strum::IntoEnumIterator;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
-use crate::core::classes::Class;
+use crate::core::classes::{Ajah, Class};
 use crate::core::constants::*;
 use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::settings::{spawn_label, SettingsBtn};
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
+use crate::core::pets::Pet;
 use crate::core::player::{Attribute, Player};
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
@@ -153,7 +154,6 @@ pub fn setup_game_settings(
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                margin: UiRect::ZERO.with_top(percent(30.)),
                 ..default()
             },))
             .with_children(|parent| {
@@ -398,7 +398,13 @@ pub fn update_character_creation_continue_btn(
 
 pub fn update_attribute_buttons(
     player: Res<Player>,
-    mut btn_q: Query<(Entity, &AttributeAction, &mut BackgroundColor, &mut BorderColor, Option<&DisabledButton>)>,
+    mut btn_q: Query<(
+        Entity,
+        &AttributeAction,
+        &mut BackgroundColor,
+        &mut BorderColor,
+        Option<&DisabledButton>,
+    )>,
     mut commands: Commands,
 ) {
     let current_sum = (player.strength
@@ -810,6 +816,9 @@ pub trait SelectionItem: NameFromEnum + Copy + Clone + Send + Sync + 'static {
     fn get_description(&self, lang: Language, localization: &Localization) -> String;
     fn create_desc_component(&self) -> Self::DescComponent;
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>);
+    fn get_image_key(&self, _player: &Player) -> String {
+        self.to_lowername()
+    }
 }
 
 impl SelectionItem for Race {
@@ -843,7 +852,56 @@ impl SelectionItem for Class {
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = *self;
         player.abilities = vec![self.starting_ability()];
-        next_game_state.set(GameState::ChooseSubClass);
+        player.perks = vec![self.starting_perk()];
+        if matches!(*self, Class::Mage(_) | Class::Druid) {
+            next_game_state.set(GameState::ChooseSubClass);
+        } else {
+            next_game_state.set(GameState::Playing);
+        }
+    }
+
+    fn get_image_key(&self, player: &Player) -> String {
+        let race_key = player.race.to_lowername();
+        match self {
+            Class::Mage(_) => "mage_human".to_string(),
+            Class::Warrior => "warrior_human".to_string(),
+            Class::Rogue => format!("rogue_{}", race_key),
+            Class::Druid => format!("druid_{}", race_key),
+        }
+    }
+}
+
+impl SelectionItem for Ajah {
+    type DescComponent = LocalizedAjahDesc;
+
+    fn get_description(&self, lang: Language, localization: &Localization) -> String {
+        format_ajah_description(*self, lang, localization)
+    }
+
+    fn create_desc_component(&self) -> Self::DescComponent {
+        LocalizedAjahDesc(*self)
+    }
+
+    fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
+        player.abilities.push(self.special_ability());
+        next_game_state.set(GameState::Playing);
+    }
+}
+
+impl SelectionItem for Pet {
+    type DescComponent = LocalizedPetDesc;
+
+    fn get_description(&self, lang: Language, localization: &Localization) -> String {
+        format_pet_description(*self, lang, localization)
+    }
+
+    fn create_desc_component(&self) -> Self::DescComponent {
+        LocalizedPetDesc(*self)
+    }
+
+    fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
+        player.pet = Some(*self);
+        next_game_state.set(GameState::Playing);
     }
 }
 
@@ -854,6 +912,7 @@ pub fn setup_selection_screen<T>(
     localization: Res<Localization>,
     title_key: &'static str,
     has_back_button: bool,
+    player: &Player,
 ) where
     T: SelectionItem + IntoEnumIterator,
 {
@@ -930,7 +989,7 @@ pub fn setup_selection_screen<T>(
                                             height: percent(50.),
                                             ..default()
                                         },
-                                        ImageNode::new(assets.image(item_key.clone())).with_mode(NodeImageMode::Stretch),
+                                        ImageNode::new(assets.image(item.get_image_key(player))).with_mode(NodeImageMode::Stretch),
                                     ));
 
                                     // Stone background container for Name and Description
@@ -1024,8 +1083,17 @@ pub fn setup_race_selection(
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
+    player: Res<Player>,
 ) {
-    setup_selection_screen::<Race>(commands, settings, assets, localization, "choose race", true);
+    setup_selection_screen::<Race>(
+        commands,
+        settings,
+        assets,
+        localization,
+        "choose race",
+        true,
+        &player,
+    );
 }
 
 pub fn setup_class_selection(
@@ -1033,6 +1101,49 @@ pub fn setup_class_selection(
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
+    player: Res<Player>,
 ) {
-    setup_selection_screen::<Class>(commands, settings, assets, localization, "choose class", true);
+    setup_selection_screen::<Class>(
+        commands,
+        settings,
+        assets,
+        localization,
+        "choose class",
+        true,
+        &player,
+    );
+}
+
+pub fn setup_subclass_selection(
+    commands: Commands,
+    settings: Res<Settings>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    player: Res<Player>,
+) {
+    match player.class {
+        Class::Mage(_) => {
+            setup_selection_screen::<Ajah>(
+                commands,
+                settings,
+                assets,
+                localization,
+                "choose subclass",
+                true,
+                &player,
+            );
+        },
+        Class::Druid => {
+            setup_selection_screen::<Pet>(
+                commands,
+                settings,
+                assets,
+                localization,
+                "choose pet",
+                true,
+                &player,
+            );
+        },
+        _ => {},
+    }
 }
