@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 
+use crate::core::classes::Class;
+use crate::core::player::Attribute;
+use crate::core::races::Race;
+use crate::core::settings::{Language, Settings};
+use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use serde_json;
 use strum::IntoEnumIterator;
-use crate::core::settings::{Language, Settings};
-use crate::core::races::Race;
-use crate::core::player::Attribute;
-use crate::utils::NameFromEnum;
 
 #[derive(Resource)]
 pub struct Localization {
@@ -20,7 +21,10 @@ impl FromWorld for Localization {
             .expect("Failed to parse en.json");
         let es = serde_json::from_str(include_str!("../../assets/language/es.json"))
             .expect("Failed to parse es.json");
-        Self { en, es }
+        Self {
+            en,
+            es,
+        }
     }
 }
 
@@ -45,7 +49,15 @@ pub struct LocalizedText(pub String);
 #[derive(Component)]
 pub struct LocalizedRaceDesc(pub Race);
 
-pub fn format_race_description(race: Race, language: Language, localization: &Localization) -> String {
+/// Marks a text entity with the class description so it can be updated with modifiers on language change.
+#[derive(Component)]
+pub struct LocalizedClassDesc(pub Class);
+
+pub fn format_race_description(
+    race: Race,
+    language: Language,
+    localization: &Localization,
+) -> String {
     let race_key = race.to_lowername();
     let desc = localization.get(&format!("{}_desc", race_key), language);
 
@@ -53,7 +65,11 @@ pub fn format_race_description(race: Race, language: Language, localization: &Lo
     for attr in Attribute::iter() {
         let val = race.modifier(attr);
         if val != 0.0 {
-            let sign = if val > 0.0 { "+" } else { "" };
+            let sign = if val > 0.0 {
+                "+"
+            } else {
+                ""
+            };
             let attr_name = localization.get(attr.to_lowername().as_str(), language);
             modifier_strs.push(format!("{} {}{}", attr_name, sign, val));
         }
@@ -67,18 +83,44 @@ pub fn format_race_description(race: Race, language: Language, localization: &Lo
     }
 }
 
+pub fn format_class_description(
+    class: Class,
+    language: Language,
+    localization: &Localization,
+) -> String {
+    let class_key = class.to_lowername();
+    let desc = localization.get(&format!("{}_desc", class_key), language);
+
+    let starting_ability = class.starting_ability();
+    let ability_key = starting_ability.to_lowername();
+    let ability_name = localization.get(&ability_key, language);
+    let ability_desc = localization.get(&format!("{}_desc", ability_key), language);
+
+    let starting_ability_label = localization.get("starting_ability", language);
+
+    format!("{}\n\n{}: {} - {}", desc, starting_ability_label, ability_name, ability_desc)
+}
+
 /// Updates all LocalizedText and LocalizedRaceDesc entities whenever the Settings resource changes.
 pub fn update_localized_text(
     settings: Res<Settings>,
     localization: Res<Localization>,
     mut text_q: Query<(&mut Text, &LocalizedText)>,
     mut desc_q: Query<(&mut Text, &LocalizedRaceDesc), Without<LocalizedText>>,
+    mut class_desc_q: Query<
+        (&mut Text, &LocalizedClassDesc),
+        (Without<LocalizedText>, Without<LocalizedRaceDesc>),
+    >,
 ) {
     for (mut text, loc) in &mut text_q {
         text.0 = localization.get(&loc.0, settings.language);
     }
-    
+
     for (mut text, desc) in &mut desc_q {
         text.0 = format_race_description(desc.0, settings.language, &localization);
+    }
+
+    for (mut text, desc) in &mut class_desc_q {
+        text.0 = format_class_description(desc.0, settings.language, &localization);
     }
 }

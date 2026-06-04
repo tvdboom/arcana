@@ -56,7 +56,7 @@ pub fn load_game(
     for _ in load_game_msg.read() {
         if let Some(file_path) = FileDialog::new().pick_file() {
             let file_path_str = file_path.to_string_lossy().to_string();
-            let mut data = load_from_bin(&file_path_str).expect("Failed to load the game.");
+            let data = load_from_bin(&file_path_str).expect("Failed to load the game.");
 
             change_audio_msg.write(ChangeAudioMsg(Some(data.settings.audio)));
 

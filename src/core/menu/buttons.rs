@@ -3,9 +3,9 @@ use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::systems::StartNewCharacterMsg;
 use crate::core::menu::utils::{add_text, recolor};
-use crate::core::settings::Language;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::core::persistence::{LoadCharacterMsg, SaveCharacterMsg};
+use crate::core::settings::Language;
 use crate::core::states::{AppState, GameState};
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
@@ -103,14 +103,23 @@ pub fn spawn_menu_button(
 ) {
     let key = btn.to_lowername();
     let label = localization.get(&key, language);
+
+    let (width, height) = match btn {
+        MenuBtn::Back => (Val::Px(200.), Val::Px(45.)),
+        MenuBtn::NewCharacter | MenuBtn::LoadCharacter | MenuBtn::Settings | MenuBtn::Quit => {
+            (Val::Px(420.), Val::Px(75.))
+        },
+        _ => (Val::Px(300.), Val::Px(55.)),
+    };
+
     parent
         .spawn((
             Node {
-                width: percent(25.),
-                height: percent(10.),
+                width,
+                height,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                margin: UiRect::all(percent(1.)),
+                margin: UiRect::all(Val::Px(8.)),
                 border: UiRect::all(Val::Px(2.)),
                 border_radius: BorderRadius::all(Val::Px(4.)),
                 ..default()

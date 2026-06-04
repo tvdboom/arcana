@@ -3,7 +3,6 @@ use std::fmt::Debug;
 use crate::core::assets::WorldAssets;
 use bevy::prelude::*;
 
-
 /// Change the background color of an entity
 pub fn recolor<E: Debug + Clone + Reflect>(
     color: Color,

@@ -98,6 +98,11 @@ impl FromWorld for WorldAssets {
             ("elf", assets.load("images/races/elf.png")),
             ("human", assets.load("images/races/human.png")),
             ("orc", assets.load("images/races/orc.png")),
+            // Classes
+            ("warrior", assets.load("images/classes/warrior_human.png")),
+            ("mage", assets.load("images/classes/mage_human.png")),
+            ("rogue", assets.load("images/classes/rogue_human.png")),
+            ("druid", assets.load("images/classes/druid_human.png")),
         ]);
 
         let atlas: HashMap<&'static str, AtlasInfo> = HashMap::new();
