@@ -3,6 +3,7 @@ mod assets;
 mod audio;
 mod camera;
 pub mod classes;
+pub mod consumables;
 mod constants;
 pub mod localization;
 mod menu;
@@ -16,6 +17,7 @@ mod settings;
 mod states;
 mod systems;
 mod utils;
+pub mod weapons;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::*;
@@ -113,7 +115,11 @@ impl Plugin for GamePlugin {
             // Utilities
             .add_systems(
                 Update,
-                (check_keys_menu, update_localized_text.run_if(resource_changed::<Settings>)),
+                (
+                    check_keys_menu,
+                    update_localized_text.run_if(resource_changed::<Settings>),
+                    update_playing_screen.run_if(resource_changed::<Settings>),
+                ),
             )
             .add_systems(OnEnter(GameState::CreateCharacter), setup_character_creation)
             .add_systems(OnExit(GameState::CreateCharacter), despawn::<MenuCmp>)
@@ -132,6 +138,12 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::ChooseClass), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::ChooseSubClass), setup_subclass_selection)
             .add_systems(OnExit(GameState::ChooseSubClass), despawn::<MenuCmp>)
+            .add_systems(OnEnter(GameState::Playing), setup_playing_screen)
+            .add_systems(OnExit(AppState::Game), despawn::<PlayingCmp>)
+            .add_systems(
+                Update,
+                (update_playing_screen, handle_playing_action_clicks).run_if(in_state(GameState::Playing)),
+            )
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::Settings), setup_game_settings)
@@ -146,11 +158,8 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     load_game,
-                    (
-                        save_game,
-                        run_autosave.run_if(on_timer(Duration::from_secs(10))).in_set(InPlayingSet),
-                    )
-                        .in_set(InPlayingSet),
+                    save_game,
+                    run_autosave.run_if(on_timer(Duration::from_secs(10))).in_set(InPlayingSet),
                 ),
             );
     }

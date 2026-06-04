@@ -13,6 +13,8 @@ use crate::core::pets::Pet;
 use crate::core::player::{Attribute, Player};
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
+use crate::core::weapons::Weapon;
+use crate::core::consumables::Consumable;
 use crate::core::states::{AppState, GameState};
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
@@ -103,6 +105,12 @@ pub fn setup_menu(
                                 );
                             });
 
+                        // Spacer to push the back button lower down
+                        parent.spawn(Node {
+                            height: Val::Px(50.),
+                            ..default()
+                        });
+
                         spawn_menu_button(parent, MenuBtn::Back, &assets, &localization, lang);
                     },
                     _ => (),
@@ -134,9 +142,24 @@ pub fn setup_game_menu(
 ) {
     let lang = settings.language;
     commands.spawn((add_root_node(true), MenuCmp)).with_children(|parent| {
-        spawn_menu_button(parent, MenuBtn::Continue, &assets, &localization, lang);
-        spawn_menu_button(parent, MenuBtn::Settings, &assets, &localization, lang);
-        spawn_menu_button(parent, MenuBtn::Quit, &assets, &localization, lang);
+        parent.spawn((
+            Node {
+                width: Val::Px(550.),
+                height: Val::Px(560.),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                padding: UiRect::all(Val::Px(25.)),
+                ..default()
+            },
+            ImageNode::new(assets.image("stone")).with_mode(NodeImageMode::Stretch),
+        )).with_children(|parent| {
+            spawn_menu_button(parent, MenuBtn::Continue, &assets, &localization, lang);
+            #[cfg(not(target_arch = "wasm32"))]
+            spawn_menu_button(parent, MenuBtn::SaveCharacter, &assets, &localization, lang);
+            spawn_menu_button(parent, MenuBtn::Settings, &assets, &localization, lang);
+            spawn_menu_button(parent, MenuBtn::Quit, &assets, &localization, lang);
+        });
     });
 }
 
@@ -149,13 +172,18 @@ pub fn setup_game_settings(
     let lang = settings.language;
     commands.spawn((add_root_node(true), MenuCmp)).with_children(|parent| {
         parent
-            .spawn((Node {
-                width: percent(40.),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },))
+            .spawn((
+                Node {
+                    width: Val::Px(580.),
+                    height: Val::Px(680.),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    padding: UiRect::all(Val::Px(25.)),
+                    ..default()
+                },
+                ImageNode::new(assets.image("stone")).with_mode(NodeImageMode::Stretch),
+            ))
             .with_children(|parent| {
                 spawn_label(
                     parent,
@@ -181,9 +209,15 @@ pub fn setup_game_settings(
                     &assets,
                     &localization,
                 );
-            });
 
-        spawn_menu_button(parent, MenuBtn::Back, &assets, &localization, lang);
+                // Spacer to push the back button lower down
+                parent.spawn(Node {
+                    height: Val::Px(75.),
+                    ..default()
+                });
+
+                spawn_menu_button(parent, MenuBtn::Back, &assets, &localization, lang);
+            });
     });
 }
 
@@ -191,8 +225,10 @@ pub fn start_new_game_message(
     mut start_new_char_msg: MessageReader<StartNewCharacterMsg>,
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut player: ResMut<Player>,
 ) {
     if !start_new_char_msg.is_empty() {
+        *player = Player::default();
         next_game_state.set(GameState::default());
         next_app_state.set(AppState::Game);
 
@@ -569,13 +605,14 @@ pub fn setup_character_creation(
                             &assets,
                         ),
                         TextColor(BUTTON_TEXT_COLOR),
+                        LocalizedText("create your character".to_string()),
                     ));
                 });
 
             // Main container (Horizontal row with name selection on the left, attributes on the right)
             parent
                 .spawn(Node {
-                    width: percent(75.),
+                    width: percent(55.),
                     height: percent(65.),
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::SpaceBetween,
@@ -602,6 +639,7 @@ pub fn setup_character_creation(
                                     &assets,
                                 ),
                                 TextColor(BUTTON_TEXT_COLOR),
+                                LocalizedText("character name".to_string()),
                                 Node {
                                     margin: UiRect::bottom(percent(5.)),
                                     ..default()
@@ -644,6 +682,7 @@ pub fn setup_character_creation(
                                     &assets,
                                 ),
                                 TextColor(Color::srgba_u8(180, 180, 180, 255)),
+                                LocalizedText("change name hint".to_string()),
                                 Node {
                                     margin: UiRect::top(percent(3.)),
                                     ..default()
@@ -713,7 +752,7 @@ pub fn setup_character_creation(
                                         // Row for this attribute
                                         parent
                                             .spawn(Node {
-                                                width: percent(55.),
+                                                width: percent(75.),
                                                 height: Val::Px(45.),
                                                 flex_direction: FlexDirection::Row,
                                                 align_items: AlignItems::Center,
@@ -731,6 +770,7 @@ pub fn setup_character_creation(
                                                         &assets,
                                                     ),
                                                     TextColor(BUTTON_TEXT_COLOR),
+                                                    LocalizedText(attr.to_lowername()),
                                                     Node {
                                                         width: percent(45.),
                                                         ..default()
@@ -853,6 +893,46 @@ impl SelectionItem for Class {
         player.class = *self;
         player.abilities = vec![self.starting_ability()];
         player.perks = vec![self.starting_perk()];
+
+        match self {
+            Class::Warrior => {
+                player.helmet = Some(Weapon::IronHelmet);
+                player.armor = Some(Weapon::IronChestplate);
+                player.boots = Some(Weapon::IronBoots);
+                player.weapon_lh = Some(Weapon::SteelSword);
+                player.weapon_rh = Some(Weapon::IronShield);
+                player.weapon_2h = None;
+                player.consumables = vec![Consumable::HealingPotion];
+            }
+            Class::Mage(_) => {
+                player.helmet = None;
+                player.armor = Some(Weapon::MageRobes);
+                player.boots = Some(Weapon::ClothShoes);
+                player.weapon_lh = None;
+                player.weapon_rh = None;
+                player.weapon_2h = Some(Weapon::WizardStaff);
+                player.consumables = vec![Consumable::ManaPotion];
+            }
+            Class::Rogue => {
+                player.helmet = None;
+                player.armor = Some(Weapon::LeatherArmor);
+                player.boots = Some(Weapon::SilentBoots);
+                player.weapon_lh = Some(Weapon::AssassinDagger);
+                player.weapon_rh = Some(Weapon::ThiefDagger);
+                player.weapon_2h = None;
+                player.consumables = vec![Consumable::PoisonVial];
+            }
+            Class::Druid => {
+                player.helmet = None;
+                player.armor = Some(Weapon::LeafyGarb);
+                player.boots = Some(Weapon::LeatherBoots);
+                player.weapon_lh = Some(Weapon::OakWand);
+                player.weapon_rh = None;
+                player.weapon_2h = None;
+                player.consumables = vec![Consumable::HerbBlend];
+            }
+        }
+        
         if matches!(*self, Class::Mage(_) | Class::Druid) {
             next_game_state.set(GameState::ChooseSubClass);
         } else {
@@ -1145,5 +1225,536 @@ pub fn setup_subclass_selection(
             );
         },
         _ => {},
+    }
+}
+
+#[derive(Component)]
+pub struct PlayingCmp;
+
+#[derive(Component)]
+pub struct PlayingLog(pub Vec<String>);
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum StatType {
+    Name,
+    Level,
+    Ap,
+    Money,
+    Helmet,
+    Armor,
+    Boots,
+    WeaponLh,
+    WeaponRh,
+    Weapon2h,
+    Consumables,
+    Attributes,
+    Abilities,
+    Perks,
+    Pet,
+}
+
+#[derive(Component)]
+pub struct StatLabel(pub StatType);
+
+#[derive(Component)]
+pub struct LogTextContainer;
+
+#[derive(Component)]
+pub struct ActionButton(pub &'static str);
+
+pub fn setup_playing_screen(
+    mut commands: Commands,
+    settings: Res<Settings>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    player: Res<Player>,
+) {
+    let lang = settings.language;
+    commands.spawn((
+        PlayingLog(vec![if lang == Language::Spanish {
+            "¡Bienvenido a Arcana! Comienza tu aventura.".to_string()
+        } else {
+            "Welcome to Arcana! Start your adventure.".to_string()
+        }]),
+        PlayingCmp,
+    ));
+
+    let (root_node, pickable) = add_root_node(true);
+
+    commands
+        .spawn((
+            root_node,
+            pickable,
+            ImageNode::new(assets.image("bg2")).with_mode(NodeImageMode::Stretch),
+            PlayingCmp,
+        ))
+        .with_children(|parent| {
+            // Spacer node
+            parent.spawn(Node {
+                width: percent(100.),
+                height: percent(5.),
+                ..default()
+            });
+
+            // Main Columns container
+            parent.spawn(Node {
+                width: percent(96.),
+                height: percent(85.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::SpaceBetween,
+                align_items: AlignItems::Center,
+                margin: UiRect::horizontal(percent(2.)),
+                ..default()
+            }).with_children(|parent| {
+                // Left Column: Character & Equipment
+                parent.spawn((
+                    Node {
+                        width: percent(42.),
+                        height: percent(95.),
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::FlexStart,
+                        padding: UiRect::all(percent(2.)),
+                        ..default()
+                    },
+                    BackgroundColor(NORMAL_BUTTON_COLOR),
+                )).with_children(|parent| {
+                    // Title info
+                    parent.spawn((
+                        add_text("Character", "bold", SUBTITLE_TEXT_SIZE, &assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        StatLabel(StatType::Name),
+                    ));
+
+                    // Portrait
+                    let portrait_key = player.class.get_image_key(&player);
+                    parent.spawn((
+                        Node {
+                            width: percent(75.),
+                            height: percent(35.),
+                            margin: UiRect::vertical(percent(1.5)),
+                            border: UiRect::all(Val::Px(3.)),
+                            ..default()
+                        },
+                        BorderColor::all(BUTTON_BORDER_COLOR),
+                        ImageNode::new(assets.image(portrait_key)).with_mode(NodeImageMode::Stretch),
+                    ));
+
+                    // Equipment details container
+                    parent.spawn((
+                        Node {
+                            width: percent(100.),
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::FlexStart,
+                            padding: UiRect::left(percent(5.)),
+                            ..default()
+                        },
+                    )).with_children(|parent| {
+                        // Equipment lines
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::Helmet)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::Armor)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::Boots)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::WeaponLh)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::WeaponRh)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::Weapon2h)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::Consumables)));
+                    });
+                });
+
+                // Right Column: Stats, Action buttons, Logs
+                parent.spawn((
+                    Node {
+                        width: percent(54.),
+                        height: percent(95.),
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::SpaceBetween,
+                        ..default()
+                    },
+                )).with_children(|parent| {
+                    // Top: Stats card
+                    parent.spawn((
+                        Node {
+                            width: percent(100.),
+                            height: percent(45.),
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::SpaceBetween,
+                            padding: UiRect::all(percent(2.)),
+                            ..default()
+                        },
+                        BackgroundColor(NORMAL_BUTTON_COLOR),
+                    )).with_children(|parent| {
+                        parent.spawn((add_text("", "bold", SUBTITLE_TEXT_SIZE, &assets), TextColor(BUTTON_TEXT_COLOR), StatLabel(StatType::Level)));
+                        parent.spawn((add_text("", "bold", 2.2, &assets), TextColor(BUTTON_TEXT_COLOR), StatLabel(StatType::Ap)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::Attributes)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::Abilities)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::Perks)));
+                        parent.spawn((add_text("", "medium", 1.8, &assets), TextColor(Color::WHITE), StatLabel(StatType::Pet)));
+                        parent.spawn((add_text("", "bold", 2.0, &assets), TextColor(BUTTON_TEXT_COLOR), StatLabel(StatType::Money)));
+                    });
+
+                    // Middle: Actions grid
+                    parent.spawn(Node {
+                        width: percent(100.),
+                        height: percent(35.),
+                        display: Display::Grid,
+                        grid_template_columns: vec![GridTrack::flex(1.), GridTrack::flex(1.), GridTrack::flex(1.)],
+                        grid_template_rows: vec![GridTrack::flex(1.), GridTrack::flex(1.)],
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    }).with_children(|parent| {
+                        // Action buttons: Hunt, Buy, Quest, Train, Craft, Heal
+                        spawn_playing_action_button(parent, "hunt", &assets, &localization, lang);
+                        spawn_playing_action_button(parent, "buy", &assets, &localization, lang);
+                        spawn_playing_action_button(parent, "quest", &assets, &localization, lang);
+                        spawn_playing_action_button(parent, "train", &assets, &localization, lang);
+                        spawn_playing_action_button(parent, "craft", &assets, &localization, lang);
+                        spawn_playing_action_button(parent, "heal", &assets, &localization, lang);
+                    });
+
+                    // Bottom: Log box
+                    parent.spawn((
+                        Node {
+                            width: percent(100.),
+                            height: percent(15.),
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            padding: UiRect::all(percent(1.)),
+                            ..default()
+                        },
+                        BackgroundColor(NORMAL_BUTTON_COLOR),
+                    )).with_children(|parent| {
+                        parent.spawn((
+                            add_text("", "bold", 1.8, &assets),
+                            TextColor(Color::WHITE),
+                            LogTextContainer,
+                        ));
+                    });
+                });
+            });
+        });
+}
+
+pub fn spawn_playing_action_button(
+    parent: &mut ChildSpawnerCommands,
+    action: &'static str,
+    assets: &WorldAssets,
+    localization: &Localization,
+    lang: Language,
+) {
+    let action_label = localization.get(action, lang);
+    parent.spawn((
+        Node {
+            margin: UiRect::all(Val::Px(4.)),
+            height: Val::Px(55.),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            border: UiRect::all(Val::Px(2.)),
+            border_radius: BorderRadius::all(Val::Px(4.)),
+            ..default()
+        },
+        BackgroundColor(NORMAL_BUTTON_COLOR),
+        BorderColor::all(BUTTON_BORDER_COLOR),
+        Button,
+        ActionButton(action),
+    ))
+    .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+    .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+    .observe(cursor::<Out>(SystemCursorIcon::Default))
+    .with_children(|parent| {
+        parent.spawn((
+            add_text(action_label, "bold", BUTTON_TEXT_SIZE, assets),
+            TextColor(BUTTON_TEXT_COLOR),
+            LocalizedText(action.to_string()),
+        ));
+    });
+}
+
+pub fn update_playing_screen(
+    player: Res<Player>,
+    settings: Res<Settings>,
+    localization: Res<Localization>,
+    mut text_q: Query<(&mut Text, &StatLabel)>,
+    log_q: Query<&PlayingLog>,
+    mut log_text_q: Query<&mut Text, (With<LogTextContainer>, Without<StatLabel>)>,
+) {
+    let lang = settings.language;
+    for (mut text, stat) in &mut text_q {
+        text.0 = match &stat.0 {
+            StatType::Name => {
+                let class_name = localization.get(&player.class.to_lowername(), lang);
+                format!("{}: {}", player.name, class_name)
+            }
+            StatType::Level => format!("{}: {}", localization.get("level", lang), player.level),
+            StatType::Ap => format!("{}: {}", localization.get("action_points", lang), player.ap),
+            StatType::Money => format!("{}: {} {}", localization.get("money", lang), player.money, localization.get("money", lang)),
+            StatType::Helmet => {
+                let val = player.helmet.as_ref().map(|s| localization.get(&s.to_lowername(), lang)).unwrap_or_else(|| localization.get("none", lang));
+                format!("{}: {}", localization.get("helmet", lang), val)
+            }
+            StatType::Armor => {
+                let val = player.armor.as_ref().map(|s| localization.get(&s.to_lowername(), lang)).unwrap_or_else(|| localization.get("none", lang));
+                format!("{}: {}", localization.get("armor", lang), val)
+            }
+            StatType::Boots => {
+                let val = player.boots.as_ref().map(|s| localization.get(&s.to_lowername(), lang)).unwrap_or_else(|| localization.get("none", lang));
+                format!("{}: {}", localization.get("boots", lang), val)
+            }
+            StatType::WeaponLh => {
+                let val = player.weapon_lh.as_ref().map(|s| localization.get(&s.to_lowername(), lang)).unwrap_or_else(|| localization.get("none", lang));
+                format!("{}: {}", localization.get("weapon_lh", lang), val)
+            }
+            StatType::WeaponRh => {
+                let val = player.weapon_rh.as_ref().map(|s| localization.get(&s.to_lowername(), lang)).unwrap_or_else(|| localization.get("none", lang));
+                format!("{}: {}", localization.get("weapon_rh", lang), val)
+            }
+            StatType::Weapon2h => {
+                let val = player.weapon_2h.as_ref().map(|s| localization.get(&s.to_lowername(), lang)).unwrap_or_else(|| localization.get("none", lang));
+                format!("{}: {}", localization.get("weapon_2h", lang), val)
+            }
+            StatType::Consumables => {
+                let items: Vec<String> = player.consumables.iter().map(|s| localization.get(&s.to_lowername(), lang)).collect();
+                let val = if items.is_empty() { localization.get("none", lang) } else { items.join(", ") };
+                format!("{}: {}", localization.get("consumables", lang), val)
+            }
+            StatType::Attributes => {
+                let str_label = localization.get("strength", lang);
+                let dex_label = localization.get("dexterity", lang);
+                let con_label = localization.get("constitution", lang);
+                let int_label = localization.get("intelligence", lang);
+                let wis_label = localization.get("wisdom", lang);
+                let cha_label = localization.get("charisma", lang);
+                format!(
+                    "{}: {} | {}: {} | {}: {}\n{}: {} | {}: {} | {}: {}",
+                    str_label, player.strength(),
+                    dex_label, player.dexterity(),
+                    con_label, player.constitution(),
+                    int_label, player.intelligence(),
+                    wis_label, player.wisdom(),
+                    cha_label, player.charisma()
+                )
+            }
+            StatType::Abilities => {
+                let list: Vec<String> = player.abilities.iter().map(|a| localization.get(&a.to_lowername(), lang)).collect();
+                format!("{}: {}", localization.get("abilities", lang), list.join(", "))
+            }
+            StatType::Perks => {
+                let list: Vec<String> = player.perks.iter().map(|p| localization.get(&p.to_lowername(), lang)).collect();
+                format!("{}: {}", localization.get("perks", lang), list.join(", "))
+            }
+            StatType::Pet => {
+                let val = player.pet.as_ref().map(|p| localization.get(&p.to_lowername(), lang)).unwrap_or_else(|| localization.get("none", lang));
+                format!("{}: {}", localization.get("pet", lang), val)
+            }
+        };
+    }
+
+    if let Some(log) = log_q.iter().next() {
+        if let Some(mut text) = log_text_q.iter_mut().next() {
+            text.0 = log.0.join("\n");
+        }
+    }
+}
+
+pub fn handle_playing_action_clicks(
+    mut player: ResMut<Player>,
+    mut log_q: Query<&mut PlayingLog>,
+    settings: Res<Settings>,
+    localization: Res<Localization>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    interaction_q: Query<(&Interaction, &ActionButton), (Changed<Interaction>, With<Button>)>,
+) {
+    use rand::RngExt;
+    let mut log_updated = false;
+    let mut log_msgs = Vec::new();
+    let lang = settings.language;
+
+    for (interaction, action) in &interaction_q {
+        if *interaction == Interaction::Pressed {
+            play_audio_msg.write(PlayAudioMsg::new("button"));
+            
+            let cost_gold = match action.0 {
+                "craft" => 15,
+                "buy" => 30,
+                "heal" => 10,
+                _ => 0,
+            };
+
+            if player.money < cost_gold {
+                play_audio_msg.write(PlayAudioMsg::new("error"));
+                let err_msg = if lang == Language::Spanish {
+                    format!("¡No hay suficiente oro para {}! (Necesitas {} oro)", action.0, cost_gold)
+                } else {
+                    format!("Not enough gold to {}! (Need {} gold)", action.0, cost_gold)
+                };
+                log_msgs.push(err_msg);
+                log_updated = true;
+                continue;
+            }
+
+            player.money -= cost_gold;
+
+            // Handle the specific action
+            let (ap_cost, log_msg) = match action.0 {
+                "hunt" => {
+                    let gold_earned = rand::rng().random_range(10..=20);
+                    player.money += gold_earned;
+                    let msg = if lang == Language::Spanish {
+                        format!("Fuiste a cazar y obtuviste {} oro.", gold_earned)
+                    } else {
+                        format!("You went hunting and found {} gold.", gold_earned)
+                    };
+                    (2, msg)
+                }
+                "buy" => {
+                    let items = vec![Consumable::HealingPotion, Consumable::ManaPotion, Consumable::PoisonVial, Consumable::HerbBlend];
+                    use rand::seq::IndexedRandom;
+                    let item = items.choose(&mut rand::rng()).copied().unwrap_or(Consumable::HealingPotion);
+                    player.consumables.push(item);
+                    let item_name = localization.get(&item.to_lowername(), lang);
+                    let msg = if lang == Language::Spanish {
+                        format!("Compraste una {} en la tienda.", item_name)
+                    } else {
+                        format!("You bought a {} from the shop.", item_name)
+                    };
+                    (1, msg)
+                }
+                "quest" => {
+                    let gold_earned = rand::rng().random_range(20..=40);
+                    let mut found_item = None;
+                    if rand::rng().random_bool(0.5) {
+                        let upgrade_types = vec![
+                            Weapon::IronHelmet, Weapon::IronChestplate, Weapon::IronBoots, Weapon::SteelSword, 
+                            Weapon::IronShield, Weapon::WizardStaff, Weapon::MageRobes, Weapon::ClothShoes, 
+                            Weapon::LeatherArmor, Weapon::SilentBoots, Weapon::AssassinDagger, Weapon::ThiefDagger, 
+                            Weapon::OakWand, Weapon::LeafyGarb
+                        ];
+                        use rand::seq::IndexedRandom;
+                        if let Some(&upg) = upgrade_types.choose(&mut rand::rng()) {
+                            found_item = Some(upg);
+                            match upg {
+                                Weapon::IronHelmet => player.helmet = Some(upg),
+                                Weapon::IronChestplate | Weapon::MageRobes | Weapon::LeatherArmor | Weapon::LeafyGarb => player.armor = Some(upg),
+                                Weapon::IronBoots | Weapon::ClothShoes | Weapon::SilentBoots | Weapon::LeatherBoots => player.boots = Some(upg),
+                                Weapon::WizardStaff => {
+                                    player.weapon_2h = Some(upg);
+                                    player.weapon_lh = None;
+                                    player.weapon_rh = None;
+                                }
+                                Weapon::SteelSword | Weapon::AssassinDagger | Weapon::ThiefDagger | Weapon::OakWand => {
+                                    player.weapon_lh = Some(upg);
+                                }
+                                Weapon::IronShield => {
+                                    player.weapon_rh = Some(upg);
+                                }
+                            }
+                        }
+                    }
+                    player.money += gold_earned;
+                    let msg = if let Some(item) = found_item {
+                        let item_name = localization.get(&item.to_lowername(), lang);
+                        if lang == Language::Spanish {
+                            format!("¡Misión completada! Ganaste {} oro y encontraste: {}.", gold_earned, item_name)
+                        } else {
+                            format!("Quest completed! Gained {} gold and found: {}.", gold_earned, item_name)
+                        }
+                    } else {
+                        if lang == Language::Spanish {
+                            format!("Misión completada. Ganaste {} oro.", gold_earned)
+                        } else {
+                            format!("Quest completed. Gained {} gold.", gold_earned)
+                        }
+                    };
+                    (3, msg)
+                }
+                "train" => {
+                    let attr_idx = rand::rng().random_range(0..6);
+                    let (attr_name, new_val) = match attr_idx {
+                        0 => { player.strength += 1; (localization.get("strength", lang), player.strength) }
+                        1 => { player.dexterity += 1; (localization.get("dexterity", lang), player.dexterity) }
+                        2 => { player.constitution += 1; (localization.get("constitution", lang), player.constitution) }
+                        3 => { player.intelligence += 1; (localization.get("intelligence", lang), player.intelligence) }
+                        4 => { player.wisdom += 1; (localization.get("wisdom", lang), player.wisdom) }
+                        _ => { player.charisma += 1; (localization.get("charisma", lang), player.charisma) }
+                    };
+                    let msg = if lang == Language::Spanish {
+                        format!("Entrenaste duro. Tu {} aumentó a {}.", attr_name, new_val)
+                    } else {
+                        format!("You trained hard. Your {} increased to {}.", attr_name, new_val)
+                    };
+                    (2, msg)
+                }
+                "craft" => {
+                    let items = vec![Weapon::IronHelmet, Weapon::IronChestplate, Weapon::IronBoots, Weapon::SteelSword, Weapon::IronShield];
+                    use rand::seq::IndexedRandom;
+                    let item = items.choose(&mut rand::rng()).copied().unwrap_or(Weapon::IronHelmet);
+                    match item {
+                        Weapon::IronHelmet => player.helmet = Some(item),
+                        Weapon::IronChestplate => player.armor = Some(item),
+                        Weapon::IronBoots => player.boots = Some(item),
+                        Weapon::SteelSword => player.weapon_lh = Some(item),
+                        Weapon::IronShield => player.weapon_rh = Some(item),
+                        _ => {}
+                    }
+                    let item_name = localization.get(&item.to_lowername(), lang);
+                    let msg = if lang == Language::Spanish {
+                        format!("Fabricaste una {}.", item_name)
+                    } else {
+                        format!("You crafted a {}.", item_name)
+                    };
+                    (2, msg)
+                }
+                "heal" => {
+                    player.health = 100.;
+                    let msg = if lang == Language::Spanish {
+                        "Restauraste completamente tu salud.".to_string()
+                    } else {
+                        "You completely restored your health.".to_string()
+                    };
+                    (1, msg)
+                }
+                _ => (0, "".to_string()),
+            };
+
+            log_msgs.push(log_msg);
+
+            // Deduct action points
+            if player.ap <= ap_cost {
+                player.level += 1;
+                player.ap = 10 + (player.level as u32) * 2;
+                player.strength += 1;
+                player.dexterity += 1;
+                player.constitution += 1;
+                player.intelligence += 1;
+                player.wisdom += 1;
+                player.charisma += 1;
+                play_audio_msg.write(PlayAudioMsg::new("victory"));
+                let lvl_msg = if lang == Language::Spanish {
+                    format!("¡SUBIDA DE NIVEL! ¡Has alcanzado el nivel {}!", player.level)
+                } else {
+                    format!("LEVEL UP! You reached Level {}!", player.level)
+                };
+                log_msgs.push(lvl_msg);
+            } else {
+                player.ap -= ap_cost;
+            }
+
+            log_updated = true;
+        }
+    }
+
+    if log_updated {
+        if let Ok(mut log) = log_q.single_mut() {
+            for m in log_msgs {
+                log.0.push(m);
+                if log.0.len() > 3 {
+                    log.0.remove(0);
+                }
+            }
+        }
     }
 }

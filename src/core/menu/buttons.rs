@@ -76,7 +76,7 @@ pub fn on_click_menu_button(
                     next_game_state.set(GameState::ChooseClass);
                 },
                 GameState::Settings => {
-                    next_game_state.set(GameState::Playing);
+                    next_game_state.set(GameState::GameMenu);
                 },
                 _ => unreachable!(),
             },
@@ -123,9 +123,13 @@ pub fn spawn_menu_button(
         | MenuBtn::LoadCharacter
         | MenuBtn::Settings
         | MenuBtn::Quit
-        | MenuBtn::Continue => (Val::Px(420.), Val::Px(75.)),
+        | MenuBtn::Continue
+        | MenuBtn::SaveCharacter => (Val::Px(420.), Val::Px(75.)),
+        #[allow(unreachable_patterns)]
         _ => (Val::Px(300.), Val::Px(55.)),
     };
+
+    let margin = UiRect::all(Val::Px(8.));
 
     parent
         .spawn((
@@ -134,7 +138,7 @@ pub fn spawn_menu_button(
                 height,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                margin: UiRect::all(Val::Px(8.)),
+                margin,
                 border: UiRect::all(Val::Px(2.)),
                 border_radius: BorderRadius::all(Val::Px(4.)),
                 ..default()

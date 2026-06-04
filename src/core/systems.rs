@@ -1,7 +1,9 @@
 use crate::core::audio::PlayAudioMsg;
-use crate::core::menu::systems::StartNewCharacterMsg;
+use crate::core::menu::systems::{StartNewCharacterMsg, SelectionItem};
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
+use crate::core::classes::{Class, Ajah};
+use crate::core::pets::Pet;
 use bevy::prelude::*;
 
 pub fn check_keys_menu(
@@ -11,7 +13,7 @@ pub fn check_keys_menu(
     mut next_app_state: ResMut<NextState<AppState>>,
     mut start_new_char_msg: MessageWriter<StartNewCharacterMsg>,
     keyboard: Res<ButtonInput<KeyCode>>,
-    player: Res<Player>,
+    mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     if keyboard.just_released(KeyCode::Escape) {
@@ -86,7 +88,24 @@ pub fn check_keys_menu(
                 },
                 GameState::ChooseClass => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
-                    next_game_state.set(GameState::ChooseSubClass);
+                    let class = player.class;
+                    class.on_select(&mut player, &mut next_game_state);
+                },
+                GameState::ChooseSubClass => {
+                    play_audio_msg.write(PlayAudioMsg::new("button"));
+                    match player.class {
+                        Class::Mage(_) => {
+                            let ajah = Ajah::default();
+                            ajah.on_select(&mut player, &mut next_game_state);
+                        }
+                        Class::Druid => {
+                            let pet = Pet::default();
+                            pet.on_select(&mut player, &mut next_game_state);
+                        }
+                        _ => {
+                            next_game_state.set(GameState::Playing);
+                        }
+                    }
                 },
                 _ => (),
             },

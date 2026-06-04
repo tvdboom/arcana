@@ -100,16 +100,11 @@ pub fn spawn_label(
     parent
         .spawn(Node {
             width: percent(100.),
-            height: percent(100.),
+            height: Val::Px(65.),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             flex_direction: FlexDirection::Row,
-            padding: UiRect {
-                top: percent(3.),
-                left: percent(5.),
-                right: percent(5.),
-                bottom: percent(7.),
-            },
+            margin: UiRect::bottom(Val::Px(15.)),
             ..default()
         })
         .with_children(|parent| {
@@ -119,11 +114,11 @@ pub fn spawn_label(
                 parent
                     .spawn((
                         Node {
-                            width: percent(30.),
-                            height: percent(100.),
+                            width: Val::Px(120.),
+                            height: Val::Px(45.),
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::Center,
-                            margin: UiRect::all(percent(1.)),
+                            margin: UiRect::horizontal(Val::Px(8.)),
                             border: UiRect::all(Val::Px(2.)),
                             border_radius: BorderRadius::all(Val::Px(4.)),
                             ..default()

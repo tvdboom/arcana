@@ -63,7 +63,7 @@ pub fn load_game(
             commands.insert_resource(data.settings);
             commands.insert_resource(data.player);
 
-            next_game_state.set(GameState::default());
+            next_game_state.set(GameState::Playing);
             next_app_state.set(AppState::Game);
         }
     }
