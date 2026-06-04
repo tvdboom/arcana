@@ -2,6 +2,7 @@ mod assets;
 mod audio;
 mod camera;
 mod constants;
+pub mod localization;
 mod menu;
 #[cfg(not(target_arch = "wasm32"))]
 mod persistence;
@@ -14,6 +15,7 @@ mod utils;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::*;
 use crate::core::camera::*;
+use crate::core::localization::{update_localized_text, Localization};
 use crate::core::menu::buttons::MenuCmp;
 use crate::core::menu::systems::*;
 #[cfg(not(target_arch = "wasm32"))]
@@ -66,7 +68,8 @@ impl Plugin for GamePlugin {
             // Resources
             .init_resource::<WorldAssets>()
             .init_resource::<PlayingAudio>()
-            .init_resource::<Settings>();
+            .init_resource::<Settings>()
+            .init_resource::<Localization>();
 
         // Sets
         configure_stages!(app, InGameSet, in_state(AppState::Game));
@@ -101,7 +104,7 @@ impl Plugin for GamePlugin {
 
         app
             // Utilities
-            .add_systems(Update, (check_keys_menu,))
+            .add_systems(Update, (check_keys_menu, update_localized_text.run_if(resource_changed::<Settings>)))
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::Settings), setup_game_settings)

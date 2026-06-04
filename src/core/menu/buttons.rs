@@ -1,7 +1,9 @@
 use crate::core::assets::WorldAssets;
 use crate::core::constants::*;
+use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::systems::StartNewCharacterMsg;
 use crate::core::menu::utils::{add_text, recolor};
+use crate::core::settings::Language;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::core::persistence::{LoadCharacterMsg, SaveCharacterMsg};
 use crate::core::states::{AppState, GameState};
@@ -92,7 +94,15 @@ pub fn on_click_menu_button(
     }
 }
 
-pub fn spawn_menu_button(parent: &mut ChildSpawnerCommands, btn: MenuBtn, assets: &WorldAssets) {
+pub fn spawn_menu_button(
+    parent: &mut ChildSpawnerCommands,
+    btn: MenuBtn,
+    assets: &WorldAssets,
+    localization: &Localization,
+    language: Language,
+) {
+    let key = btn.to_lowername();
+    let label = localization.get(&key, language);
     parent
         .spawn((
             Node {
@@ -119,8 +129,9 @@ pub fn spawn_menu_button(parent: &mut ChildSpawnerCommands, btn: MenuBtn, assets
         .observe(on_click_menu_button)
         .with_children(|parent| {
             parent.spawn((
-                add_text(btn.to_title(), "bold", BUTTON_TEXT_SIZE, assets),
+                add_text(label, "bold", BUTTON_TEXT_SIZE, assets),
                 TextColor(BUTTON_TEXT_COLOR),
+                LocalizedText(key),
             ));
         });
 }

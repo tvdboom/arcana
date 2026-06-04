@@ -10,3 +10,4 @@ pub const PRESSED_BUTTON_COLOR: Color = Color::srgb_u8(35, 85, 175);
 pub const DISABLED_BUTTON_COLOR: Color = Color::srgb_u8(70, 30, 30);
 pub const BUTTON_BORDER_COLOR: Color = Color::srgb_u8(170, 140, 55);
 pub const BUTTON_TEXT_COLOR: Color = Color::srgb_u8(230, 205, 145);
+pub const SETTINGS_LABEL_COLOR: Color = Color::srgb_u8(150, 205, 235);

@@ -2,10 +2,10 @@ use bevy::prelude::*;
 
 use crate::core::assets::WorldAssets;
 use crate::core::constants::*;
+use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::buttons::*;
 use crate::core::menu::settings::{spawn_label, SettingsBtn};
 use crate::core::menu::utils::{add_root_node, add_text};
-#[cfg(not(target_arch = "wasm32"))]
 use crate::core::settings::Settings;
 use crate::core::states::{AppState, GameState};
 
@@ -17,7 +17,9 @@ pub fn setup_menu(
     app_state: Res<State<AppState>>,
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
+    localization: Res<Localization>,
 ) {
+    let lang = settings.language;
     commands
         .spawn((
             add_root_node(true),
@@ -37,11 +39,11 @@ pub fn setup_menu(
                 })
                 .with_children(|parent| match app_state.get() {
                     AppState::MainMenu => {
-                        spawn_menu_button(parent, MenuBtn::NewCharacter, &assets);
-                        spawn_menu_button(parent, MenuBtn::LoadCharacter, &assets);
-                        spawn_menu_button(parent, MenuBtn::Settings, &assets);
+                        spawn_menu_button(parent, MenuBtn::NewCharacter, &assets, &localization, lang);
+                        spawn_menu_button(parent, MenuBtn::LoadCharacter, &assets, &localization, lang);
+                        spawn_menu_button(parent, MenuBtn::Settings, &assets, &localization, lang);
                         #[cfg(not(target_arch = "wasm32"))]
-                        spawn_menu_button(parent, MenuBtn::Quit, &assets);
+                        spawn_menu_button(parent, MenuBtn::Quit, &assets, &localization, lang);
                     },
                     AppState::Settings => {
                         parent
@@ -55,28 +57,31 @@ pub fn setup_menu(
                             .with_children(|parent| {
                                 spawn_label(
                                     parent,
-                                    "Language",
+                                    "language",
                                     vec![SettingsBtn::English, SettingsBtn::Spanish],
                                     &settings,
                                     &assets,
+                                    &localization,
                                 );
                                 spawn_label(
                                     parent,
-                                    "Audio",
+                                    "audio",
                                     vec![SettingsBtn::Mute, SettingsBtn::Sound, SettingsBtn::Music],
                                     &settings,
                                     &assets,
+                                    &localization,
                                 );
                                 spawn_label(
                                     parent,
-                                    "Autosave",
+                                    "autosave",
                                     vec![SettingsBtn::True, SettingsBtn::False],
                                     &settings,
                                     &assets,
+                                    &localization,
                                 );
                             });
 
-                        spawn_menu_button(parent, MenuBtn::Back, &assets);
+                        spawn_menu_button(parent, MenuBtn::Back, &assets, &localization, lang);
                     },
                     _ => (),
                 });
@@ -89,16 +94,26 @@ pub fn setup_menu(
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn(add_text("Created by Mavs", "medium", TITLE_TEXT_SIZE, &assets));
+                    let credit = localization.get("created_by", lang);
+                    parent.spawn((
+                        add_text(credit, "medium", TITLE_TEXT_SIZE, &assets),
+                        LocalizedText("created_by".to_string()),
+                    ));
                 });
         });
 }
 
-pub fn setup_game_menu(mut commands: Commands, assets: Res<WorldAssets>) {
+pub fn setup_game_menu(
+    mut commands: Commands,
+    settings: Res<Settings>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+) {
+    let lang = settings.language;
     commands.spawn((add_root_node(true), MenuCmp)).with_children(|parent| {
-        spawn_menu_button(parent, MenuBtn::Continue, &assets);
-        spawn_menu_button(parent, MenuBtn::Settings, &assets);
-        spawn_menu_button(parent, MenuBtn::Quit, &assets);
+        spawn_menu_button(parent, MenuBtn::Continue, &assets, &localization, lang);
+        spawn_menu_button(parent, MenuBtn::Settings, &assets, &localization, lang);
+        spawn_menu_button(parent, MenuBtn::Quit, &assets, &localization, lang);
     });
 }
 
@@ -106,7 +121,9 @@ pub fn setup_game_settings(
     mut commands: Commands,
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
+    localization: Res<Localization>,
 ) {
+    let lang = settings.language;
     commands.spawn((add_root_node(true), MenuCmp)).with_children(|parent| {
         parent
             .spawn((Node {
@@ -120,28 +137,31 @@ pub fn setup_game_settings(
             .with_children(|parent| {
                 spawn_label(
                     parent,
-                    "Language",
+                    "language",
                     vec![SettingsBtn::English, SettingsBtn::Spanish],
                     &settings,
                     &assets,
+                    &localization,
                 );
                 spawn_label(
                     parent,
-                    "Audio",
+                    "audio",
                     vec![SettingsBtn::Mute, SettingsBtn::Sound, SettingsBtn::Music],
                     &settings,
                     &assets,
+                    &localization,
                 );
                 spawn_label(
                     parent,
-                    "Autosave",
+                    "autosave",
                     vec![SettingsBtn::True, SettingsBtn::False],
                     &settings,
                     &assets,
+                    &localization,
                 );
             });
 
-        spawn_menu_button(parent, MenuBtn::Back, &assets);
+        spawn_menu_button(parent, MenuBtn::Back, &assets, &localization, lang);
     });
 }
 

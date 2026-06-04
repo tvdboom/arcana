@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::ChangeAudioMsg;
 use crate::core::constants::*;
+use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::utils::add_text;
 use crate::core::settings::{AudioSettings, Language, Settings};
 use crate::core::utils::cursor;
@@ -81,12 +82,18 @@ pub fn on_click_label_button(
 
 pub fn spawn_label(
     parent: &mut ChildSpawnerCommands,
-    title: &str,
+    key: &str,
     buttons: Vec<SettingsBtn>,
     settings: &Settings,
     assets: &WorldAssets,
+    localization: &Localization,
 ) {
-    parent.spawn((add_text(title, "bold", BUTTON_TEXT_SIZE, assets), TextColor(BUTTON_TEXT_COLOR)));
+    let title = localization.get(key, settings.language);
+    parent.spawn((
+        add_text(title, "bold", BUTTON_TEXT_SIZE, assets),
+        TextColor(SETTINGS_LABEL_COLOR),
+        LocalizedText(key.to_string()),
+    ));
 
     parent
         .spawn(Node {
@@ -105,6 +112,8 @@ pub fn spawn_label(
         })
         .with_children(|parent| {
             for item in buttons.iter() {
+                let key = item.to_lowername();
+                let label = localization.get(&key, settings.language);
                 parent
                     .spawn((
                         Node {
@@ -134,8 +143,9 @@ pub fn spawn_label(
                     .observe(on_click_label_button)
                     .with_children(|parent| {
                         parent.spawn((
-                            add_text(item.to_title(), "bold", SUBTITLE_TEXT_SIZE, assets),
+                            add_text(label, "bold", SUBTITLE_TEXT_SIZE, assets),
                             TextColor(BUTTON_TEXT_COLOR),
+                            LocalizedText(key),
                         ));
                     });
             }
