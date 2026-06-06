@@ -7,7 +7,6 @@ use crate::core::audio::ChangeAudioMsg;
 use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::states::{AppState, GameState};
-use crate::TITLE;
 use bevy::prelude::*;
 use bincode::config::standard;
 use bincode::serde::{decode_from_slice, encode_to_vec};
@@ -77,11 +76,12 @@ pub fn save_game(
 ) {
     for msg in save_game_msg.read() {
         let file_path = if msg.0 {
-            let mut path = current_dir().expect("Failed to get current directory.");
-            path.push(TITLE.to_lowercase());
-            Some(path)
+            let path = current_dir().expect("Failed to get current directory.");
+            Some(path.join(&player.name))
         } else {
-            FileDialog::new().save_file()
+            FileDialog::new()
+                .set_file_name(player.name.clone())
+                .save_file()
         };
 
         if let Some(mut file_path) = file_path {

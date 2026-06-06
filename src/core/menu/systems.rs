@@ -896,40 +896,16 @@ impl SelectionItem for Class {
 
         match self {
             Class::Warrior => {
-                player.helmet = Some(Weapon::IronHelmet);
-                player.armor = Some(Weapon::IronChestplate);
-                player.boots = Some(Weapon::IronBoots);
-                player.weapon_lh = Some(Weapon::SteelSword);
-                player.weapon_rh = Some(Weapon::IronShield);
-                player.weapon_2h = None;
-                player.consumables = vec![Consumable::HealingPotion];
+                player.weapon_rh = Some(Weapon::SteelSword);
             }
             Class::Mage(_) => {
-                player.helmet = None;
-                player.armor = Some(Weapon::MageRobes);
-                player.boots = Some(Weapon::ClothShoes);
-                player.weapon_lh = None;
-                player.weapon_rh = None;
                 player.weapon_2h = Some(Weapon::WizardStaff);
-                player.consumables = vec![Consumable::ManaPotion];
             }
             Class::Rogue => {
-                player.helmet = None;
-                player.armor = Some(Weapon::LeatherArmor);
-                player.boots = Some(Weapon::SilentBoots);
-                player.weapon_lh = Some(Weapon::AssassinDagger);
                 player.weapon_rh = Some(Weapon::ThiefDagger);
-                player.weapon_2h = None;
-                player.consumables = vec![Consumable::PoisonVial];
             }
             Class::Druid => {
-                player.helmet = None;
-                player.armor = Some(Weapon::LeafyGarb);
-                player.boots = Some(Weapon::LeatherBoots);
-                player.weapon_lh = Some(Weapon::OakWand);
-                player.weapon_rh = None;
-                player.weapon_2h = None;
-                player.consumables = vec![Consumable::HerbBlend];
+                player.weapon_rh = Some(Weapon::OakWand);
             }
         }
         
@@ -943,8 +919,8 @@ impl SelectionItem for Class {
     fn get_image_key(&self, player: &Player) -> String {
         let race_key = player.race.to_lowername();
         match self {
-            Class::Mage(_) => "mage_human".to_string(),
-            Class::Warrior => "warrior_human".to_string(),
+            Class::Mage(_) => format!("mage_{}", race_key),
+            Class::Warrior => format!("warrior_{}", race_key),
             Class::Rogue => format!("rogue_{}", race_key),
             Class::Druid => format!("druid_{}", race_key),
         }
@@ -963,8 +939,19 @@ impl SelectionItem for Ajah {
     }
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
+        player.class = Class::Mage(*self);
         player.abilities.push(self.special_ability());
         next_game_state.set(GameState::Playing);
+    }
+
+    fn get_image_key(&self, player: &Player) -> String {
+        let race_key = player.race.to_lowername();
+        match self {
+            Ajah::Black => "mage_black".to_string(),
+            Ajah::Red => format!("mage_red_{}", race_key),
+            Ajah::Green => format!("mage_green_{}", race_key),
+            Ajah::White => format!("mage_white_{}", race_key),
+        }
     }
 }
 
@@ -1236,7 +1223,6 @@ pub struct PlayingLog(pub Vec<String>);
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum StatType {
-    Name,
     Level,
     Ap,
     Money,
@@ -1285,7 +1271,7 @@ pub fn setup_playing_screen(
         .spawn((
             root_node,
             pickable,
-            ImageNode::new(assets.image("bg2")).with_mode(NodeImageMode::Stretch),
+            ImageNode::new(assets.image("bg3")).with_mode(NodeImageMode::Stretch),
             PlayingCmp,
         ))
         .with_children(|parent| {
@@ -1321,24 +1307,44 @@ pub fn setup_playing_screen(
                 )).with_children(|parent| {
                     // Title info
                     parent.spawn((
-                        add_text("Character", "bold", SUBTITLE_TEXT_SIZE, &assets),
+                        add_text(&player.name, "bold", SUBTITLE_TEXT_SIZE, &assets),
                         TextColor(BUTTON_TEXT_COLOR),
-                        StatLabel(StatType::Name),
                     ));
 
                     // Portrait
-                    let portrait_key = player.class.get_image_key(&player);
+                    let portrait_key = match player.class {
+                        Class::Mage(ajah) => ajah.get_image_key(&player),
+                        _ => player.class.get_image_key(&player),
+                    };
+
                     parent.spawn((
                         Node {
                             width: percent(75.),
-                            height: percent(35.),
+                            aspect_ratio: Some(1.0),
                             margin: UiRect::vertical(percent(1.5)),
                             border: UiRect::all(Val::Px(3.)),
+                            position_type: PositionType::Relative,
                             ..default()
                         },
                         BorderColor::all(BUTTON_BORDER_COLOR),
                         ImageNode::new(assets.image(portrait_key)).with_mode(NodeImageMode::Stretch),
-                    ));
+                    )).with_children(|parent| {
+                        if let Some(pet) = &player.pet {
+                            parent.spawn((
+                                Node {
+                                    position_type: PositionType::Absolute,
+                                    left: Val::Px(8.),
+                                    bottom: Val::Px(8.),
+                                    width: percent(38.),
+                                    aspect_ratio: Some(1.0),
+                                    border: UiRect::all(Val::Px(2.)),
+                                    ..default()
+                                },
+                                BorderColor::all(BUTTON_BORDER_COLOR),
+                                ImageNode::new(assets.image(pet.get_image_key(&player))).with_mode(NodeImageMode::Stretch),
+                            ));
+                        }
+                    });
 
                     // Equipment details container
                     parent.spawn((
@@ -1485,10 +1491,6 @@ pub fn update_playing_screen(
     let lang = settings.language;
     for (mut text, stat) in &mut text_q {
         text.0 = match &stat.0 {
-            StatType::Name => {
-                let class_name = localization.get(&player.class.to_lowername(), lang);
-                format!("{}: {}", player.name, class_name)
-            }
             StatType::Level => format!("{}: {}", localization.get("level", lang), player.level),
             StatType::Ap => format!("{}: {}", localization.get("action_points", lang), player.ap),
             StatType::Money => format!("{}: {} {}", localization.get("money", lang), player.money, localization.get("money", lang)),

@@ -4,8 +4,11 @@ use crate::core::perks::Perk;
 use crate::core::pets::Pet;
 use crate::core::races::Race;
 use bevy::prelude::*;
+use rand::prelude::IndexedRandom;
+use rand::rng;
 use serde::{Deserialize, Serialize};
 use strum_macros::{EnumIter, EnumString};
+use crate::core::constants::FANTASY_NAMES;
 use crate::core::consumables::Consumable;
 use crate::core::weapons::Weapon;
 
@@ -47,64 +50,9 @@ pub struct Player {
     pub money: u32,
 }
 
-const FANTASY_NAMES: &[&str] = &[
-    "Eldrin",
-    "Zephyrus",
-    "Thorne",
-    "Kaelen",
-    "Valerius",
-    "Sylas",
-    "Baelor",
-    "Garrick",
-    "Cedric",
-    "Gideon",
-    "Alistair",
-    "Ronan",
-    "Dorian",
-    "Lucian",
-    "Tristan",
-    "Percival",
-    "Alaric",
-    "Orpheus",
-    "Tyrion",
-    "Ignis",
-    "Vaelen",
-    "Elidor",
-    "Malakor",
-    "Rhaegar",
-    "Viserys",
-    "Jorah",
-    "Daario",
-    "Arthur",
-    "Lancelot",
-    "Merlin",
-    "Kenneth",
-    "Raymond",
-    "Jonan",
-    "Bran",
-    "Sanson",
-    "Loras",
-    "Oberyn",
-    "Theon",
-    "Stannis",
-    "Davos",
-    "Barristan",
-    "Joffrey",
-    "Sandor",
-    "Gregor",
-    "Renly",
-    "Eddard",
-    "Robert",
-    "Tywin",
-    "Jaime",
-    "Ramsay",
-];
-
 impl Default for Player {
     fn default() -> Self {
-        use rand::seq::IndexedRandom;
-        let mut rng = rand::rng();
-        let name = FANTASY_NAMES.choose(&mut rng).copied().unwrap_or("Arcana").to_string();
+        let name = FANTASY_NAMES.choose(&mut rng()).copied().unwrap_or("Arcana").to_string();
         Self {
             name,
             race: Race::default(),
