@@ -42,7 +42,7 @@ pub struct CreateCharacterContinueBtn;
 
 pub const AGE_STAGES: &[&str] = &["youth", "young adult", "adult", "senior", "elder"];
 pub const AGE_SLIDER_WIDTH: f32 = 280.0;
-pub const AGE_VALUE_WIDTH: f32 = 140.0;
+pub const AGE_VALUE_WIDTH: f32 = 180.0;
 
 #[derive(Component)]
 pub struct AgeSliderHandle;
@@ -964,7 +964,6 @@ pub fn update_age_slider(
     settings: Res<Settings>,
     localization: Res<Localization>,
     track_q: Query<&GlobalTransform, With<AgeSliderTrack>>,
-    interaction_q: Query<&Interaction, Or<(With<AgeSliderTrack>, With<AgeStageButton>)>>,
     mut handle_q: Query<&mut Node, (With<AgeSliderHandle>, Without<AgeSliderTrack>)>,
     mut value_node_q: Query<
         &mut Node,
@@ -986,8 +985,8 @@ pub fn update_age_slider(
         return;
     };
 
-    let any_pressed = interaction_q.iter().any(|interaction| *interaction == Interaction::Pressed);
-    if mouse_buttons.pressed(MouseButton::Left) && any_pressed {
+    let cursor_is_on_slider = age_cursor_is_on_slider(track_transform, window, cursor_pos);
+    if mouse_buttons.pressed(MouseButton::Left) && (*drag_active || cursor_is_on_slider) {
         *drag_active = true;
     }
 
@@ -1096,6 +1095,19 @@ fn age_relative_x_from_cursor(
     let track_center_x = track_transform.translation().x + window.width() / 2.0;
     let track_left = track_center_x - AGE_SLIDER_WIDTH / 2.0;
     (cursor_x - track_left).clamp(0., AGE_SLIDER_WIDTH)
+}
+
+fn age_cursor_is_on_slider(
+    track_transform: &GlobalTransform,
+    window: &Window,
+    cursor_pos: Vec2,
+) -> bool {
+    let track_center = track_transform.translation();
+    let track_center_x = track_center.x + window.width() / 2.0;
+    let left = track_center_x - AGE_SLIDER_WIDTH / 2.0;
+    let right = track_center_x + AGE_SLIDER_WIDTH / 2.0;
+
+    cursor_pos.x >= left && cursor_pos.x <= right
 }
 
 fn age_stage_from_relative_x(relative_x: f32) -> u32 {

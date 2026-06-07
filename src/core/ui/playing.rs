@@ -83,6 +83,13 @@ pub struct PetImage;
 #[derive(Component)]
 pub struct TooltipNode;
 
+#[derive(Component, Clone, Copy)]
+pub enum InfoTooltip {
+    Gold,
+    ActionPoints,
+    Combat(PlayingStat),
+}
+
 fn portrait_key(player: &Player) -> String {
     match player.class {
         Class::Mage(ajah) => ajah.get_image_key(player),
@@ -129,6 +136,124 @@ fn weapon_stat_lines(
 
 fn name_with_level(name: String, level: u8) -> String {
     format!("{} (lv. {})", name, level)
+}
+
+fn signed_line(label: impl Into<String>, value: i32) -> String {
+    let label = label.into();
+    if value > 0 {
+        format!("{}: +{}", label, value)
+    } else {
+        format!("{}: {}", label, value)
+    }
+}
+
+fn weapon_bonus_lines(
+    player: &Player,
+    localization: &Localization,
+    lang: Language,
+    value_for: impl Fn(&Weapon) -> i32,
+) -> Vec<String> {
+    player
+        .equipped_weapons()
+        .into_iter()
+        .filter_map(|weapon| {
+            let value = value_for(weapon);
+            (value != 0).then(|| signed_line(localization.get(&weapon.to_lowername(), lang), value))
+        })
+        .collect()
+}
+
+fn combat_breakdown(
+    stat: PlayingStat,
+    player: &Player,
+    localization: &Localization,
+    lang: Language,
+) -> Vec<String> {
+    match stat {
+        PlayingStat::Attack => {
+            let mut lines = vec![signed_line(localization.get("base", lang).to_lowercase(), 5)];
+            lines.push(signed_line(
+                localization.get("strength", lang).to_lowercase(),
+                player.strength() as i32 - 10,
+            ));
+            lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
+                weapon.stats().attack
+            }));
+            lines
+        },
+        PlayingStat::Armor => {
+            let mut lines = vec![signed_line(
+                localization.get("constitution", lang).to_lowercase(),
+                player.constitution() as i32 / 4,
+            )];
+            lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
+                weapon.stats().armor
+            }));
+            lines
+        },
+        PlayingStat::Initiative => {
+            let mut lines = vec![signed_line(
+                localization.get("dexterity", lang).to_lowercase(),
+                player.dexterity() as i32 / 2,
+            )];
+            lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
+                weapon.stats().initiative
+            }));
+            if matches!(player.class, Class::Rogue) {
+                lines.push(signed_line(localization.get("rogue", lang), 2));
+            }
+            lines
+        },
+        _ => vec![],
+    }
+}
+
+fn spawn_tooltip(
+    commands: &mut Commands,
+    assets: &WorldAssets,
+    title: String,
+    lines: Vec<String>,
+    windows: &Query<&Window>,
+) {
+    let (left, top) = if let Ok(window) = windows.single() {
+        if let Some(cursor) = window.cursor_position() {
+            (cursor.x, cursor.y)
+        } else {
+            (100., 100.)
+        }
+    } else {
+        (100., 100.)
+    };
+
+    commands
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(left),
+                top: Val::Px(top),
+                padding: UiRect::all(Val::Px(10.)),
+                border: UiRect::all(Val::Px(2.)),
+                width: Val::Auto,
+                height: Val::Auto,
+                max_width: Val::Px(320.),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(4.),
+                ..default()
+            },
+            BackgroundColor(Color::srgba_u8(10, 18, 45, 245)),
+            BorderColor::all(BUTTON_BORDER_COLOR),
+            GlobalZIndex(200),
+            TooltipNode,
+        ))
+        .with_children(|parent| {
+            parent.spawn((add_text(title, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
+            if !lines.is_empty() {
+                parent.spawn((
+                    add_text(lines.join("\n"), "medium", 1.6, assets),
+                    TextColor(Color::WHITE),
+                ));
+            }
+        });
 }
 
 /// A bordered placeholder box (used wherever an item/ability image will go later).
@@ -220,6 +345,9 @@ fn spawn_combat_stat(
             },
             BackgroundColor(PLACEHOLDER_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            Interaction::default(),
+            Pickable::default(),
+            InfoTooltip::Combat(stat),
         ))
         .with_children(|parent| {
             // Semi-transparent icon background
@@ -298,7 +426,7 @@ pub fn setup_playing_screen(
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::SpaceBetween,
                     align_items: AlignItems::Stretch,
-                    column_gap: Val::Px(2.),
+                    column_gap: Val::Px(0.),
                     padding: UiRect::horizontal(Val::Px(26.)),
                     ..default()
                 })
@@ -343,7 +471,7 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
     parent
         .spawn((
             Node {
-                width: percent(28.),
+                width: percent(29.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
                 padding: UiRect::all(Val::Px(6.)),
@@ -438,7 +566,7 @@ fn spawn_stats_column(
     parent
         .spawn((
             Node {
-                width: percent(30.),
+                width: percent(32.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
                 padding: UiRect::all(Val::Px(8.)),
@@ -469,6 +597,9 @@ fn spawn_stats_column(
                         add_text(format!("AP: {}", player.ap), "bold", 2.2, assets),
                         TextColor(Color::WHITE),
                         StatLabel(PlayingStat::ActionPoints),
+                        Interaction::default(),
+                        Pickable::default(),
+                        InfoTooltip::ActionPoints,
                     ));
                 });
 
@@ -769,52 +900,56 @@ pub fn equip_slot_tooltip_system(
                     name_with_level(localization.get(&weapon.to_lowername(), lang), weapon.level());
                 let stat_lines = weapon_stat_lines(&weapon, &player, &localization, lang);
 
-                let (left, top) = if let Ok(window) = windows.single() {
-                    if let Some(cursor) = window.cursor_position() {
-                        (cursor.x, cursor.y)
-                    } else {
-                        (100., 100.)
-                    }
-                } else {
-                    (100., 100.)
-                };
-
-                commands
-                    .spawn((
-                        Node {
-                            position_type: PositionType::Absolute,
-                            left: Val::Px(left),
-                            top: Val::Px(top),
-                            padding: UiRect::all(Val::Px(10.)),
-                            border: UiRect::all(Val::Px(2.)),
-                            width: Val::Auto,
-                            height: Val::Auto,
-                            max_width: Val::Px(280.),
-                            flex_direction: FlexDirection::Column,
-                            row_gap: Val::Px(4.),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgba_u8(10, 18, 45, 245)),
-                        BorderColor::all(BUTTON_BORDER_COLOR),
-                        GlobalZIndex(200),
-                        TooltipNode,
-                    ))
-                    .with_children(|parent| {
-                        // Weapon name in gold/title color
-                        parent.spawn((
-                            add_text(name, "bold", 1.9, &assets),
-                            TextColor(BUTTON_TEXT_COLOR),
-                        ));
-                        // Stats in white with medium font
-                        if !stat_lines.is_empty() {
-                            parent.spawn((
-                                add_text(stat_lines.join("\n"), "medium", 1.6, &assets),
-                                TextColor(Color::WHITE),
-                            ));
-                        }
-                    });
+                spawn_tooltip(&mut commands, &assets, name, stat_lines, &windows);
             }
         }
+    }
+}
+
+pub fn info_tooltip_system(
+    mut commands: Commands,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    player: Res<Player>,
+    info_q: Query<(&Interaction, &InfoTooltip), Changed<Interaction>>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
+    windows: Query<&Window>,
+) {
+    let lang = settings.language;
+
+    for (interaction, tooltip) in &info_q {
+        for entity in tooltip_q.iter() {
+            commands.entity(entity).try_despawn();
+        }
+
+        if *interaction != Interaction::Hovered && *interaction != Interaction::Pressed {
+            continue;
+        }
+
+        let (title, lines) = match tooltip {
+            InfoTooltip::Gold => {
+                (localization.get("gold", lang), vec![localization.get("gold_desc", lang)])
+            },
+            InfoTooltip::ActionPoints => (
+                localization.get("active_points", lang),
+                vec![localization.get("active_points_desc", lang)],
+            ),
+            InfoTooltip::Combat(stat) => {
+                let title_key = match stat {
+                    PlayingStat::Attack => "attack",
+                    PlayingStat::Armor => "armor",
+                    PlayingStat::Initiative => "initiative",
+                    _ => "",
+                };
+                (
+                    localization.get(title_key, lang),
+                    combat_breakdown(*stat, &player, &localization, lang),
+                )
+            },
+        };
+
+        spawn_tooltip(&mut commands, &assets, title, lines, &windows);
     }
 }
 
@@ -842,7 +977,7 @@ fn spawn_right_column(
     parent
         .spawn((
             Node {
-                width: percent(34.),
+                width: percent(38.),
                 height: percent(100.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
@@ -883,12 +1018,17 @@ fn spawn_right_column(
                             ));
 
                             parent
-                                .spawn(Node {
-                                    flex_direction: FlexDirection::Row,
-                                    align_items: AlignItems::Center,
-                                    column_gap: Val::Px(6.),
-                                    ..default()
-                                })
+                                .spawn((
+                                    Node {
+                                        flex_direction: FlexDirection::Row,
+                                        align_items: AlignItems::Center,
+                                        column_gap: Val::Px(6.),
+                                        ..default()
+                                    },
+                                    Interaction::default(),
+                                    Pickable::default(),
+                                    InfoTooltip::Gold,
+                                ))
                                 .with_children(|parent| {
                                     parent.spawn((
                                         Node {

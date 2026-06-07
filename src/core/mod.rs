@@ -150,6 +150,7 @@ impl Plugin for GamePlugin {
                 OnEnter(GameState::Playing),
                 (setup_playing_screen, rebuild_playing_lists).chain(),
             )
+            .add_systems(OnExit(GameState::Playing), despawn::<PlayingCmp>)
             .add_systems(OnExit(AppState::Game), despawn::<PlayingCmp>)
             .add_systems(
                 Update,
@@ -158,6 +159,7 @@ impl Plugin for GamePlugin {
                     handle_playing_action_clicks,
                     scroll_system,
                     equip_slot_tooltip_system,
+                    info_tooltip_system,
                     tooltip_follow_cursor_system,
                 )
                     .run_if(in_state(GameState::Playing)),
