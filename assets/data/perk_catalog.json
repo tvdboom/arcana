@@ -1,0 +1,4202 @@
+[
+  {
+    "name": "novice swift vanguard mastery",
+    "level": 1,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/novice swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "novice infused acolyte resilience",
+    "level": 1,
+    "class_hint": "mage",
+    "icon_path": "images/perks/novice infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "novice clandestine stalker reflexes",
+    "level": 1,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/novice clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "novice sovereign dryad harmony",
+    "level": 1,
+    "class_hint": "druid",
+    "icon_path": "images/perks/novice sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "novice hallowed juggernaut might",
+    "level": 1,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/novice hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "novice vile pyromancy affinity",
+    "level": 1,
+    "class_hint": "mage",
+    "icon_path": "images/perks/novice vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "novice exalted spectre fortitude",
+    "level": 1,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/novice exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "novice primal earthkeeper insight",
+    "level": 1,
+    "class_hint": "druid",
+    "icon_path": "images/perks/novice primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "novice dread conqueror purity",
+    "level": 1,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/novice dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "novice ethereal cosmologist vigor",
+    "level": 1,
+    "class_hint": "mage",
+    "icon_path": "images/perks/novice ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "novice radiant dreadblade wisdom",
+    "level": 1,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/novice radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "novice grave wildshaper agility",
+    "level": 1,
+    "class_hint": "druid",
+    "icon_path": "images/perks/novice grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "novice savage bastion bravery",
+    "level": 1,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/novice savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "novice noble spellcraft sentry",
+    "level": 1,
+    "class_hint": "mage",
+    "icon_path": "images/perks/novice noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "novice gargoyle scoundrel vigilance",
+    "level": 1,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/novice gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "novice wild animist aura",
+    "level": 1,
+    "class_hint": "druid",
+    "icon_path": "images/perks/novice wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "novice mystic gladiator guile",
+    "level": 1,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/novice mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "novice ashen aether tenacity",
+    "level": 1,
+    "class_hint": "mage",
+    "icon_path": "images/perks/novice ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "novice blood acrobat luck",
+    "level": 1,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/novice blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "novice runic grovewarden fortification",
+    "level": 1,
+    "class_hint": "druid",
+    "icon_path": "images/perks/novice runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "novice void vanguard mastery",
+    "level": 1,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/novice void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "novice volcanic acolyte resilience",
+    "level": 1,
+    "class_hint": "mage",
+    "icon_path": "images/perks/novice volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "novice elder stalker reflexes",
+    "level": 1,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/novice elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "novice stormy dryad harmony",
+    "level": 1,
+    "class_hint": "druid",
+    "icon_path": "images/perks/novice stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "novice ancient juggernaut might",
+    "level": 1,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/novice ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "novice enchanted pyromancy affinity",
+    "level": 1,
+    "class_hint": "mage",
+    "icon_path": "images/perks/novice enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "novice abyssal spectre fortitude",
+    "level": 1,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/novice abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "novice astral earthkeeper insight",
+    "level": 1,
+    "class_hint": "druid",
+    "icon_path": "images/perks/novice astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "novice zealous conqueror purity",
+    "level": 1,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/novice zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "novice haunted cosmologist vigor",
+    "level": 1,
+    "class_hint": "mage",
+    "icon_path": "images/perks/novice haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "initiate swift vanguard mastery",
+    "level": 2,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/initiate swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "initiate infused acolyte resilience",
+    "level": 2,
+    "class_hint": "mage",
+    "icon_path": "images/perks/initiate infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "initiate clandestine stalker reflexes",
+    "level": 2,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/initiate clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "initiate sovereign dryad harmony",
+    "level": 2,
+    "class_hint": "druid",
+    "icon_path": "images/perks/initiate sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "initiate hallowed juggernaut might",
+    "level": 2,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/initiate hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "initiate vile pyromancy affinity",
+    "level": 2,
+    "class_hint": "mage",
+    "icon_path": "images/perks/initiate vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "initiate exalted spectre fortitude",
+    "level": 2,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/initiate exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "initiate primal earthkeeper insight",
+    "level": 2,
+    "class_hint": "druid",
+    "icon_path": "images/perks/initiate primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "initiate dread conqueror purity",
+    "level": 2,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/initiate dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "initiate ethereal cosmologist vigor",
+    "level": 2,
+    "class_hint": "mage",
+    "icon_path": "images/perks/initiate ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "initiate radiant dreadblade wisdom",
+    "level": 2,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/initiate radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "initiate grave wildshaper agility",
+    "level": 2,
+    "class_hint": "druid",
+    "icon_path": "images/perks/initiate grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "initiate savage bastion bravery",
+    "level": 2,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/initiate savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "initiate noble spellcraft sentry",
+    "level": 2,
+    "class_hint": "mage",
+    "icon_path": "images/perks/initiate noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "initiate gargoyle scoundrel vigilance",
+    "level": 2,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/initiate gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "initiate wild animist aura",
+    "level": 2,
+    "class_hint": "druid",
+    "icon_path": "images/perks/initiate wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "initiate mystic gladiator guile",
+    "level": 2,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/initiate mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "initiate ashen aether tenacity",
+    "level": 2,
+    "class_hint": "mage",
+    "icon_path": "images/perks/initiate ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "initiate blood acrobat luck",
+    "level": 2,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/initiate blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "initiate runic grovewarden fortification",
+    "level": 2,
+    "class_hint": "druid",
+    "icon_path": "images/perks/initiate runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "initiate void vanguard mastery",
+    "level": 2,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/initiate void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "initiate volcanic acolyte resilience",
+    "level": 2,
+    "class_hint": "mage",
+    "icon_path": "images/perks/initiate volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "initiate elder stalker reflexes",
+    "level": 2,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/initiate elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "initiate stormy dryad harmony",
+    "level": 2,
+    "class_hint": "druid",
+    "icon_path": "images/perks/initiate stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "initiate ancient juggernaut might",
+    "level": 2,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/initiate ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "initiate enchanted pyromancy affinity",
+    "level": 2,
+    "class_hint": "mage",
+    "icon_path": "images/perks/initiate enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "initiate abyssal spectre fortitude",
+    "level": 2,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/initiate abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "initiate astral earthkeeper insight",
+    "level": 2,
+    "class_hint": "druid",
+    "icon_path": "images/perks/initiate astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "initiate zealous conqueror purity",
+    "level": 2,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/initiate zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "initiate haunted cosmologist vigor",
+    "level": 2,
+    "class_hint": "mage",
+    "icon_path": "images/perks/initiate haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "apprentice swift vanguard mastery",
+    "level": 3,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/apprentice swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "apprentice infused acolyte resilience",
+    "level": 3,
+    "class_hint": "mage",
+    "icon_path": "images/perks/apprentice infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "apprentice clandestine stalker reflexes",
+    "level": 3,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/apprentice clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "apprentice sovereign dryad harmony",
+    "level": 3,
+    "class_hint": "druid",
+    "icon_path": "images/perks/apprentice sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "apprentice hallowed juggernaut might",
+    "level": 3,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/apprentice hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "apprentice vile pyromancy affinity",
+    "level": 3,
+    "class_hint": "mage",
+    "icon_path": "images/perks/apprentice vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "apprentice exalted spectre fortitude",
+    "level": 3,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/apprentice exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "apprentice primal earthkeeper insight",
+    "level": 3,
+    "class_hint": "druid",
+    "icon_path": "images/perks/apprentice primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "apprentice dread conqueror purity",
+    "level": 3,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/apprentice dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "apprentice ethereal cosmologist vigor",
+    "level": 3,
+    "class_hint": "mage",
+    "icon_path": "images/perks/apprentice ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "apprentice radiant dreadblade wisdom",
+    "level": 3,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/apprentice radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "apprentice grave wildshaper agility",
+    "level": 3,
+    "class_hint": "druid",
+    "icon_path": "images/perks/apprentice grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "apprentice savage bastion bravery",
+    "level": 3,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/apprentice savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "apprentice noble spellcraft sentry",
+    "level": 3,
+    "class_hint": "mage",
+    "icon_path": "images/perks/apprentice noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "apprentice gargoyle scoundrel vigilance",
+    "level": 3,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/apprentice gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "apprentice wild animist aura",
+    "level": 3,
+    "class_hint": "druid",
+    "icon_path": "images/perks/apprentice wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "apprentice mystic gladiator guile",
+    "level": 3,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/apprentice mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "apprentice ashen aether tenacity",
+    "level": 3,
+    "class_hint": "mage",
+    "icon_path": "images/perks/apprentice ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "apprentice blood acrobat luck",
+    "level": 3,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/apprentice blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "apprentice runic grovewarden fortification",
+    "level": 3,
+    "class_hint": "druid",
+    "icon_path": "images/perks/apprentice runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "apprentice void vanguard mastery",
+    "level": 3,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/apprentice void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "apprentice volcanic acolyte resilience",
+    "level": 3,
+    "class_hint": "mage",
+    "icon_path": "images/perks/apprentice volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "apprentice elder stalker reflexes",
+    "level": 3,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/apprentice elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "apprentice stormy dryad harmony",
+    "level": 3,
+    "class_hint": "druid",
+    "icon_path": "images/perks/apprentice stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "apprentice ancient juggernaut might",
+    "level": 3,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/apprentice ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "apprentice enchanted pyromancy affinity",
+    "level": 3,
+    "class_hint": "mage",
+    "icon_path": "images/perks/apprentice enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "apprentice abyssal spectre fortitude",
+    "level": 3,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/apprentice abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "apprentice astral earthkeeper insight",
+    "level": 3,
+    "class_hint": "druid",
+    "icon_path": "images/perks/apprentice astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "apprentice zealous conqueror purity",
+    "level": 3,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/apprentice zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "apprentice haunted cosmologist vigor",
+    "level": 3,
+    "class_hint": "mage",
+    "icon_path": "images/perks/apprentice haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "journeyman swift vanguard mastery",
+    "level": 4,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/journeyman swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "journeyman infused acolyte resilience",
+    "level": 4,
+    "class_hint": "mage",
+    "icon_path": "images/perks/journeyman infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "journeyman clandestine stalker reflexes",
+    "level": 4,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/journeyman clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "journeyman sovereign dryad harmony",
+    "level": 4,
+    "class_hint": "druid",
+    "icon_path": "images/perks/journeyman sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "journeyman hallowed juggernaut might",
+    "level": 4,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/journeyman hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "journeyman vile pyromancy affinity",
+    "level": 4,
+    "class_hint": "mage",
+    "icon_path": "images/perks/journeyman vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "journeyman exalted spectre fortitude",
+    "level": 4,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/journeyman exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "journeyman primal earthkeeper insight",
+    "level": 4,
+    "class_hint": "druid",
+    "icon_path": "images/perks/journeyman primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "journeyman dread conqueror purity",
+    "level": 4,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/journeyman dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "journeyman ethereal cosmologist vigor",
+    "level": 4,
+    "class_hint": "mage",
+    "icon_path": "images/perks/journeyman ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "journeyman radiant dreadblade wisdom",
+    "level": 4,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/journeyman radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "journeyman grave wildshaper agility",
+    "level": 4,
+    "class_hint": "druid",
+    "icon_path": "images/perks/journeyman grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "journeyman savage bastion bravery",
+    "level": 4,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/journeyman savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "journeyman noble spellcraft sentry",
+    "level": 4,
+    "class_hint": "mage",
+    "icon_path": "images/perks/journeyman noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "journeyman gargoyle scoundrel vigilance",
+    "level": 4,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/journeyman gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "journeyman wild animist aura",
+    "level": 4,
+    "class_hint": "druid",
+    "icon_path": "images/perks/journeyman wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "journeyman mystic gladiator guile",
+    "level": 4,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/journeyman mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "journeyman ashen aether tenacity",
+    "level": 4,
+    "class_hint": "mage",
+    "icon_path": "images/perks/journeyman ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "journeyman blood acrobat luck",
+    "level": 4,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/journeyman blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "journeyman runic grovewarden fortification",
+    "level": 4,
+    "class_hint": "druid",
+    "icon_path": "images/perks/journeyman runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "journeyman void vanguard mastery",
+    "level": 4,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/journeyman void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "journeyman volcanic acolyte resilience",
+    "level": 4,
+    "class_hint": "mage",
+    "icon_path": "images/perks/journeyman volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "journeyman elder stalker reflexes",
+    "level": 4,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/journeyman elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "journeyman stormy dryad harmony",
+    "level": 4,
+    "class_hint": "druid",
+    "icon_path": "images/perks/journeyman stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "journeyman ancient juggernaut might",
+    "level": 4,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/journeyman ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "journeyman enchanted pyromancy affinity",
+    "level": 4,
+    "class_hint": "mage",
+    "icon_path": "images/perks/journeyman enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "journeyman abyssal spectre fortitude",
+    "level": 4,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/journeyman abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "journeyman astral earthkeeper insight",
+    "level": 4,
+    "class_hint": "druid",
+    "icon_path": "images/perks/journeyman astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "journeyman zealous conqueror purity",
+    "level": 4,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/journeyman zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "journeyman haunted cosmologist vigor",
+    "level": 4,
+    "class_hint": "mage",
+    "icon_path": "images/perks/journeyman haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "adept swift vanguard mastery",
+    "level": 5,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/adept swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "adept infused acolyte resilience",
+    "level": 5,
+    "class_hint": "mage",
+    "icon_path": "images/perks/adept infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "adept clandestine stalker reflexes",
+    "level": 5,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/adept clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "adept sovereign dryad harmony",
+    "level": 5,
+    "class_hint": "druid",
+    "icon_path": "images/perks/adept sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "adept hallowed juggernaut might",
+    "level": 5,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/adept hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "adept vile pyromancy affinity",
+    "level": 5,
+    "class_hint": "mage",
+    "icon_path": "images/perks/adept vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "adept exalted spectre fortitude",
+    "level": 5,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/adept exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "adept primal earthkeeper insight",
+    "level": 5,
+    "class_hint": "druid",
+    "icon_path": "images/perks/adept primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "adept dread conqueror purity",
+    "level": 5,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/adept dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "adept ethereal cosmologist vigor",
+    "level": 5,
+    "class_hint": "mage",
+    "icon_path": "images/perks/adept ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "adept radiant dreadblade wisdom",
+    "level": 5,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/adept radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "adept grave wildshaper agility",
+    "level": 5,
+    "class_hint": "druid",
+    "icon_path": "images/perks/adept grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "adept savage bastion bravery",
+    "level": 5,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/adept savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "adept noble spellcraft sentry",
+    "level": 5,
+    "class_hint": "mage",
+    "icon_path": "images/perks/adept noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "adept gargoyle scoundrel vigilance",
+    "level": 5,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/adept gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "adept wild animist aura",
+    "level": 5,
+    "class_hint": "druid",
+    "icon_path": "images/perks/adept wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "adept mystic gladiator guile",
+    "level": 5,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/adept mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "adept ashen aether tenacity",
+    "level": 5,
+    "class_hint": "mage",
+    "icon_path": "images/perks/adept ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "adept blood acrobat luck",
+    "level": 5,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/adept blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "adept runic grovewarden fortification",
+    "level": 5,
+    "class_hint": "druid",
+    "icon_path": "images/perks/adept runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "adept void vanguard mastery",
+    "level": 5,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/adept void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "adept volcanic acolyte resilience",
+    "level": 5,
+    "class_hint": "mage",
+    "icon_path": "images/perks/adept volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "adept elder stalker reflexes",
+    "level": 5,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/adept elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "adept stormy dryad harmony",
+    "level": 5,
+    "class_hint": "druid",
+    "icon_path": "images/perks/adept stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "adept ancient juggernaut might",
+    "level": 5,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/adept ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "adept enchanted pyromancy affinity",
+    "level": 5,
+    "class_hint": "mage",
+    "icon_path": "images/perks/adept enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "adept abyssal spectre fortitude",
+    "level": 5,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/adept abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "adept astral earthkeeper insight",
+    "level": 5,
+    "class_hint": "druid",
+    "icon_path": "images/perks/adept astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "adept zealous conqueror purity",
+    "level": 5,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/adept zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "adept haunted cosmologist vigor",
+    "level": 5,
+    "class_hint": "mage",
+    "icon_path": "images/perks/adept haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "expert swift vanguard mastery",
+    "level": 6,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/expert swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "expert infused acolyte resilience",
+    "level": 6,
+    "class_hint": "mage",
+    "icon_path": "images/perks/expert infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "expert clandestine stalker reflexes",
+    "level": 6,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/expert clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "expert sovereign dryad harmony",
+    "level": 6,
+    "class_hint": "druid",
+    "icon_path": "images/perks/expert sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "expert hallowed juggernaut might",
+    "level": 6,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/expert hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "expert vile pyromancy affinity",
+    "level": 6,
+    "class_hint": "mage",
+    "icon_path": "images/perks/expert vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "expert exalted spectre fortitude",
+    "level": 6,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/expert exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "expert primal earthkeeper insight",
+    "level": 6,
+    "class_hint": "druid",
+    "icon_path": "images/perks/expert primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "expert dread conqueror purity",
+    "level": 6,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/expert dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "expert ethereal cosmologist vigor",
+    "level": 6,
+    "class_hint": "mage",
+    "icon_path": "images/perks/expert ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "expert radiant dreadblade wisdom",
+    "level": 6,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/expert radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "expert grave wildshaper agility",
+    "level": 6,
+    "class_hint": "druid",
+    "icon_path": "images/perks/expert grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "expert savage bastion bravery",
+    "level": 6,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/expert savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "expert noble spellcraft sentry",
+    "level": 6,
+    "class_hint": "mage",
+    "icon_path": "images/perks/expert noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "expert gargoyle scoundrel vigilance",
+    "level": 6,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/expert gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "expert wild animist aura",
+    "level": 6,
+    "class_hint": "druid",
+    "icon_path": "images/perks/expert wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "expert mystic gladiator guile",
+    "level": 6,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/expert mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "expert ashen aether tenacity",
+    "level": 6,
+    "class_hint": "mage",
+    "icon_path": "images/perks/expert ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "expert blood acrobat luck",
+    "level": 6,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/expert blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "expert runic grovewarden fortification",
+    "level": 6,
+    "class_hint": "druid",
+    "icon_path": "images/perks/expert runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "expert void vanguard mastery",
+    "level": 6,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/expert void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "expert volcanic acolyte resilience",
+    "level": 6,
+    "class_hint": "mage",
+    "icon_path": "images/perks/expert volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "expert elder stalker reflexes",
+    "level": 6,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/expert elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "expert stormy dryad harmony",
+    "level": 6,
+    "class_hint": "druid",
+    "icon_path": "images/perks/expert stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "expert ancient juggernaut might",
+    "level": 6,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/expert ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "expert enchanted pyromancy affinity",
+    "level": 6,
+    "class_hint": "mage",
+    "icon_path": "images/perks/expert enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "expert abyssal spectre fortitude",
+    "level": 6,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/expert abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "expert astral earthkeeper insight",
+    "level": 6,
+    "class_hint": "druid",
+    "icon_path": "images/perks/expert astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "expert zealous conqueror purity",
+    "level": 6,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/expert zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "expert haunted cosmologist vigor",
+    "level": 6,
+    "class_hint": "mage",
+    "icon_path": "images/perks/expert haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "elite swift vanguard mastery",
+    "level": 7,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/elite swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "elite infused acolyte resilience",
+    "level": 7,
+    "class_hint": "mage",
+    "icon_path": "images/perks/elite infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "elite clandestine stalker reflexes",
+    "level": 7,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/elite clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "elite sovereign dryad harmony",
+    "level": 7,
+    "class_hint": "druid",
+    "icon_path": "images/perks/elite sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "elite hallowed juggernaut might",
+    "level": 7,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/elite hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "elite vile pyromancy affinity",
+    "level": 7,
+    "class_hint": "mage",
+    "icon_path": "images/perks/elite vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "elite exalted spectre fortitude",
+    "level": 7,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/elite exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "elite primal earthkeeper insight",
+    "level": 7,
+    "class_hint": "druid",
+    "icon_path": "images/perks/elite primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "elite dread conqueror purity",
+    "level": 7,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/elite dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "elite ethereal cosmologist vigor",
+    "level": 7,
+    "class_hint": "mage",
+    "icon_path": "images/perks/elite ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "elite radiant dreadblade wisdom",
+    "level": 7,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/elite radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "elite grave wildshaper agility",
+    "level": 7,
+    "class_hint": "druid",
+    "icon_path": "images/perks/elite grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "elite savage bastion bravery",
+    "level": 7,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/elite savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "elite noble spellcraft sentry",
+    "level": 7,
+    "class_hint": "mage",
+    "icon_path": "images/perks/elite noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "elite gargoyle scoundrel vigilance",
+    "level": 7,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/elite gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "elite wild animist aura",
+    "level": 7,
+    "class_hint": "druid",
+    "icon_path": "images/perks/elite wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "elite mystic gladiator guile",
+    "level": 7,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/elite mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "elite ashen aether tenacity",
+    "level": 7,
+    "class_hint": "mage",
+    "icon_path": "images/perks/elite ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "elite blood acrobat luck",
+    "level": 7,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/elite blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "elite runic grovewarden fortification",
+    "level": 7,
+    "class_hint": "druid",
+    "icon_path": "images/perks/elite runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "elite void vanguard mastery",
+    "level": 7,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/elite void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "elite volcanic acolyte resilience",
+    "level": 7,
+    "class_hint": "mage",
+    "icon_path": "images/perks/elite volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "elite elder stalker reflexes",
+    "level": 7,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/elite elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "elite stormy dryad harmony",
+    "level": 7,
+    "class_hint": "druid",
+    "icon_path": "images/perks/elite stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "elite ancient juggernaut might",
+    "level": 7,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/elite ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "elite enchanted pyromancy affinity",
+    "level": 7,
+    "class_hint": "mage",
+    "icon_path": "images/perks/elite enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "elite abyssal spectre fortitude",
+    "level": 7,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/elite abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "elite astral earthkeeper insight",
+    "level": 7,
+    "class_hint": "druid",
+    "icon_path": "images/perks/elite astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "elite zealous conqueror purity",
+    "level": 7,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/elite zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "elite haunted cosmologist vigor",
+    "level": 7,
+    "class_hint": "mage",
+    "icon_path": "images/perks/elite haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "veteran swift vanguard mastery",
+    "level": 8,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/veteran swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "veteran infused acolyte resilience",
+    "level": 8,
+    "class_hint": "mage",
+    "icon_path": "images/perks/veteran infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "veteran clandestine stalker reflexes",
+    "level": 8,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/veteran clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "veteran sovereign dryad harmony",
+    "level": 8,
+    "class_hint": "druid",
+    "icon_path": "images/perks/veteran sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "veteran hallowed juggernaut might",
+    "level": 8,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/veteran hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "veteran vile pyromancy affinity",
+    "level": 8,
+    "class_hint": "mage",
+    "icon_path": "images/perks/veteran vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "veteran exalted spectre fortitude",
+    "level": 8,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/veteran exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "veteran primal earthkeeper insight",
+    "level": 8,
+    "class_hint": "druid",
+    "icon_path": "images/perks/veteran primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "veteran dread conqueror purity",
+    "level": 8,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/veteran dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "veteran ethereal cosmologist vigor",
+    "level": 8,
+    "class_hint": "mage",
+    "icon_path": "images/perks/veteran ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "veteran radiant dreadblade wisdom",
+    "level": 8,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/veteran radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "veteran grave wildshaper agility",
+    "level": 8,
+    "class_hint": "druid",
+    "icon_path": "images/perks/veteran grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "veteran savage bastion bravery",
+    "level": 8,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/veteran savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "veteran noble spellcraft sentry",
+    "level": 8,
+    "class_hint": "mage",
+    "icon_path": "images/perks/veteran noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "veteran gargoyle scoundrel vigilance",
+    "level": 8,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/veteran gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "veteran wild animist aura",
+    "level": 8,
+    "class_hint": "druid",
+    "icon_path": "images/perks/veteran wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "veteran mystic gladiator guile",
+    "level": 8,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/veteran mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "veteran ashen aether tenacity",
+    "level": 8,
+    "class_hint": "mage",
+    "icon_path": "images/perks/veteran ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "veteran blood acrobat luck",
+    "level": 8,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/veteran blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "veteran runic grovewarden fortification",
+    "level": 8,
+    "class_hint": "druid",
+    "icon_path": "images/perks/veteran runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "veteran void vanguard mastery",
+    "level": 8,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/veteran void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "veteran volcanic acolyte resilience",
+    "level": 8,
+    "class_hint": "mage",
+    "icon_path": "images/perks/veteran volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "veteran elder stalker reflexes",
+    "level": 8,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/veteran elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "veteran stormy dryad harmony",
+    "level": 8,
+    "class_hint": "druid",
+    "icon_path": "images/perks/veteran stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "veteran ancient juggernaut might",
+    "level": 8,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/veteran ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "veteran enchanted pyromancy affinity",
+    "level": 8,
+    "class_hint": "mage",
+    "icon_path": "images/perks/veteran enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "veteran abyssal spectre fortitude",
+    "level": 8,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/veteran abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "veteran astral earthkeeper insight",
+    "level": 8,
+    "class_hint": "druid",
+    "icon_path": "images/perks/veteran astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "veteran zealous conqueror purity",
+    "level": 8,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/veteran zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "veteran haunted cosmologist vigor",
+    "level": 8,
+    "class_hint": "mage",
+    "icon_path": "images/perks/veteran haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "master swift vanguard mastery",
+    "level": 9,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/master swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "master infused acolyte resilience",
+    "level": 9,
+    "class_hint": "mage",
+    "icon_path": "images/perks/master infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "master clandestine stalker reflexes",
+    "level": 9,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/master clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "master sovereign dryad harmony",
+    "level": 9,
+    "class_hint": "druid",
+    "icon_path": "images/perks/master sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "master hallowed juggernaut might",
+    "level": 9,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/master hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "master vile pyromancy affinity",
+    "level": 9,
+    "class_hint": "mage",
+    "icon_path": "images/perks/master vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "master exalted spectre fortitude",
+    "level": 9,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/master exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "master primal earthkeeper insight",
+    "level": 9,
+    "class_hint": "druid",
+    "icon_path": "images/perks/master primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "master dread conqueror purity",
+    "level": 9,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/master dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "master ethereal cosmologist vigor",
+    "level": 9,
+    "class_hint": "mage",
+    "icon_path": "images/perks/master ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "master radiant dreadblade wisdom",
+    "level": 9,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/master radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "master grave wildshaper agility",
+    "level": 9,
+    "class_hint": "druid",
+    "icon_path": "images/perks/master grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "master savage bastion bravery",
+    "level": 9,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/master savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "master noble spellcraft sentry",
+    "level": 9,
+    "class_hint": "mage",
+    "icon_path": "images/perks/master noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "master gargoyle scoundrel vigilance",
+    "level": 9,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/master gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "master wild animist aura",
+    "level": 9,
+    "class_hint": "druid",
+    "icon_path": "images/perks/master wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "master mystic gladiator guile",
+    "level": 9,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/master mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "master ashen aether tenacity",
+    "level": 9,
+    "class_hint": "mage",
+    "icon_path": "images/perks/master ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "master blood acrobat luck",
+    "level": 9,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/master blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "master runic grovewarden fortification",
+    "level": 9,
+    "class_hint": "druid",
+    "icon_path": "images/perks/master runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "master void vanguard mastery",
+    "level": 9,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/master void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "master volcanic acolyte resilience",
+    "level": 9,
+    "class_hint": "mage",
+    "icon_path": "images/perks/master volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "master elder stalker reflexes",
+    "level": 9,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/master elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "master stormy dryad harmony",
+    "level": 9,
+    "class_hint": "druid",
+    "icon_path": "images/perks/master stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "master ancient juggernaut might",
+    "level": 9,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/master ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "master enchanted pyromancy affinity",
+    "level": 9,
+    "class_hint": "mage",
+    "icon_path": "images/perks/master enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "master abyssal spectre fortitude",
+    "level": 9,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/master abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "master astral earthkeeper insight",
+    "level": 9,
+    "class_hint": "druid",
+    "icon_path": "images/perks/master astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "master zealous conqueror purity",
+    "level": 9,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/master zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "master haunted cosmologist vigor",
+    "level": 9,
+    "class_hint": "mage",
+    "icon_path": "images/perks/master haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "grandmaster swift vanguard mastery",
+    "level": 10,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/grandmaster swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "grandmaster infused acolyte resilience",
+    "level": 10,
+    "class_hint": "mage",
+    "icon_path": "images/perks/grandmaster infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "grandmaster clandestine stalker reflexes",
+    "level": 10,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/grandmaster clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "grandmaster sovereign dryad harmony",
+    "level": 10,
+    "class_hint": "druid",
+    "icon_path": "images/perks/grandmaster sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "grandmaster hallowed juggernaut might",
+    "level": 10,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/grandmaster hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "grandmaster vile pyromancy affinity",
+    "level": 10,
+    "class_hint": "mage",
+    "icon_path": "images/perks/grandmaster vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "grandmaster exalted spectre fortitude",
+    "level": 10,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/grandmaster exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "grandmaster primal earthkeeper insight",
+    "level": 10,
+    "class_hint": "druid",
+    "icon_path": "images/perks/grandmaster primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "grandmaster dread conqueror purity",
+    "level": 10,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/grandmaster dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "grandmaster ethereal cosmologist vigor",
+    "level": 10,
+    "class_hint": "mage",
+    "icon_path": "images/perks/grandmaster ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "grandmaster radiant dreadblade wisdom",
+    "level": 10,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/grandmaster radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "grandmaster grave wildshaper agility",
+    "level": 10,
+    "class_hint": "druid",
+    "icon_path": "images/perks/grandmaster grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "grandmaster savage bastion bravery",
+    "level": 10,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/grandmaster savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "grandmaster noble spellcraft sentry",
+    "level": 10,
+    "class_hint": "mage",
+    "icon_path": "images/perks/grandmaster noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "grandmaster gargoyle scoundrel vigilance",
+    "level": 10,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/grandmaster gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "grandmaster wild animist aura",
+    "level": 10,
+    "class_hint": "druid",
+    "icon_path": "images/perks/grandmaster wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "grandmaster mystic gladiator guile",
+    "level": 10,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/grandmaster mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "grandmaster ashen aether tenacity",
+    "level": 10,
+    "class_hint": "mage",
+    "icon_path": "images/perks/grandmaster ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "grandmaster blood acrobat luck",
+    "level": 10,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/grandmaster blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "grandmaster runic grovewarden fortification",
+    "level": 10,
+    "class_hint": "druid",
+    "icon_path": "images/perks/grandmaster runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "grandmaster void vanguard mastery",
+    "level": 10,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/grandmaster void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "grandmaster volcanic acolyte resilience",
+    "level": 10,
+    "class_hint": "mage",
+    "icon_path": "images/perks/grandmaster volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "grandmaster elder stalker reflexes",
+    "level": 10,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/grandmaster elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "grandmaster stormy dryad harmony",
+    "level": 10,
+    "class_hint": "druid",
+    "icon_path": "images/perks/grandmaster stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "grandmaster ancient juggernaut might",
+    "level": 10,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/grandmaster ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "grandmaster enchanted pyromancy affinity",
+    "level": 10,
+    "class_hint": "mage",
+    "icon_path": "images/perks/grandmaster enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "grandmaster abyssal spectre fortitude",
+    "level": 10,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/grandmaster abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "grandmaster astral earthkeeper insight",
+    "level": 10,
+    "class_hint": "druid",
+    "icon_path": "images/perks/grandmaster astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "grandmaster zealous conqueror purity",
+    "level": 10,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/grandmaster zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "grandmaster haunted cosmologist vigor",
+    "level": 10,
+    "class_hint": "mage",
+    "icon_path": "images/perks/grandmaster haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "sovereign swift vanguard mastery",
+    "level": 11,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/sovereign swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "sovereign infused acolyte resilience",
+    "level": 11,
+    "class_hint": "mage",
+    "icon_path": "images/perks/sovereign infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "sovereign clandestine stalker reflexes",
+    "level": 11,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/sovereign clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "sovereign sovereign dryad harmony",
+    "level": 11,
+    "class_hint": "druid",
+    "icon_path": "images/perks/sovereign sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "sovereign hallowed juggernaut might",
+    "level": 11,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/sovereign hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "sovereign vile pyromancy affinity",
+    "level": 11,
+    "class_hint": "mage",
+    "icon_path": "images/perks/sovereign vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "sovereign exalted spectre fortitude",
+    "level": 11,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/sovereign exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "sovereign primal earthkeeper insight",
+    "level": 11,
+    "class_hint": "druid",
+    "icon_path": "images/perks/sovereign primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "sovereign dread conqueror purity",
+    "level": 11,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/sovereign dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "sovereign ethereal cosmologist vigor",
+    "level": 11,
+    "class_hint": "mage",
+    "icon_path": "images/perks/sovereign ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "sovereign radiant dreadblade wisdom",
+    "level": 11,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/sovereign radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "sovereign grave wildshaper agility",
+    "level": 11,
+    "class_hint": "druid",
+    "icon_path": "images/perks/sovereign grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "sovereign savage bastion bravery",
+    "level": 11,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/sovereign savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "sovereign noble spellcraft sentry",
+    "level": 11,
+    "class_hint": "mage",
+    "icon_path": "images/perks/sovereign noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "sovereign gargoyle scoundrel vigilance",
+    "level": 11,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/sovereign gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "sovereign wild animist aura",
+    "level": 11,
+    "class_hint": "druid",
+    "icon_path": "images/perks/sovereign wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "sovereign mystic gladiator guile",
+    "level": 11,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/sovereign mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "sovereign ashen aether tenacity",
+    "level": 11,
+    "class_hint": "mage",
+    "icon_path": "images/perks/sovereign ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "sovereign blood acrobat luck",
+    "level": 11,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/sovereign blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "sovereign runic grovewarden fortification",
+    "level": 11,
+    "class_hint": "druid",
+    "icon_path": "images/perks/sovereign runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "sovereign void vanguard mastery",
+    "level": 11,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/sovereign void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "sovereign volcanic acolyte resilience",
+    "level": 11,
+    "class_hint": "mage",
+    "icon_path": "images/perks/sovereign volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "sovereign elder stalker reflexes",
+    "level": 11,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/sovereign elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "sovereign stormy dryad harmony",
+    "level": 11,
+    "class_hint": "druid",
+    "icon_path": "images/perks/sovereign stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "sovereign ancient juggernaut might",
+    "level": 11,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/sovereign ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "sovereign enchanted pyromancy affinity",
+    "level": 11,
+    "class_hint": "mage",
+    "icon_path": "images/perks/sovereign enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "sovereign abyssal spectre fortitude",
+    "level": 11,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/sovereign abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "sovereign astral earthkeeper insight",
+    "level": 11,
+    "class_hint": "druid",
+    "icon_path": "images/perks/sovereign astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "sovereign zealous conqueror purity",
+    "level": 11,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/sovereign zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "sovereign haunted cosmologist vigor",
+    "level": 11,
+    "class_hint": "mage",
+    "icon_path": "images/perks/sovereign haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "exalted swift vanguard mastery",
+    "level": 12,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/exalted swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "exalted infused acolyte resilience",
+    "level": 12,
+    "class_hint": "mage",
+    "icon_path": "images/perks/exalted infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "exalted clandestine stalker reflexes",
+    "level": 12,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/exalted clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "exalted sovereign dryad harmony",
+    "level": 12,
+    "class_hint": "druid",
+    "icon_path": "images/perks/exalted sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "exalted hallowed juggernaut might",
+    "level": 12,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/exalted hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "exalted vile pyromancy affinity",
+    "level": 12,
+    "class_hint": "mage",
+    "icon_path": "images/perks/exalted vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "exalted exalted spectre fortitude",
+    "level": 12,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/exalted exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "exalted primal earthkeeper insight",
+    "level": 12,
+    "class_hint": "druid",
+    "icon_path": "images/perks/exalted primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "exalted dread conqueror purity",
+    "level": 12,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/exalted dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "exalted ethereal cosmologist vigor",
+    "level": 12,
+    "class_hint": "mage",
+    "icon_path": "images/perks/exalted ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "exalted radiant dreadblade wisdom",
+    "level": 12,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/exalted radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "exalted grave wildshaper agility",
+    "level": 12,
+    "class_hint": "druid",
+    "icon_path": "images/perks/exalted grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "exalted savage bastion bravery",
+    "level": 12,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/exalted savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "exalted noble spellcraft sentry",
+    "level": 12,
+    "class_hint": "mage",
+    "icon_path": "images/perks/exalted noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "exalted gargoyle scoundrel vigilance",
+    "level": 12,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/exalted gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "exalted wild animist aura",
+    "level": 12,
+    "class_hint": "druid",
+    "icon_path": "images/perks/exalted wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "exalted mystic gladiator guile",
+    "level": 12,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/exalted mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "exalted ashen aether tenacity",
+    "level": 12,
+    "class_hint": "mage",
+    "icon_path": "images/perks/exalted ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "exalted blood acrobat luck",
+    "level": 12,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/exalted blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "exalted runic grovewarden fortification",
+    "level": 12,
+    "class_hint": "druid",
+    "icon_path": "images/perks/exalted runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "exalted void vanguard mastery",
+    "level": 12,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/exalted void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "exalted volcanic acolyte resilience",
+    "level": 12,
+    "class_hint": "mage",
+    "icon_path": "images/perks/exalted volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "exalted elder stalker reflexes",
+    "level": 12,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/exalted elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "exalted stormy dryad harmony",
+    "level": 12,
+    "class_hint": "druid",
+    "icon_path": "images/perks/exalted stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "exalted ancient juggernaut might",
+    "level": 12,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/exalted ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "exalted enchanted pyromancy affinity",
+    "level": 12,
+    "class_hint": "mage",
+    "icon_path": "images/perks/exalted enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "exalted abyssal spectre fortitude",
+    "level": 12,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/exalted abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "exalted astral earthkeeper insight",
+    "level": 12,
+    "class_hint": "druid",
+    "icon_path": "images/perks/exalted astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "exalted zealous conqueror purity",
+    "level": 12,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/exalted zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "exalted haunted cosmologist vigor",
+    "level": 12,
+    "class_hint": "mage",
+    "icon_path": "images/perks/exalted haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "gladiator swift vanguard mastery",
+    "level": 13,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/gladiator swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "gladiator infused acolyte resilience",
+    "level": 13,
+    "class_hint": "mage",
+    "icon_path": "images/perks/gladiator infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "gladiator clandestine stalker reflexes",
+    "level": 13,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/gladiator clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "gladiator sovereign dryad harmony",
+    "level": 13,
+    "class_hint": "druid",
+    "icon_path": "images/perks/gladiator sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "gladiator hallowed juggernaut might",
+    "level": 13,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/gladiator hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "gladiator vile pyromancy affinity",
+    "level": 13,
+    "class_hint": "mage",
+    "icon_path": "images/perks/gladiator vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "gladiator exalted spectre fortitude",
+    "level": 13,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/gladiator exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "gladiator primal earthkeeper insight",
+    "level": 13,
+    "class_hint": "druid",
+    "icon_path": "images/perks/gladiator primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "gladiator dread conqueror purity",
+    "level": 13,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/gladiator dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "gladiator ethereal cosmologist vigor",
+    "level": 13,
+    "class_hint": "mage",
+    "icon_path": "images/perks/gladiator ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "gladiator radiant dreadblade wisdom",
+    "level": 13,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/gladiator radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "gladiator grave wildshaper agility",
+    "level": 13,
+    "class_hint": "druid",
+    "icon_path": "images/perks/gladiator grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "gladiator savage bastion bravery",
+    "level": 13,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/gladiator savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "gladiator noble spellcraft sentry",
+    "level": 13,
+    "class_hint": "mage",
+    "icon_path": "images/perks/gladiator noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "gladiator gargoyle scoundrel vigilance",
+    "level": 13,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/gladiator gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "gladiator wild animist aura",
+    "level": 13,
+    "class_hint": "druid",
+    "icon_path": "images/perks/gladiator wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "gladiator mystic gladiator guile",
+    "level": 13,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/gladiator mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "gladiator ashen aether tenacity",
+    "level": 13,
+    "class_hint": "mage",
+    "icon_path": "images/perks/gladiator ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "gladiator blood acrobat luck",
+    "level": 13,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/gladiator blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "gladiator runic grovewarden fortification",
+    "level": 13,
+    "class_hint": "druid",
+    "icon_path": "images/perks/gladiator runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "gladiator void vanguard mastery",
+    "level": 13,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/gladiator void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "gladiator volcanic acolyte resilience",
+    "level": 13,
+    "class_hint": "mage",
+    "icon_path": "images/perks/gladiator volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "gladiator elder stalker reflexes",
+    "level": 13,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/gladiator elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "gladiator stormy dryad harmony",
+    "level": 13,
+    "class_hint": "druid",
+    "icon_path": "images/perks/gladiator stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "gladiator ancient juggernaut might",
+    "level": 13,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/gladiator ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "gladiator enchanted pyromancy affinity",
+    "level": 13,
+    "class_hint": "mage",
+    "icon_path": "images/perks/gladiator enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "gladiator abyssal spectre fortitude",
+    "level": 13,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/gladiator abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "gladiator astral earthkeeper insight",
+    "level": 13,
+    "class_hint": "druid",
+    "icon_path": "images/perks/gladiator astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "gladiator zealous conqueror purity",
+    "level": 13,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/gladiator zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "gladiator haunted cosmologist vigor",
+    "level": 13,
+    "class_hint": "mage",
+    "icon_path": "images/perks/gladiator haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "heroic swift vanguard mastery",
+    "level": 14,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/heroic swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "heroic infused acolyte resilience",
+    "level": 14,
+    "class_hint": "mage",
+    "icon_path": "images/perks/heroic infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "heroic clandestine stalker reflexes",
+    "level": 14,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/heroic clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "heroic sovereign dryad harmony",
+    "level": 14,
+    "class_hint": "druid",
+    "icon_path": "images/perks/heroic sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "heroic hallowed juggernaut might",
+    "level": 14,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/heroic hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "heroic vile pyromancy affinity",
+    "level": 14,
+    "class_hint": "mage",
+    "icon_path": "images/perks/heroic vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "heroic exalted spectre fortitude",
+    "level": 14,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/heroic exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "heroic primal earthkeeper insight",
+    "level": 14,
+    "class_hint": "druid",
+    "icon_path": "images/perks/heroic primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "heroic dread conqueror purity",
+    "level": 14,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/heroic dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "heroic ethereal cosmologist vigor",
+    "level": 14,
+    "class_hint": "mage",
+    "icon_path": "images/perks/heroic ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "heroic radiant dreadblade wisdom",
+    "level": 14,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/heroic radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "heroic grave wildshaper agility",
+    "level": 14,
+    "class_hint": "druid",
+    "icon_path": "images/perks/heroic grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "heroic savage bastion bravery",
+    "level": 14,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/heroic savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "heroic noble spellcraft sentry",
+    "level": 14,
+    "class_hint": "mage",
+    "icon_path": "images/perks/heroic noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "heroic gargoyle scoundrel vigilance",
+    "level": 14,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/heroic gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "heroic wild animist aura",
+    "level": 14,
+    "class_hint": "druid",
+    "icon_path": "images/perks/heroic wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "heroic mystic gladiator guile",
+    "level": 14,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/heroic mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "heroic ashen aether tenacity",
+    "level": 14,
+    "class_hint": "mage",
+    "icon_path": "images/perks/heroic ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "heroic blood acrobat luck",
+    "level": 14,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/heroic blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "heroic runic grovewarden fortification",
+    "level": 14,
+    "class_hint": "druid",
+    "icon_path": "images/perks/heroic runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "heroic void vanguard mastery",
+    "level": 14,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/heroic void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "heroic volcanic acolyte resilience",
+    "level": 14,
+    "class_hint": "mage",
+    "icon_path": "images/perks/heroic volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "heroic elder stalker reflexes",
+    "level": 14,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/heroic elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "heroic stormy dryad harmony",
+    "level": 14,
+    "class_hint": "druid",
+    "icon_path": "images/perks/heroic stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "heroic ancient juggernaut might",
+    "level": 14,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/heroic ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "heroic enchanted pyromancy affinity",
+    "level": 14,
+    "class_hint": "mage",
+    "icon_path": "images/perks/heroic enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "heroic abyssal spectre fortitude",
+    "level": 14,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/heroic abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "heroic astral earthkeeper insight",
+    "level": 14,
+    "class_hint": "druid",
+    "icon_path": "images/perks/heroic astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "heroic zealous conqueror purity",
+    "level": 14,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/heroic zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "heroic haunted cosmologist vigor",
+    "level": 14,
+    "class_hint": "mage",
+    "icon_path": "images/perks/heroic haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "champion swift vanguard mastery",
+    "level": 15,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/champion swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "champion infused acolyte resilience",
+    "level": 15,
+    "class_hint": "mage",
+    "icon_path": "images/perks/champion infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "champion clandestine stalker reflexes",
+    "level": 15,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/champion clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "champion sovereign dryad harmony",
+    "level": 15,
+    "class_hint": "druid",
+    "icon_path": "images/perks/champion sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "champion hallowed juggernaut might",
+    "level": 15,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/champion hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "champion vile pyromancy affinity",
+    "level": 15,
+    "class_hint": "mage",
+    "icon_path": "images/perks/champion vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "champion exalted spectre fortitude",
+    "level": 15,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/champion exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "champion primal earthkeeper insight",
+    "level": 15,
+    "class_hint": "druid",
+    "icon_path": "images/perks/champion primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "champion dread conqueror purity",
+    "level": 15,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/champion dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "champion ethereal cosmologist vigor",
+    "level": 15,
+    "class_hint": "mage",
+    "icon_path": "images/perks/champion ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "champion radiant dreadblade wisdom",
+    "level": 15,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/champion radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "champion grave wildshaper agility",
+    "level": 15,
+    "class_hint": "druid",
+    "icon_path": "images/perks/champion grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "champion savage bastion bravery",
+    "level": 15,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/champion savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "champion noble spellcraft sentry",
+    "level": 15,
+    "class_hint": "mage",
+    "icon_path": "images/perks/champion noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "champion gargoyle scoundrel vigilance",
+    "level": 15,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/champion gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "champion wild animist aura",
+    "level": 15,
+    "class_hint": "druid",
+    "icon_path": "images/perks/champion wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "champion mystic gladiator guile",
+    "level": 15,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/champion mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "champion ashen aether tenacity",
+    "level": 15,
+    "class_hint": "mage",
+    "icon_path": "images/perks/champion ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "champion blood acrobat luck",
+    "level": 15,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/champion blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "champion runic grovewarden fortification",
+    "level": 15,
+    "class_hint": "druid",
+    "icon_path": "images/perks/champion runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "champion void vanguard mastery",
+    "level": 15,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/champion void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "champion volcanic acolyte resilience",
+    "level": 15,
+    "class_hint": "mage",
+    "icon_path": "images/perks/champion volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "champion elder stalker reflexes",
+    "level": 15,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/champion elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "champion stormy dryad harmony",
+    "level": 15,
+    "class_hint": "druid",
+    "icon_path": "images/perks/champion stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "champion ancient juggernaut might",
+    "level": 15,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/champion ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "champion enchanted pyromancy affinity",
+    "level": 15,
+    "class_hint": "mage",
+    "icon_path": "images/perks/champion enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "champion abyssal spectre fortitude",
+    "level": 15,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/champion abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "champion astral earthkeeper insight",
+    "level": 15,
+    "class_hint": "druid",
+    "icon_path": "images/perks/champion astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "champion zealous conqueror purity",
+    "level": 15,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/champion zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "champion haunted cosmologist vigor",
+    "level": 15,
+    "class_hint": "mage",
+    "icon_path": "images/perks/champion haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "overlord swift vanguard mastery",
+    "level": 16,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/overlord swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "overlord infused acolyte resilience",
+    "level": 16,
+    "class_hint": "mage",
+    "icon_path": "images/perks/overlord infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "overlord clandestine stalker reflexes",
+    "level": 16,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/overlord clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "overlord sovereign dryad harmony",
+    "level": 16,
+    "class_hint": "druid",
+    "icon_path": "images/perks/overlord sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "overlord hallowed juggernaut might",
+    "level": 16,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/overlord hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "overlord vile pyromancy affinity",
+    "level": 16,
+    "class_hint": "mage",
+    "icon_path": "images/perks/overlord vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "overlord exalted spectre fortitude",
+    "level": 16,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/overlord exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "overlord primal earthkeeper insight",
+    "level": 16,
+    "class_hint": "druid",
+    "icon_path": "images/perks/overlord primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "overlord dread conqueror purity",
+    "level": 16,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/overlord dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "overlord ethereal cosmologist vigor",
+    "level": 16,
+    "class_hint": "mage",
+    "icon_path": "images/perks/overlord ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "overlord radiant dreadblade wisdom",
+    "level": 16,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/overlord radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "overlord grave wildshaper agility",
+    "level": 16,
+    "class_hint": "druid",
+    "icon_path": "images/perks/overlord grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "overlord savage bastion bravery",
+    "level": 16,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/overlord savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "overlord noble spellcraft sentry",
+    "level": 16,
+    "class_hint": "mage",
+    "icon_path": "images/perks/overlord noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "overlord gargoyle scoundrel vigilance",
+    "level": 16,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/overlord gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "overlord wild animist aura",
+    "level": 16,
+    "class_hint": "druid",
+    "icon_path": "images/perks/overlord wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "overlord mystic gladiator guile",
+    "level": 16,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/overlord mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "overlord ashen aether tenacity",
+    "level": 16,
+    "class_hint": "mage",
+    "icon_path": "images/perks/overlord ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "overlord blood acrobat luck",
+    "level": 16,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/overlord blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "overlord runic grovewarden fortification",
+    "level": 16,
+    "class_hint": "druid",
+    "icon_path": "images/perks/overlord runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "overlord void vanguard mastery",
+    "level": 16,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/overlord void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "overlord volcanic acolyte resilience",
+    "level": 16,
+    "class_hint": "mage",
+    "icon_path": "images/perks/overlord volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "overlord elder stalker reflexes",
+    "level": 16,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/overlord elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "overlord stormy dryad harmony",
+    "level": 16,
+    "class_hint": "druid",
+    "icon_path": "images/perks/overlord stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "overlord ancient juggernaut might",
+    "level": 16,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/overlord ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "overlord enchanted pyromancy affinity",
+    "level": 16,
+    "class_hint": "mage",
+    "icon_path": "images/perks/overlord enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "overlord abyssal spectre fortitude",
+    "level": 16,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/overlord abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "overlord astral earthkeeper insight",
+    "level": 16,
+    "class_hint": "druid",
+    "icon_path": "images/perks/overlord astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "overlord zealous conqueror purity",
+    "level": 16,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/overlord zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "overlord haunted cosmologist vigor",
+    "level": 16,
+    "class_hint": "mage",
+    "icon_path": "images/perks/overlord haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "epic swift vanguard mastery",
+    "level": 17,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/epic swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "epic infused acolyte resilience",
+    "level": 17,
+    "class_hint": "mage",
+    "icon_path": "images/perks/epic infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "epic clandestine stalker reflexes",
+    "level": 17,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/epic clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "epic sovereign dryad harmony",
+    "level": 17,
+    "class_hint": "druid",
+    "icon_path": "images/perks/epic sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "epic hallowed juggernaut might",
+    "level": 17,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/epic hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "epic vile pyromancy affinity",
+    "level": 17,
+    "class_hint": "mage",
+    "icon_path": "images/perks/epic vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "epic exalted spectre fortitude",
+    "level": 17,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/epic exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "epic primal earthkeeper insight",
+    "level": 17,
+    "class_hint": "druid",
+    "icon_path": "images/perks/epic primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "epic dread conqueror purity",
+    "level": 17,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/epic dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "epic ethereal cosmologist vigor",
+    "level": 17,
+    "class_hint": "mage",
+    "icon_path": "images/perks/epic ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "epic radiant dreadblade wisdom",
+    "level": 17,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/epic radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "epic grave wildshaper agility",
+    "level": 17,
+    "class_hint": "druid",
+    "icon_path": "images/perks/epic grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "epic savage bastion bravery",
+    "level": 17,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/epic savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "epic noble spellcraft sentry",
+    "level": 17,
+    "class_hint": "mage",
+    "icon_path": "images/perks/epic noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "epic gargoyle scoundrel vigilance",
+    "level": 17,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/epic gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "epic wild animist aura",
+    "level": 17,
+    "class_hint": "druid",
+    "icon_path": "images/perks/epic wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "epic mystic gladiator guile",
+    "level": 17,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/epic mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "epic ashen aether tenacity",
+    "level": 17,
+    "class_hint": "mage",
+    "icon_path": "images/perks/epic ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "epic blood acrobat luck",
+    "level": 17,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/epic blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "epic runic grovewarden fortification",
+    "level": 17,
+    "class_hint": "druid",
+    "icon_path": "images/perks/epic runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "epic void vanguard mastery",
+    "level": 17,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/epic void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "epic volcanic acolyte resilience",
+    "level": 17,
+    "class_hint": "mage",
+    "icon_path": "images/perks/epic volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "epic elder stalker reflexes",
+    "level": 17,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/epic elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "epic stormy dryad harmony",
+    "level": 17,
+    "class_hint": "druid",
+    "icon_path": "images/perks/epic stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "epic ancient juggernaut might",
+    "level": 17,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/epic ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "epic enchanted pyromancy affinity",
+    "level": 17,
+    "class_hint": "mage",
+    "icon_path": "images/perks/epic enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "epic abyssal spectre fortitude",
+    "level": 17,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/epic abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "epic astral earthkeeper insight",
+    "level": 17,
+    "class_hint": "druid",
+    "icon_path": "images/perks/epic astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "epic zealous conqueror purity",
+    "level": 17,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/epic zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "epic haunted cosmologist vigor",
+    "level": 17,
+    "class_hint": "mage",
+    "icon_path": "images/perks/epic haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "eldritch swift vanguard mastery",
+    "level": 18,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/eldritch swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "eldritch infused acolyte resilience",
+    "level": 18,
+    "class_hint": "mage",
+    "icon_path": "images/perks/eldritch infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "eldritch clandestine stalker reflexes",
+    "level": 18,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/eldritch clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "eldritch sovereign dryad harmony",
+    "level": 18,
+    "class_hint": "druid",
+    "icon_path": "images/perks/eldritch sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "eldritch hallowed juggernaut might",
+    "level": 18,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/eldritch hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "eldritch vile pyromancy affinity",
+    "level": 18,
+    "class_hint": "mage",
+    "icon_path": "images/perks/eldritch vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "eldritch exalted spectre fortitude",
+    "level": 18,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/eldritch exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "eldritch primal earthkeeper insight",
+    "level": 18,
+    "class_hint": "druid",
+    "icon_path": "images/perks/eldritch primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "eldritch dread conqueror purity",
+    "level": 18,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/eldritch dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "eldritch ethereal cosmologist vigor",
+    "level": 18,
+    "class_hint": "mage",
+    "icon_path": "images/perks/eldritch ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "eldritch radiant dreadblade wisdom",
+    "level": 18,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/eldritch radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "eldritch grave wildshaper agility",
+    "level": 18,
+    "class_hint": "druid",
+    "icon_path": "images/perks/eldritch grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "eldritch savage bastion bravery",
+    "level": 18,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/eldritch savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "eldritch noble spellcraft sentry",
+    "level": 18,
+    "class_hint": "mage",
+    "icon_path": "images/perks/eldritch noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "eldritch gargoyle scoundrel vigilance",
+    "level": 18,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/eldritch gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "eldritch wild animist aura",
+    "level": 18,
+    "class_hint": "druid",
+    "icon_path": "images/perks/eldritch wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "eldritch mystic gladiator guile",
+    "level": 18,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/eldritch mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "eldritch ashen aether tenacity",
+    "level": 18,
+    "class_hint": "mage",
+    "icon_path": "images/perks/eldritch ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "eldritch blood acrobat luck",
+    "level": 18,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/eldritch blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "eldritch runic grovewarden fortification",
+    "level": 18,
+    "class_hint": "druid",
+    "icon_path": "images/perks/eldritch runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "eldritch void vanguard mastery",
+    "level": 18,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/eldritch void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "eldritch volcanic acolyte resilience",
+    "level": 18,
+    "class_hint": "mage",
+    "icon_path": "images/perks/eldritch volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "eldritch elder stalker reflexes",
+    "level": 18,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/eldritch elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "eldritch stormy dryad harmony",
+    "level": 18,
+    "class_hint": "druid",
+    "icon_path": "images/perks/eldritch stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "eldritch ancient juggernaut might",
+    "level": 18,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/eldritch ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "eldritch enchanted pyromancy affinity",
+    "level": 18,
+    "class_hint": "mage",
+    "icon_path": "images/perks/eldritch enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "eldritch abyssal spectre fortitude",
+    "level": 18,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/eldritch abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "eldritch astral earthkeeper insight",
+    "level": 18,
+    "class_hint": "druid",
+    "icon_path": "images/perks/eldritch astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "eldritch zealous conqueror purity",
+    "level": 18,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/eldritch zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "eldritch haunted cosmologist vigor",
+    "level": 18,
+    "class_hint": "mage",
+    "icon_path": "images/perks/eldritch haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "mythic swift vanguard mastery",
+    "level": 19,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/mythic swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "mythic infused acolyte resilience",
+    "level": 19,
+    "class_hint": "mage",
+    "icon_path": "images/perks/mythic infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "mythic clandestine stalker reflexes",
+    "level": 19,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/mythic clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "mythic sovereign dryad harmony",
+    "level": 19,
+    "class_hint": "druid",
+    "icon_path": "images/perks/mythic sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "mythic hallowed juggernaut might",
+    "level": 19,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/mythic hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "mythic vile pyromancy affinity",
+    "level": 19,
+    "class_hint": "mage",
+    "icon_path": "images/perks/mythic vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "mythic exalted spectre fortitude",
+    "level": 19,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/mythic exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "mythic primal earthkeeper insight",
+    "level": 19,
+    "class_hint": "druid",
+    "icon_path": "images/perks/mythic primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "mythic dread conqueror purity",
+    "level": 19,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/mythic dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "mythic ethereal cosmologist vigor",
+    "level": 19,
+    "class_hint": "mage",
+    "icon_path": "images/perks/mythic ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "mythic radiant dreadblade wisdom",
+    "level": 19,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/mythic radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "mythic grave wildshaper agility",
+    "level": 19,
+    "class_hint": "druid",
+    "icon_path": "images/perks/mythic grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "mythic savage bastion bravery",
+    "level": 19,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/mythic savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "mythic noble spellcraft sentry",
+    "level": 19,
+    "class_hint": "mage",
+    "icon_path": "images/perks/mythic noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "mythic gargoyle scoundrel vigilance",
+    "level": 19,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/mythic gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "mythic wild animist aura",
+    "level": 19,
+    "class_hint": "druid",
+    "icon_path": "images/perks/mythic wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "mythic mystic gladiator guile",
+    "level": 19,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/mythic mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "mythic ashen aether tenacity",
+    "level": 19,
+    "class_hint": "mage",
+    "icon_path": "images/perks/mythic ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "mythic blood acrobat luck",
+    "level": 19,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/mythic blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "mythic runic grovewarden fortification",
+    "level": 19,
+    "class_hint": "druid",
+    "icon_path": "images/perks/mythic runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "mythic void vanguard mastery",
+    "level": 19,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/mythic void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "mythic volcanic acolyte resilience",
+    "level": 19,
+    "class_hint": "mage",
+    "icon_path": "images/perks/mythic volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "mythic elder stalker reflexes",
+    "level": 19,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/mythic elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "mythic stormy dryad harmony",
+    "level": 19,
+    "class_hint": "druid",
+    "icon_path": "images/perks/mythic stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "mythic ancient juggernaut might",
+    "level": 19,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/mythic ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "mythic enchanted pyromancy affinity",
+    "level": 19,
+    "class_hint": "mage",
+    "icon_path": "images/perks/mythic enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "mythic abyssal spectre fortitude",
+    "level": 19,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/mythic abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "mythic astral earthkeeper insight",
+    "level": 19,
+    "class_hint": "druid",
+    "icon_path": "images/perks/mythic astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "mythic zealous conqueror purity",
+    "level": 19,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/mythic zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "mythic haunted cosmologist vigor",
+    "level": 19,
+    "class_hint": "mage",
+    "icon_path": "images/perks/mythic haunted cosmologist vigor.png",
+    "theme": "magic"
+  },
+  {
+    "name": "legendary swift vanguard mastery",
+    "level": 20,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/legendary swift vanguard mastery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "legendary infused acolyte resilience",
+    "level": 20,
+    "class_hint": "mage",
+    "icon_path": "images/perks/legendary infused acolyte resilience.png",
+    "theme": "mana"
+  },
+  {
+    "name": "legendary clandestine stalker reflexes",
+    "level": 20,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/legendary clandestine stalker reflexes.png",
+    "theme": "speed"
+  },
+  {
+    "name": "legendary sovereign dryad harmony",
+    "level": 20,
+    "class_hint": "druid",
+    "icon_path": "images/perks/legendary sovereign dryad harmony.png",
+    "theme": "nature"
+  },
+  {
+    "name": "legendary hallowed juggernaut might",
+    "level": 20,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/legendary hallowed juggernaut might.png",
+    "theme": "offense"
+  },
+  {
+    "name": "legendary vile pyromancy affinity",
+    "level": 20,
+    "class_hint": "mage",
+    "icon_path": "images/perks/legendary vile pyromancy affinity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "legendary exalted spectre fortitude",
+    "level": 20,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/legendary exalted spectre fortitude.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "legendary primal earthkeeper insight",
+    "level": 20,
+    "class_hint": "druid",
+    "icon_path": "images/perks/legendary primal earthkeeper insight.png",
+    "theme": "animals"
+  },
+  {
+    "name": "legendary dread conqueror purity",
+    "level": 20,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/legendary dread conqueror purity.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "legendary ethereal cosmologist vigor",
+    "level": 20,
+    "class_hint": "mage",
+    "icon_path": "images/perks/legendary ethereal cosmologist vigor.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "legendary radiant dreadblade wisdom",
+    "level": 20,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/legendary radiant dreadblade wisdom.png",
+    "theme": "survival"
+  },
+  {
+    "name": "legendary grave wildshaper agility",
+    "level": 20,
+    "class_hint": "druid",
+    "icon_path": "images/perks/legendary grave wildshaper agility.png",
+    "theme": "precision"
+  },
+  {
+    "name": "legendary savage bastion bravery",
+    "level": 20,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/legendary savage bastion bravery.png",
+    "theme": "defense"
+  },
+  {
+    "name": "legendary noble spellcraft sentry",
+    "level": 20,
+    "class_hint": "mage",
+    "icon_path": "images/perks/legendary noble spellcraft sentry.png",
+    "theme": "mana"
+  },
+  {
+    "name": "legendary gargoyle scoundrel vigilance",
+    "level": 20,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/legendary gargoyle scoundrel vigilance.png",
+    "theme": "speed"
+  },
+  {
+    "name": "legendary wild animist aura",
+    "level": 20,
+    "class_hint": "druid",
+    "icon_path": "images/perks/legendary wild animist aura.png",
+    "theme": "nature"
+  },
+  {
+    "name": "legendary mystic gladiator guile",
+    "level": 20,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/legendary mystic gladiator guile.png",
+    "theme": "offense"
+  },
+  {
+    "name": "legendary ashen aether tenacity",
+    "level": 20,
+    "class_hint": "mage",
+    "icon_path": "images/perks/legendary ashen aether tenacity.png",
+    "theme": "magic"
+  },
+  {
+    "name": "legendary blood acrobat luck",
+    "level": 20,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/legendary blood acrobat luck.png",
+    "theme": "stealth"
+  },
+  {
+    "name": "legendary runic grovewarden fortification",
+    "level": 20,
+    "class_hint": "druid",
+    "icon_path": "images/perks/legendary runic grovewarden fortification.png",
+    "theme": "animals"
+  },
+  {
+    "name": "legendary void vanguard mastery",
+    "level": 20,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/legendary void vanguard mastery.png",
+    "theme": "vitality"
+  },
+  {
+    "name": "legendary volcanic acolyte resilience",
+    "level": 20,
+    "class_hint": "mage",
+    "icon_path": "images/perks/legendary volcanic acolyte resilience.png",
+    "theme": "wealth"
+  },
+  {
+    "name": "legendary elder stalker reflexes",
+    "level": 20,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/legendary elder stalker reflexes.png",
+    "theme": "survival"
+  },
+  {
+    "name": "legendary stormy dryad harmony",
+    "level": 20,
+    "class_hint": "druid",
+    "icon_path": "images/perks/legendary stormy dryad harmony.png",
+    "theme": "precision"
+  },
+  {
+    "name": "legendary ancient juggernaut might",
+    "level": 20,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/legendary ancient juggernaut might.png",
+    "theme": "defense"
+  },
+  {
+    "name": "legendary enchanted pyromancy affinity",
+    "level": 20,
+    "class_hint": "mage",
+    "icon_path": "images/perks/legendary enchanted pyromancy affinity.png",
+    "theme": "mana"
+  },
+  {
+    "name": "legendary abyssal spectre fortitude",
+    "level": 20,
+    "class_hint": "rogue",
+    "icon_path": "images/perks/legendary abyssal spectre fortitude.png",
+    "theme": "speed"
+  },
+  {
+    "name": "legendary astral earthkeeper insight",
+    "level": 20,
+    "class_hint": "druid",
+    "icon_path": "images/perks/legendary astral earthkeeper insight.png",
+    "theme": "nature"
+  },
+  {
+    "name": "legendary zealous conqueror purity",
+    "level": 20,
+    "class_hint": "warrior",
+    "icon_path": "images/perks/legendary zealous conqueror purity.png",
+    "theme": "offense"
+  },
+  {
+    "name": "legendary haunted cosmologist vigor",
+    "level": 20,
+    "class_hint": "mage",
+    "icon_path": "images/perks/legendary haunted cosmologist vigor.png",
+    "theme": "magic"
+  }
+]

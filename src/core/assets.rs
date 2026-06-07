@@ -66,8 +66,6 @@ impl FromWorld for WorldAssets {
             ("armor_icon", assets.load("images/icons/armor.png")),
             ("attack_icon", assets.load("images/icons/attack.png")),
             ("initiative_icon", assets.load("images/icons/initiative.png")),
-            ("helmet_icon", assets.load("images/icons/Icon_10.png")),
-            ("boots_icon", assets.load("images/icons/Icon_11.png")),
             ("gold", assets.load("images/icons/gold.png")),
             ("action_hunt", assets.load("images/icons/action_hunt.png")),
             ("action_shop", assets.load("images/icons/action_shop.png")),
@@ -76,7 +74,6 @@ impl FromWorld for WorldAssets {
             ("action_craft", assets.load("images/icons/action_craft.png")),
             ("action_work", assets.load("images/icons/action_work.png")),
             ("action_rest", assets.load("images/icons/action_rest.png")),
-            ("action_inventory", assets.load("images/icons/action_inventory.png")),
             // Background
             ("bg", assets.load("images/bg/bg.png")),
             ("bg2", assets.load("images/bg/bg2.png")),
