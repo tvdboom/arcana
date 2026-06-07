@@ -14,6 +14,7 @@ use strum::IntoEnumIterator;
 pub struct Localization {
     en: HashMap<String, String>,
     es: HashMap<String, String>,
+    nl: HashMap<String, String>,
 }
 
 impl FromWorld for Localization {
@@ -22,9 +23,12 @@ impl FromWorld for Localization {
             .expect("Failed to parse en.json");
         let es = serde_json::from_str(include_str!("../../assets/language/es.json"))
             .expect("Failed to parse es.json");
+        let nl = serde_json::from_str(include_str!("../../assets/language/nl.json"))
+            .expect("Failed to parse nl.json");
         Self {
             en,
             es,
+            nl,
         }
     }
 }
@@ -34,6 +38,7 @@ impl Localization {
         let map = match language {
             Language::English => &self.en,
             Language::Spanish => &self.es,
+            Language::Dutch => &self.nl,
         };
         map.get(key).cloned().unwrap_or_else(|| {
             warn!("Missing localization key: '{key}'");
@@ -108,12 +113,44 @@ pub fn format_class_description(
     let perk_key = starting_perk.to_lowername();
     let perk_name = localization.get(&perk_key, language);
 
+    let starting_weapon = class.starting_weapon();
+    let weapon_key = starting_weapon.to_lowername();
+    let weapon_name = localization.get(&weapon_key, language);
+
     let starting_ability_label = localization.get("starting_ability", language);
     let starting_perk_label = localization.get("starting_perk", language);
+    let starting_weapon_label = localization.get("starting_weapon", language);
+
+    let bonus_desc = match class {
+        Class::Warrior => {
+            let hp_label = localization.get("health", language);
+            format!("Max {}: +20", hp_label)
+        }
+        Class::Mage(_) => {
+            let mana_label = localization.get("mana", language);
+            format!("Max {}: +30", mana_label)
+        }
+        Class::Rogue => {
+            let init_label = localization.get("initiative", language);
+            format!("{}: +2", init_label)
+        }
+        Class::Druid => {
+            let pet_label = localization.get("pet", language);
+            let choose_pet_label = localization.get("choose pet", language);
+            format!("{}: {}", pet_label, choose_pet_label)
+        }
+    };
 
     format!(
-        "{}\n\n{}: {}\n{}: {}",
-        desc, starting_ability_label, ability_name, starting_perk_label, perk_name
+        "{}\n\n{}: {}\n{}: {}\n{}: {}\n\n{}",
+        desc,
+        starting_ability_label,
+        ability_name,
+        starting_perk_label,
+        perk_name,
+        starting_weapon_label,
+        weapon_name,
+        bonus_desc
     )
 }
 

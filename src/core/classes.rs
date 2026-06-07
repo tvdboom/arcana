@@ -1,5 +1,6 @@
 use crate::core::abilities::Ability;
 use crate::core::perks::Perk;
+use crate::core::weapons::Weapon;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
@@ -48,6 +49,15 @@ impl Class {
             Class::Mage(_) => Perk::ArcaneFlow,
             Class::Rogue => Perk::FleetFooted,
             Class::Druid => Perk::WildBond,
+        }
+    }
+
+    pub fn starting_weapon(&self) -> Weapon {
+        match self {
+            Class::Warrior => Weapon::SteelSword,
+            Class::Mage(_) => Weapon::WizardStaff,
+            Class::Rogue => Weapon::ThiefDagger,
+            Class::Druid => Weapon::OakWand,
         }
     }
 }

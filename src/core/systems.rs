@@ -1,5 +1,6 @@
 use crate::core::audio::PlayAudioMsg;
-use crate::core::menu::systems::{StartNewCharacterMsg, SelectionItem};
+use crate::core::menu::systems::StartNewCharacterMsg;
+use crate::core::ui::creation::SelectionItem;
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
 use crate::core::classes::{Class, Ajah};
@@ -30,13 +31,9 @@ pub fn check_keys_menu(
                     next_app_state.set(AppState::MainMenu);
                 },
                 GameState::Settings => next_game_state.set(GameState::GameMenu),
-                GameState::CreateCharacter => {
-                    play_audio_msg.write(PlayAudioMsg::new("button"));
-                    next_app_state.set(AppState::MainMenu);
-                },
                 GameState::ChooseRace => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
-                    next_game_state.set(GameState::CreateCharacter);
+                    next_app_state.set(AppState::MainMenu);
                 },
                 GameState::ChooseClass => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
@@ -45,6 +42,14 @@ pub fn check_keys_menu(
                 GameState::ChooseSubClass => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_game_state.set(GameState::ChooseClass);
+                },
+                GameState::CreateCharacter => {
+                    play_audio_msg.write(PlayAudioMsg::new("button"));
+                    if matches!(player.class, Class::Mage(_) | Class::Druid) {
+                        next_game_state.set(GameState::ChooseSubClass);
+                    } else {
+                        next_game_state.set(GameState::ChooseClass);
+                    }
                 },
                 _ => (),
             },
@@ -77,7 +82,7 @@ pub fn check_keys_menu(
 
                     if !player.name.trim().is_empty() && current_sum == 60 {
                         play_audio_msg.write(PlayAudioMsg::new("button"));
-                        next_game_state.set(GameState::ChooseRace);
+                        next_game_state.set(GameState::Playing);
                     } else {
                         play_audio_msg.write(PlayAudioMsg::new("error"));
                     }
@@ -103,7 +108,7 @@ pub fn check_keys_menu(
                             pet.on_select(&mut player, &mut next_game_state);
                         }
                         _ => {
-                            next_game_state.set(GameState::Playing);
+                            next_game_state.set(GameState::CreateCharacter);
                         }
                     }
                 },

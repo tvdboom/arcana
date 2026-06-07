@@ -16,6 +16,7 @@ mod races;
 mod settings;
 mod states;
 mod systems;
+mod ui;
 mod utils;
 pub mod weapons;
 
@@ -25,6 +26,8 @@ use crate::core::camera::*;
 use crate::core::localization::{update_localized_text, Localization};
 use crate::core::menu::buttons::MenuCmp;
 use crate::core::menu::systems::*;
+use crate::core::ui::creation::*;
+use crate::core::ui::playing::*;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::core::persistence::{
     load_game, run_autosave, save_game, LoadCharacterMsg, SaveCharacterMsg,
@@ -129,6 +132,7 @@ impl Plugin for GamePlugin {
                     handle_name_input,
                     update_character_creation_continue_btn,
                     update_attribute_buttons,
+                    update_sex_button_colors,
                 )
                     .run_if(in_state(GameState::CreateCharacter)),
             )
@@ -138,11 +142,17 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::ChooseClass), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::ChooseSubClass), setup_subclass_selection)
             .add_systems(OnExit(GameState::ChooseSubClass), despawn::<MenuCmp>)
-            .add_systems(OnEnter(GameState::Playing), setup_playing_screen)
+            .add_systems(OnEnter(GameState::Playing), (setup_playing_screen, rebuild_playing_lists).chain())
             .add_systems(OnExit(AppState::Game), despawn::<PlayingCmp>)
             .add_systems(
                 Update,
-                (update_playing_screen, handle_playing_action_clicks).run_if(in_state(GameState::Playing)),
+                (update_playing_screen, handle_playing_action_clicks, scroll_system).run_if(in_state(GameState::Playing)),
+            )
+            .add_systems(
+                Update,
+                rebuild_playing_lists
+                    .run_if(in_state(GameState::Playing))
+                    .run_if(resource_changed::<Player>.or_else(resource_changed::<Settings>)),
             )
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)

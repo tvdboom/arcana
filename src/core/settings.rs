@@ -7,6 +7,7 @@ pub enum Language {
     #[default]
     English,
     Spanish,
+    Dutch,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Default, Serialize, Deserialize)]

@@ -15,6 +15,7 @@ use bevy::window::SystemCursorIcon;
 pub enum SettingsBtn {
     English,
     Spanish,
+    Dutch,
     Mute,
     Sound,
     Music,
@@ -26,6 +27,7 @@ fn match_setting(button: &SettingsBtn, settings: &Settings) -> bool {
     match button {
         SettingsBtn::English => settings.language == Language::English,
         SettingsBtn::Spanish => settings.language == Language::Spanish,
+        SettingsBtn::Dutch => settings.language == Language::Dutch,
         SettingsBtn::Mute => settings.audio == AudioSettings::Mute,
         SettingsBtn::Sound => settings.audio == AudioSettings::Sfx,
         SettingsBtn::Music => settings.audio == AudioSettings::Music,
@@ -58,6 +60,7 @@ pub fn on_click_label_button(
     match btn_q.get(event.entity).unwrap().1 {
         SettingsBtn::English => settings.language = Language::English,
         SettingsBtn::Spanish => settings.language = Language::Spanish,
+        SettingsBtn::Dutch => settings.language = Language::Dutch,
         SettingsBtn::Mute => {
             settings.audio = AudioSettings::Mute;
             change_audio_msg.write(ChangeAudioMsg(Some(AudioSettings::Mute)));

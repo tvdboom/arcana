@@ -12,6 +12,26 @@ pub enum Race {
 }
 
 impl Race {
+    /// Plausible (min, max) age range in years for this race.
+    pub fn age_range(&self) -> (u32, u32) {
+        match self {
+            Race::Dwarf => (40, 300),
+            Race::Elf => (100, 750),
+            Race::Human => (16, 80),
+            Race::Orc => (16, 60),
+        }
+    }
+
+    /// Plausible (min, max) ranges for age (years), height (cm) and weight (kg).
+    pub fn vital_ranges(&self) -> ((u32, u32), (u32, u32), (u32, u32)) {
+        match self {
+            Race::Dwarf => (self.age_range(), (120, 150), (60, 95)),
+            Race::Elf => (self.age_range(), (170, 200), (50, 75)),
+            Race::Human => (self.age_range(), (160, 190), (60, 95)),
+            Race::Orc => (self.age_range(), (180, 220), (90, 145)),
+        }
+    }
+
     pub fn modifier(&self, attr: Attribute) -> i8 {
         match attr {
             Attribute::Strength => match self {
