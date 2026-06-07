@@ -16,7 +16,6 @@ fn extract_variant_name(text: String) -> String {
 pub trait NameFromEnum {
     fn to_name(&self) -> String;
     fn to_lowername(&self) -> String;
-    fn to_title(&self) -> String;
 }
 
 impl<T: Debug> NameFromEnum for T {
@@ -29,14 +28,5 @@ impl<T: Debug> NameFromEnum for T {
 
     fn to_lowername(&self) -> String {
         self.to_name().to_lowercase()
-    }
-
-    fn to_title(&self) -> String {
-        let mut name = self.to_lowername();
-
-        // Capitalize only the first letter
-        name.replace_range(0..1, &name[0..1].to_uppercase());
-
-        name
     }
 }

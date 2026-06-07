@@ -1,6 +1,6 @@
 use crate::core::abilities::Ability;
 use crate::core::classes::Class;
-use crate::core::constants::FANTASY_NAMES;
+use crate::core::constants::{FANTASY_NAMES, PET_NAMES};
 use crate::core::consumables::Consumable;
 use crate::core::perks::Perk;
 use crate::core::pets::Pet;
@@ -51,6 +51,7 @@ pub struct Player {
     pub abilities: Vec<Ability>,
     pub perks: Vec<Perk>,
     pub pet: Option<Pet>,
+    pub pet_name: String,
     pub helmet: Option<Weapon>,
     pub armor: Option<Weapon>,
     pub boots: Option<Weapon>,
@@ -64,6 +65,7 @@ pub struct Player {
 impl Default for Player {
     fn default() -> Self {
         let name = FANTASY_NAMES.choose(&mut rng()).copied().unwrap_or("Arcana").to_string();
+        let pet_name = PET_NAMES.choose(&mut rng()).copied().unwrap_or("Ash").to_string();
         Self {
             name,
             sex: Sex::default(),
@@ -83,6 +85,7 @@ impl Default for Player {
             abilities: vec![],
             perks: vec![],
             pet: None,
+            pet_name,
             helmet: None,
             armor: None,
             boots: None,

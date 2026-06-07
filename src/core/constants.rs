@@ -65,3 +65,11 @@ pub const FANTASY_NAMES: &[&str] = &[
     "Jaime",
     "Ramsay",
 ];
+
+pub const PET_NAMES: &[&str] = &[
+    "Ash", "Bramble", "Cinder", "Dusk", "Echo", "Ember", "Fable", "Fern", "Frost", "Glimmer",
+    "Hazel", "Ivy", "Jasper", "Koda", "Luna", "Milo", "Misty", "Nimble", "Nova", "Onyx", "Pip",
+    "Quill", "Raven", "River", "Rune", "Sable", "Sage", "Shadow", "Skye", "Soot", "Spark", "Sprig",
+    "Storm", "Sunny", "Talon", "Thistle", "Timber", "Toffee", "Twig", "Vale", "Whisper", "Willow",
+    "Wisp", "Yara", "Zephyr", "Biscuit", "Copper", "Maple", "Pebble", "Scout",
+];

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use strum::IntoEnumIterator;
 
+use crate::core::abilities::MagicType;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::Class;
@@ -81,7 +82,10 @@ pub enum EquipSlot {
 pub struct PetImage;
 
 #[derive(Component)]
-pub struct TooltipNode;
+pub struct TooltipNode {
+    width: f32,
+    height: f32,
+}
 
 #[derive(Component, Clone, Copy)]
 pub enum InfoTooltip {
@@ -101,6 +105,70 @@ fn class_line(player: &Player, localization: &Localization, lang: Language) -> S
     format!("{} {}", localization.get("level", lang), player.level)
 }
 
+fn playing_title(player: &Player) -> String {
+    if player.pet.is_some() && !player.pet_name.trim().is_empty() {
+        format!("{} & {}", player.name, player.pet_name)
+    } else {
+        player.name.clone()
+    }
+}
+
+fn localized_class_name(player: &Player, localization: &Localization, lang: Language) -> String {
+    match player.class {
+        Class::Mage(ajah) => format!(
+            "{} {}",
+            localization.get(&ajah.to_lowername(), lang),
+            localization.get("mage", lang)
+        ),
+        _ => localization.get(&player.class.to_lowername(), lang),
+    }
+}
+
+fn name_with_level(name: String, level: u8) -> String {
+    format!("{} (Lv. {})", name, level)
+}
+
+fn localized_magic_type(
+    magic_type: MagicType,
+    localization: &Localization,
+    lang: Language,
+) -> String {
+    let key = match magic_type {
+        MagicType::Physical => "physical",
+        MagicType::Fire => "fire",
+        MagicType::Ice => "ice",
+        MagicType::Dark => "dark",
+        MagicType::Nature => "nature",
+        MagicType::Holy => "holy",
+    };
+    localization.get(key, lang)
+}
+
+fn ability_detail_line(
+    stats: crate::core::abilities::AbilityStats,
+    localization: &Localization,
+    lang: Language,
+) -> String {
+    let mut parts = vec![format!(
+        "{}: {} | {}: {}",
+        localization.get("ability_type", lang),
+        localized_magic_type(stats.magic_type, localization, lang),
+        localization.get("mana", lang),
+        stats.mana_cost
+    )];
+
+    if stats.cooldown > 0 {
+        parts.push(format!(
+            "{}: {} {}",
+            localization.get("cooldown", lang),
+            stats.cooldown,
+            localization.get("seconds", lang)
+        ));
+    }
+
+    parts.join(" | ")
+}
+
 /// Format the bonus characteristics of a weapon, e.g. "+6 attack | +10 crit | 1.2 as".
 fn weapon_stat_lines(
     weapon: &Weapon,
@@ -117,7 +185,7 @@ fn weapon_stat_lines(
             } else {
                 ""
             };
-            parts.push(format!("{}{} {}", sign, val, localization.get(key, lang).to_lowercase()));
+            parts.push(format!("{}{} {}", sign, val, localization.get(key, lang)));
         }
     };
     push(stats.attack, "attack");
@@ -132,10 +200,6 @@ fn weapon_stat_lines(
     } else {
         vec![parts.join(" | ")]
     }
-}
-
-fn name_with_level(name: String, level: u8) -> String {
-    format!("{} (lv. {})", name, level)
 }
 
 fn signed_line(label: impl Into<String>, value: i32) -> String {
@@ -171,9 +235,9 @@ fn combat_breakdown(
 ) -> Vec<String> {
     match stat {
         PlayingStat::Attack => {
-            let mut lines = vec![signed_line(localization.get("base", lang).to_lowercase(), 5)];
+            let mut lines = vec![signed_line(localization.get("base", lang), 5)];
             lines.push(signed_line(
-                localization.get("strength", lang).to_lowercase(),
+                localization.get("strength", lang),
                 player.strength() as i32 - 10,
             ));
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
@@ -183,7 +247,7 @@ fn combat_breakdown(
         },
         PlayingStat::Armor => {
             let mut lines = vec![signed_line(
-                localization.get("constitution", lang).to_lowercase(),
+                localization.get("constitution", lang),
                 player.constitution() as i32 / 4,
             )];
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
@@ -193,7 +257,7 @@ fn combat_breakdown(
         },
         PlayingStat::Initiative => {
             let mut lines = vec![signed_line(
-                localization.get("dexterity", lang).to_lowercase(),
+                localization.get("dexterity", lang),
                 player.dexterity() as i32 / 2,
             )];
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
@@ -215,15 +279,29 @@ fn spawn_tooltip(
     lines: Vec<String>,
     windows: &Query<&Window>,
 ) {
-    let (left, top) = if let Ok(window) = windows.single() {
-        if let Some(cursor) = window.cursor_position() {
-            (cursor.x, cursor.y)
-        } else {
-            (100., 100.)
-        }
+    let wrapped_lines: Vec<String> =
+        lines.into_iter().flat_map(|line| wrap_tooltip_line(&line, 42)).collect();
+    let max_chars = std::iter::once(title.as_str())
+        .chain(wrapped_lines.iter().map(String::as_str))
+        .map(|line| line.chars().count())
+        .max()
+        .unwrap_or(12) as f32;
+    let line_count = 1 + wrapped_lines.len().max(1);
+
+    let (window_width, window_height, cursor) = if let Ok(window) = windows.single() {
+        (window.width(), window.height(), window.cursor_position())
     } else {
-        (100., 100.)
+        (1600., 900., None)
     };
+    let tooltip_width = (max_chars * 8.5 + 28.).clamp(170., (window_width - 24.).max(170.));
+    let tooltip_height = (line_count as f32 * 24. + 24.).clamp(64., (window_height - 24.).max(64.));
+    let (left, top) = place_tooltip(
+        cursor.unwrap_or(Vec2::new(100., 100.)),
+        tooltip_width,
+        tooltip_height,
+        window_width,
+        window_height,
+    );
 
     commands
         .spawn((
@@ -233,9 +311,9 @@ fn spawn_tooltip(
                 top: Val::Px(top),
                 padding: UiRect::all(Val::Px(10.)),
                 border: UiRect::all(Val::Px(2.)),
-                width: Val::Auto,
+                width: Val::Px(tooltip_width),
                 height: Val::Auto,
-                max_width: Val::Px(320.),
+                max_width: Val::Px(tooltip_width),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(4.),
                 ..default()
@@ -243,17 +321,73 @@ fn spawn_tooltip(
             BackgroundColor(Color::srgba_u8(10, 18, 45, 245)),
             BorderColor::all(BUTTON_BORDER_COLOR),
             GlobalZIndex(200),
-            TooltipNode,
+            TooltipNode {
+                width: tooltip_width,
+                height: tooltip_height,
+            },
         ))
         .with_children(|parent| {
             parent.spawn((add_text(title, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
-            if !lines.is_empty() {
+            if !wrapped_lines.is_empty() {
                 parent.spawn((
-                    add_text(lines.join("\n"), "medium", 1.6, assets),
+                    add_text(wrapped_lines.join("\n"), "medium", 1.6, assets),
                     TextColor(Color::WHITE),
                 ));
             }
         });
+}
+
+fn wrap_tooltip_line(line: &str, max_chars: usize) -> Vec<String> {
+    if line.chars().count() <= max_chars {
+        return vec![line.to_string()];
+    }
+
+    let mut lines = Vec::new();
+    let mut current = String::new();
+    for word in line.split_whitespace() {
+        let next_len = current.chars().count()
+            + if current.is_empty() {
+                0
+            } else {
+                1
+            }
+            + word.chars().count();
+        if next_len > max_chars && !current.is_empty() {
+            lines.push(current);
+            current = word.to_string();
+        } else {
+            if !current.is_empty() {
+                current.push(' ');
+            }
+            current.push_str(word);
+        }
+    }
+    if !current.is_empty() {
+        lines.push(current);
+    }
+    lines
+}
+
+fn place_tooltip(
+    cursor: Vec2,
+    width: f32,
+    height: f32,
+    window_width: f32,
+    window_height: f32,
+) -> (f32, f32) {
+    let margin = 12.;
+    let mut left = cursor.x + margin;
+    if left + width + margin > window_width {
+        left = cursor.x - width - margin;
+    }
+    let mut top = cursor.y + margin;
+    if top + height + margin > window_height {
+        top = cursor.y - height - margin;
+    }
+    (
+        left.clamp(margin, (window_width - width - margin).max(margin)),
+        top.clamp(margin, (window_height - height - margin).max(margin)),
+    )
 }
 
 /// A bordered placeholder box (used wherever an item/ability image will go later).
@@ -386,7 +520,12 @@ pub fn setup_playing_screen(
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
     player: Res<Player>,
+    existing_screen_q: Query<Entity, With<PlayingCmp>>,
 ) {
+    if existing_screen_q.iter().next().is_some() {
+        return;
+    }
+
     let lang = settings.language;
 
     let (mut root_node, pickable) = add_root_node(true);
@@ -407,13 +546,17 @@ pub fn setup_playing_screen(
                 .spawn(Node {
                     width: percent(100.),
                     justify_content: JustifyContent::Center,
-                    padding: UiRect::vertical(Val::Px(8.)),
-                    margin: UiRect::bottom(Val::Px(8.)),
+                    padding: UiRect {
+                        top: Val::Px(24.),
+                        bottom: Val::Px(14.),
+                        ..default()
+                    },
+                    margin: UiRect::bottom(Val::Px(16.)),
                     ..default()
                 })
                 .with_children(|parent| {
                     parent.spawn((
-                        add_text(&player.name, "bold", TITLE_TEXT_SIZE, &assets),
+                        add_text(playing_title(&player), "bold", TITLE_TEXT_SIZE, &assets),
                         TextColor(BUTTON_TEXT_COLOR),
                     ));
                 });
@@ -422,7 +565,8 @@ pub fn setup_playing_screen(
             parent
                 .spawn(Node {
                     width: percent(100.),
-                    flex_grow: 1.,
+                    height: percent(66.),
+                    flex_shrink: 0.,
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::SpaceBetween,
                     align_items: AlignItems::Stretch,
@@ -445,13 +589,17 @@ pub fn setup_playing_screen(
             parent
                 .spawn(Node {
                     width: percent(100.),
-                    height: Val::Px(115.),
+                    height: Val::Px(135.),
                     flex_shrink: 0.,
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     column_gap: Val::Px(4.),
-                    padding: UiRect::vertical(Val::Px(2.)),
+                    padding: UiRect {
+                        top: Val::Px(18.),
+                        bottom: Val::Px(4.),
+                        ..default()
+                    },
                     ..default()
                 })
                 .with_children(|parent| {
@@ -471,7 +619,7 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
     parent
         .spawn((
             Node {
-                width: percent(29.),
+                width: percent(31.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
                 padding: UiRect::all(Val::Px(6.)),
@@ -485,7 +633,7 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
                 .spawn((
                     Node {
                         width: percent(100.),
-                        aspect_ratio: Some(1.),
+                        aspect_ratio: Some(0.88),
                         position_type: PositionType::Relative,
                         border: UiRect::all(Val::Px(3.)),
                         ..default()
@@ -541,7 +689,7 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
                                 left: Val::Px(3.),
                                 bottom: Val::Px(3.),
                                 width: percent(50.),
-                                aspect_ratio: Some(1.),
+                                aspect_ratio: Some(0.82),
                                 border: UiRect::all(Val::Px(2.)),
                                 ..default()
                             },
@@ -569,7 +717,12 @@ fn spawn_stats_column(
                 width: percent(32.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
-                padding: UiRect::all(Val::Px(8.)),
+                padding: UiRect {
+                    left: Val::Px(4.),
+                    right: Val::Px(4.),
+                    top: Val::Px(8.),
+                    bottom: Val::Px(8.),
+                },
                 row_gap: Val::Px(4.),
                 overflow: Overflow::clip(),
                 ..default()
@@ -589,7 +742,7 @@ fn spawn_stats_column(
                 })
                 .with_children(|parent| {
                     parent.spawn((
-                        add_text(class_line(player, localization, lang), "bold", 2.6, assets),
+                        add_text(class_line(player, localization, lang), "bold", 3.0, assets),
                         TextColor(BUTTON_TEXT_COLOR),
                         StatLabel(PlayingStat::ClassLine),
                     ));
@@ -610,7 +763,7 @@ fn spawn_stats_column(
 
             // Spacer between bars and characteristics
             parent.spawn(Node {
-                height: Val::Px(10.),
+                height: Val::Px(20.),
                 ..default()
             });
 
@@ -743,7 +896,7 @@ fn spawn_stats_column(
 
             // Spacer between attributes and combat stats
             parent.spawn(Node {
-                height: Val::Px(10.),
+                height: Val::Px(20.),
                 ..default()
             });
 
@@ -931,10 +1084,9 @@ pub fn info_tooltip_system(
             InfoTooltip::Gold => {
                 (localization.get("gold", lang), vec![localization.get("gold_desc", lang)])
             },
-            InfoTooltip::ActionPoints => (
-                localization.get("active_points", lang),
-                vec![localization.get("active_points_desc", lang)],
-            ),
+            InfoTooltip::ActionPoints => {
+                ("AP".to_string(), vec![localization.get("active_points_desc", lang)])
+            },
             InfoTooltip::Combat(stat) => {
                 let title_key = match stat {
                     PlayingStat::Attack => "attack",
@@ -955,14 +1107,21 @@ pub fn info_tooltip_system(
 
 /// Moves the tooltip to follow the mouse cursor.
 pub fn tooltip_follow_cursor_system(
-    mut tooltip_q: Query<&mut Node, With<TooltipNode>>,
+    mut tooltip_q: Query<(&mut Node, &TooltipNode)>,
     windows: Query<&Window>,
 ) {
     if let Ok(window) = windows.single() {
         if let Some(cursor) = window.cursor_position() {
-            for mut node in &mut tooltip_q {
-                node.left = Val::Px(cursor.x);
-                node.top = Val::Px(cursor.y);
+            for (mut node, tooltip) in &mut tooltip_q {
+                let (left, top) = place_tooltip(
+                    cursor,
+                    tooltip.width,
+                    tooltip.height,
+                    window.width(),
+                    window.height(),
+                );
+                node.left = Val::Px(left);
+                node.top = Val::Px(top);
             }
         }
     }
@@ -977,7 +1136,7 @@ fn spawn_right_column(
     parent
         .spawn((
             Node {
-                width: percent(38.),
+                width: percent(36.),
                 height: percent(100.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
@@ -1201,16 +1360,13 @@ pub fn rebuild_playing_lists(
             for ability in &player.abilities {
                 let key = ability.to_lowername();
                 let stats = ability.stats();
-                let type_str = format!("{:?}", stats.magic_type);
-                let detail_parts =
-                    [type_str, format!("{} mana", stats.mana_cost), format!("{}s", stats.cooldown)];
                 spawn_card(
                     parent,
                     &assets,
                     name_with_level(localization.get(&key, lang), stats.level),
                     None,
                     vec![
-                        detail_parts.join(" | "),
+                        ability_detail_line(stats, &localization, lang),
                         localization.get(&format!("{}_desc", key), lang),
                     ],
                 );
@@ -1257,12 +1413,7 @@ pub fn update_playing_screen(
         text.0 = match stat.0 {
             PlayingStat::ClassLine => class_line(&player, &localization, lang),
             PlayingStat::CharRace => localization.get(&player.race.to_lowername(), lang),
-            PlayingStat::CharClass => match player.class {
-                Class::Mage(ajah) => {
-                    format!("{} {}", ajah.to_title(), localization.get("mage", lang))
-                },
-                _ => localization.get(&player.class.to_lowername(), lang),
-            },
+            PlayingStat::CharClass => localized_class_name(&player, &localization, lang),
             PlayingStat::CharSex => match player.sex {
                 crate::core::player::Sex::Male => localization.get("male", lang),
                 crate::core::player::Sex::Female => localization.get("female", lang),
@@ -1292,7 +1443,9 @@ pub fn update_playing_screen(
             PlayingStat::Attack => format!("{}", player.attack_damage()),
             PlayingStat::Armor => format!("{}", player.armor_value()),
             PlayingStat::Initiative => format!("{}", player.initiative()),
-            PlayingStat::ActionPoints => format!("AP: {}", player.ap),
+            PlayingStat::ActionPoints => {
+                format!("AP: {}", player.ap)
+            },
         };
     }
 
@@ -1331,16 +1484,16 @@ pub fn spawn_playing_action_button(
             flex_direction: FlexDirection::Column,
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
-            row_gap: Val::Px(2.),
-            margin: UiRect::horizontal(Val::Px(6.)),
+            row_gap: Val::Px(4.),
+            margin: UiRect::horizontal(Val::Px(8.)),
             ..default()
         })
         .with_children(|parent| {
             parent
                 .spawn((
                     Node {
-                        width: Val::Px(76.),
-                        height: Val::Px(76.),
+                        width: Val::Px(88.),
+                        height: Val::Px(88.),
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
                         border: UiRect::all(Val::Px(2.)),

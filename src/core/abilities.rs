@@ -16,7 +16,7 @@ pub struct AbilityStats {
     pub level: u8,
     pub magic_type: MagicType,
     pub mana_cost: u32,
-    pub cooldown: u32, // turns
+    pub cooldown: u32,
 }
 
 #[derive(EnumIter, Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -37,12 +37,12 @@ pub enum Ability {
 
 impl Ability {
     pub fn stats(&self) -> AbilityStats {
-        match self {
+        let stats = match self {
             Ability::Slash => AbilityStats {
                 level: 1,
                 magic_type: MagicType::Physical,
                 mana_cost: 0,
-                cooldown: 0,
+                cooldown: 1,
             },
             Ability::Firebolt => AbilityStats {
                 level: 1,
@@ -110,10 +110,25 @@ impl Ability {
                 mana_cost: 5,
                 cooldown: 1,
             },
-        }
-    }
+        };
 
-    pub fn level(&self) -> u8 {
-        self.stats().level
+        debug_assert!(stats.cooldown > 0, "abilities cannot have a 0-second cooldown");
+        stats
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use strum::IntoEnumIterator;
+
+    #[test]
+    fn every_ability_has_positive_cooldown() {
+        for ability in Ability::iter() {
+            assert!(
+                ability.stats().cooldown > 0,
+                "{ability:?} should not have a 0-second cooldown"
+            );
+        }
     }
 }

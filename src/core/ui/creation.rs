@@ -42,7 +42,7 @@ pub struct CreateCharacterContinueBtn;
 
 pub const AGE_STAGES: &[&str] = &["youth", "young adult", "adult", "senior", "elder"];
 pub const AGE_SLIDER_WIDTH: f32 = 280.0;
-pub const AGE_VALUE_WIDTH: f32 = 180.0;
+pub const AGE_VALUE_WIDTH: f32 = 240.0;
 
 #[derive(Component)]
 pub struct AgeSliderHandle;
@@ -59,27 +59,48 @@ pub struct AgeValueNode;
 #[derive(Component, Clone, Copy)]
 pub struct AgeStageButton(pub u32);
 
+#[derive(Component)]
+pub struct PetNameText;
+
 fn creation_attribute_value(player: &Player, attr: Attribute) -> u8 {
-    match attr {
-        Attribute::Strength => player.strength,
-        Attribute::Dexterity => player.dexterity,
-        Attribute::Constitution => player.constitution,
-        Attribute::Intelligence => player.intelligence,
-        Attribute::Wisdom => player.wisdom,
-        Attribute::Charisma => player.charisma,
-    }
+    let age_modifier = player.age_modifier();
+    let value = match attr {
+        Attribute::Strength => {
+            player.strength as i16
+                + if matches!(player.sex, Sex::Male) {
+                    1
+                } else {
+                    0
+                }
+        },
+        Attribute::Dexterity => player.dexterity as i16,
+        Attribute::Constitution => player.constitution as i16 - age_modifier,
+        Attribute::Intelligence => player.intelligence as i16,
+        Attribute::Wisdom => player.wisdom as i16 + age_modifier,
+        Attribute::Charisma => {
+            player.charisma as i16
+                + if matches!(player.sex, Sex::Female) {
+                    1
+                } else {
+                    0
+                }
+        },
+    };
+
+    value.max(0) as u8
 }
 
 pub fn update_sex_button_colors(
     player: Res<Player>,
-    mut btn_q: Query<(&SexButton, &mut BackgroundColor)>,
+    mut btn_q: Query<(&SexButton, &Interaction, &mut BackgroundColor)>,
 ) {
-    for (btn, mut bg) in &mut btn_q {
-        if player.sex == btn.0 {
-            bg.0 = HOVERED_BUTTON_COLOR;
-        } else {
-            bg.0 = NORMAL_BUTTON_COLOR;
-        }
+    for (btn, interaction, mut bg) in &mut btn_q {
+        bg.0 = match *interaction {
+            Interaction::Pressed => PRESSED_BUTTON_COLOR,
+            Interaction::Hovered => HOVERED_BUTTON_COLOR,
+            Interaction::None if player.sex == btn.0 => HOVERED_BUTTON_COLOR,
+            Interaction::None => NORMAL_BUTTON_COLOR,
+        };
     }
 }
 
@@ -112,6 +133,8 @@ fn spawn_sex_button(
             },
             BackgroundColor(NORMAL_BUTTON_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            Button,
+            Interaction::default(),
             SexButton(sex),
         ))
         .observe(cursor::<Over>(SystemCursorIcon::Pointer))
@@ -184,6 +207,46 @@ pub fn handle_name_input(
     if changed {
         for mut text in &mut text_q {
             text.0 = player.name.clone();
+        }
+    }
+}
+
+pub fn handle_pet_name_input(
+    mut events: MessageReader<KeyboardInput>,
+    mut player: ResMut<Player>,
+    mut text_q: Query<&mut Text, With<PetNameText>>,
+) {
+    let mut changed = false;
+    for event in events.read() {
+        if event.state != bevy::input::ButtonState::Pressed {
+            continue;
+        }
+        match &event.logical_key {
+            Key::Character(c) => {
+                if player.pet_name.len() < 16
+                    && c.chars().all(|ch| ch.is_alphanumeric() || ch == ' ')
+                {
+                    player.pet_name.push_str(c);
+                    changed = true;
+                }
+            },
+            Key::Backspace => {
+                player.pet_name.pop();
+                changed = true;
+            },
+            Key::Space => {
+                if player.pet_name.len() < 16 {
+                    player.pet_name.push(' ');
+                    changed = true;
+                }
+            },
+            _ => {},
+        }
+    }
+
+    if changed {
+        for mut text in &mut text_q {
+            text.0 = player.pet_name.clone();
         }
     }
 }
@@ -754,22 +817,33 @@ pub fn setup_character_creation(
                                             }
 
                                             // Handle (visual only)
-                                            parent.spawn((
-                                                Node {
-                                                    position_type: PositionType::Absolute,
-                                                    width: Val::Px(24.),
-                                                    height: Val::Px(24.),
-                                                    top: Val::Px(3.),
-                                                    left: Val::Px(frac * AGE_SLIDER_WIDTH - 12.),
-                                                    border: UiRect::all(Val::Px(2.)),
-                                                    border_radius: BorderRadius::all(Val::Px(12.)),
-                                                    ..default()
-                                                },
-                                                BackgroundColor(BUTTON_TEXT_COLOR),
-                                                BorderColor::all(BUTTON_BORDER_COLOR),
-                                                AgeSliderHandle,
-                                                Pickable::IGNORE,
-                                            ));
+                                            parent
+                                                .spawn((
+                                                    Node {
+                                                        position_type: PositionType::Absolute,
+                                                        width: Val::Px(24.),
+                                                        height: Val::Px(24.),
+                                                        top: Val::Px(3.),
+                                                        left: Val::Px(
+                                                            frac * AGE_SLIDER_WIDTH - 12.,
+                                                        ),
+                                                        border: UiRect::all(Val::Px(2.)),
+                                                        border_radius: BorderRadius::all(Val::Px(
+                                                            12.,
+                                                        )),
+                                                        ..default()
+                                                    },
+                                                    BackgroundColor(BUTTON_TEXT_COLOR),
+                                                    BorderColor::all(BUTTON_BORDER_COLOR),
+                                                    Button,
+                                                    Interaction::default(),
+                                                    Pickable::default(),
+                                                    AgeSliderHandle,
+                                                ))
+                                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                                .observe(on_age_slider_drag)
+                                                .observe(on_age_slider_release);
                                         });
 
                                     // Label showing current stage, positioned below the selected point.
@@ -779,7 +853,7 @@ pub fn setup_character_creation(
                                                 position_type: PositionType::Absolute,
                                                 top: Val::Px(34.),
                                                 left: Val::Px(
-                                                    frac * AGE_SLIDER_WIDTH - AGE_VALUE_WIDTH / 2.,
+                                                    AGE_SLIDER_WIDTH / 2. - AGE_VALUE_WIDTH / 2.,
                                                 ),
                                                 width: Val::Px(AGE_VALUE_WIDTH),
                                                 justify_content: JustifyContent::Center,
@@ -798,6 +872,7 @@ pub fn setup_character_creation(
                                                     &assets,
                                                 ),
                                                 TextColor(BUTTON_TEXT_COLOR),
+                                                TextLayout::justify(Justify::Center),
                                                 AgeValueText,
                                             ));
                                         });
@@ -859,11 +934,12 @@ pub fn setup_character_creation(
                                         // Row for this attribute
                                         parent
                                             .spawn(Node {
-                                                width: percent(75.),
+                                                width: percent(88.),
                                                 height: Val::Px(45.),
                                                 flex_direction: FlexDirection::Row,
                                                 align_items: AlignItems::Center,
                                                 justify_content: JustifyContent::SpaceBetween,
+                                                column_gap: Val::Px(18.),
                                                 margin: UiRect::vertical(Val::Px(5.)),
                                                 ..default()
                                             })
@@ -879,7 +955,7 @@ pub fn setup_character_creation(
                                                     TextColor(BUTTON_TEXT_COLOR),
                                                     LocalizedText(attr.to_lowername()),
                                                     Node {
-                                                        width: percent(45.),
+                                                        width: percent(55.),
                                                         ..default()
                                                     },
                                                 ));
@@ -887,7 +963,7 @@ pub fn setup_character_creation(
                                                 // Controls (Minus, Value, Plus)
                                                 parent
                                                     .spawn(Node {
-                                                        width: percent(50.),
+                                                        width: percent(42.),
                                                         flex_direction: FlexDirection::Row,
                                                         align_items: AlignItems::Center,
                                                         justify_content: JustifyContent::End,
@@ -958,12 +1034,11 @@ pub fn setup_character_creation(
         });
 }
 
-/// Drag the age slider handle with the mouse, then snap to the nearest stage on release.
-pub fn update_age_slider(
+fn on_age_slider_drag(
+    ev: On<Pointer<Drag>>,
     mut player: ResMut<Player>,
     settings: Res<Settings>,
     localization: Res<Localization>,
-    track_q: Query<&GlobalTransform, With<AgeSliderTrack>>,
     mut handle_q: Query<&mut Node, (With<AgeSliderHandle>, Without<AgeSliderTrack>)>,
     mut value_node_q: Query<
         &mut Node,
@@ -971,46 +1046,64 @@ pub fn update_age_slider(
     >,
     mut text_q: Query<&mut Text, (With<AgeValueText>, Without<AttributeValueText>)>,
     mut attr_text_q: Query<(&mut Text, &AttributeValueText), Without<AgeValueText>>,
-    windows: Query<&Window>,
-    mouse_buttons: Res<ButtonInput<MouseButton>>,
-    mut drag_active: Local<bool>,
 ) {
-    let Ok(track_transform) = track_q.single() else {
-        return;
+    let current_left = {
+        let Ok(handle_node) = handle_q.single_mut() else {
+            return;
+        };
+        match handle_node.left {
+            Val::Px(px) => px,
+            _ => -12.,
+        }
     };
-    let Ok(window) = windows.single() else {
-        return;
-    };
-    let Some(cursor_pos) = window.cursor_position() else {
-        return;
-    };
-
-    let cursor_is_on_slider = age_cursor_is_on_slider(track_transform, window, cursor_pos);
-    if mouse_buttons.pressed(MouseButton::Left) && (*drag_active || cursor_is_on_slider) {
-        *drag_active = true;
-    }
-
-    if !*drag_active {
-        return;
-    }
-
-    let relative_x = age_relative_x_from_cursor(track_transform, window, cursor_pos.x);
+    let relative_x = current_left + 12. + ev.delta.x;
     set_age_slider_position(&mut handle_q, &mut value_node_q, relative_x);
-
-    if mouse_buttons.just_released(MouseButton::Left) {
-        *drag_active = false;
-        let stage = age_stage_from_relative_x(relative_x);
-        apply_age_stage(
-            stage,
-            &mut player,
-            &settings,
-            &localization,
-            &mut handle_q,
-            &mut value_node_q,
-            &mut text_q,
-            &mut attr_text_q,
-        );
+    let stage = age_stage_from_relative_x(relative_x);
+    set_age_value_position(&mut value_node_q, stage as f32 / 4.0 * AGE_SLIDER_WIDTH);
+    player.age = stage;
+    if let Ok(mut text) = text_q.single_mut() {
+        text.0 = localization.get(AGE_STAGES[stage as usize], settings.language);
     }
+
+    for (mut text, val_attr) in attr_text_q.iter_mut() {
+        let val = creation_attribute_value(&player, val_attr.0);
+        text.0 = format!("{}", val);
+    }
+}
+
+fn on_age_slider_release(
+    _: On<Pointer<Release>>,
+    mut player: ResMut<Player>,
+    settings: Res<Settings>,
+    localization: Res<Localization>,
+    mut handle_q: Query<&mut Node, (With<AgeSliderHandle>, Without<AgeSliderTrack>)>,
+    mut value_node_q: Query<
+        &mut Node,
+        (With<AgeValueNode>, Without<AgeSliderHandle>, Without<AgeSliderTrack>),
+    >,
+    mut text_q: Query<&mut Text, (With<AgeValueText>, Without<AttributeValueText>)>,
+    mut attr_text_q: Query<(&mut Text, &AttributeValueText), Without<AgeValueText>>,
+) {
+    let relative_x = {
+        let Ok(handle_node) = handle_q.single_mut() else {
+            return;
+        };
+        match handle_node.left {
+            Val::Px(px) => px + 12.,
+            _ => player.age as f32 / 4.0 * AGE_SLIDER_WIDTH,
+        }
+    };
+    let stage = age_stage_from_relative_x(relative_x);
+    apply_age_stage(
+        stage,
+        &mut player,
+        &settings,
+        &localization,
+        &mut handle_q,
+        &mut value_node_q,
+        &mut text_q,
+        &mut attr_text_q,
+    );
 }
 
 fn on_age_slider_click(
@@ -1097,19 +1190,6 @@ fn age_relative_x_from_cursor(
     (cursor_x - track_left).clamp(0., AGE_SLIDER_WIDTH)
 }
 
-fn age_cursor_is_on_slider(
-    track_transform: &GlobalTransform,
-    window: &Window,
-    cursor_pos: Vec2,
-) -> bool {
-    let track_center = track_transform.translation();
-    let track_center_x = track_center.x + window.width() / 2.0;
-    let left = track_center_x - AGE_SLIDER_WIDTH / 2.0;
-    let right = track_center_x + AGE_SLIDER_WIDTH / 2.0;
-
-    cursor_pos.x >= left && cursor_pos.x <= right
-}
-
 fn age_stage_from_relative_x(relative_x: f32) -> u32 {
     // Snap to nearest of 5 positions.
     let frac = relative_x / AGE_SLIDER_WIDTH;
@@ -1128,6 +1208,17 @@ fn set_age_slider_position(
     if let Ok(mut handle_node) = handle_q.single_mut() {
         handle_node.left = Val::Px(relative_x - 12.);
     }
+    set_age_value_position(value_node_q, relative_x);
+}
+
+fn set_age_value_position(
+    value_node_q: &mut Query<
+        &mut Node,
+        (With<AgeValueNode>, Without<AgeSliderHandle>, Without<AgeSliderTrack>),
+    >,
+    relative_x: f32,
+) {
+    let relative_x = relative_x.clamp(0., AGE_SLIDER_WIDTH);
     if let Ok(mut value_node) = value_node_q.single_mut() {
         value_node.left = Val::Px(relative_x - AGE_VALUE_WIDTH / 2.);
     }
@@ -1327,7 +1418,7 @@ pub fn setup_selection_screen<T>(
             parent.spawn(Node {
                 margin: UiRect {
                     top: percent(3.),
-                    bottom: percent(3.),
+                    bottom: if title_key == "choose pet" { percent(1.) } else { percent(3.) },
                     ..default()
                 },
                 ..default()
@@ -1339,11 +1430,46 @@ pub fn setup_selection_screen<T>(
                 ));
             });
 
+            if title_key == "choose pet" {
+                parent
+                    .spawn(Node {
+                        width: percent(42.),
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        margin: UiRect::bottom(percent(1.5)),
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        parent
+                            .spawn((
+                                Node {
+                                    width: percent(75.),
+                                    height: Val::Px(46.),
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::Center,
+                                    margin: UiRect::vertical(Val::Px(6.)),
+                                    border: UiRect::all(Val::Px(2.)),
+                                    border_radius: BorderRadius::all(Val::Px(6.)),
+                                    ..default()
+                                },
+                                BackgroundColor(NORMAL_BUTTON_COLOR),
+                                BorderColor::all(BUTTON_BORDER_COLOR),
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn((
+                                    add_text(player.pet_name.clone(), "medium", BUTTON_TEXT_SIZE, &assets),
+                                    TextColor(Color::WHITE),
+                                    PetNameText,
+                                ));
+                            });
+                    });
+            }
+
             // Container for the cards
             parent
                 .spawn(Node {
                     width: percent(96.),
-                    height: percent(70.),
+                    height: if title_key == "choose pet" { percent(64.) } else { percent(70.) },
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,

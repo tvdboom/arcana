@@ -3,26 +3,11 @@ use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
 use std::collections::HashMap;
 
-#[derive(Clone)]
-pub struct TextureInfo {
-    pub image: Handle<Image>,
-    pub layout: Handle<TextureAtlasLayout>,
-}
-
-#[derive(Clone)]
-pub struct AtlasInfo {
-    pub image: Handle<Image>,
-    pub atlas: TextureAtlas,
-    pub last_index: usize,
-}
-
 #[derive(Resource)]
 pub struct WorldAssets {
     pub audio: HashMap<&'static str, Handle<AudioSource>>,
     pub fonts: HashMap<&'static str, Handle<Font>>,
     pub images: HashMap<&'static str, Handle<Image>>,
-    pub textures: HashMap<&'static str, TextureInfo>,
-    pub atlas: HashMap<&'static str, AtlasInfo>,
 }
 
 impl WorldAssets {
@@ -46,14 +31,6 @@ impl WorldAssets {
 
     pub fn image(&self, name: impl Into<String>) -> Handle<Image> {
         self.get_asset(&self.images, name, "image").clone()
-    }
-
-    pub fn texture(&self, name: impl Into<String>) -> TextureInfo {
-        self.get_asset(&self.textures, name, "texture").clone()
-    }
-
-    pub fn atlas(&self, name: impl Into<String>) -> AtlasInfo {
-        self.get_asset(&self.atlas, name, "atlas").clone()
     }
 }
 
@@ -173,16 +150,10 @@ impl FromWorld for WorldAssets {
             ("bear", assets.load("images/pets/bear.png")),
         ]);
 
-        let atlas: HashMap<&'static str, AtlasInfo> = HashMap::new();
-
-        let textures = HashMap::new();
-
         Self {
             audio,
             fonts,
             images,
-            textures,
-            atlas,
         }
     }
 }

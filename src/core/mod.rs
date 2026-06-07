@@ -136,7 +136,6 @@ impl Plugin for GamePlugin {
                     update_character_creation_continue_btn,
                     update_attribute_buttons,
                     update_sex_button_colors,
-                    update_age_slider,
                 )
                     .run_if(in_state(GameState::CreateCharacter)),
             )
@@ -146,12 +145,13 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::ChooseClass), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::ChooseSubClass), setup_subclass_selection)
             .add_systems(OnExit(GameState::ChooseSubClass), despawn::<MenuCmp>)
+            .add_systems(Update, handle_pet_name_input.run_if(in_state(GameState::ChooseSubClass)))
             .add_systems(
                 OnEnter(GameState::Playing),
                 (setup_playing_screen, rebuild_playing_lists).chain(),
             )
-            .add_systems(OnExit(GameState::Playing), despawn::<PlayingCmp>)
-            .add_systems(OnExit(AppState::Game), despawn::<PlayingCmp>)
+            .add_systems(OnExit(GameState::Playing), despawn::<TooltipNode>)
+            .add_systems(OnExit(AppState::Game), (despawn::<PlayingCmp>, despawn::<TooltipNode>))
             .add_systems(
                 Update,
                 (
@@ -167,7 +167,7 @@ impl Plugin for GamePlugin {
             .add_systems(
                 Update,
                 rebuild_playing_lists
-                    .run_if(in_state(GameState::Playing))
+                    .run_if(in_state(AppState::Game))
                     .run_if(resource_changed::<Player>.or_else(resource_changed::<Settings>)),
             )
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
