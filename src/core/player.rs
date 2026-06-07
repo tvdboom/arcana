@@ -1,8 +1,11 @@
 use crate::core::abilities::Ability;
 use crate::core::classes::Class;
+use crate::core::constants::FANTASY_NAMES;
+use crate::core::consumables::Consumable;
 use crate::core::perks::Perk;
 use crate::core::pets::Pet;
 use crate::core::races::Race;
+use crate::core::weapons::Weapon;
 use bevy::prelude::*;
 use rand::prelude::IndexedRandom;
 use rand::rng;
@@ -10,9 +13,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use strum_macros::{EnumIter, EnumString};
-use crate::core::constants::FANTASY_NAMES;
-use crate::core::consumables::Consumable;
-use crate::core::weapons::Weapon;
 
 #[derive(EnumIter, Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum Sex {
@@ -58,7 +58,7 @@ pub struct Player {
     pub weapon_rh: Option<Weapon>,
     pub weapon_2h: Option<Weapon>,
     pub consumables: Vec<Consumable>,
-    pub money: u32,
+    pub gold: u32,
 }
 
 impl Default for Player {
@@ -69,7 +69,7 @@ impl Default for Player {
             sex: Sex::default(),
             race: Race::default(),
             class: Class::default(),
-            age: 25,
+            age: 2,
             level: 1,
             ap: 10,
             health: 100.,
@@ -81,7 +81,7 @@ impl Default for Player {
             wisdom: 10,
             charisma: 10,
             abilities: vec![],
-            perks: vec![Perk::IronSkin],
+            perks: vec![],
             pet: None,
             helmet: None,
             armor: None,
@@ -90,28 +90,28 @@ impl Default for Player {
             weapon_rh: None,
             weapon_2h: None,
             consumables: vec![],
-            money: 100,
+            gold: 100,
         }
     }
 }
 
 impl Player {
-    /// Wisdom bonus (and equal strength penalty) gained with age: +0 when young,
-    /// up to +2 when at the upper end of the race's age range.
+    /// Age stage modifier: Youth=-2, Young Adult=-1, Adult=0, Senior=+1, Elder=+2.
+    /// This is added to wisdom and subtracted from constitution.
     pub fn age_modifier(&self) -> i16 {
-        let (min, max) = self.race.age_range();
-        if max <= min {
-            return 0;
-        }
-        let fraction = (self.age.clamp(min, max) - min) as f32 / (max - min) as f32;
-        (fraction * 2.).round() as i16
+        // age stores the stage index: 0=Youth, 1=Young Adult, 2=Adult, 3=Senior, 4=Elder
+        (self.age as i16).clamp(0, 4) - 2
     }
 
     pub fn strength(&self) -> u8 {
         let base = self.strength as i16;
         let modifier = self.race.modifier(Attribute::Strength) as i16;
-        let sex_mod = if matches!(self.sex, Sex::Male) { 1 } else { 0 };
-        (base + modifier - self.age_modifier() + sex_mod).max(0) as u8
+        let sex_mod = if matches!(self.sex, Sex::Male) {
+            1
+        } else {
+            0
+        };
+        (base + modifier + sex_mod).max(0) as u8
     }
 
     pub fn dexterity(&self) -> u8 {
@@ -123,7 +123,7 @@ impl Player {
     pub fn constitution(&self) -> u8 {
         let base = self.constitution as i16;
         let modifier = self.race.modifier(Attribute::Constitution) as i16;
-        (base + modifier).max(0) as u8
+        (base + modifier - self.age_modifier()).max(0) as u8
     }
 
     pub fn intelligence(&self) -> u8 {
@@ -141,54 +141,67 @@ impl Player {
     pub fn charisma(&self) -> u8 {
         let base = self.charisma as i16;
         let modifier = self.race.modifier(Attribute::Charisma) as i16;
-        let sex_mod = if matches!(self.sex, Sex::Female) { 1 } else { 0 };
+        let sex_mod = if matches!(self.sex, Sex::Female) {
+            1
+        } else {
+            0
+        };
         (base + modifier + sex_mod).max(0) as u8
     }
 
     /// All currently equipped pieces of gear.
     pub fn equipped_weapons(&self) -> Vec<&Weapon> {
-        [
-            &self.helmet,
-            &self.armor,
-            &self.boots,
-            &self.weapon_lh,
-            &self.weapon_rh,
-            &self.weapon_2h,
-        ]
-        .into_iter()
-        .flatten()
-        .collect()
+        [&self.helmet, &self.armor, &self.boots, &self.weapon_lh, &self.weapon_rh, &self.weapon_2h]
+            .into_iter()
+            .flatten()
+            .collect()
     }
 
     pub fn max_health(&self) -> f32 {
-        let mut base_max = self.constitution() as f32 * 5. + (self.level as f32 - 1.) * 10. + 50.;
+        let base_max = 100. + (self.constitution() as f32 - 10.) * 10.;
         if matches!(self.class, Class::Warrior) {
-            base_max += 20.;
+            base_max + 20.
+        } else {
+            base_max
         }
-        base_max
     }
 
     pub fn max_mana(&self) -> f32 {
-        let mut base_max = self.intelligence() as f32 * 3. + self.wisdom() as f32 * 2. + 50.;
-        if matches!(self.class, Class::Mage(_)) {
-            base_max += 30.;
+        let mut base_max = 100.0_f32;
+        match self.class {
+            Class::Mage(_) => base_max += 30.,
+            Class::Druid => base_max += 10.,
+            _ => {},
         }
-        base_max
+        let wisdom_bonus = (self.wisdom() as i32 - 10) * 10;
+        (base_max + wisdom_bonus as f32).max(0.)
     }
 
     /// Total physical attack damage (base from strength plus weapon bonuses).
     pub fn attack_damage(&self) -> i32 {
-        self.strength() as i32 / 2 + self.equipped_weapons().iter().map(|w| w.stats().attack).sum::<i32>()
+        let str_bonus = (self.strength() as i32 - 10) + 5; // base 5 + 1 per str above 10
+        str_bonus + self.equipped_weapons().iter().map(|w| w.stats().attack).sum::<i32>()
+    }
+
+    pub fn weapon_attack_speed(&self, weapon: &Weapon) -> f32 {
+        self.adjust_attack_speed(weapon.stats().attack_speed)
+    }
+
+    fn adjust_attack_speed(&self, weapon_speed: f32) -> f32 {
+        let dex_bonus = (self.dexterity() as f32 - 10.) * 0.05;
+        (weapon_speed + dex_bonus).max(0.3)
     }
 
     /// Total armor rating (base from constitution plus equipment bonuses).
     pub fn armor_value(&self) -> i32 {
-        self.constitution() as i32 / 4 + self.equipped_weapons().iter().map(|w| w.stats().armor).sum::<i32>()
+        self.constitution() as i32 / 4
+            + self.equipped_weapons().iter().map(|w| w.stats().armor).sum::<i32>()
     }
 
     /// Initiative determines turn order (base from dexterity plus equipment bonuses).
     pub fn initiative(&self) -> i32 {
-        let base_init = self.dexterity() as i32 / 2 + self.equipped_weapons().iter().map(|w| w.stats().initiative).sum::<i32>();
+        let base_init = self.dexterity() as i32 / 2
+            + self.equipped_weapons().iter().map(|w| w.stats().initiative).sum::<i32>();
         if matches!(self.class, Class::Rogue) {
             base_init + 2
         } else {
@@ -196,9 +209,8 @@ impl Player {
         }
     }
 
-    /// (age, height_cm, weight_kg). Age is the value chosen during character
-    /// creation; height and weight are derived deterministically from name and race.
-    pub fn vitals(&self) -> (u32, u32, u32) {
+    /// (height_cm, weight_kg). Height and weight are derived deterministically from name and race.
+    pub fn vitals(&self) -> (u32, u32) {
         let (_age_r, height_r, weight_r) = self.race.vital_ranges();
 
         let mut hasher = DefaultHasher::new();
@@ -211,6 +223,19 @@ impl Player {
             range.0 + ((seed.rotate_left(salt as u32 * 17) ^ salt) % span) as u32
         };
 
-        (self.age, pick(height_r, 2), pick(weight_r, 3))
+        (pick(height_r, 2), pick(weight_r, 3))
+    }
+
+    pub fn actual_age(&self) -> u32 {
+        let range = self.race.age_stage_range(self.age);
+
+        let mut hasher = DefaultHasher::new();
+        self.name.hash(&mut hasher);
+        format!("{:?}", self.race).hash(&mut hasher);
+        self.age.hash(&mut hasher);
+        let seed = hasher.finish();
+
+        let span = (range.1 - range.0 + 1) as u64;
+        range.0 + (seed % span) as u32
     }
 }

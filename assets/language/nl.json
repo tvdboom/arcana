@@ -5,7 +5,7 @@
   "continue": "Doorgaan",
   "create your character": "Maak je personage",
   "character name": "Naam personage",
-  "change name hint": "Typ op je toetsenbord om de naam te wijzigen",
+  "change name hint": "Typ om de naam te wijzigen",
   "points remaining": "Resterende punten",
   "save character": "Personage opslaan",
   "settings": "Instellingen",
@@ -101,7 +101,7 @@
   "weapon_rh": "Rechterhand",
   "weapon_2h": "Tweehandig",
   "consumables": "Verbruiksartikelen",
-  "money": "Goud",
+  "gold": "Goud",
   "level": "Niveau",
   "action_points": "Resterende actiepunten",
   "hunt": "Jagen",
@@ -136,6 +136,7 @@
   "health": "Gezondheid",
   "mana": "Mana",
   "race": "Ras",
+  "class": "Klasse",
   "age": "Leeftijd",
   "height": "Lengte",
   "weight": "Gewicht",
@@ -158,5 +159,10 @@
   "name": "Naam",
   "shop": "Winkel",
   "rest": "Rusten",
-  "inventory": "Inventaris"
+  "inventory": "Inventaris",
+  "youth": "Jeugd",
+  "young adult": "Jong Volwassen",
+  "adult": "Volwassen",
+  "senior": "Senior",
+  "elder": "Oudere"
 }

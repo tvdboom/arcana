@@ -10,6 +10,10 @@ pub fn despawn<T: Component>(mut commands: Commands, query_c: Query<Entity, With
     }
 }
 
+pub fn reset_cursor(mut commands: Commands, window_e: Single<Entity, With<Window>>) {
+    commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
+}
+
 /// Set cursor icon on event
 pub fn cursor<T: Debug + Clone + Reflect>(
     icon: SystemCursorIcon,

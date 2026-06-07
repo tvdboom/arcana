@@ -70,7 +70,11 @@ pub fn setup_menu(
                                 spawn_label(
                                     parent,
                                     "language",
-                                    vec![SettingsBtn::English, SettingsBtn::Spanish, SettingsBtn::Dutch],
+                                    vec![
+                                        SettingsBtn::English,
+                                        SettingsBtn::Spanish,
+                                        SettingsBtn::Dutch,
+                                    ],
                                     &settings,
                                     &assets,
                                     &localization,
@@ -130,24 +134,26 @@ pub fn setup_game_menu(
 ) {
     let lang = settings.language;
     commands.spawn((add_root_node(true), MenuCmp)).with_children(|parent| {
-        parent.spawn((
-            Node {
-                width: Val::Px(550.),
-                height: Val::Px(560.),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                padding: UiRect::all(Val::Px(25.)),
-                ..default()
-            },
-            ImageNode::new(assets.image("stone")).with_mode(NodeImageMode::Stretch),
-        )).with_children(|parent| {
-            spawn_menu_button(parent, MenuBtn::Continue, &assets, &localization, lang);
-            #[cfg(not(target_arch = "wasm32"))]
-            spawn_menu_button(parent, MenuBtn::SaveCharacter, &assets, &localization, lang);
-            spawn_menu_button(parent, MenuBtn::Settings, &assets, &localization, lang);
-            spawn_menu_button(parent, MenuBtn::Quit, &assets, &localization, lang);
-        });
+        parent
+            .spawn((
+                Node {
+                    width: Val::Px(550.),
+                    height: Val::Px(560.),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    padding: UiRect::all(Val::Px(25.)),
+                    ..default()
+                },
+                ImageNode::new(assets.image("stone")).with_mode(NodeImageMode::Stretch),
+            ))
+            .with_children(|parent| {
+                spawn_menu_button(parent, MenuBtn::Continue, &assets, &localization, lang);
+                #[cfg(not(target_arch = "wasm32"))]
+                spawn_menu_button(parent, MenuBtn::SaveCharacter, &assets, &localization, lang);
+                spawn_menu_button(parent, MenuBtn::Settings, &assets, &localization, lang);
+                spawn_menu_button(parent, MenuBtn::Quit, &assets, &localization, lang);
+            });
     });
 }
 

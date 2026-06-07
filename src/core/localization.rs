@@ -125,20 +125,20 @@ pub fn format_class_description(
         Class::Warrior => {
             let hp_label = localization.get("health", language);
             format!("Max {}: +20", hp_label)
-        }
+        },
         Class::Mage(_) => {
             let mana_label = localization.get("mana", language);
             format!("Max {}: +30", mana_label)
-        }
+        },
         Class::Rogue => {
             let init_label = localization.get("initiative", language);
             format!("{}: +2", init_label)
-        }
+        },
         Class::Druid => {
             let pet_label = localization.get("pet", language);
             let choose_pet_label = localization.get("choose pet", language);
             format!("{}: {}", pet_label, choose_pet_label)
-        }
+        },
     };
 
     format!(

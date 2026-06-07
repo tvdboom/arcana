@@ -1,10 +1,10 @@
 use crate::core::audio::PlayAudioMsg;
+use crate::core::classes::{Ajah, Class};
 use crate::core::menu::systems::StartNewCharacterMsg;
-use crate::core::ui::creation::SelectionItem;
+use crate::core::pets::Pet;
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
-use crate::core::classes::{Class, Ajah};
-use crate::core::pets::Pet;
+use crate::core::ui::creation::SelectionItem;
 use bevy::prelude::*;
 
 pub fn check_keys_menu(
@@ -33,7 +33,7 @@ pub fn check_keys_menu(
                 GameState::Settings => next_game_state.set(GameState::GameMenu),
                 GameState::ChooseRace => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
-                    next_app_state.set(AppState::MainMenu);
+                    next_game_state.set(GameState::CreateCharacter);
                 },
                 GameState::ChooseClass => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
@@ -45,11 +45,7 @@ pub fn check_keys_menu(
                 },
                 GameState::CreateCharacter => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
-                    if matches!(player.class, Class::Mage(_) | Class::Druid) {
-                        next_game_state.set(GameState::ChooseSubClass);
-                    } else {
-                        next_game_state.set(GameState::ChooseClass);
-                    }
+                    next_app_state.set(AppState::MainMenu);
                 },
                 _ => (),
             },
@@ -82,7 +78,7 @@ pub fn check_keys_menu(
 
                     if !player.name.trim().is_empty() && current_sum == 60 {
                         play_audio_msg.write(PlayAudioMsg::new("button"));
-                        next_game_state.set(GameState::Playing);
+                        next_game_state.set(GameState::ChooseRace);
                     } else {
                         play_audio_msg.write(PlayAudioMsg::new("error"));
                     }
@@ -102,14 +98,14 @@ pub fn check_keys_menu(
                         Class::Mage(_) => {
                             let ajah = Ajah::default();
                             ajah.on_select(&mut player, &mut next_game_state);
-                        }
+                        },
                         Class::Druid => {
                             let pet = Pet::default();
                             pet.on_select(&mut player, &mut next_game_state);
-                        }
+                        },
                         _ => {
                             next_game_state.set(GameState::CreateCharacter);
-                        }
+                        },
                     }
                 },
                 _ => (),

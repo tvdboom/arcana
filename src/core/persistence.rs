@@ -79,9 +79,7 @@ pub fn save_game(
             let path = current_dir().expect("Failed to get current directory.");
             Some(path.join(&player.name))
         } else {
-            FileDialog::new()
-                .set_file_name(player.name.clone())
-                .save_file()
+            FileDialog::new().set_file_name(player.name.clone()).save_file()
         };
 
         if let Some(mut file_path) = file_path {

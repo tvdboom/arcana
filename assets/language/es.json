@@ -101,7 +101,7 @@
   "weapon_rh": "Mano Derecha",
   "weapon_2h": "Dos Manos",
   "consumables": "Consumibles",
-  "money": "Oro",
+  "gold": "Oro",
   "level": "Nivel",
   "action_points": "Acciones Restantes para Nivel",
   "hunt": "Cazar",
@@ -136,6 +136,7 @@
   "health": "Salud",
   "mana": "Maná",
   "race": "Raza",
+  "class": "Clase",
   "age": "Edad",
   "height": "Altura",
   "weight": "Peso",
@@ -158,5 +159,10 @@
   "name": "Nombre",
   "shop": "Tienda",
   "rest": "Descansar",
-  "inventory": "Inventario"
+  "inventory": "Inventario",
+  "youth": "Joven",
+  "young adult": "Adulto Joven",
+  "adult": "Adulto",
+  "senior": "Mayor",
+  "elder": "Anciano"
 }

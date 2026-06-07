@@ -3,8 +3,8 @@ mod assets;
 mod audio;
 mod camera;
 pub mod classes;
-pub mod consumables;
 mod constants;
+pub mod consumables;
 pub mod localization;
 mod menu;
 pub mod perks;
@@ -26,8 +26,6 @@ use crate::core::camera::*;
 use crate::core::localization::{update_localized_text, Localization};
 use crate::core::menu::buttons::MenuCmp;
 use crate::core::menu::systems::*;
-use crate::core::ui::creation::*;
-use crate::core::ui::playing::*;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::core::persistence::{
     load_game, run_autosave, save_game, LoadCharacterMsg, SaveCharacterMsg,
@@ -36,7 +34,9 @@ use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::states::{AppState, GameState};
 use crate::core::systems::*;
-use crate::core::utils::despawn;
+use crate::core::ui::creation::*;
+use crate::core::ui::playing::*;
+use crate::core::utils::{despawn, reset_cursor};
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
 use std::time::Duration;
@@ -109,8 +109,11 @@ impl Plugin for GamePlugin {
 
         // Menu
         for state in AppState::iter().filter(|s| *s != AppState::Game) {
-            app.add_systems(OnEnter(state), setup_menu)
+            app.add_systems(OnEnter(state), (reset_cursor, setup_menu))
                 .add_systems(OnExit(state), despawn::<MenuCmp>);
+        }
+        for state in GameState::iter() {
+            app.add_systems(OnEnter(state), reset_cursor);
         }
         app.add_systems(Update, start_new_game_message.run_if(not(in_state(AppState::Game))));
 
@@ -133,6 +136,7 @@ impl Plugin for GamePlugin {
                     update_character_creation_continue_btn,
                     update_attribute_buttons,
                     update_sex_button_colors,
+                    update_age_slider,
                 )
                     .run_if(in_state(GameState::CreateCharacter)),
             )
@@ -142,11 +146,21 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::ChooseClass), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::ChooseSubClass), setup_subclass_selection)
             .add_systems(OnExit(GameState::ChooseSubClass), despawn::<MenuCmp>)
-            .add_systems(OnEnter(GameState::Playing), (setup_playing_screen, rebuild_playing_lists).chain())
+            .add_systems(
+                OnEnter(GameState::Playing),
+                (setup_playing_screen, rebuild_playing_lists).chain(),
+            )
             .add_systems(OnExit(AppState::Game), despawn::<PlayingCmp>)
             .add_systems(
                 Update,
-                (update_playing_screen, handle_playing_action_clicks, scroll_system).run_if(in_state(GameState::Playing)),
+                (
+                    update_playing_screen,
+                    handle_playing_action_clicks,
+                    scroll_system,
+                    equip_slot_tooltip_system,
+                    tooltip_follow_cursor_system,
+                )
+                    .run_if(in_state(GameState::Playing)),
             )
             .add_systems(
                 Update,

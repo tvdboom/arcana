@@ -10,13 +10,15 @@ pub enum AppState {
     Game,
 }
 
-#[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default, Serialize, Deserialize)]
+#[derive(
+    States, EnumIter, Debug, Clone, Copy, Eq, PartialEq, Hash, Default, Serialize, Deserialize,
+)]
 pub enum GameState {
     #[default]
+    CreateCharacter,
     ChooseRace,
     ChooseClass,
     ChooseSubClass,
-    CreateCharacter,
     Playing,
     Combat,
     CombatPaused,

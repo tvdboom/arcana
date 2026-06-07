@@ -22,6 +22,15 @@ impl Race {
         }
     }
 
+    pub fn age_stage_range(&self, stage: u32) -> (u32, u32) {
+        let (min, max) = self.age_range();
+        let span = max - min + 1;
+        let stage = stage.clamp(0, 4);
+        let start = min + (span * stage) / 5;
+        let end = min + (span * (stage + 1)) / 5 - 1;
+        (start, end.max(start))
+    }
+
     /// Plausible (min, max) ranges for age (years), height (cm) and weight (kg).
     pub fn vital_ranges(&self) -> ((u32, u32), (u32, u32), (u32, u32)) {
         match self {

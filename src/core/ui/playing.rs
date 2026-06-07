@@ -5,7 +5,6 @@ use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::Class;
 use crate::core::constants::*;
-use crate::core::consumables::Consumable;
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
 use crate::core::player::{Attribute, Player};
@@ -26,25 +25,25 @@ const PLACEHOLDER_COLOR: Color = Color::srgba_u8(40, 40, 55, 220);
 pub struct PlayingCmp;
 
 #[derive(Component)]
-pub struct PlayingLog(pub Vec<String>);
-
-#[derive(Component)]
-pub struct LogTextContainer;
-
-#[derive(Component)]
 pub struct ActionButton(pub &'static str);
 
 /// Simple text stats that are refreshed every frame.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum PlayingStat {
     ClassLine,
-    RaceLine,
+    CharRace,
+    CharClass,
+    CharSex,
+    CharAge,
+    CharHeight,
+    CharWeight,
     Health,
     Mana,
     Money,
     Attack,
     Armor,
     Initiative,
+    ActionPoints,
 }
 
 #[derive(Component)]
@@ -81,6 +80,9 @@ pub enum EquipSlot {
 #[derive(Component)]
 pub struct PetImage;
 
+#[derive(Component)]
+pub struct TooltipNode;
+
 fn portrait_key(player: &Player) -> String {
     match player.class {
         Class::Mage(ajah) => ajah.get_image_key(player),
@@ -89,49 +91,44 @@ fn portrait_key(player: &Player) -> String {
 }
 
 fn class_line(player: &Player, localization: &Localization, lang: Language) -> String {
-    let class_name = match player.class {
-        Class::Mage(ajah) => format!("{} {}", ajah.to_title(), localization.get("mage", lang)),
-        _ => localization.get(&player.class.to_lowername(), lang),
-    };
-    format!("{} {} {}", localization.get("level", lang), player.level, class_name)
+    format!("{} {}", localization.get("level", lang), player.level)
 }
 
-fn characteristics_text(player: &Player, localization: &Localization, lang: Language) -> String {
-    let (age, height, weight) = player.vitals();
-    let sex_val = match player.sex {
-        crate::core::player::Sex::Male => localization.get("male", lang),
-        crate::core::player::Sex::Female => localization.get("female", lang),
-    };
-    format!(
-        "{}: {}\n{}: {}\n{}: {}\n{}: {} cm\n{}: {} kg",
-        localization.get("race", lang),
-        localization.get(&player.race.to_lowername(), lang),
-        localization.get("sex", lang),
-        sex_val,
-        localization.get("age", lang),
-        age,
-        localization.get("height", lang),
-        height,
-        localization.get("weight", lang),
-        weight,
-    )
-}
-
-/// Format the bonus characteristics of a weapon, e.g. "+6 Attack, +10 Crit".
-fn weapon_stat_lines(weapon: &Weapon, localization: &Localization, lang: Language) -> Vec<String> {
+/// Format the bonus characteristics of a weapon, e.g. "+6 attack | +10 crit | 1.2 as".
+fn weapon_stat_lines(
+    weapon: &Weapon,
+    player: &Player,
+    localization: &Localization,
+    lang: Language,
+) -> Vec<String> {
     let stats = weapon.stats();
-    let mut lines = Vec::new();
+    let mut parts = Vec::new();
     let mut push = |val: i32, key: &str| {
         if val != 0 {
-            let sign = if val > 0 { "+" } else { "" };
-            lines.push(format!("{}{} {}", sign, val, localization.get(key, lang)));
+            let sign = if val > 0 {
+                "+"
+            } else {
+                ""
+            };
+            parts.push(format!("{}{} {}", sign, val, localization.get(key, lang).to_lowercase()));
         }
     };
     push(stats.attack, "attack");
     push(stats.armor, "armor");
     push(stats.crit, "crit");
     push(stats.initiative, "initiative");
-    lines
+    if stats.attack_speed > 0.0 {
+        parts.push(format!("{:.1} as", player.weapon_attack_speed(weapon)));
+    }
+    if parts.is_empty() {
+        vec![]
+    } else {
+        vec![parts.join(" | ")]
+    }
+}
+
+fn name_with_level(name: String, level: u8) -> String {
+    format!("{} (lv. {})", name, level)
 }
 
 /// A bordered placeholder box (used wherever an item/ability image will go later).
@@ -182,17 +179,15 @@ fn spawn_card(
                     ..default()
                 })
                 .with_children(|parent| {
-                    let mut name_cmd = parent.spawn((
-                        add_text(name, "bold", 1.7, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
+                    let mut name_cmd = parent
+                        .spawn((add_text(name, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
                     if let Some(key) = name_key {
                         name_cmd.insert(LocalizedText(key));
                     }
 
                     for line in lines {
                         parent.spawn((
-                            add_text(line, "medium", 1.4, assets),
+                            add_text(line, "medium", 1.6, assets),
                             TextColor(Color::WHITE),
                         ));
                     }
@@ -220,20 +215,37 @@ fn spawn_combat_stat(
                 justify_content: JustifyContent::Center,
                 row_gap: Val::Px(4.),
                 border: UiRect::all(Val::Px(2.)),
+                position_type: PositionType::Relative,
                 ..default()
             },
             BackgroundColor(PLACEHOLDER_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
-            ImageNode::new(assets.image(image_key)).with_mode(NodeImageMode::Stretch),
         ))
         .with_children(|parent| {
+            // Semi-transparent icon background
             parent.spawn((
-                add_text(localization.get(label_key, lang), "medium", 1.5, assets),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.),
+                    top: Val::Px(0.),
+                    width: percent(100.),
+                    height: percent(100.),
+                    ..default()
+                },
+                ImageNode {
+                    image: assets.image(image_key),
+                    image_mode: NodeImageMode::Stretch,
+                    color: Color::srgba(1., 1., 1., 0.3),
+                    ..default()
+                },
+            ));
+            parent.spawn((
+                add_text(localization.get(label_key, lang), "medium", 2.2, assets),
                 TextColor(BUTTON_TEXT_COLOR),
                 LocalizedText(label_key.to_string()),
             ));
             parent.spawn((
-                add_text("", "bold", 3.0, assets),
+                add_text("", "bold", 4.5, assets),
                 TextColor(Color::WHITE),
                 StatLabel(stat),
             ));
@@ -249,19 +261,10 @@ pub fn setup_playing_screen(
 ) {
     let lang = settings.language;
 
-    commands.spawn((
-        PlayingLog(vec![if lang == Language::Spanish {
-            "¡Bienvenido a Arcana! Comienza tu aventura.".to_string()
-        } else {
-            "Welcome to Arcana! Start your adventure.".to_string()
-        }]),
-        PlayingCmp,
-    ));
-
     let (mut root_node, pickable) = add_root_node(true);
     root_node.justify_content = JustifyContent::FlexStart;
     root_node.padding = UiRect::all(Val::Px(0.));
-    root_node.row_gap = Val::Px(6.);
+    root_node.row_gap = Val::Px(4.);
 
     commands
         .spawn((
@@ -276,7 +279,8 @@ pub fn setup_playing_screen(
                 .spawn(Node {
                     width: percent(100.),
                     justify_content: JustifyContent::Center,
-                    padding: UiRect::vertical(Val::Px(6.)),
+                    padding: UiRect::vertical(Val::Px(8.)),
+                    margin: UiRect::bottom(Val::Px(8.)),
                     ..default()
                 })
                 .with_children(|parent| {
@@ -286,7 +290,7 @@ pub fn setup_playing_screen(
                     ));
                 });
 
-            // Two main columns.
+            // Three main columns.
             parent
                 .spawn(Node {
                     width: percent(100.),
@@ -294,27 +298,32 @@ pub fn setup_playing_screen(
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::SpaceBetween,
                     align_items: AlignItems::Stretch,
-                    column_gap: Val::Px(8.),
-                    padding: UiRect::horizontal(Val::Px(8.)),
+                    column_gap: Val::Px(2.),
+                    padding: UiRect::horizontal(Val::Px(26.)),
                     ..default()
                 })
                 .with_children(|parent| {
-                    // Left main section: Character column (Takes 49% width)
-                    spawn_character_column(parent, &assets, &localization, lang, &player);
+                    // Column 1: Character portrait image
+                    spawn_image_column(parent, &assets, &player);
 
-                    // Right main section: Scrollable equipment and abilities column (Takes 49% width)
+                    // Column 2: Stats (level, bars, characteristics, attributes, combat)
+                    spawn_stats_column(parent, &assets, &localization, lang, &player);
+
+                    // Column 3: Scrollable equipment, abilities and perks
                     spawn_right_column(parent, &assets, &localization, lang);
                 });
 
-            // Bottom row: Action buttons all in one single horizontal row (No logs panel)
+            // Bottom row: Action buttons
             parent
                 .spawn(Node {
                     width: percent(100.),
-                    height: Val::Px(110.),
+                    height: Val::Px(115.),
+                    flex_shrink: 0.,
                     flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceEvenly,
+                    justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
-                    padding: UiRect::vertical(Val::Px(4.)),
+                    column_gap: Val::Px(4.),
+                    padding: UiRect::vertical(Val::Px(2.)),
                     ..default()
                 })
                 .with_children(|parent| {
@@ -329,35 +338,28 @@ pub fn setup_playing_screen(
         });
 }
 
-fn spawn_character_column(
-    parent: &mut ChildSpawnerCommands,
-    assets: &WorldAssets,
-    localization: &Localization,
-    lang: Language,
-    player: &Player,
-) {
+/// Column 1: Character portrait image with equipment slot overlays and pet.
+fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, player: &Player) {
     parent
         .spawn((
             Node {
-                width: percent(48.),
+                width: percent(28.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
-                padding: UiRect::all(Val::Px(10.)),
-                row_gap: Val::Px(8.),
+                padding: UiRect::all(Val::Px(6.)),
                 ..default()
             },
             BackgroundColor(PANEL_COLOR),
         ))
         .with_children(|parent| {
-            // Expanded portrait (relative container for children slot/pet/title overlays)
+            // Portrait (relative container for equipment slot / pet overlays)
             parent
                 .spawn((
                     Node {
-                        width: percent(100.), // Way larger!
+                        width: percent(100.),
                         aspect_ratio: Some(1.),
                         position_type: PositionType::Relative,
                         border: UiRect::all(Val::Px(3.)),
-                        margin: UiRect::bottom(Val::Px(4.)),
                         ..default()
                     },
                     BorderColor::all(BUTTON_BORDER_COLOR),
@@ -365,14 +367,17 @@ fn spawn_character_column(
                         .with_mode(NodeImageMode::Stretch),
                 ))
                 .with_children(|parent| {
-                    // Five equipment slots stacked on the top-right - made larger!
+                    // Equipment slots stacked on the top-right, scaling with image
                     parent
                         .spawn(Node {
                             position_type: PositionType::Absolute,
-                            right: Val::Px(4.),
-                            top: Val::Px(4.),
+                            right: Val::Percent(2.),
+                            top: Val::Percent(2.),
+                            width: percent(16.),
+                            height: percent(96.),
                             flex_direction: FlexDirection::Column,
-                            row_gap: Val::Px(4.),
+                            justify_content: JustifyContent::SpaceBetween,
+                            row_gap: Val::Px(2.),
                             ..default()
                         })
                         .with_children(|parent| {
@@ -385,8 +390,8 @@ fn spawn_character_column(
                             ] {
                                 parent.spawn((
                                     Node {
-                                        width: Val::Px(50.),
-                                        height: Val::Px(50.),
+                                        width: percent(100.),
+                                        aspect_ratio: Some(1.),
                                         border: UiRect::all(Val::Px(1.)),
                                         ..default()
                                     },
@@ -394,141 +399,266 @@ fn spawn_character_column(
                                     BorderColor::all(BUTTON_BORDER_COLOR),
                                     ImageNode::new(assets.image("stone"))
                                         .with_mode(NodeImageMode::Stretch),
+                                    Interaction::default(),
                                     slot,
                                 ));
                             }
                         });
 
-                    // Pet image, bottom-left overlay
+                    // Pet image, bottom-left overlay — larger
                     if player.pet.is_some() {
                         parent.spawn((
                             Node {
                                 position_type: PositionType::Absolute,
                                 left: Val::Px(3.),
                                 bottom: Val::Px(3.),
-                                width: percent(40.),
+                                width: percent(50.),
                                 aspect_ratio: Some(1.),
                                 border: UiRect::all(Val::Px(2.)),
                                 ..default()
                             },
                             BorderColor::all(BUTTON_BORDER_COLOR),
-                            ImageNode::new(
-                                assets.image(player.pet.unwrap().to_lowername()),
-                            )
-                            .with_mode(NodeImageMode::Stretch),
+                            ImageNode::new(assets.image(player.pet.unwrap().to_lowername()))
+                                .with_mode(NodeImageMode::Stretch),
                             PetImage,
                         ));
                     }
                 });
+        });
+}
 
-            // Level text (placed level line vertically below the portrait first)
-            parent.spawn((
-                add_text(class_line(player, localization, lang), "bold", 2.2, assets),
-                TextColor(BUTTON_TEXT_COLOR),
-                StatLabel(PlayingStat::ClassLine),
-                Node {
-                    margin: UiRect::vertical(Val::Px(2.)),
-                    ..default()
-                },
-            ));
-
-            // Health bar (thicker)
-            spawn_bar(parent, assets, true);
-            // Mana bar (thinner)
-            spawn_bar(parent, assets, false);
-
-            // Double Column layout: Characteristics and Attributes under the image
-            parent.spawn(Node {
-                width: percent(100.),
-                flex_direction: FlexDirection::Row,
-                justify_content: JustifyContent::SpaceBetween,
+/// Column 2: Level, health/mana bars, characteristics, attributes, combat stats.
+fn spawn_stats_column(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    localization: &Localization,
+    lang: Language,
+    player: &Player,
+) {
+    parent
+        .spawn((
+            Node {
+                width: percent(30.),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Stretch,
+                padding: UiRect::all(Val::Px(8.)),
+                row_gap: Val::Px(4.),
+                overflow: Overflow::clip(),
                 ..default()
-            }).with_children(|parent| {
-                // Column A: Characteristics
-                parent.spawn(Node {
-                    width: percent(48.),
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(4.),
-                    ..default()
-                }).with_children(|parent| {
-                    parent.spawn((
-                        add_text(localization.get("characteristics", lang), "bold", 1.9, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                        LocalizedText("characteristics".to_string()),
-                    ));
-                    parent.spawn((
-                        add_text(characteristics_text(player, localization, lang), "medium", 1.5, assets),
-                        TextColor(Color::WHITE),
-                        StatLabel(PlayingStat::RaceLine),
-                    ));
-                });
-
-                // Column B: Attributes
-                parent.spawn(Node {
-                    width: percent(48.),
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(4.),
-                    ..default()
-                }).with_children(|parent| {
-                    parent.spawn((
-                        add_text(localization.get("attributes", lang), "bold", 1.9, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                        LocalizedText("attributes".to_string()),
-                    ));
-                    parent.spawn(Node {
-                        width: percent(100.),
-                        flex_direction: FlexDirection::Column,
-                        row_gap: Val::Px(2.),
-                        ..default()
-                    }).with_children(|parent| {
-                        for attr in Attribute::iter() {
-                            parent.spawn(Node {
-                                width: percent(100.),
-                                flex_direction: FlexDirection::Row,
-                                justify_content: JustifyContent::SpaceBetween,
-                                ..default()
-                            }).with_children(|parent| {
-                                parent.spawn((
-                                    add_text(
-                                        localization.get(&attr.to_lowername(), lang),
-                                        "medium",
-                                        1.5,
-                                        assets,
-                                    ),
-                                    TextColor(Color::WHITE),
-                                    LocalizedText(attr.to_lowername()),
-                                ));
-                                parent.spawn((
-                                    add_text("", "bold", 1.5, assets),
-                                    TextColor(BUTTON_TEXT_COLOR),
-                                    AttrValue(attr),
-                                ));
-                            });
-                        }
-                    });
-                });
-            });
-
-            // Combat stats: attack / armor / initiative.
+            },
+            BackgroundColor(PANEL_COLOR),
+        ))
+        .with_children(|parent| {
+            // Level / class text + AP on the right
             parent
                 .spawn(Node {
                     width: percent(100.),
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::SpaceBetween,
-                    margin: UiRect::top(Val::Px(6.)),
+                    align_items: AlignItems::Center,
+                    margin: UiRect::bottom(Val::Px(10.)),
                     ..default()
                 })
                 .with_children(|parent| {
-                    spawn_combat_stat(parent, assets, localization, lang, "attack", "sword", PlayingStat::Attack);
-                    spawn_combat_stat(parent, assets, localization, lang, "armor", "shield", PlayingStat::Armor);
-                    spawn_combat_stat(parent, assets, localization, lang, "initiative", "boots_icon", PlayingStat::Initiative);
+                    parent.spawn((
+                        add_text(class_line(player, localization, lang), "bold", 2.6, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        StatLabel(PlayingStat::ClassLine),
+                    ));
+                    parent.spawn((
+                        add_text(format!("AP: {}", player.ap), "bold", 2.2, assets),
+                        TextColor(Color::WHITE),
+                        StatLabel(PlayingStat::ActionPoints),
+                    ));
+                });
+
+            // Health bar
+            spawn_bar(parent, assets, true);
+            // Mana bar (same height as health)
+            spawn_bar(parent, assets, false);
+
+            // Spacer between bars and characteristics
+            parent.spawn(Node {
+                height: Val::Px(10.),
+                ..default()
+            });
+
+            // Characteristics and Attributes side by side
+            parent
+                .spawn(Node {
+                    width: percent(100.),
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::SpaceBetween,
+                    column_gap: Val::Px(36.),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    // Left: Characteristics
+                    parent
+                        .spawn(Node {
+                            width: percent(45.),
+                            flex_direction: FlexDirection::Column,
+                            row_gap: Val::Px(2.),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            parent.spawn((
+                                add_text(
+                                    localization.get("characteristics", lang),
+                                    "bold",
+                                    2.2,
+                                    assets,
+                                ),
+                                TextColor(BUTTON_TEXT_COLOR),
+                                LocalizedText("characteristics".to_string()),
+                            ));
+                            parent
+                                .spawn(Node {
+                                    width: percent(100.),
+                                    flex_direction: FlexDirection::Column,
+                                    row_gap: Val::Px(2.),
+                                    ..default()
+                                })
+                                .with_children(|parent| {
+                                    let char_rows = [
+                                        ("race", PlayingStat::CharRace),
+                                        ("class", PlayingStat::CharClass),
+                                        ("sex", PlayingStat::CharSex),
+                                        ("age", PlayingStat::CharAge),
+                                        ("height", PlayingStat::CharHeight),
+                                        ("weight", PlayingStat::CharWeight),
+                                    ];
+                                    for (key, stat) in char_rows {
+                                        parent
+                                            .spawn(Node {
+                                                width: percent(100.),
+                                                flex_direction: FlexDirection::Row,
+                                                justify_content: JustifyContent::SpaceBetween,
+                                                ..default()
+                                            })
+                                            .with_children(|parent| {
+                                                parent.spawn((
+                                                    add_text(
+                                                        localization.get(key, lang),
+                                                        "medium",
+                                                        1.8,
+                                                        assets,
+                                                    ),
+                                                    TextColor(Color::WHITE),
+                                                    LocalizedText(key.to_string()),
+                                                ));
+                                                parent.spawn((
+                                                    add_text("", "bold", 1.8, assets),
+                                                    TextColor(Color::WHITE),
+                                                    StatLabel(stat),
+                                                ));
+                                            });
+                                    }
+                                });
+                        });
+
+                    // Right: Attributes
+                    parent
+                        .spawn(Node {
+                            width: percent(45.),
+                            flex_direction: FlexDirection::Column,
+                            row_gap: Val::Px(2.),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            parent.spawn((
+                                add_text(localization.get("attributes", lang), "bold", 2.2, assets),
+                                TextColor(BUTTON_TEXT_COLOR),
+                                LocalizedText("attributes".to_string()),
+                            ));
+                            parent
+                                .spawn(Node {
+                                    width: percent(100.),
+                                    flex_direction: FlexDirection::Column,
+                                    row_gap: Val::Px(2.),
+                                    ..default()
+                                })
+                                .with_children(|parent| {
+                                    for attr in Attribute::iter() {
+                                        parent
+                                            .spawn(Node {
+                                                width: percent(100.),
+                                                flex_direction: FlexDirection::Row,
+                                                justify_content: JustifyContent::SpaceBetween,
+                                                ..default()
+                                            })
+                                            .with_children(|parent| {
+                                                parent.spawn((
+                                                    add_text(
+                                                        localization
+                                                            .get(&attr.to_lowername(), lang),
+                                                        "medium",
+                                                        1.8,
+                                                        assets,
+                                                    ),
+                                                    TextColor(Color::WHITE),
+                                                    LocalizedText(attr.to_lowername()),
+                                                ));
+                                                parent.spawn((
+                                                    add_text("", "bold", 1.8, assets),
+                                                    TextColor(Color::WHITE),
+                                                    AttrValue(attr),
+                                                ));
+                                            });
+                                    }
+                                });
+                        });
+                });
+
+            // Spacer between attributes and combat stats
+            parent.spawn(Node {
+                height: Val::Px(10.),
+                ..default()
+            });
+
+            // Combat stats: attack / armor / initiative
+            parent
+                .spawn(Node {
+                    width: percent(100.),
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::SpaceBetween,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    spawn_combat_stat(
+                        parent,
+                        assets,
+                        localization,
+                        lang,
+                        "attack",
+                        "attack_icon",
+                        PlayingStat::Attack,
+                    );
+                    spawn_combat_stat(
+                        parent,
+                        assets,
+                        localization,
+                        lang,
+                        "armor",
+                        "armor_icon",
+                        PlayingStat::Armor,
+                    );
+                    spawn_combat_stat(
+                        parent,
+                        assets,
+                        localization,
+                        lang,
+                        "initiative",
+                        "initiative_icon",
+                        PlayingStat::Initiative,
+                    );
                 });
         });
 }
 
 fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_health: bool) {
-    let bar_height = if is_health { Val::Px(24.) } else { Val::Px(14.) };
-    let font_size = if is_health { 1.5 } else { 1.1 };
+    let bar_height = Val::Px(32.);
+    let font_size = 1.9;
     parent
         .spawn((
             Node {
@@ -552,7 +682,11 @@ fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_health:
                     height: percent(100.),
                     ..default()
                 },
-                BackgroundColor(if is_health { HEALTH_COLOR } else { MANA_COLOR }),
+                BackgroundColor(if is_health {
+                    HEALTH_COLOR
+                } else {
+                    MANA_COLOR
+                }),
             ));
             if is_health {
                 fill.insert(HealthBarFill);
@@ -574,7 +708,11 @@ fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_health:
                     parent.spawn((
                         add_text("", "bold", font_size, assets),
                         TextColor(Color::WHITE),
-                        StatLabel(if is_health { PlayingStat::Health } else { PlayingStat::Mana }),
+                        StatLabel(if is_health {
+                            PlayingStat::Health
+                        } else {
+                            PlayingStat::Mana
+                        }),
                     ));
                 });
         });
@@ -598,6 +736,103 @@ pub fn scroll_system(
     }
 }
 
+/// Shows/hides a tooltip when hovering over equipment slots.
+pub fn equip_slot_tooltip_system(
+    mut commands: Commands,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    player: Res<Player>,
+    slot_q: Query<(&Interaction, &EquipSlot), Changed<Interaction>>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
+    windows: Query<&Window>,
+) {
+    let lang = settings.language;
+
+    for (interaction, slot) in &slot_q {
+        // Despawn any existing tooltip on any change
+        for entity in tooltip_q.iter() {
+            commands.entity(entity).try_despawn();
+        }
+
+        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
+            let equipped = match slot {
+                EquipSlot::Helmet => player.helmet,
+                EquipSlot::Weapon => player.weapon_2h.or(player.weapon_lh),
+                EquipSlot::Offhand => player.weapon_rh,
+                EquipSlot::Armor => player.armor,
+                EquipSlot::Boots => player.boots,
+            };
+
+            if let Some(weapon) = equipped {
+                let name =
+                    name_with_level(localization.get(&weapon.to_lowername(), lang), weapon.level());
+                let stat_lines = weapon_stat_lines(&weapon, &player, &localization, lang);
+
+                let (left, top) = if let Ok(window) = windows.single() {
+                    if let Some(cursor) = window.cursor_position() {
+                        (cursor.x, cursor.y)
+                    } else {
+                        (100., 100.)
+                    }
+                } else {
+                    (100., 100.)
+                };
+
+                commands
+                    .spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(left),
+                            top: Val::Px(top),
+                            padding: UiRect::all(Val::Px(10.)),
+                            border: UiRect::all(Val::Px(2.)),
+                            width: Val::Auto,
+                            height: Val::Auto,
+                            max_width: Val::Px(280.),
+                            flex_direction: FlexDirection::Column,
+                            row_gap: Val::Px(4.),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgba_u8(10, 18, 45, 245)),
+                        BorderColor::all(BUTTON_BORDER_COLOR),
+                        GlobalZIndex(200),
+                        TooltipNode,
+                    ))
+                    .with_children(|parent| {
+                        // Weapon name in gold/title color
+                        parent.spawn((
+                            add_text(name, "bold", 1.9, &assets),
+                            TextColor(BUTTON_TEXT_COLOR),
+                        ));
+                        // Stats in white with medium font
+                        if !stat_lines.is_empty() {
+                            parent.spawn((
+                                add_text(stat_lines.join("\n"), "medium", 1.6, &assets),
+                                TextColor(Color::WHITE),
+                            ));
+                        }
+                    });
+            }
+        }
+    }
+}
+
+/// Moves the tooltip to follow the mouse cursor.
+pub fn tooltip_follow_cursor_system(
+    mut tooltip_q: Query<&mut Node, With<TooltipNode>>,
+    windows: Query<&Window>,
+) {
+    if let Ok(window) = windows.single() {
+        if let Some(cursor) = window.cursor_position() {
+            for mut node in &mut tooltip_q {
+                node.left = Val::Px(cursor.x);
+                node.top = Val::Px(cursor.y);
+            }
+        }
+    }
+}
+
 fn spawn_right_column(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -607,121 +842,123 @@ fn spawn_right_column(
     parent
         .spawn((
             Node {
-                width: percent(48.),
+                width: percent(34.),
                 height: percent(100.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
-                padding: UiRect::all(Val::Px(10.)),
+                padding: UiRect::all(Val::Px(8.)),
                 ..default()
             },
             BackgroundColor(PANEL_COLOR),
         ))
         .with_children(|parent| {
-            parent.spawn((
-                Node {
-                    width: percent(100.),
-                    height: percent(100.),
-                    flex_direction: FlexDirection::Column,
-                    overflow: Overflow::clip(),
-                    ..default()
-                },
-                ScrollableContainer,
-                ScrollPosition::default(),
-            )).with_children(|parent| {
-                // Title row: "Equipment" on the left, gold icon + amount on the right.
-                parent
-                    .spawn(Node {
-                        width: percent(100.),
-                        flex_direction: FlexDirection::Row,
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::SpaceBetween,
-                        margin: UiRect::bottom(Val::Px(4.)),
-                        ..default()
-                    })
-                    .with_children(|parent| {
-                        parent.spawn((
-                            add_text(localization.get("equipment", lang), "bold", 2.0, assets),
-                            TextColor(BUTTON_TEXT_COLOR),
-                            LocalizedText("equipment".to_string()),
-                        ));
-
-                        parent
-                            .spawn(Node {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                column_gap: Val::Px(6.),
-                                ..default()
-                            })
-                            .with_children(|parent| {
-                                parent.spawn((
-                                    Node {
-                                        width: Val::Px(30.),
-                                        height: Val::Px(30.),
-                                        ..default()
-                                    },
-                                    ImageNode::new(assets.image("gold"))
-                                        .with_mode(NodeImageMode::Stretch),
-                                ));
-                                parent.spawn((
-                                    add_text("", "bold", 2.0, assets),
-                                    TextColor(BUTTON_TEXT_COLOR),
-                                    StatLabel(PlayingStat::Money),
-                                ));
-                            });
-                    });
-
-                // Dynamic equipment list
-                parent.spawn((
+            parent
+                .spawn((
                     Node {
                         width: percent(100.),
+                        height: percent(100.),
                         flex_direction: FlexDirection::Column,
-                        margin: UiRect::bottom(Val::Px(15.)),
+                        overflow: Overflow::clip(),
                         ..default()
                     },
-                    EquipmentList,
-                ));
+                    ScrollableContainer,
+                    ScrollPosition::default(),
+                ))
+                .with_children(|parent| {
+                    // Title row: "Equipment" on the left, gold icon + amount on the right.
+                    parent
+                        .spawn(Node {
+                            width: percent(100.),
+                            flex_direction: FlexDirection::Row,
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::SpaceBetween,
+                            margin: UiRect::bottom(Val::Px(4.)),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            parent.spawn((
+                                add_text(localization.get("equipment", lang), "bold", 2.4, assets),
+                                TextColor(BUTTON_TEXT_COLOR),
+                                LocalizedText("equipment".to_string()),
+                            ));
 
-                // Title: Abilities
-                parent.spawn((
-                    add_text(localization.get("abilities", lang), "bold", 2.0, assets),
-                    TextColor(BUTTON_TEXT_COLOR),
-                    LocalizedText("abilities".to_string()),
-                    Node {
-                        margin: UiRect::bottom(Val::Px(4.)),
-                        ..default()
-                    },
-                ));
+                            parent
+                                .spawn(Node {
+                                    flex_direction: FlexDirection::Row,
+                                    align_items: AlignItems::Center,
+                                    column_gap: Val::Px(6.),
+                                    ..default()
+                                })
+                                .with_children(|parent| {
+                                    parent.spawn((
+                                        Node {
+                                            width: Val::Px(30.),
+                                            height: Val::Px(30.),
+                                            ..default()
+                                        },
+                                        ImageNode::new(assets.image("gold"))
+                                            .with_mode(NodeImageMode::Stretch),
+                                    ));
+                                    parent.spawn((
+                                        add_text("", "bold", 2.4, assets),
+                                        TextColor(BUTTON_TEXT_COLOR),
+                                        StatLabel(PlayingStat::Money),
+                                    ));
+                                });
+                        });
 
-                parent.spawn((
-                    Node {
-                        width: percent(100.),
-                        flex_direction: FlexDirection::Column,
-                        margin: UiRect::bottom(Val::Px(15.)),
-                        ..default()
-                    },
-                    AbilitiesList,
-                ));
+                    // Dynamic equipment list
+                    parent.spawn((
+                        Node {
+                            width: percent(100.),
+                            flex_direction: FlexDirection::Column,
+                            margin: UiRect::bottom(Val::Px(15.)),
+                            ..default()
+                        },
+                        EquipmentList,
+                    ));
 
-                // Title: Perks
-                parent.spawn((
-                    add_text(localization.get("perks", lang), "bold", 2.0, assets),
-                    TextColor(BUTTON_TEXT_COLOR),
-                    LocalizedText("perks".to_string()),
-                    Node {
-                        margin: UiRect::bottom(Val::Px(4.)),
-                        ..default()
-                    },
-                ));
+                    // Title: Abilities
+                    parent.spawn((
+                        add_text(localization.get("abilities", lang), "bold", 2.4, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        LocalizedText("abilities".to_string()),
+                        Node {
+                            margin: UiRect::bottom(Val::Px(4.)),
+                            ..default()
+                        },
+                    ));
 
-                parent.spawn((
-                    Node {
-                        width: percent(100.),
-                        flex_direction: FlexDirection::Column,
-                        ..default()
-                    },
-                    PerksList,
-                ));
-            });
+                    parent.spawn((
+                        Node {
+                            width: percent(100.),
+                            flex_direction: FlexDirection::Column,
+                            margin: UiRect::bottom(Val::Px(15.)),
+                            ..default()
+                        },
+                        AbilitiesList,
+                    ));
+
+                    // Title: Perks
+                    parent.spawn((
+                        add_text(localization.get("perks", lang), "bold", 2.4, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        LocalizedText("perks".to_string()),
+                        Node {
+                            margin: UiRect::bottom(Val::Px(4.)),
+                            ..default()
+                        },
+                    ));
+
+                    parent.spawn((
+                        Node {
+                            width: percent(100.),
+                            flex_direction: FlexDirection::Column,
+                            ..default()
+                        },
+                        PerksList,
+                    ));
+                });
         });
 }
 
@@ -787,9 +1024,9 @@ pub fn rebuild_playing_lists(
                 spawn_card(
                     parent,
                     &assets,
-                    localization.get(&weapon.to_lowername(), lang),
-                    Some(weapon.to_lowername()),
-                    weapon_stat_lines(weapon, &localization, lang),
+                    name_with_level(localization.get(&weapon.to_lowername(), lang), weapon.level()),
+                    None,
+                    weapon_stat_lines(weapon, &player, &localization, lang),
                 );
             }
             for consumable in &player.consumables {
@@ -823,12 +1060,19 @@ pub fn rebuild_playing_lists(
             }
             for ability in &player.abilities {
                 let key = ability.to_lowername();
+                let stats = ability.stats();
+                let type_str = format!("{:?}", stats.magic_type);
+                let detail_parts =
+                    [type_str, format!("{} mana", stats.mana_cost), format!("{}s", stats.cooldown)];
                 spawn_card(
                     parent,
                     &assets,
-                    localization.get(&key, lang),
-                    Some(key.clone()),
-                    vec![localization.get(&format!("{}_desc", key), lang)],
+                    name_with_level(localization.get(&key, lang), stats.level),
+                    None,
+                    vec![
+                        detail_parts.join(" | "),
+                        localization.get(&format!("{}_desc", key), lang),
+                    ],
                 );
             }
         });
@@ -849,8 +1093,8 @@ pub fn rebuild_playing_lists(
                 spawn_card(
                     parent,
                     &assets,
-                    localization.get(&key, lang),
-                    Some(key.clone()),
+                    name_with_level(localization.get(&key, lang), perk.level()),
+                    None,
                     vec![localization.get(&format!("{}_desc", key), lang)],
                 );
             }
@@ -866,15 +1110,32 @@ pub fn update_playing_screen(
     mut attr_q: Query<(&mut Text, &AttrValue), Without<StatLabel>>,
     mut hbar_q: Query<&mut Node, (With<HealthBarFill>, Without<ManaBarFill>)>,
     mut mbar_q: Query<&mut Node, (With<ManaBarFill>, Without<HealthBarFill>)>,
-    log_q: Query<&PlayingLog>,
-    mut log_text_q: Query<&mut Text, (With<LogTextContainer>, Without<StatLabel>, Without<AttrValue>)>,
 ) {
     let lang = settings.language;
 
     for (mut text, stat) in &mut text_q {
         text.0 = match stat.0 {
             PlayingStat::ClassLine => class_line(&player, &localization, lang),
-            PlayingStat::RaceLine => characteristics_text(&player, &localization, lang),
+            PlayingStat::CharRace => localization.get(&player.race.to_lowername(), lang),
+            PlayingStat::CharClass => match player.class {
+                Class::Mage(ajah) => {
+                    format!("{} {}", ajah.to_title(), localization.get("mage", lang))
+                },
+                _ => localization.get(&player.class.to_lowername(), lang),
+            },
+            PlayingStat::CharSex => match player.sex {
+                crate::core::player::Sex::Male => localization.get("male", lang),
+                crate::core::player::Sex::Female => localization.get("female", lang),
+            },
+            PlayingStat::CharAge => format!("{}", player.actual_age()),
+            PlayingStat::CharHeight => {
+                let (height, _) = player.vitals();
+                format!("{} cm", height)
+            },
+            PlayingStat::CharWeight => {
+                let (_, weight) = player.vitals();
+                format!("{} kg", weight)
+            },
             PlayingStat::Health => format!(
                 "{} / {} {}",
                 player.health.max(0.) as i32,
@@ -887,10 +1148,11 @@ pub fn update_playing_screen(
                 player.max_mana() as i32,
                 localization.get("mana", lang)
             ),
-            PlayingStat::Money => format!("{} {}", player.money, localization.get("money", lang)),
+            PlayingStat::Money => format!("{}", player.gold),
             PlayingStat::Attack => format!("{}", player.attack_damage()),
             PlayingStat::Armor => format!("{}", player.armor_value()),
             PlayingStat::Initiative => format!("{}", player.initiative()),
+            PlayingStat::ActionPoints => format!("AP: {}", player.ap),
         };
     }
 
@@ -914,12 +1176,6 @@ pub fn update_playing_screen(
         let ratio = (player.mana / player.max_mana()).clamp(0., 1.) * 100.;
         node.width = percent(ratio);
     }
-
-    if let Some(log) = log_q.iter().next() {
-        if let Some(mut text) = log_text_q.iter_mut().next() {
-            text.0 = log.0.join("\n");
-        }
-    }
 }
 
 pub fn spawn_playing_action_button(
@@ -935,16 +1191,16 @@ pub fn spawn_playing_action_button(
             flex_direction: FlexDirection::Column,
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
-            row_gap: Val::Px(3.),
-            margin: UiRect::all(Val::Px(2.)),
+            row_gap: Val::Px(2.),
+            margin: UiRect::horizontal(Val::Px(6.)),
             ..default()
         })
         .with_children(|parent| {
             parent
                 .spawn((
                     Node {
-                        width: Val::Px(58.),
-                        height: Val::Px(58.),
+                        width: Val::Px(76.),
+                        height: Val::Px(76.),
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
                         border: UiRect::all(Val::Px(2.)),
@@ -964,32 +1220,24 @@ pub fn spawn_playing_action_button(
                 .observe(cursor::<Out>(SystemCursorIcon::Default));
 
             parent.spawn((
-                add_text(action_label, "bold", 1.5, assets),
+                add_text(action_label, "bold", 1.8, assets),
                 TextColor(BUTTON_TEXT_COLOR),
                 LocalizedText(action.to_string()),
             ));
         });
 }
 
-
-
 pub fn handle_playing_action_clicks(
     mut player: ResMut<Player>,
-    mut log_q: Query<&mut PlayingLog>,
-    settings: Res<Settings>,
-    localization: Res<Localization>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     interaction_q: Query<(&Interaction, &ActionButton), (Changed<Interaction>, With<Button>)>,
 ) {
     use rand::RngExt;
-    let mut log_updated = false;
-    let mut log_msgs = Vec::new();
-    let lang = settings.language;
 
     for (interaction, action) in &interaction_q {
         if *interaction == Interaction::Pressed {
             play_audio_msg.write(PlayAudioMsg::new("button"));
-            
+
             let cost_gold = match action.0 {
                 "craft" => 15,
                 "shop" => 30,
@@ -997,152 +1245,128 @@ pub fn handle_playing_action_clicks(
                 _ => 0,
             };
 
-            if player.money < cost_gold {
+            if player.gold < cost_gold {
                 play_audio_msg.write(PlayAudioMsg::new("error"));
-                let err_msg = if lang == Language::Spanish {
-                    format!("-�No hay suficiente oro para {}! (Necesitas {} oro)", action.0, cost_gold)
-                } else {
-                    format!("Not enough gold to {}! (Need {} gold)", action.0, cost_gold)
-                };
-                log_msgs.push(err_msg);
-                log_updated = true;
                 continue;
             }
 
-            player.money -= cost_gold;
+            player.gold -= cost_gold;
 
             // Handle the specific action
-            let (ap_cost, log_msg) = match action.0 {
+            let ap_cost = match action.0 {
                 "hunt" => {
                     let gold_earned = rand::rng().random_range(10..=20);
-                    player.money += gold_earned;
-                    let msg = if lang == Language::Spanish {
-                        format!("Fuiste a cazar y obtuviste {} oro.", gold_earned)
-                    } else {
-                        format!("You went hunting and found {} gold.", gold_earned)
-                    };
-                    (2, msg)
-                }
+                    player.gold += gold_earned;
+                    2
+                },
                 "shop" => {
-                    let items = vec![Consumable::HealingPotion, Consumable::ManaPotion, Consumable::PoisonVial, Consumable::HerbBlend];
+                    use crate::core::consumables::Consumable;
+                    let items = vec![
+                        Consumable::HealingPotion,
+                        Consumable::ManaPotion,
+                        Consumable::PoisonVial,
+                        Consumable::HerbBlend,
+                    ];
                     use rand::seq::IndexedRandom;
-                    let item = items.choose(&mut rand::rng()).copied().unwrap_or(Consumable::HealingPotion);
+                    let item = items
+                        .choose(&mut rand::rng())
+                        .copied()
+                        .unwrap_or(Consumable::HealingPotion);
                     player.consumables.push(item);
-                    let item_name = localization.get(&item.to_lowername(), lang);
-                    let msg = if lang == Language::Spanish {
-                        format!("Compraste una {} en la tienda.", item_name)
-                    } else {
-                        format!("You bought a {} from the shop.", item_name)
-                    };
-                    (1, msg)
-                }
+                    1
+                },
                 "quest" => {
                     let gold_earned = rand::rng().random_range(20..=40);
-                    let mut found_item = None;
                     if rand::rng().random_bool(0.5) {
                         let upgrade_types = vec![
-                            Weapon::IronHelmet, Weapon::IronChestplate, Weapon::IronBoots, Weapon::SteelSword, 
-                            Weapon::IronShield, Weapon::WizardStaff, Weapon::MageRobes, Weapon::ClothShoes, 
-                            Weapon::LeatherArmor, Weapon::SilentBoots, Weapon::AssassinDagger, Weapon::ThiefDagger, 
-                            Weapon::OakWand, Weapon::LeafyGarb
+                            Weapon::IronHelmet,
+                            Weapon::IronChestplate,
+                            Weapon::IronBoots,
+                            Weapon::SteelSword,
+                            Weapon::IronShield,
+                            Weapon::WizardStaff,
+                            Weapon::MageRobes,
+                            Weapon::ClothShoes,
+                            Weapon::LeatherArmor,
+                            Weapon::SilentBoots,
+                            Weapon::AssassinDagger,
+                            Weapon::ThiefDagger,
+                            Weapon::OakWand,
+                            Weapon::LeafyGarb,
                         ];
                         use rand::seq::IndexedRandom;
                         if let Some(&upg) = upgrade_types.choose(&mut rand::rng()) {
-                            found_item = Some(upg);
                             match upg {
                                 Weapon::IronHelmet => player.helmet = Some(upg),
-                                Weapon::IronChestplate | Weapon::MageRobes | Weapon::LeatherArmor | Weapon::LeafyGarb => player.armor = Some(upg),
-                                Weapon::IronBoots | Weapon::ClothShoes | Weapon::SilentBoots | Weapon::LeatherBoots => player.boots = Some(upg),
+                                Weapon::IronChestplate
+                                | Weapon::MageRobes
+                                | Weapon::LeatherArmor
+                                | Weapon::LeafyGarb => player.armor = Some(upg),
+                                Weapon::IronBoots
+                                | Weapon::ClothShoes
+                                | Weapon::SilentBoots
+                                | Weapon::LeatherBoots => player.boots = Some(upg),
                                 Weapon::WizardStaff => {
                                     player.weapon_2h = Some(upg);
                                     player.weapon_lh = None;
                                     player.weapon_rh = None;
-                                }
-                                Weapon::SteelSword | Weapon::AssassinDagger | Weapon::ThiefDagger | Weapon::OakWand => {
+                                },
+                                Weapon::SteelSword
+                                | Weapon::AssassinDagger
+                                | Weapon::ThiefDagger
+                                | Weapon::OakWand => {
                                     player.weapon_lh = Some(upg);
-                                }
+                                },
                                 Weapon::IronShield => {
                                     player.weapon_rh = Some(upg);
-                                }
+                                },
                             }
                         }
                     }
-                    player.money += gold_earned;
-                    let msg = if let Some(item) = found_item {
-                        let item_name = localization.get(&item.to_lowername(), lang);
-                        if lang == Language::Spanish {
-                            format!("-�Misi+�n completada! Ganaste {} oro y encontraste: {}.", gold_earned, item_name)
-                        } else {
-                            format!("Quest completed! Gained {} gold and found: {}.", gold_earned, item_name)
-                        }
-                    } else {
-                        if lang == Language::Spanish {
-                            format!("Misi+�n completada. Ganaste {} oro.", gold_earned)
-                        } else {
-                            format!("Quest completed. Gained {} gold.", gold_earned)
-                        }
-                    };
-                    (3, msg)
-                }
+                    player.gold += gold_earned;
+                    3
+                },
                 "train" => {
                     let attr_idx = rand::rng().random_range(0..6);
-                    let (attr_name, new_val) = match attr_idx {
-                        0 => { player.strength += 1; (localization.get("strength", lang), player.strength) }
-                        1 => { player.dexterity += 1; (localization.get("dexterity", lang), player.dexterity) }
-                        2 => { player.constitution += 1; (localization.get("constitution", lang), player.constitution) }
-                        3 => { player.intelligence += 1; (localization.get("intelligence", lang), player.intelligence) }
-                        4 => { player.wisdom += 1; (localization.get("wisdom", lang), player.wisdom) }
-                        _ => { player.charisma += 1; (localization.get("charisma", lang), player.charisma) }
+                    match attr_idx {
+                        0 => player.strength += 1,
+                        1 => player.dexterity += 1,
+                        2 => player.constitution += 1,
+                        3 => player.intelligence += 1,
+                        4 => player.wisdom += 1,
+                        _ => player.charisma += 1,
                     };
-                    let msg = if lang == Language::Spanish {
-                        format!("Entrenaste duro. Tu {} aument+� a {}.", attr_name, new_val)
-                    } else {
-                        format!("You trained hard. Your {} increased to {}.", attr_name, new_val)
-                    };
-                    (2, msg)
-                }
+                    2
+                },
                 "craft" => {
-                    let items = vec![Weapon::IronHelmet, Weapon::IronChestplate, Weapon::IronBoots, Weapon::SteelSword, Weapon::IronShield];
+                    let items = vec![
+                        Weapon::IronHelmet,
+                        Weapon::IronChestplate,
+                        Weapon::IronBoots,
+                        Weapon::SteelSword,
+                        Weapon::IronShield,
+                    ];
                     use rand::seq::IndexedRandom;
-                    let item = items.choose(&mut rand::rng()).copied().unwrap_or(Weapon::IronHelmet);
+                    let item =
+                        items.choose(&mut rand::rng()).copied().unwrap_or(Weapon::IronHelmet);
                     match item {
                         Weapon::IronHelmet => player.helmet = Some(item),
                         Weapon::IronChestplate => player.armor = Some(item),
                         Weapon::IronBoots => player.boots = Some(item),
                         Weapon::SteelSword => player.weapon_lh = Some(item),
                         Weapon::IronShield => player.weapon_rh = Some(item),
-                        _ => {}
+                        _ => {},
                     }
-                    let item_name = localization.get(&item.to_lowername(), lang);
-                    let msg = if lang == Language::Spanish {
-                        format!("Fabricaste una {}.", item_name)
-                    } else {
-                        format!("You crafted a {}.", item_name)
-                    };
-                    (2, msg)
-                }
+                    2
+                },
                 "rest" => {
-                    player.health = player.max_health();
-                    player.mana = player.max_mana();
-                    let msg = if lang == Language::Spanish {
-                        "Restauraste completamente tu salud.".to_string()
-                    } else {
-                        "You completely restored your health.".to_string()
-                    };
-                    (1, msg)
-                }
-                "inventory" => {
-                    let msg = if lang == Language::Spanish {
-                        "Abriste el inventario.".to_string()
-                    } else {
-                        "Opened your inventory.".to_string()
-                    };
-                    (0, msg)
-                }
-                _ => (0, "".to_string()),
+                    player.health = player.max_health().floor();
+                    player.mana = player.max_mana().floor();
+                    1
+                },
+                "inventory" => 0,
+                _ => 0,
             };
-
-            log_msgs.push(log_msg);
 
             // Deduct action points
             if player.ap <= ap_cost {
@@ -1155,29 +1379,9 @@ pub fn handle_playing_action_clicks(
                 player.wisdom += 1;
                 player.charisma += 1;
                 play_audio_msg.write(PlayAudioMsg::new("victory"));
-                let lvl_msg = if lang == Language::Spanish {
-                    format!("-�SUBIDA DE NIVEL! -�Has alcanzado el nivel {}!", player.level)
-                } else {
-                    format!("LEVEL UP! You reached Level {}!", player.level)
-                };
-                log_msgs.push(lvl_msg);
             } else {
                 player.ap -= ap_cost;
-            }
-
-            log_updated = true;
-        }
-    }
-
-    if log_updated {
-        if let Ok(mut log) = log_q.single_mut() {
-            for m in log_msgs {
-                log.0.push(m);
-                if log.0.len() > 3 {
-                    log.0.remove(0);
-                }
             }
         }
     }
 }
-

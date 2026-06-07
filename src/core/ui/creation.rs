@@ -12,9 +12,9 @@ use crate::core::pets::Pet;
 use crate::core::player::{Attribute, Player, Sex};
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
-use crate::core::weapons::Weapon;
 use crate::core::states::GameState;
 use crate::core::utils::cursor;
+use crate::core::weapons::Weapon;
 use crate::utils::NameFromEnum;
 use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::window::SystemCursorIcon;
@@ -40,13 +40,35 @@ pub struct PointsRemainingText;
 #[derive(Component)]
 pub struct CreateCharacterContinueBtn;
 
-pub const AGE_TRACK_WIDTH: f32 = 260.0;
+pub const AGE_STAGES: &[&str] = &["youth", "young adult", "adult", "senior", "elder"];
+pub const AGE_SLIDER_WIDTH: f32 = 280.0;
+pub const AGE_VALUE_WIDTH: f32 = 140.0;
 
 #[derive(Component)]
 pub struct AgeSliderHandle;
 
 #[derive(Component)]
+pub struct AgeSliderTrack;
+
+#[derive(Component)]
 pub struct AgeValueText;
+
+#[derive(Component)]
+pub struct AgeValueNode;
+
+#[derive(Component, Clone, Copy)]
+pub struct AgeStageButton(pub u32);
+
+fn creation_attribute_value(player: &Player, attr: Attribute) -> u8 {
+    match attr {
+        Attribute::Strength => player.strength,
+        Attribute::Dexterity => player.dexterity,
+        Attribute::Constitution => player.constitution,
+        Attribute::Intelligence => player.intelligence,
+        Attribute::Wisdom => player.wisdom,
+        Attribute::Charisma => player.charisma,
+    }
+}
 
 pub fn update_sex_button_colors(
     player: Res<Player>,
@@ -117,14 +139,7 @@ fn on_sex_button_click(
             player.sex = btn.0;
 
             for (mut text, val_attr) in &mut text_q {
-                let val = match val_attr.0 {
-                    Attribute::Strength => player.strength(),
-                    Attribute::Dexterity => player.dexterity(),
-                    Attribute::Constitution => player.constitution(),
-                    Attribute::Intelligence => player.intelligence(),
-                    Attribute::Wisdom => player.wisdom(),
-                    Attribute::Charisma => player.charisma(),
-                };
+                let val = creation_attribute_value(&player, val_attr.0);
                 text.0 = format!("{}", val);
             }
         }
@@ -241,14 +256,7 @@ fn on_attribute_button_click(
 
     for (mut text, val_attr, remaining_text) in &mut text_q {
         if let Some(val_attr) = val_attr {
-            let val = match val_attr.0 {
-                Attribute::Strength => player.strength(),
-                Attribute::Dexterity => player.dexterity(),
-                Attribute::Constitution => player.constitution(),
-                Attribute::Intelligence => player.intelligence(),
-                Attribute::Wisdom => player.wisdom(),
-                Attribute::Charisma => player.charisma(),
-            };
+            let val = creation_attribute_value(&player, val_attr.0);
             text.0 = format!("{}", val as i32);
         } else if remaining_text.is_some() {
             let points_label = localization.get("points remaining", settings.language);
@@ -259,7 +267,7 @@ fn on_attribute_button_click(
 
 fn on_continue_click(
     _: On<Pointer<Click>>,
-    mut player: ResMut<Player>,
+    player: Res<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
@@ -272,9 +280,7 @@ fn on_continue_click(
 
     if !player.name.trim().is_empty() && current_sum == 60 {
         play_audio_msg.write(PlayAudioMsg::new("button"));
-        player.health = player.max_health();
-        player.mana = player.max_mana();
-        next_game_state.set(GameState::Playing);
+        next_game_state.set(GameState::ChooseRace);
     }
 }
 
@@ -461,7 +467,12 @@ pub fn setup_character_creation(
         .spawn((
             root_node,
             pickable,
-            ImageNode::new(assets.image("bg2")).with_mode(NodeImageMode::Stretch),
+            ImageNode {
+                image: assets.image("bg2"),
+                image_mode: NodeImageMode::Stretch,
+                color: Color::srgba(0.55, 0.55, 0.55, 1.0),
+                ..default()
+            },
             MenuCmp,
         ))
         .with_children(|parent| {
@@ -588,25 +599,31 @@ pub fn setup_character_creation(
                                 },
                             ));
 
-                            parent.spawn(Node {
-                                flex_direction: FlexDirection::Row,
-                                justify_content: JustifyContent::SpaceBetween,
-                                width: Val::Px(260.),
-                                ..default()
-                            }).with_children(|parent| {
-                                spawn_sex_button(parent, Sex::Male, &assets, &localization, lang);
-                                spawn_sex_button(parent, Sex::Female, &assets, &localization, lang);
-                            });
+                            parent
+                                .spawn(Node {
+                                    flex_direction: FlexDirection::Row,
+                                    justify_content: JustifyContent::SpaceBetween,
+                                    width: Val::Px(260.),
+                                    ..default()
+                                })
+                                .with_children(|parent| {
+                                    spawn_sex_button(
+                                        parent,
+                                        Sex::Male,
+                                        &assets,
+                                        &localization,
+                                        lang,
+                                    );
+                                    spawn_sex_button(
+                                        parent,
+                                        Sex::Female,
+                                        &assets,
+                                        &localization,
+                                        lang,
+                                    );
+                                });
 
-                            // Age selection
-                            let (age_min, age_max) = player.race.age_range();
-                            let age = player.age.clamp(age_min, age_max);
-                            let frac = if age_max > age_min {
-                                (age - age_min) as f32 / (age_max - age_min) as f32
-                            } else {
-                                0.0
-                            };
-
+                            // Age stage selection
                             parent.spawn((
                                 add_text(
                                     localization.get("age", lang),
@@ -626,53 +643,164 @@ pub fn setup_character_creation(
                                 },
                             ));
 
-                            parent.spawn((
-                                add_text(
-                                    format!("{}", age),
-                                    "bold",
-                                    BUTTON_TEXT_SIZE,
-                                    &assets,
-                                ),
-                                TextColor(Color::WHITE),
-                                AgeValueText,
-                                Node {
-                                    margin: UiRect::bottom(percent(2.)),
-                                    ..default()
-                                },
-                            ));
-
-                            // Slider track
+                            // Slider block centered below the Age title.
                             parent
-                                .spawn((
-                                    Node {
-                                        width: Val::Px(AGE_TRACK_WIDTH),
-                                        height: Val::Px(10.),
-                                        border_radius: BorderRadius::all(Val::Px(5.)),
-                                        ..default()
-                                    },
-                                    BackgroundColor(NORMAL_BUTTON_COLOR),
-                                ))
+                                .spawn(Node {
+                                    width: Val::Px(AGE_SLIDER_WIDTH),
+                                    height: Val::Px(68.),
+                                    position_type: PositionType::Relative,
+                                    flex_direction: FlexDirection::Column,
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                })
                                 .with_children(|parent| {
-                                    // Draggable handle
+                                    // Slider track - the whole area is interactive
+                                    let frac = player.age as f32 / 4.0;
+                                    parent
+                                        .spawn((
+                                            Node {
+                                                width: Val::Px(AGE_SLIDER_WIDTH),
+                                                height: Val::Px(30.),
+                                                position_type: PositionType::Relative,
+                                                align_items: AlignItems::Center,
+                                                ..default()
+                                            },
+                                            Button,
+                                            Interaction::default(),
+                                            Pickable::default(),
+                                            BackgroundColor(Color::srgba(0., 0., 0., 0.01)),
+                                            AgeSliderTrack,
+                                        ))
+                                        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                        .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                        .observe(on_age_slider_click)
+                                        .with_children(|parent| {
+                                            // Track visual bar
+                                            parent.spawn((
+                                                Node {
+                                                    position_type: PositionType::Absolute,
+                                                    left: Val::Px(0.),
+                                                    top: Val::Px(12.),
+                                                    width: percent(100.),
+                                                    height: Val::Px(6.),
+                                                    border_radius: BorderRadius::all(Val::Px(3.)),
+                                                    ..default()
+                                                },
+                                                BackgroundColor(Color::srgba_u8(60, 60, 80, 200)),
+                                                Pickable::IGNORE,
+                                            ));
+
+                                            // Notch markers
+                                            for i in 0..5 {
+                                                let notch_x = (i as f32 / 4.0) * AGE_SLIDER_WIDTH;
+                                                parent.spawn((
+                                                    Node {
+                                                        position_type: PositionType::Absolute,
+                                                        left: Val::Px(notch_x - 2.),
+                                                        top: Val::Px(5.),
+                                                        width: Val::Px(4.),
+                                                        height: Val::Px(20.),
+                                                        border_radius: BorderRadius::all(Val::Px(
+                                                            2.,
+                                                        )),
+                                                        ..default()
+                                                    },
+                                                    BackgroundColor(BUTTON_BORDER_COLOR),
+                                                    Pickable::IGNORE,
+                                                ));
+                                            }
+
+                                            // Invisible but pickable zones for each stage. These make
+                                            // the slider work even when the parent track's cursor math
+                                            // or Interaction state is not updated by the UI picker.
+                                            for i in 0..5 {
+                                                let (left, width) = match i {
+                                                    0 => (0., AGE_SLIDER_WIDTH / 8.),
+                                                    4 => (
+                                                        AGE_SLIDER_WIDTH * 7. / 8.,
+                                                        AGE_SLIDER_WIDTH / 8.,
+                                                    ),
+                                                    _ => (
+                                                        (i as f32 - 0.5) * AGE_SLIDER_WIDTH / 4.,
+                                                        AGE_SLIDER_WIDTH / 4.,
+                                                    ),
+                                                };
+
+                                                parent
+                                                    .spawn((
+                                                        Node {
+                                                            position_type: PositionType::Absolute,
+                                                            left: Val::Px(left),
+                                                            top: Val::Px(0.),
+                                                            width: Val::Px(width),
+                                                            height: Val::Px(30.),
+                                                            ..default()
+                                                        },
+                                                        Button,
+                                                        Interaction::default(),
+                                                        Pickable::default(),
+                                                        BackgroundColor(Color::srgba(
+                                                            0., 0., 0., 0.01,
+                                                        )),
+                                                        AgeStageButton(i),
+                                                    ))
+                                                    .observe(cursor::<Over>(
+                                                        SystemCursorIcon::Pointer,
+                                                    ))
+                                                    .observe(cursor::<Out>(
+                                                        SystemCursorIcon::Default,
+                                                    ))
+                                                    .observe(on_age_stage_click);
+                                            }
+
+                                            // Handle (visual only)
+                                            parent.spawn((
+                                                Node {
+                                                    position_type: PositionType::Absolute,
+                                                    width: Val::Px(24.),
+                                                    height: Val::Px(24.),
+                                                    top: Val::Px(3.),
+                                                    left: Val::Px(frac * AGE_SLIDER_WIDTH - 12.),
+                                                    border: UiRect::all(Val::Px(2.)),
+                                                    border_radius: BorderRadius::all(Val::Px(12.)),
+                                                    ..default()
+                                                },
+                                                BackgroundColor(BUTTON_TEXT_COLOR),
+                                                BorderColor::all(BUTTON_BORDER_COLOR),
+                                                AgeSliderHandle,
+                                                Pickable::IGNORE,
+                                            ));
+                                        });
+
+                                    // Label showing current stage, positioned below the selected point.
                                     parent
                                         .spawn((
                                             Node {
                                                 position_type: PositionType::Absolute,
-                                                width: Val::Px(24.),
-                                                height: Val::Px(24.),
-                                                top: Val::Px(-7.),
-                                                left: Val::Px(frac * AGE_TRACK_WIDTH - 12.),
-                                                border: UiRect::all(Val::Px(2.)),
-                                                border_radius: BorderRadius::all(Val::Px(12.)),
+                                                top: Val::Px(34.),
+                                                left: Val::Px(
+                                                    frac * AGE_SLIDER_WIDTH - AGE_VALUE_WIDTH / 2.,
+                                                ),
+                                                width: Val::Px(AGE_VALUE_WIDTH),
+                                                justify_content: JustifyContent::Center,
+                                                align_items: AlignItems::Center,
                                                 ..default()
                                             },
-                                            BackgroundColor(BUTTON_TEXT_COLOR),
-                                            BorderColor::all(BUTTON_BORDER_COLOR),
-                                            AgeSliderHandle,
+                                            AgeValueNode,
                                         ))
-                                        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                        .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                        .observe(on_age_slider_drag);
+                                        .with_children(|parent| {
+                                            parent.spawn((
+                                                add_text(
+                                                    localization
+                                                        .get(AGE_STAGES[player.age as usize], lang),
+                                                    "bold",
+                                                    BUTTON_TEXT_SIZE,
+                                                    &assets,
+                                                ),
+                                                TextColor(BUTTON_TEXT_COLOR),
+                                                AgeValueText,
+                                            ));
+                                        });
                                 });
                         });
 
@@ -726,14 +854,7 @@ pub fn setup_character_creation(
                                     for attr in Attribute::iter() {
                                         let translated_attr_name =
                                             localization.get(attr.to_lowername().as_str(), lang);
-                                        let val = match attr {
-                                            Attribute::Strength => player.strength(),
-                                            Attribute::Dexterity => player.dexterity(),
-                                            Attribute::Constitution => player.constitution(),
-                                            Attribute::Intelligence => player.intelligence(),
-                                            Attribute::Wisdom => player.wisdom(),
-                                            Attribute::Charisma => player.charisma(),
-                                        } as i32;
+                                        let val = creation_attribute_value(&player, attr) as i32;
 
                                         // Row for this attribute
                                         parent
@@ -837,47 +958,197 @@ pub fn setup_character_creation(
         });
 }
 
-pub fn on_age_slider_drag(
-    ev: On<Pointer<Drag>>,
+/// Drag the age slider handle with the mouse, then snap to the nearest stage on release.
+pub fn update_age_slider(
     mut player: ResMut<Player>,
-    mut handle_q: Query<&mut Node, With<AgeSliderHandle>>,
+    settings: Res<Settings>,
+    localization: Res<Localization>,
+    track_q: Query<&GlobalTransform, With<AgeSliderTrack>>,
+    interaction_q: Query<&Interaction, Or<(With<AgeSliderTrack>, With<AgeStageButton>)>>,
+    mut handle_q: Query<&mut Node, (With<AgeSliderHandle>, Without<AgeSliderTrack>)>,
+    mut value_node_q: Query<
+        &mut Node,
+        (With<AgeValueNode>, Without<AgeSliderHandle>, Without<AgeSliderTrack>),
+    >,
     mut text_q: Query<&mut Text, (With<AgeValueText>, Without<AttributeValueText>)>,
     mut attr_text_q: Query<(&mut Text, &AttributeValueText), Without<AgeValueText>>,
+    windows: Query<&Window>,
+    mouse_buttons: Res<ButtonInput<MouseButton>>,
+    mut drag_active: Local<bool>,
 ) {
-    let (age_min, age_max) = player.race.age_range();
-
-    let Ok(mut node) = handle_q.single_mut() else {
+    let Ok(track_transform) = track_q.single() else {
+        return;
+    };
+    let Ok(window) = windows.single() else {
+        return;
+    };
+    let Some(cursor_pos) = window.cursor_position() else {
         return;
     };
 
-    let current_left = match node.left {
-        Val::Px(px) => px,
-        _ => -12.,
-    };
-    // Handle left is offset by -12 (half its width) from the track position.
-    let mut center = current_left + 12. + ev.delta.x;
-    center = center.clamp(0., AGE_TRACK_WIDTH);
-
-    let frac = center / AGE_TRACK_WIDTH;
-    let age = age_min + (frac * (age_max - age_min) as f32).round() as u32;
-    let age = age.clamp(age_min, age_max);
-
-    node.left = Val::Px(center - 12.);
-    player.age = age;
-
-    if let Ok(mut text) = text_q.single_mut() {
-        text.0 = format!("{}", age);
+    let any_pressed = interaction_q.iter().any(|interaction| *interaction == Interaction::Pressed);
+    if mouse_buttons.pressed(MouseButton::Left) && any_pressed {
+        *drag_active = true;
     }
 
-    for (mut text, val_attr) in &mut attr_text_q {
-        let val = match val_attr.0 {
-            Attribute::Strength => player.strength(),
-            Attribute::Dexterity => player.dexterity(),
-            Attribute::Constitution => player.constitution(),
-            Attribute::Intelligence => player.intelligence(),
-            Attribute::Wisdom => player.wisdom(),
-            Attribute::Charisma => player.charisma(),
-        };
+    if !*drag_active {
+        return;
+    }
+
+    let relative_x = age_relative_x_from_cursor(track_transform, window, cursor_pos.x);
+    set_age_slider_position(&mut handle_q, &mut value_node_q, relative_x);
+
+    if mouse_buttons.just_released(MouseButton::Left) {
+        *drag_active = false;
+        let stage = age_stage_from_relative_x(relative_x);
+        apply_age_stage(
+            stage,
+            &mut player,
+            &settings,
+            &localization,
+            &mut handle_q,
+            &mut value_node_q,
+            &mut text_q,
+            &mut attr_text_q,
+        );
+    }
+}
+
+fn on_age_slider_click(
+    _: On<Pointer<Click>>,
+    mut player: ResMut<Player>,
+    settings: Res<Settings>,
+    localization: Res<Localization>,
+    track_q: Query<&GlobalTransform, With<AgeSliderTrack>>,
+    mut handle_q: Query<&mut Node, (With<AgeSliderHandle>, Without<AgeSliderTrack>)>,
+    mut value_node_q: Query<
+        &mut Node,
+        (With<AgeValueNode>, Without<AgeSliderHandle>, Without<AgeSliderTrack>),
+    >,
+    mut text_q: Query<&mut Text, (With<AgeValueText>, Without<AttributeValueText>)>,
+    mut attr_text_q: Query<(&mut Text, &AttributeValueText), Without<AgeValueText>>,
+    windows: Query<&Window>,
+) {
+    let Ok(track_transform) = track_q.single() else {
+        return;
+    };
+    let Ok(window) = windows.single() else {
+        return;
+    };
+    let Some(cursor_pos) = window.cursor_position() else {
+        return;
+    };
+
+    let stage = age_stage_from_cursor(track_transform, window, cursor_pos.x);
+    apply_age_stage(
+        stage,
+        &mut player,
+        &settings,
+        &localization,
+        &mut handle_q,
+        &mut value_node_q,
+        &mut text_q,
+        &mut attr_text_q,
+    );
+}
+
+fn on_age_stage_click(
+    event: On<Pointer<Click>>,
+    stage_q: Query<&AgeStageButton>,
+    mut player: ResMut<Player>,
+    settings: Res<Settings>,
+    localization: Res<Localization>,
+    mut handle_q: Query<&mut Node, (With<AgeSliderHandle>, Without<AgeSliderTrack>)>,
+    mut value_node_q: Query<
+        &mut Node,
+        (With<AgeValueNode>, Without<AgeSliderHandle>, Without<AgeSliderTrack>),
+    >,
+    mut text_q: Query<&mut Text, (With<AgeValueText>, Without<AttributeValueText>)>,
+    mut attr_text_q: Query<(&mut Text, &AttributeValueText), Without<AgeValueText>>,
+) {
+    let Ok(stage) = stage_q.get(event.entity) else {
+        return;
+    };
+
+    apply_age_stage(
+        stage.0,
+        &mut player,
+        &settings,
+        &localization,
+        &mut handle_q,
+        &mut value_node_q,
+        &mut text_q,
+        &mut attr_text_q,
+    );
+}
+
+fn age_stage_from_cursor(track_transform: &GlobalTransform, window: &Window, cursor_x: f32) -> u32 {
+    age_stage_from_relative_x(age_relative_x_from_cursor(track_transform, window, cursor_x))
+}
+
+fn age_relative_x_from_cursor(
+    track_transform: &GlobalTransform,
+    window: &Window,
+    cursor_x: f32,
+) -> f32 {
+    // UI transforms are centered around the window, while cursor positions start at the
+    // window's left edge. Convert the track center into cursor-space.
+    let track_center_x = track_transform.translation().x + window.width() / 2.0;
+    let track_left = track_center_x - AGE_SLIDER_WIDTH / 2.0;
+    (cursor_x - track_left).clamp(0., AGE_SLIDER_WIDTH)
+}
+
+fn age_stage_from_relative_x(relative_x: f32) -> u32 {
+    // Snap to nearest of 5 positions.
+    let frac = relative_x / AGE_SLIDER_WIDTH;
+    ((frac * 4.0).round() as u32).clamp(0, 4)
+}
+
+fn set_age_slider_position(
+    handle_q: &mut Query<&mut Node, (With<AgeSliderHandle>, Without<AgeSliderTrack>)>,
+    value_node_q: &mut Query<
+        &mut Node,
+        (With<AgeValueNode>, Without<AgeSliderHandle>, Without<AgeSliderTrack>),
+    >,
+    relative_x: f32,
+) {
+    let relative_x = relative_x.clamp(0., AGE_SLIDER_WIDTH);
+    if let Ok(mut handle_node) = handle_q.single_mut() {
+        handle_node.left = Val::Px(relative_x - 12.);
+    }
+    if let Ok(mut value_node) = value_node_q.single_mut() {
+        value_node.left = Val::Px(relative_x - AGE_VALUE_WIDTH / 2.);
+    }
+}
+
+fn apply_age_stage(
+    stage: u32,
+    player: &mut Player,
+    settings: &Settings,
+    localization: &Localization,
+    handle_q: &mut Query<&mut Node, (With<AgeSliderHandle>, Without<AgeSliderTrack>)>,
+    value_node_q: &mut Query<
+        &mut Node,
+        (With<AgeValueNode>, Without<AgeSliderHandle>, Without<AgeSliderTrack>),
+    >,
+    text_q: &mut Query<&mut Text, (With<AgeValueText>, Without<AttributeValueText>)>,
+    attr_text_q: &mut Query<(&mut Text, &AttributeValueText), Without<AgeValueText>>,
+) {
+    let changed = player.age != stage;
+    player.age = stage;
+    let snapped_frac = stage as f32 / 4.0;
+    set_age_slider_position(handle_q, value_node_q, snapped_frac * AGE_SLIDER_WIDTH);
+
+    if let Ok(mut text) = text_q.single_mut() {
+        text.0 = localization.get(AGE_STAGES[stage as usize], settings.language);
+    }
+
+    if !changed {
+        return;
+    }
+
+    for (mut text, val_attr) in attr_text_q.iter_mut() {
+        let val = creation_attribute_value(player, val_attr.0);
         text.0 = format!("{}", val);
     }
 }
@@ -905,9 +1176,15 @@ impl SelectionItem for Race {
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.race = *self;
-        let (min, max) = self.age_range();
-        player.age = (min + max) / 2;
         next_game_state.set(GameState::ChooseClass);
+    }
+
+    fn get_image_key(&self, player: &Player) -> String {
+        let sex_key = match player.sex {
+            Sex::Male => "male",
+            Sex::Female => "female",
+        };
+        format!("{}_{}", self.to_lowername(), sex_key)
     }
 }
 
@@ -930,22 +1207,24 @@ impl SelectionItem for Class {
         match self {
             Class::Warrior => {
                 player.weapon_rh = Some(Weapon::SteelSword);
-            }
+            },
             Class::Mage(_) => {
                 player.weapon_2h = Some(Weapon::WizardStaff);
-            }
+            },
             Class::Rogue => {
                 player.weapon_rh = Some(Weapon::ThiefDagger);
-            }
+            },
             Class::Druid => {
                 player.weapon_rh = Some(Weapon::OakWand);
-            }
+            },
         }
-        
+
         if matches!(*self, Class::Mage(_) | Class::Druid) {
             next_game_state.set(GameState::ChooseSubClass);
         } else {
-            next_game_state.set(GameState::CreateCharacter);
+            player.health = player.max_health().floor();
+            player.mana = player.max_mana().floor();
+            next_game_state.set(GameState::Playing);
         }
     }
 
@@ -974,13 +1253,15 @@ impl SelectionItem for Ajah {
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = Class::Mage(*self);
         player.abilities.push(self.special_ability());
-        next_game_state.set(GameState::CreateCharacter);
+        player.health = player.max_health().floor();
+        player.mana = player.max_mana().floor();
+        next_game_state.set(GameState::Playing);
     }
 
     fn get_image_key(&self, player: &Player) -> String {
         let race_key = player.race.to_lowername();
         match self {
-            Ajah::Black => "mage_black".to_string(),
+            Ajah::Black => format!("mage_black_{}", race_key),
             Ajah::Red => format!("mage_red_{}", race_key),
             Ajah::Green => format!("mage_green_{}", race_key),
             Ajah::White => format!("mage_white_{}", race_key),
@@ -1001,7 +1282,9 @@ impl SelectionItem for Pet {
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.pet = Some(*self);
-        next_game_state.set(GameState::CreateCharacter);
+        player.health = player.max_health().floor();
+        player.mana = player.max_mana().floor();
+        next_game_state.set(GameState::Playing);
     }
 }
 

@@ -40,7 +40,6 @@ pub fn on_click_menu_button(
     #[cfg(not(target_arch = "wasm32"))] mut save_game_msg: MessageWriter<SaveCharacterMsg>,
     app_state: Res<State<AppState>>,
     game_state: Res<State<GameState>>,
-    player: Res<crate::core::player::Player>,
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
@@ -64,21 +63,17 @@ pub fn on_click_menu_button(
         MenuBtn::Back => match *app_state.get() {
             AppState::Settings => next_app_state.set(AppState::MainMenu),
             AppState::Game => match *game_state.get() {
-                GameState::ChooseRace => {
+                GameState::CreateCharacter => {
                     next_app_state.set(AppState::MainMenu);
+                },
+                GameState::ChooseRace => {
+                    next_game_state.set(GameState::CreateCharacter);
                 },
                 GameState::ChooseClass => {
                     next_game_state.set(GameState::ChooseRace);
                 },
                 GameState::ChooseSubClass => {
                     next_game_state.set(GameState::ChooseClass);
-                },
-                GameState::CreateCharacter => {
-                    if matches!(player.class, crate::core::classes::Class::Mage(_) | crate::core::classes::Class::Druid) {
-                        next_game_state.set(GameState::ChooseSubClass);
-                    } else {
-                        next_game_state.set(GameState::ChooseClass);
-                    }
                 },
                 GameState::Settings => {
                     next_game_state.set(GameState::GameMenu);

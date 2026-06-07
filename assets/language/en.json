@@ -101,7 +101,7 @@
   "weapon_rh": "Right Hand",
   "weapon_2h": "Two-Handed",
   "consumables": "Consumables",
-  "money": "Gold",
+  "gold": "Gold",
   "level": "Level",
   "action_points": "Action Points Remaining",
   "hunt": "Hunt",
@@ -136,6 +136,7 @@
   "health": "Health",
   "mana": "Mana",
   "race": "Race",
+  "class": "Class",
   "age": "Age",
   "height": "Height",
   "weight": "Weight",
@@ -158,5 +159,10 @@
   "name": "Name",
   "shop": "Shop",
   "rest": "Rest",
-  "inventory": "Inventory"
+  "inventory": "Inventory",
+  "youth": "Youth",
+  "young adult": "Young Adult",
+  "adult": "Adult",
+  "senior": "Senior",
+  "elder": "Elder"
 }
