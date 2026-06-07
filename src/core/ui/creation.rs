@@ -1306,19 +1306,22 @@ impl SelectionItem for Class {
         player.abilities = vec![self.starting_ability().to_string()];
         player.perks = vec![self.starting_perk().to_string()];
 
-        match self {
-            Class::Warrior => {
-                player.weapon_lh = Some(self.starting_weapon().to_string());
-            },
-            Class::Mage(_) => {
-                player.weapon_2h = Some(self.starting_weapon().to_string());
-            },
-            Class::Rogue => {
-                player.weapon_lh = Some(self.starting_weapon().to_string());
-            },
-            Class::Druid => {
-                player.weapon_lh = Some(self.starting_weapon().to_string());
-            },
+        let weapon_name = self.starting_weapon();
+        let mut is_two_hand = false;
+        if let Some(eq) = crate::core::catalog::get_equipment(weapon_name) {
+            if eq.kind == "two_hand_weapon" {
+                is_two_hand = true;
+            }
+        } else {
+            if matches!(self, Class::Mage(_)) {
+                is_two_hand = true;
+            }
+        }
+
+        if is_two_hand {
+            player.weapon_2h = Some(weapon_name.to_string());
+        } else {
+            player.weapon_lh = Some(weapon_name.to_string());
         }
 
         if matches!(*self, Class::Mage(_) | Class::Druid) {

@@ -1,5 +1,47 @@
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
+
+function hasTransparency(filePath) {
+    try {
+        const buf = fs.readFileSync(filePath);
+        if (buf.readUInt32BE(0) !== 0x89504E47) return false;
+        let offset = 8;
+        let colorType = 0, bitDepth = 0, width = 0, height = 0;
+        let idatBuffers = [];
+        while (offset < buf.length) {
+            if (offset + 8 > buf.length) break;
+            const length = buf.readUInt32BE(offset);
+            const type = buf.toString('ascii', offset + 4, offset + 8);
+            if (type === 'IHDR') {
+                width = buf.readUInt32BE(offset + 8);
+                height = buf.readUInt32BE(offset + 12);
+                bitDepth = buf.readUInt8(offset + 16);
+                colorType = buf.readUInt8(offset + 17);
+            } else if (type === 'IDAT') {
+                idatBuffers.push(buf.subarray(offset + 8, offset + 8 + length));
+            } else if (type === 'IEND') {
+                break;
+            }
+            offset += 12 + length;
+        }
+        if (colorType !== 4 && colorType !== 6) return false;
+        const compressed = Buffer.concat(idatBuffers);
+        const decompressed = zlib.inflateSync(compressed);
+        let bytesPerPixel = colorType === 4 ? 2 : 4;
+        let ptr = 0;
+        const scanlineLength = 1 + width * bytesPerPixel;
+        for (let y = 0; y < height; y++) {
+            const lineData = decompressed.subarray(ptr + 1, ptr + scanlineLength);
+            ptr += scanlineLength;
+            for (let x = 0; x < width; x++) {
+                let alpha = lineData[x * bytesPerPixel + (colorType === 6 ? 3 : 1)];
+                if (alpha < 240) return true;
+            }
+        }
+    } catch (e) {}
+    return false;
+}
 
 // Helper to capitalize first letter
 function capitalize(str) {
@@ -45,9 +87,11 @@ const weaponIconsDir = path.join(allIconsDir, 'WeaponIcons');
 const skillsIconsDir = path.join(allIconsDir, 'SkillsIcons');
 const accessoryIconsDir = path.join(allIconsDir, 'ArmorIcons', 'RingAndNeck_Icons');
 
-const weapon_sources = fs.existsSync(weaponIconsDir) ? getPngFiles(weaponIconsDir, assetsDir, [], true) : [];
+const raw_weapon_sources = fs.existsSync(weaponIconsDir) ? getPngFiles(weaponIconsDir, assetsDir, [], true) : [];
+const weapon_sources = raw_weapon_sources.filter(src => hasTransparency(path.join(assetsDir, src)));
 const ability_sources = fs.existsSync(skillsIconsDir) ? getPngFiles(skillsIconsDir, assetsDir, [], false) : [];
-const accessory_sources = fs.existsSync(accessoryIconsDir) ? getPngFiles(accessoryIconsDir, assetsDir, [], false) : [];
+const raw_accessory_sources = fs.existsSync(accessoryIconsDir) ? getPngFiles(accessoryIconsDir, assetsDir, [], false) : [];
+const accessory_sources = raw_accessory_sources.filter(src => hasTransparency(path.join(assetsDir, src)));
 
 // Perk sources will be everything under all_icons except WeaponIcons, SkillsIcons and RingAndNeck_Icons
 const perk_sources = [];
@@ -87,6 +131,9 @@ const category_sources = {
 };
 
 for (const src of all_png_sources) {
+    if (!hasTransparency(path.join(assetsDir, src))) {
+        continue;
+    }
     const fileName = path.basename(src).toLowerCase();
     if (fileName.startsWith('helm_') || fileName.startsWith('helms')) {
         category_sources.helmet.push(src);
@@ -96,7 +143,7 @@ for (const src of all_png_sources) {
         category_sources.boots.push(src);
     } else if (fileName.startsWith('shield_') || fileName.startsWith('shields') || fileName.startsWith('book_')) {
         category_sources.offhand.push(src);
-    } else if (fileName.startsWith('potion_')) {
+    } else if (fileName.startsWith('potion_') || (src.toLowerCase().includes('/alchemy/') && (fileName.includes('potion') || fileName.includes('flask') || fileName.includes('mixture') || fileName === 'holywater.png'))) {
         category_sources.consumable.push(src);
     } else if (fileName.startsWith('dagger_') || fileName.startsWith('sword_') || fileName.startsWith('axe_') || fileName.startsWith('hammer_')) {
         category_sources.one_hand_weapon.push(src);
@@ -113,6 +160,27 @@ if (category_sources.offhand.length === 0) category_sources.offhand = weapon_sou
 if (category_sources.consumable.length === 0) category_sources.consumable = weapon_sources;
 if (category_sources.one_hand_weapon.length === 0) category_sources.one_hand_weapon = weapon_sources;
 if (category_sources.two_hand_weapon.length === 0) category_sources.two_hand_weapon = weapon_sources;
+
+// Alphabetical sort of all files so progression is deterministic and follows design
+category_sources.helmet.sort();
+category_sources.armor.sort();
+category_sources.boots.sort();
+category_sources.offhand.sort();
+category_sources.consumable.sort();
+category_sources.one_hand_weapon.sort();
+category_sources.two_hand_weapon.sort();
+accessory_sources.sort();
+
+const pools = {
+    helmet: [...category_sources.helmet],
+    armor: [...category_sources.armor],
+    boots: [...category_sources.boots],
+    one_hand_weapon: [...category_sources.one_hand_weapon],
+    two_hand_weapon: [...category_sources.two_hand_weapon],
+    offhand: [...category_sources.offhand],
+    accessory: [...accessory_sources],
+    consumable: [...category_sources.consumable]
+};
 
 console.log(`Loaded sources:
  - Weapons: ${weapon_sources.length} sources
@@ -243,93 +311,422 @@ for (const adj of levelAdjectives) {
     cleanGeneratedImages(destPerksDir, adj.toLowerCase());
 }
 
-function getItemWord(kind_eq, src_eq, index) {
-    const fileName = path.basename(src_eq).toLowerCase();
+function analyzeAccessory(fileName, index) {
+    fileName = fileName.toLowerCase();
+    let mat = "Bronze"; // default
+    if (fileName.includes("gold") || fileName.includes("princess") || fileName.includes("yellow")) {
+        mat = "Gold";
+    } else if (fileName.includes("silver") || fileName.includes("white")) {
+        mat = "Silver";
+    } else if (fileName.includes("platinum")) {
+        mat = "Platinum";
+    } else if (fileName.includes("copper")) {
+        mat = "Copper";
+    } else if (fileName.includes("pewter")) {
+        mat = "Pewter";
+    } else if (fileName.includes("crystalblue") || fileName.includes("water")) {
+        mat = "Sapphire";
+    } else if (fileName.includes("crystalgreen") || fileName.includes("tree")) {
+        mat = "Emerald";
+    } else if (fileName.includes("crystalpurple") || fileName.includes("purple")) {
+        mat = "Amethyst";
+    } else if (fileName.includes("red") || fileName.includes("fire")) {
+        mat = "Ruby";
+    } else if (fileName.includes("black") || fileName.includes("dark") || fileName.includes("necromantic") || fileName.includes("demonic") || fileName.includes("warlock")) {
+        mat = "Obsidian";
+    } else {
+        const mats = ["Bronze", "Copper", "Pewter", "Iron", "Silver", "Gold", "Platinum"];
+        mat = mats[index % mats.length];
+    }
 
-    if (kind_eq === 'helmet') {
-        const options = ["Helm", "Helmet", "Cap", "Visor", "Crown", "Hood"];
-        return options[index % options.length];
-    }
-    if (kind_eq === 'armor') {
-        const options = ["Plates", "Chestplate", "Robes", "Mail", "Tunic", "Cuirass"];
-        return options[index % options.length];
-    }
-    if (kind_eq === 'boots') {
-        const options = ["Boots", "Greaves", "Shoes", "Slippers", "Soles", "Treads"];
-        return options[index % options.length];
-    }
-    if (kind_eq === 'consumable') {
-        const options = ["Potion", "Elixir", "Vial", "Scroll", "Flask", "Tonic"];
-        return options[index % options.length];
-    }
-    if (kind_eq === 'offhand') {
-        if (fileName.includes('book')) {
-            const options = ["Tome", "Grimoire", "Book", "Scroll", "Tome of Fire", "Tome of Ice"];
-            return options[index % options.length];
-        } else {
-            const options = ["Shield", "Buckler", "Aegis", "Bulwark", "Kite Shield", "Greatshield"];
-            return options[index % options.length];
+    let word = "Ring";
+    if (fileName.includes("necklace") || fileName.includes("neck_") || fileName.includes("pendant")) {
+        word = "Necklace";
+        if (fileName.includes("scull") || fileName.includes("skull")) {
+            word = "Skull Pendant";
+        } else if (fileName.includes("cross")) {
+            word = "Crucifix Pendant";
+        }
+    } else if (fileName.includes("bracelet") || fileName.includes("bracer") || fileName.includes("bangle") || fileName.includes("cuff")) {
+        if (fileName.includes("cuff")) word = "Cuff";
+        else if (fileName.includes("bangle")) word = "Bangle";
+        else if (fileName.includes("bracer")) word = "Bracer";
+        else word = "Bracelet";
+    } else if (fileName.includes("ring")) {
+        word = "Ring";
+        if (fileName.includes("lion")) {
+            word = "Lion Ring";
+        } else if (fileName.includes("dragon")) {
+            word = "Dragon Ring";
+        } else if (fileName.includes("flower")) {
+            word = "Flower Ring";
         }
     }
-    if (kind_eq === 'one_hand_weapon') {
-        if (fileName.includes('dagger')) {
-            const options = ["Dagger", "Knife", "Dirk", "Stiletto", "Striker"];
-            return options[index % options.length];
-        }
-        if (fileName.includes('sword')) {
-            const options = ["Sword", "Blade", "Saber", "Rapier", "Cutlass"];
-            return options[index % options.length];
-        }
-        if (fileName.includes('axe')) {
-            const options = ["Axe", "Hatchet", "Cleaver", "Handaxe"];
-            return options[index % options.length];
-        }
-        if (fileName.includes('hammer')) {
-            const options = ["Hammer", "Mace", "Warhammer", "Flail", "Club"];
-            return options[index % options.length];
-        }
-        const options = ["Blade", "Sword", "Dagger", "Saber", "Axe", "Mace", "Hammer"];
-        return options[index % options.length];
-    }
-    if (kind_eq === 'two_hand_weapon') {
-        if (fileName.includes('bow') || fileName.includes('crossbow')) {
-            const options = ["Bow", "Longbow", "Shortbow", "Crossbow", "Recurve Bow"];
-            return options[index % options.length];
-        }
-        if (fileName.includes('staff')) {
-            const options = ["Staff", "Greatstaff", "Crook", "Spire"];
-            return options[index % options.length];
-        }
-        if (fileName.includes('spear')) {
-            const options = ["Spear", "Halberd", "Pike", "Lance", "Trident"];
-            return options[index % options.length];
-        }
-        if (fileName.includes('scythe')) {
-            const options = ["Scythe", "Reaper", "Harvester"];
-            return options[index % options.length];
-        }
-        const options = ["Staff", "Greatsword", "Warhammer", "Bow", "Halberd", "Scythe"];
-        return options[index % options.length];
-    }
-    return "Item";
+    return { mat, word };
 }
 
-function getAccessoryWord(src_acc, index) {
-    const fileName = path.basename(src_acc).toLowerCase();
-    if (fileName.includes('ring')) {
-        const options = ["Ring", "Band", "Signet", "Loop"];
-        return options[index % options.length];
+function classifyAccessory(fileName, index, lvl) {
+    return analyzeAccessory(fileName, index);
+}
+
+function classifyHelmet(fileName, index, lvl) {
+    fileName = fileName.toLowerCase();
+    let mat = "";
+    let word = "";
+
+    if (fileName.includes("gold") || fileName.includes("golden") || fileName.includes("king") || fileName.includes("queen") || fileName.includes("crown")) {
+        mat = "Golden";
+    } else if (fileName.includes("leather") || fileName.includes("farmer") || fileName.includes("wanderer") || fileName.includes("rogue") || fileName.includes("robber") || fileName.includes("cowl") || fileName.includes("hood")) {
+        mat = "Leather";
+    } else if (fileName.includes("samurai") || fileName.includes("knight") || fileName.includes("crusader") || fileName.includes("guard") || fileName.includes("footman") || fileName.includes("spearman")) {
+        mat = "Steel";
+    } else if (fileName.includes("green") || fileName.includes("priest") || fileName.includes("mage")) {
+        mat = "Ritual";
+    } else {
+        if (lvl <= 5) mat = "Bronze";
+        else if (lvl <= 12) mat = "Iron";
+        else mat = "Plated";
     }
-    if (fileName.includes('necklace') || fileName.includes('neck_')) {
-        const options = ["Necklace", "Amulet", "Choker", "Collar", "Talisman", "Medallion"];
-        return options[index % options.length];
+
+    if (fileName.includes("crown") || fileName.includes("king") || fileName.includes("queen")) {
+        mat = "Regal";
+        word = "Crown";
+        if (fileName.includes("queen")) word = "Queen's Golden Crown";
+        else if (fileName.includes("king")) word = "King's Crown";
+    } else if (fileName.includes("horn")) {
+        word = "Horned Greathelm";
+    } else if (fileName.includes("mask")) {
+        word = "Visor Mask";
+    } else if (fileName.includes("hood") || fileName.includes("cowl")) {
+        word = "Hood";
+    } else if (fileName.includes("cap") || fileName.includes("farmer")) {
+        word = "Cap";
+    } else if (fileName.includes("samurai")) {
+        word = "Kabuto";
+    } else if (fileName.includes("crusader")) {
+        word = "Crusader Greathelm";
+    } else if (fileName.includes("knight")) {
+        word = "Knightly Helm";
+    } else if (fileName.includes("guard") || fileName.includes("footman")) {
+        word = "Guard's Bascinet";
+    } else {
+        const options = ["Helm", "Helmet", "Bascinet", "Bascinet", "Bascinet", "Bascinet"];
+        word = options[index % options.length];
     }
-    if (fileName.includes('bracelet')) {
-        const options = ["Bracelet", "Bangle", "Bracer", "Cuff"];
-        return options[index % options.length];
+
+    return { mat, word };
+}
+
+function classifyArmor(fileName, index, lvl) {
+    fileName = fileName.toLowerCase();
+    let mat = "";
+    let word = "";
+
+    if (fileName.includes("leather") || fileName.includes("scout") || fileName.includes("adventure")) {
+        mat = "Reinforced Leather";
+    } else if (fileName.includes("cloth") || fileName.includes("farmer") || fileName.includes("citizen") || fileName.includes("trader")) {
+        mat = "Quilted Cloth";
+    } else if (fileName.includes("mage") || fileName.includes("wizard") || fileName.includes("priest") || fileName.includes("archimage")) {
+        mat = "Silk";
+    } else if (fileName.includes("gold") || fileName.includes("golden")) {
+        mat = "Golden";
+    } else if (fileName.includes("green")) {
+        mat = "Verdant";
+    } else if (fileName.includes("knight") || fileName.includes("cuirass") || fileName.includes("milita") || fileName.includes("warchief")) {
+        mat = "Steel";
+    } else {
+        if (lvl <= 5) mat = "Bronze";
+        else if (lvl <= 12) mat = "Iron";
+        else mat = "Plated";
     }
-    const options = ["Ring", "Bracelet", "Collar", "Necklace", "Amulet", "Choker", "Bangle", "Talisman", "Band", "Medallion"];
-    return options[index % options.length];
+
+    if (fileName.includes("robe") || fileName.includes("mage") || fileName.includes("wizard") || fileName.includes("priest") || fileName.includes("archimage")) {
+        word = "Robes";
+    } else if (fileName.includes("cuirass") || fileName.includes("chestplate") || fileName.includes("knight")) {
+        word = "Cuirass";
+    } else if (fileName.includes("leather") || fileName.includes("farmer") || fileName.includes("citizen") || fileName.includes("adventure") || fileName.includes("scout") || fileName.includes("trader")) {
+        word = "Tunic";
+        if (fileName.includes("leatherplus") || fileName.includes("warchief")) word = "Jerkin";
+    } else {
+        const options = ["Chestplate", "Plated Mail", "Scale Armor", "Hauberk", "Breastplate"];
+        word = options[index % options.length];
+    }
+
+    return { mat, word };
+}
+
+function classifyBoots(fileName, index, lvl) {
+    fileName = fileName.toLowerCase();
+    let mat = "";
+    let word = "";
+
+    if (fileName.includes("gold") || fileName.includes("golden")) {
+        mat = "Golden";
+    } else if (fileName.includes("paladin") || fileName.includes("knight")) {
+        mat = "Steel Plated";
+    } else if (fileName.includes("speed") || fileName.includes("magic")) {
+        mat = "Enchanted";
+    } else if (fileName.includes("leather") || fileName.includes("common") || fileName.includes("ogre")) {
+        mat = "Heavy Leather";
+    } else {
+        if (lvl <= 5) mat = "Rawhide";
+        else if (lvl <= 12) mat = "Iron";
+        else mat = "Heavy Steel";
+    }
+
+    if (fileName.includes("slipper") || fileName.includes("magic")) {
+        word = "Slippers";
+    } else if (fileName.includes("greave") || fileName.includes("paladin") || fileName.includes("knight") || fileName.includes("boots_22") || fileName.includes("boots_35")) {
+        word = "Sabatons";
+    } else if (fileName.includes("shoe")) {
+        word = "Shoes";
+    } else {
+        const options = ["Boots", "Greaves", "Treads", "Soles"];
+        word = options[index % options.length];
+    }
+
+    return { mat, word };
+}
+
+function classifyOneHandWeapon(fileName, index, lvl) {
+    fileName = fileName.toLowerCase();
+    let mat = "";
+    let word = "";
+
+    if (fileName.includes("gold") || fileName.includes("golden")) {
+        mat = "Gold-Embossed";
+    } else if (fileName.includes("copper")) {
+        mat = "Copper";
+    } else if (fileName.includes("bronze")) {
+        mat = "Bronze";
+    } else if (fileName.includes("iron")) {
+        mat = "Iron";
+    } else if (fileName.includes("shadow")) {
+        mat = "Shadow";
+    } else {
+        if (lvl <= 5) mat = "Worn";
+        else if (lvl <= 12) mat = "Tempered";
+        else mat = "Mighty";
+    }
+
+    if (fileName.includes("dagger") || fileName.includes("knife") || fileName.includes("stiletto") || fileName.includes("striker")) {
+        word = "Dagger";
+        if (fileName.includes("knife")) word = "Knife";
+        else if (fileName.includes("stiletto")) word = "Stiletto";
+        else if (fileName.includes("striker")) word = "Striker";
+    } else if (fileName.includes("sword") || fileName.includes("blade") || fileName.includes("saber") || fileName.includes("rapier") || fileName.includes("cutlass")) {
+        word = "Sword";
+        if (fileName.includes("blade")) word = "Blade";
+        else if (fileName.includes("saber")) word = "Saber";
+        else if (fileName.includes("rapier")) word = "Rapier";
+        else if (fileName.includes("cutlass")) word = "Cutlass";
+    } else if (fileName.includes("axe") || fileName.includes("hatchet") || fileName.includes("cleaver") || fileName.includes("handaxe")) {
+        word = "Axe";
+        if (fileName.includes("hatchet")) word = "Hatchet";
+        else if (fileName.includes("cleaver")) word = "Cleaver";
+        else if (fileName.includes("handaxe")) word = "Handaxe";
+    } else if (fileName.includes("hammer") || fileName.includes("mace") || fileName.includes("warhammer") || fileName.includes("flail") || fileName.includes("club") || fileName.includes("mace")) {
+        word = "Mace";
+        if (fileName.includes("hammer") || fileName.includes("warhammer")) word = "Hammer";
+        else if (fileName.includes("flail")) word = "Flail";
+        else if (fileName.includes("club")) word = "Club";
+    } else {
+        const options = ["Sword", "Blade", "Axe", "Mace", "Dagger"];
+        word = options[index % options.length];
+    }
+
+    return { mat, word };
+}
+
+function classifyTwoHandWeapon(fileName, index, lvl) {
+    fileName = fileName.toLowerCase();
+    let mat = "";
+    let word = "";
+
+    if (fileName.includes("gold") || fileName.includes("golden")) {
+        mat = "Golden";
+    } else if (fileName.includes("elder") || fileName.includes("ancient")) {
+        mat = "Elder";
+    } else if (fileName.includes("primal") || fileName.includes("verdant")) {
+        mat = "Primal";
+    } else {
+        if (lvl <= 5) mat = "Bronze";
+        else if (lvl <= 12) mat = "Ironed";
+        else mat = "Masterwork";
+    }
+
+    if (fileName.includes("bow") || fileName.includes("crossbow") || fileName.includes("longbow") || fileName.includes("shortbow")) {
+        word = "Bow";
+        if (fileName.includes("crossbow")) word = "Crossbow";
+        else if (fileName.includes("longbow")) word = "Longbow";
+        else if (fileName.includes("shortbow")) word = "Shortbow";
+        else if (fileName.includes("recurve")) word = "Recurve Bow";
+    } else if (fileName.includes("staff") || fileName.includes("greatstaff") || fileName.includes("crook") || fileName.includes("spire")) {
+        word = "Staff";
+        if (fileName.includes("greatstaff")) word = "Greatstaff";
+        else if (fileName.includes("crook")) word = "Crook Staff";
+        else if (fileName.includes("spire")) word = "Spire Staff";
+    } else if (fileName.includes("spear") || fileName.includes("halberd") || fileName.includes("pike") || fileName.includes("lance") || fileName.includes("trident")) {
+        word = "Spear";
+        if (fileName.includes("halberd")) word = "Halberd";
+        else if (fileName.includes("pike")) word = "Pike";
+        else if (fileName.includes("lance")) word = "Lance";
+        else if (fileName.includes("trident")) word = "Trident";
+    } else if (fileName.includes("scythe") || fileName.includes("reaper") || fileName.includes("harvester")) {
+        word = "Scythe";
+        if (fileName.includes("reaper")) word = "Reaper Scythe";
+        else if (fileName.includes("harvester")) word = "Harvester Scythe";
+    } else {
+        const options = ["Greatsword", "Warhammer", "Staff", "Bow", "Halberd", "Scythe"];
+        word = options[index % options.length];
+    }
+
+    return { mat, word };
+}
+
+function classifyOffhand(fileName, index, lvl) {
+    fileName = fileName.toLowerCase();
+    let mat = "";
+    let word = "";
+
+    if (fileName.includes("gold") || fileName.includes("golden")) {
+        mat = "Golden";
+    } else if (fileName.includes("book") || fileName.includes("tome")) {
+        mat = "Enchanted";
+    } else if (fileName.includes("wood") || fileName.includes("wooden")) {
+        mat = "Wooden";
+    } else {
+        if (lvl <= 5) mat = "Bronze";
+        else if (lvl <= 12) mat = "Iron";
+        else mat = "Heavily Plated";
+    }
+
+    if (fileName.includes("book") || fileName.includes("tome") || fileName.includes("grimoire") || fileName.includes("scroll")) {
+        word = "Tome";
+        if (fileName.includes("grimoire")) word = "Grimoire";
+        else if (fileName.includes("scroll")) word = "Scroll";
+    } else if (fileName.includes("shield") || fileName.includes("buckler") || fileName.includes("aegis") || fileName.includes("bulwark") || fileName.includes("greatshield")) {
+        word = "Shield";
+        if (fileName.includes("buckler")) word = "Buckler";
+        else if (fileName.includes("aegis")) word = "Aegis";
+        else if (fileName.includes("bulwark")) word = "Bulwark";
+        else if (fileName.includes("greatshield")) word = "Greatshield";
+    } else {
+        const options = ["Shield", "Buckler", "Aegis", "Tome", "Grimoire"];
+        word = options[index % options.length];
+    }
+
+    return { mat, word };
+}
+
+function classifyConsumable(fileName, index, lvl) {
+    fileName = fileName.toLowerCase();
+    let word = "Potion";
+
+    if (fileName.includes("holywater")) {
+        return { mat: "Sacred", word: "Holy Water" };
+    }
+    if (fileName.includes("tea")) {
+        return { mat: "Soothe", word: "Medicinal Tea" };
+    }
+    if (fileName.includes("mortar")) {
+        return { mat: "Crushed", word: "Herbal Paste" };
+    }
+
+    let mat = "Novice";
+    if (fileName.includes("huge") || fileName.includes("big") || fileName.includes("philosopher") || fileName.includes("immortal")) {
+        if (lvl <= 5) mat = "Potent";
+        else if (lvl <= 12) mat = "Greater";
+        else mat = "Sovereign";
+    } else if (fileName.includes("middle") || fileName.includes("magic")) {
+        if (lvl <= 8) mat = "Standard";
+        else mat = "Adept";
+    } else if (fileName.includes("little") || fileName.includes("mini") || fileName.includes("tea")) {
+        mat = "Minor";
+    } else {
+        const mats = ["Novice", "Minor", "Standard", "Potent", "Major", "Greater"];
+        mat = mats[lvl % mats.length];
+    }
+
+    if (fileName.includes("heal") || fileName.includes("blood")) {
+        word = "Health Potion";
+    } else if (fileName.includes("mana") || fileName.includes("blue_potion") || fileName.includes("blue_mixture")) {
+        word = "Mana Potion";
+    } else if (fileName.includes("poison") || fileName.includes("plague")) {
+        word = "Antidote Vial";
+    } else if (fileName.includes("energy") || fileName.includes("stamina")) {
+        word = "Stamina Potion";
+    } else if (fileName.includes("rejuvenation") || fileName.includes("magic") || fileName.includes("spiritual")) {
+        word = "Rejuvenation Elixir";
+    } else if (fileName.includes("strength")) {
+        word = "Strength Potion";
+    } else if (fileName.includes("dexterity") || fileName.includes("speed")) {
+        word = "Dexterity Potion";
+    } else if (fileName.includes("constitution") || fileName.includes("reactive")) {
+        word = "Constitution Potion";
+    } else if (fileName.includes("intelligence") || fileName.includes("wisdom") || fileName.includes("philosopher")) {
+        word = "Intelligence Potion";
+    } else if (fileName.includes("charisma") || fileName.includes("invisibility")) {
+        word = "Charisma Potion";
+    } else {
+        const options = ["Health Potion", "Mana Potion", "Rejuvenation Elixir", "Antidote Vial", "Stamina Potion"];
+        word = options[index % options.length];
+    }
+
+    return { mat, word };
+}
+
+function getRealisticItemName(kind, fileName, index, lvl) {
+    let res;
+    if (kind === 'helmet') {
+        res = classifyHelmet(fileName, index, lvl);
+    } else if (kind === 'armor') {
+        res = classifyArmor(fileName, index, lvl);
+    } else if (kind === 'boots') {
+        res = classifyBoots(fileName, index, lvl);
+    } else if (kind === 'one_hand_weapon') {
+        res = classifyOneHandWeapon(fileName, index, lvl);
+    } else if (kind === 'two_hand_weapon') {
+        res = classifyTwoHandWeapon(fileName, index, lvl);
+    } else if (kind === 'offhand') {
+        res = classifyOffhand(fileName, index, lvl);
+    } else if (kind === 'accessory') {
+        res = classifyAccessory(fileName, index, lvl);
+    } else if (kind === 'consumable') {
+        res = classifyConsumable(fileName, index, lvl);
+    } else {
+        res = { mat: "Standard", word: "Item" };
+    }
+
+    const levelAdj = levelAdjectives[lvl - 1];
+
+    if (kind === 'accessory') {
+        const class_hint = classes[index % classes.length];
+        const classPrefixes = {
+            warrior: ["Valor", "Might", "Fortitude", "Brutality"],
+            skin: ["Valor", "Might", "Fortitude", "Brutality"],
+            mage: ["Arcana", "Focus", "Intelligence", "Evocation"],
+            rogue: ["Cunning", "Velocity", "Deception", "Shadows"],
+            druid: ["Thorns", "Wilds", "Restoration", "Earth"]
+        };
+        const classAdjs = classPrefixes[class_hint] || classPrefixes.warrior;
+        const classAdj = classAdjs[index % classAdjs.length];
+        return `${levelAdj} ${res.mat} ${res.word} of ${classAdj}`.toLowerCase();
+    } else if (kind === 'consumable') {
+        return `${levelAdj} ${res.mat} ${res.word}`.toLowerCase();
+    } else {
+        const class_hint_eq = classes[index % classes.length];
+        const classAdjectives = {
+            warrior: ["Vanguard", "Warmonger", "Guardian", "Bulwark", "Mighty", "Challenger"],
+            mage: ["Arcane", "Pyromancer", "Spellweaver", "Sorcerer", "Evoker", "Acolyte"],
+            rogue: ["Assassin", "Shadow", "Silent", "Phantom", "Infiltrator", "Stalker"],
+            druid: ["Barkskin", "Wildheart", "Forest", "Primal", "Nature", "Verdant"]
+        };
+        const classAdjs = classAdjectives[class_hint_eq] || classAdjectives.warrior;
+        const classAdj = classAdjs[index % classAdjs.length];
+
+        return `${levelAdj} ${res.mat} ${classAdj} ${res.word}`.toLowerCase();
+    }
 }
 
 for (let lvl = 1; lvl <= totalLevels; lvl++) {
@@ -338,28 +735,15 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
 
     // 30 base equipment pieces
     for (let j = 0; j < itemsPerLevel; j++) {
-        const overallIndex = (lvl - 1) * itemsPerLevel + j;
-
         const class_hint_eq = classes[j % classes.length];
         const kind_eq = kinds[j % kinds.length];
 
-        // UNIQUE COMBINATIONS
-        const mats = ["Bronze", "Copper", "Simple", "Worn"];
-        const mat = mats[j % mats.length];
+        const src_eq = pools[kind_eq].shift();
+        if (!src_eq) {
+            continue; // Out of unique images for this kind, skip!
+        }
 
-        const src_eq = category_sources[kind_eq][overallIndex % category_sources[kind_eq].length];
-        const itemWord = getItemWord(kind_eq, src_eq, j);
-
-        const classAdjectives = {
-            warrior: ["Vanguard", "Warmonger", "Guardian", "Bulwark", "Mighty", "Challenger"],
-            mage: ["Arcane", "Pyromancer", "Spellweaver", "Sorcerer", "Evoker", "Acolyte"],
-            rogue: ["Assassin", "Shadow", "Silent", "Phantom", "Infiltrator", "Stalker"],
-            druid: ["Barkskin", "Wildheart", "Forest", "Primal", "Nature", "Verdant"]
-        };
-        const classAdjs = classAdjectives[class_hint_eq];
-        const classAdj = classAdjs[j % classAdjs.length];
-
-        const name_eq = `${levelAdj} ${mat} ${classAdj} ${itemWord}`.toLowerCase();
+        const name_eq = getRealisticItemName(kind_eq, path.basename(src_eq), j, lvl);
 
         let attack = 0;
         let armor = 0;
@@ -368,7 +752,7 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
         let attack_speed = 0.0;
 
         if (kind_eq === 'one_hand_weapon') {
-            attack = Math.floor(lvl * 1.0) + 2;
+            attack = Math.floor(lvl) + 2;
             crit = 2;
             attack_speed = 0.9 + (j % 5) * 0.1;
         } else if (kind_eq === 'two_hand_weapon') {
@@ -407,26 +791,15 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
         fs.copyFileSync(path.join(assetsDir, src_eq), path.join(destEquipmentDir, subfolder_eq, `${name_eq}.png`));
     }
 
+
     // 10 accessories per level
     for (let a = 0; a < accessoriesPerLevel; a++) {
-        const overallIndex = (lvl - 1) * accessoriesPerLevel + a;
-
+        const src_acc = pools.accessory.shift();
+        if (!src_acc) {
+            continue; // Skip if accessory_pool is empty!
+        }
         const class_hint = classes[a % classes.length];
-        const mats = ["Copper", "Bronze", "Pewter", "Silver", "Gold", "Platinum"];
-        const mat = mats[a % mats.length];
-        const src_acc = accessory_sources[overallIndex % accessory_sources.length];
-        const word = getAccessoryWord(src_acc, a);
-
-        const classPrefixes = {
-            warrior: ["Valor", "Might", "Fortitude", "Brutality"],
-            mage: ["Arcana", "Focus", "Intelligence", "Evocation"],
-            rogue: ["Cunning", "Velocity", "Deception", "Shadows"],
-            druid: ["Thorns", "Wilds", "Restoration", "Earth"]
-        };
-        const classAdjs = classPrefixes[class_hint];
-        const classAdj = classAdjs[a % classAdjs.length];
-
-        const name_acc = `${levelAdj} ${mat} ${word} of ${classAdj}`.toLowerCase();
+        const name_acc = getRealisticItemName("accessory", path.basename(src_acc), a, lvl);
 
         const attack = Math.floor(lvl * 0.41);
         const armor = Math.floor(lvl * 0.41);
@@ -455,13 +828,12 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
     }
 
     // 10 consumables per level
-    const consumableTypes = ["Health Potion", "Mana Potion", "Strength Potion", "Dexterity Potion", "Constitution Potion", "Intelligence Potion", "Wisdom Potion", "Charisma Potion", "Rejuvenation Elixir", "Antidote Vial"];
     for (let c = 0; c < 10; c++) {
-        const overallIndex = (lvl - 1) * 10 + c;
-        const type = consumableTypes[c % consumableTypes.length];
-        const name_con = `${levelAdj} ${type}`.toLowerCase();
-
-        const src_con = category_sources.consumable[overallIndex % category_sources.consumable.length];
+        const src_con = pools.consumable.shift();
+        if (!src_con) {
+            continue; // Skip if consumable pool is empty!
+        }
+        const name_con = getRealisticItemName("consumable", path.basename(src_con), c, lvl);
         const subfolder_con = getSubfolderOfKind("consumable");
 
         finalEquipment.push({
