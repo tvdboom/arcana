@@ -1,13 +1,11 @@
-pub mod abilities;
 mod assets;
 mod audio;
 mod camera;
 pub mod classes;
 mod constants;
-pub mod consumables;
+pub mod catalog;
 pub mod localization;
 mod menu;
-pub mod perks;
 #[cfg(not(target_arch = "wasm32"))]
 mod persistence;
 mod pets;
@@ -18,7 +16,6 @@ mod states;
 mod systems;
 mod ui;
 mod utils;
-pub mod weapons;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::*;
@@ -156,7 +153,7 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     update_playing_screen,
-                    handle_playing_action_clicks,
+                    handle_equipment_interactions,
                     scroll_system,
                     update_right_scrollbar_system.after(scroll_system),
                     equip_slot_tooltip_system,

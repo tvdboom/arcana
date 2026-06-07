@@ -45,6 +45,15 @@ impl Localization {
             key.to_string()
         })
     }
+
+    pub fn get_opt(&self, key: &str, language: Language) -> Option<String> {
+        let map = match language {
+            Language::English => &self.en,
+            Language::Spanish => &self.es,
+            Language::Dutch => &self.nl,
+        };
+        map.get(key).cloned()
+    }
 }
 
 /// Marks a text entity with the localization key so it can be updated on language change.
@@ -106,16 +115,19 @@ pub fn format_class_description(
     let desc = localization.get(&format!("{}_desc", class_key), language);
 
     let starting_ability = class.starting_ability();
-    let ability_key = starting_ability.to_lowername();
-    let ability_name = localization.get(&ability_key, language);
+    let ability_name = crate::core::catalog::get_ability(starting_ability)
+        .map(|a| a.name)
+        .unwrap_or("Ability");
 
     let starting_perk = class.starting_perk();
-    let perk_key = starting_perk.to_lowername();
-    let perk_name = localization.get(&perk_key, language);
+    let perk_name = crate::core::catalog::get_perk(starting_perk)
+        .map(|p| p.name)
+        .unwrap_or("Perk");
 
     let starting_weapon = class.starting_weapon();
-    let weapon_key = starting_weapon.to_lowername();
-    let weapon_name = localization.get(&weapon_key, language);
+    let weapon_name = crate::core::catalog::get_equipment(starting_weapon)
+        .map(|w| w.name)
+        .unwrap_or("Weapon");
 
     let starting_ability_label = localization.get("starting_ability", language);
     let starting_perk_label = localization.get("starting_perk", language);
@@ -163,8 +175,9 @@ pub fn format_ajah_description(
     let desc = localization.get(&format!("{}_desc", ajah_key), language);
 
     let special_ability = ajah.special_ability();
-    let ability_key = special_ability.to_lowername();
-    let ability_name = localization.get(&ability_key, language);
+    let ability_name = crate::core::catalog::get_ability(special_ability)
+        .map(|a| a.name)
+        .unwrap_or("Ability");
 
     let special_ability_label = localization.get("special_ability", language);
 

@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use strum::IntoEnumIterator;
 
-use crate::core::abilities::MagicType;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::Class;
@@ -12,7 +11,6 @@ use crate::core::player::{Attribute, Player};
 use crate::core::settings::{Language, Settings};
 use crate::core::ui::creation::SelectionItem;
 use crate::core::utils::cursor;
-use crate::core::weapons::Weapon;
 use crate::utils::NameFromEnum;
 use bevy::window::SystemCursorIcon;
 
@@ -74,12 +72,13 @@ pub struct RightScrollbarTrack;
 #[derive(Component)]
 pub struct RightScrollbarThumb;
 
-/// The five equipment image-slots overlaid on the character portrait.
-#[derive(Component, Clone, Copy)]
+/// The six equipment image-slots overlaid on the character portrait.
+#[derive(Component, Clone, Copy, PartialEq, Eq)]
 pub enum EquipSlot {
     Helmet,
-    Weapon,
-    Offhand,
+    Accessory,
+    WeaponLH,
+    WeaponRH,
     Armor,
     Boots,
 }
@@ -93,11 +92,12 @@ pub struct TooltipNode {
     height: f32,
 }
 
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Clone, Copy, PartialEq, Eq)]
 pub enum InfoTooltip {
     Gold,
     ActionPoints,
     Combat(PlayingStat),
+    Action(&'static str),
 }
 
 fn portrait_key(player: &Player) -> String {
@@ -130,45 +130,41 @@ fn localized_class_name(player: &Player, localization: &Localization, lang: Lang
     }
 }
 
-fn name_with_level(name: String, level: u8) -> String {
-    format!("{} (Lv. {})", name, level)
+pub fn capitalize_words(s: &str) -> String {
+    s.split_whitespace()
+        .map(|word| {
+            let mut chars = word.chars();
+            match chars.next() {
+                None => String::new(),
+                Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+            }
+        })
+        .collect::<Vec<String>>()
+        .join(" ")
 }
 
-fn localized_magic_type(
-    magic_type: MagicType,
-    localization: &Localization,
-    lang: Language,
-) -> String {
-    let key = match magic_type {
-        MagicType::Physical => "physical",
-        MagicType::Fire => "fire",
-        MagicType::Ice => "ice",
-        MagicType::Dark => "dark",
-        MagicType::Nature => "nature",
-        MagicType::Holy => "holy",
-    };
-    localization.get(key, lang)
+fn name_with_level(name: String, level: u8) -> String {
+    format!("{} (Lv. {})", capitalize_words(&name), level)
 }
 
 fn ability_detail_line(
-    stats: crate::core::abilities::AbilityStats,
+    stats: &crate::core::catalog::GeneratedAbility,
     localization: &Localization,
     lang: Language,
 ) -> String {
     let mut parts = vec![format!(
         "{}: {} | {}: {}",
         localization.get("ability_type", lang),
-        localized_magic_type(stats.magic_type, localization, lang),
+        localization.get(&stats.magic_type.to_lowercase(), lang),
         localization.get("mana", lang),
         stats.mana_cost
     )];
 
     if stats.cooldown > 0 {
         parts.push(format!(
-            "{}: {} {}",
+            "{}: {}s",
             localization.get("cooldown", lang),
-            stats.cooldown,
-            localization.get("seconds", lang)
+            stats.cooldown
         ));
     }
 
@@ -177,12 +173,11 @@ fn ability_detail_line(
 
 /// Format the bonus characteristics of a weapon, e.g. "+6 attack | +10 crit | 1.2 as".
 fn weapon_stat_lines(
-    weapon: &Weapon,
+    weapon: &crate::core::catalog::GeneratedEquipment,
     player: &Player,
     localization: &Localization,
     lang: Language,
 ) -> Vec<String> {
-    let stats = weapon.stats();
     let mut parts = Vec::new();
     let mut push = |val: i32, key: &str| {
         if val != 0 {
@@ -194,12 +189,12 @@ fn weapon_stat_lines(
             parts.push(format!("{}{} {}", sign, val, localization.get(key, lang)));
         }
     };
-    push(stats.attack, "attack");
-    push(stats.armor, "armor");
-    push(stats.crit, "crit");
-    push(stats.initiative, "initiative");
-    if stats.attack_speed > 0.0 {
-        parts.push(format!("{:.1} as", player.weapon_attack_speed(weapon)));
+    push(weapon.attack, "attack");
+    push(weapon.armor, "armor");
+    push(weapon.crit, "crit");
+    push(weapon.initiative, "initiative");
+    if weapon.attack_speed > 0.0 {
+        parts.push(format!("{:.1} as", player.weapon_attack_speed(&weapon.name)));
     }
     if parts.is_empty() {
         vec![]
@@ -219,16 +214,14 @@ fn signed_line(label: impl Into<String>, value: i32) -> String {
 
 fn weapon_bonus_lines(
     player: &Player,
-    localization: &Localization,
-    lang: Language,
-    value_for: impl Fn(&Weapon) -> i32,
+    value_for: impl Fn(&crate::core::catalog::GeneratedEquipment) -> i32,
 ) -> Vec<String> {
     player
-        .equipped_weapons()
+        .equipped_equipment()
         .into_iter()
         .filter_map(|weapon| {
-            let value = value_for(weapon);
-            (value != 0).then(|| signed_line(localization.get(&weapon.to_lowername(), lang), value))
+            let value = value_for(&weapon);
+            (value != 0).then(|| signed_line(weapon.name.to_string(), value))
         })
         .collect()
 }
@@ -246,8 +239,8 @@ fn combat_breakdown(
                 localization.get("strength", lang),
                 player.strength() as i32 - 10,
             ));
-            lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
-                weapon.stats().attack
+            lines.extend(weapon_bonus_lines(player, |weapon| {
+                weapon.attack
             }));
             lines
         },
@@ -256,8 +249,8 @@ fn combat_breakdown(
                 localization.get("constitution", lang),
                 player.constitution() as i32 / 4,
             )];
-            lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
-                weapon.stats().armor
+            lines.extend(weapon_bonus_lines(player, |weapon| {
+                weapon.armor
             }));
             lines
         },
@@ -266,8 +259,8 @@ fn combat_breakdown(
                 localization.get("dexterity", lang),
                 player.dexterity() as i32 / 2,
             )];
-            lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
-                weapon.stats().initiative
+            lines.extend(weapon_bonus_lines(player, |weapon| {
+                weapon.initiative
             }));
             if matches!(player.class, Class::Rogue) {
                 lines.push(signed_line(localization.get("rogue", lang), 2));
@@ -286,7 +279,7 @@ fn spawn_tooltip(
     windows: &Query<&Window>,
 ) {
     let wrapped_lines: Vec<String> =
-        lines.into_iter().flat_map(|line| wrap_tooltip_line(&line, 42)).collect();
+        lines.into_iter().flat_map(|line| wrap_tooltip_line(&line, 60)).collect();
     let max_chars = std::iter::once(title.as_str())
         .chain(wrapped_lines.iter().map(String::as_str))
         .map(|line| line.chars().count())
@@ -299,7 +292,7 @@ fn spawn_tooltip(
     } else {
         (1600., 900., None)
     };
-    let tooltip_width = (max_chars * 8.5 + 28.).clamp(170., (window_width - 24.).max(170.));
+    let tooltip_width = (max_chars * 9.5 + 32.).clamp(190., (window_width - 24.).max(190.));
     let tooltip_height = (line_count as f32 * 24. + 24.).clamp(64., (window_height - 24.).max(64.));
     let (left, top) = place_tooltip(
         cursor.unwrap_or(Vec2::new(100., 100.)),
@@ -397,7 +390,7 @@ fn place_tooltip(
 }
 
 /// A bordered placeholder box (used wherever an item/ability image will go later).
-fn spawn_placeholder(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, size: Val) {
+fn spawn_placeholder(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, image_key: &str, size: Val) {
     parent.spawn((
         Node {
             width: size,
@@ -408,7 +401,7 @@ fn spawn_placeholder(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, si
         },
         BackgroundColor(PLACEHOLDER_COLOR),
         BorderColor::all(BUTTON_BORDER_COLOR),
-        ImageNode::new(assets.image("stone")).with_mode(NodeImageMode::Stretch),
+        ImageNode::new(assets.image(image_key)).with_mode(NodeImageMode::Stretch),
     ));
 }
 
@@ -416,6 +409,7 @@ fn spawn_placeholder(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, si
 fn spawn_card(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
+    image_key: &str,
     name: String,
     name_key: Option<String>,
     lines: Vec<String>,
@@ -437,7 +431,7 @@ fn spawn_card(
             BorderColor::all(BUTTON_BORDER_COLOR),
         ))
         .with_children(|parent| {
-            spawn_placeholder(parent, assets, Val::Px(40.));
+            spawn_placeholder(parent, assets, image_key, Val::Px(40.));
 
             parent
                 .spawn(Node {
@@ -615,8 +609,8 @@ pub fn setup_playing_screen(
                     spawn_playing_action_button(parent, "quest", &assets, &localization, lang);
                     spawn_playing_action_button(parent, "train", &assets, &localization, lang);
                     spawn_playing_action_button(parent, "craft", &assets, &localization, lang);
+                    spawn_playing_action_button(parent, "work", &assets, &localization, lang);
                     spawn_playing_action_button(parent, "rest", &assets, &localization, lang);
-                    spawn_playing_action_button(parent, "inventory", &assets, &localization, lang);
                 });
         });
 }
@@ -660,14 +654,15 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
                             height: percent(96.),
                             flex_direction: FlexDirection::Column,
                             justify_content: JustifyContent::SpaceBetween,
-                            row_gap: Val::Px(2.),
+                            row_gap: Val::Px(1.),
                             ..default()
                         })
                         .with_children(|parent| {
                             for slot in [
                                 EquipSlot::Helmet,
-                                EquipSlot::Weapon,
-                                EquipSlot::Offhand,
+                                EquipSlot::Accessory,
+                                EquipSlot::WeaponLH,
+                                EquipSlot::WeaponRH,
                                 EquipSlot::Armor,
                                 EquipSlot::Boots,
                             ] {
@@ -683,8 +678,12 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
                                     ImageNode::new(assets.image("stone"))
                                         .with_mode(NodeImageMode::Stretch),
                                     Interaction::default(),
+                                    Button,
+                                    Pickable::default(),
                                     slot,
-                                ));
+                                ))
+                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                .observe(cursor::<Out>(SystemCursorIcon::Default));
                             }
                         });
 
@@ -1130,20 +1129,22 @@ pub fn equip_slot_tooltip_system(
         }
 
         if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
-            let equipped = match slot {
-                EquipSlot::Helmet => player.helmet,
-                EquipSlot::Weapon => player.weapon_2h.or(player.weapon_lh),
-                EquipSlot::Offhand => player.weapon_rh,
-                EquipSlot::Armor => player.armor,
-                EquipSlot::Boots => player.boots,
+            let equipped_key = match slot {
+                EquipSlot::Helmet => player.helmet.as_deref(),
+                EquipSlot::Accessory => player.accessory.as_deref(),
+                EquipSlot::WeaponLH => player.weapon_lh.as_deref().or(player.weapon_2h.as_deref()),
+                EquipSlot::WeaponRH => player.weapon_rh.as_deref(),
+                EquipSlot::Armor => player.armor.as_deref(),
+                EquipSlot::Boots => player.boots.as_deref(),
             };
 
-            if let Some(weapon) = equipped {
-                let name =
-                    name_with_level(localization.get(&weapon.to_lowername(), lang), weapon.level());
-                let stat_lines = weapon_stat_lines(&weapon, &player, &localization, lang);
+            if let Some(key) = equipped_key {
+                if let Some(weapon) = crate::core::catalog::get_equipment(key) {
+                    let name = name_with_level(weapon.name.to_string(), weapon.level);
+                    let stat_lines = weapon_stat_lines(&weapon, &player, &localization, lang);
 
-                spawn_tooltip(&mut commands, &assets, name, stat_lines, &windows);
+                    spawn_tooltip(&mut commands, &assets, name, stat_lines, &windows);
+                }
             }
         }
     }
@@ -1189,6 +1190,22 @@ pub fn info_tooltip_system(
                     combat_breakdown(*stat, &player, &localization, lang),
                 )
             },
+            InfoTooltip::Action(act) => {
+                let title = localization.get(act, lang);
+                let desc_key = format!("{}_desc", act);
+                let desc = localization.get_opt(&desc_key, lang)
+                    .unwrap_or_else(|| match *act {
+                        "hunt" => "Go hunting in the wild to earn gold. Cost: 2 AP. Earns: 10-20 Gold.".to_string(),
+                        "shop" => "Buy a random consumable item. Cost: 1 AP, 30 Gold.".to_string(),
+                        "quest" => "Embark on an adventure to earn gold and find new equipment. Cost: 3 AP. Earns: 20-40 Gold, 50% chance of equipment.".to_string(),
+                        "train" => "Train hard to increase a random attribute. Cost: 2 AP.".to_string(),
+                        "craft" => "Craft a piece of equipment suitable for your level. Cost: 2 AP, 15 Gold.".to_string(),
+                        "work" => "Do some hard labor to earn a stable gold reward. Cost: 2 AP. Earns: 15-30 Gold.".to_string(),
+                        "rest" => "Rest at the tavern to fully recover health and mana. Cost: 1 AP, 10 Gold.".to_string(),
+                        _ => "Perform an action.".to_string(),
+                    });
+                (title, vec![desc])
+            }
         };
 
         spawn_tooltip(&mut commands, &assets, title, lines, &windows);
@@ -1416,17 +1433,18 @@ pub fn rebuild_playing_lists(
 ) {
     let lang = settings.language;
 
-    // Update the five equipment image-slots on the portrait.
+    // Update the equipment image-slots on the portrait.
     for (slot, mut image) in &mut slot_q {
-        let equipped = match slot {
-            EquipSlot::Helmet => player.helmet,
-            EquipSlot::Weapon => player.weapon_2h.or(player.weapon_lh),
-            EquipSlot::Offhand => player.weapon_rh,
-            EquipSlot::Armor => player.armor,
-            EquipSlot::Boots => player.boots,
+        let equipped_key = match slot {
+            EquipSlot::Helmet => player.helmet.as_deref(),
+            EquipSlot::Accessory => player.accessory.as_deref(),
+            EquipSlot::WeaponLH => player.weapon_lh.as_deref().or(player.weapon_2h.as_deref()),
+            EquipSlot::WeaponRH => player.weapon_rh.as_deref(),
+            EquipSlot::Armor => player.armor.as_deref(),
+            EquipSlot::Boots => player.boots.as_deref(),
         };
-        image.image = match equipped {
-            Some(weapon) => assets.image(weapon.image_key()),
+        image.image = match equipped_key {
+            Some(key) => assets.image(key),
             None => assets.image("stone"),
         };
     }
@@ -1444,38 +1462,53 @@ pub fn rebuild_playing_lists(
         clear(&mut commands, entity, &children_q);
         commands.entity(entity).with_children(|parent| {
             let mut empty = true;
-            let mut slots: Vec<&Weapon> = Vec::new();
-            for slot in [
-                &player.helmet,
-                &player.armor,
-                &player.boots,
-                &player.weapon_lh,
-                &player.weapon_rh,
-                &player.weapon_2h,
-            ] {
-                if let Some(weapon) = slot {
-                    slots.push(weapon);
+
+            // Equipped items
+            let equipped_slots = [
+                (&player.helmet, "helmet"),
+                (&player.accessory, "accessory"),
+                (&player.weapon_lh, "one_hand_weapon"),
+                (&player.weapon_rh, "offhand"),
+                (&player.weapon_2h, "two_hand_weapon"),
+                (&player.armor, "armor"),
+                (&player.boots, "boots"),
+            ];
+
+            for (slot_val, _kind) in &equipped_slots {
+                if let Some(key) = slot_val {
+                    if let Some(weapon) = crate::core::catalog::get_equipment(key) {
+                        empty = false;
+                        spawn_equipment_card(
+                            parent,
+                            &assets,
+                            &weapon.name,
+                            format!("{} (Equipped)", name_with_level(weapon.name.to_string(), weapon.level)),
+                            weapon_stat_lines(&weapon, &player, &localization, lang),
+                            EquipmentCard {
+                                key: weapon.name.to_string(),
+                                is_equipped: true,
+                            },
+                        );
+                    }
                 }
             }
-            for weapon in slots {
-                empty = false;
-                spawn_card(
-                    parent,
-                    &assets,
-                    name_with_level(localization.get(&weapon.to_lowername(), lang), weapon.level()),
-                    None,
-                    weapon_stat_lines(weapon, &player, &localization, lang),
-                );
-            }
-            for consumable in &player.consumables {
-                empty = false;
-                spawn_card(
-                    parent,
-                    &assets,
-                    localization.get(&consumable.to_lowername(), lang),
-                    Some(consumable.to_lowername()),
-                    vec![],
-                );
+
+            // Inventory items (unequipped)
+            for key in &player.inventory {
+                if let Some(weapon) = crate::core::catalog::get_equipment(key) {
+                    empty = false;
+                    spawn_equipment_card(
+                        parent,
+                        &assets,
+                        &weapon.name,
+                        name_with_level(weapon.name.to_string(), weapon.level),
+                        weapon_stat_lines(&weapon, &player, &localization, lang),
+                        EquipmentCard {
+                            key: weapon.name.to_string(),
+                            is_equipped: false,
+                        },
+                    );
+                }
             }
             if empty {
                 parent.spawn((
@@ -1496,19 +1529,22 @@ pub fn rebuild_playing_lists(
                     TextColor(Color::WHITE),
                 ));
             }
-            for ability in &player.abilities {
-                let key = ability.to_lowername();
-                let stats = ability.stats();
-                spawn_card(
-                    parent,
-                    &assets,
-                    name_with_level(localization.get(&key, lang), stats.level),
-                    None,
-                    vec![
-                        ability_detail_line(stats, &localization, lang),
-                        localization.get(&format!("{}_desc", key), lang),
-                    ],
-                );
+            for ability_key in &player.abilities {
+                if let Some(ability) = crate::core::catalog::get_ability(ability_key) {
+                    let desc = localization.get_opt(&format!("{}_desc", ability.name), lang)
+                        .unwrap_or_else(|| format!("A powerful {} ability that consumes {} mana.", ability.magic_type.to_lowercase(), ability.mana_cost));
+                    spawn_card(
+                        parent,
+                        &assets,
+                        &ability.name,
+                        name_with_level(ability.name.to_string(), ability.level),
+                        None,
+                        vec![
+                            ability_detail_line(&ability, &localization, lang),
+                            desc,
+                        ],
+                    );
+                }
             }
         });
     }
@@ -1523,15 +1559,19 @@ pub fn rebuild_playing_lists(
                     TextColor(Color::WHITE),
                 ));
             }
-            for perk in &player.perks {
-                let key = perk.to_lowername();
-                spawn_card(
-                    parent,
-                    &assets,
-                    name_with_level(localization.get(&key, lang), perk.level()),
-                    None,
-                    vec![localization.get(&format!("{}_desc", key), lang)],
-                );
+            for perk_key in &player.perks {
+                if let Some(perk) = crate::core::catalog::get_perk(perk_key) {
+                    let desc = localization.get_opt(&format!("{}_desc", perk.name), lang)
+                        .unwrap_or_else(|| format!("An impressive passive perk that empowers your {} capabilities.", perk.theme));
+                    spawn_card(
+                        parent,
+                        &assets,
+                        &perk.name,
+                        name_with_level(perk.name.to_string(), perk.level),
+                        None,
+                        vec![desc],
+                    );
+                }
             }
         });
     }
@@ -1610,6 +1650,21 @@ pub fn update_playing_screen(
     }
 }
 
+pub fn highlight_border<E: std::fmt::Debug + Clone + Reflect>(
+    color: Color,
+    thickness: Val,
+) -> impl Fn(On<Pointer<E>>, Query<(&mut BorderColor, &mut Node)>) {
+    move |ev, mut q| {
+        if let Ok((mut border_color, mut node)) = q.get_mut(ev.entity) {
+            border_color.top = color;
+            border_color.right = color;
+            border_color.bottom = color;
+            border_color.left = color;
+            node.border = UiRect::all(thickness);
+        }
+    }
+}
+
 pub fn spawn_playing_action_button(
     parent: &mut ChildSpawnerCommands,
     action: &'static str,
@@ -1624,7 +1679,7 @@ pub fn spawn_playing_action_button(
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             row_gap: Val::Px(4.),
-            margin: UiRect::horizontal(Val::Px(8.)),
+            margin: UiRect::horizontal(Val::Px(12.)),
             ..default()
         })
         .with_children(|parent| {
@@ -1645,9 +1700,15 @@ pub fn spawn_playing_action_button(
                         .with_mode(NodeImageMode::Stretch),
                     Button,
                     ActionButton(action),
+                    InfoTooltip::Action(action),
                 ))
+                .observe(handle_playing_action_clicks)
                 .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
                 .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                .observe(highlight_border::<Over>(HOVERED_BUTTON_COLOR, Val::Px(3.)))
+                .observe(highlight_border::<Out>(BUTTON_BORDER_COLOR, Val::Px(2.)))
+                .observe(highlight_border::<Press>(Color::srgb_u8(240, 190, 60), Val::Px(3.)))
+                .observe(highlight_border::<Release>(HOVERED_BUTTON_COLOR, Val::Px(3.)))
                 .observe(cursor::<Over>(SystemCursorIcon::Pointer))
                 .observe(cursor::<Out>(SystemCursorIcon::Default));
 
@@ -1659,161 +1720,361 @@ pub fn spawn_playing_action_button(
         });
 }
 
+#[derive(Component)]
+pub struct EquipmentCard {
+    pub key: String,
+    pub is_equipped: bool,
+}
+
 pub fn handle_playing_action_clicks(
+    event: On<Pointer<Click>>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    interaction_q: Query<(&Interaction, &ActionButton), (Changed<Interaction>, With<Button>)>,
+    action_btn_q: Query<&ActionButton>,
 ) {
     use rand::RngExt;
 
-    for (interaction, action) in &interaction_q {
-        if *interaction == Interaction::Pressed {
-            play_audio_msg.write(PlayAudioMsg::new("button"));
+    if let Ok(action) = action_btn_q.get(event.entity) {
+        let cost_gold = match action.0 {
+            "craft" => 15,
+            "shop" => 30,
+            "rest" => 10,
+            _ => 0,
+        };
 
-            let cost_gold = match action.0 {
-                "craft" => 15,
-                "shop" => 30,
-                "rest" => 10,
-                _ => 0,
-            };
+        if player.gold < cost_gold {
+            play_audio_msg.write(PlayAudioMsg::new("error"));
+            return;
+        }
 
-            if player.gold < cost_gold {
-                play_audio_msg.write(PlayAudioMsg::new("error"));
-                continue;
-            }
+        play_audio_msg.write(PlayAudioMsg::new("button"));
+        player.gold -= cost_gold;
 
-            player.gold -= cost_gold;
-
-            // Handle the specific action
-            let ap_cost = match action.0 {
-                "hunt" => {
-                    let gold_earned = rand::rng().random_range(10..=20);
-                    player.gold += gold_earned;
-                    2
-                },
-                "shop" => {
-                    use crate::core::consumables::Consumable;
-                    let items = vec![
-                        Consumable::HealingPotion,
-                        Consumable::ManaPotion,
-                        Consumable::PoisonVial,
-                        Consumable::HerbBlend,
-                    ];
+        // Handle the specific action
+        let ap_cost = match action.0 {
+            "hunt" => {
+                let gold_earned = rand::rng().random_range(10..=20);
+                player.gold += gold_earned;
+                2
+            },
+            "work" => {
+                let gold_earned = rand::rng().random_range(15..=30);
+                player.gold += gold_earned;
+                2
+            },
+            "shop" => {
+                let lvl = player.level;
+                let items: Vec<&crate::core::catalog::GeneratedEquipment> = crate::core::catalog::GENERATED_EQUIPMENT
+                    .iter()
+                    .filter(|eq| eq.kind == "consumable" && eq.level <= lvl)
+                    .collect();
+                use rand::seq::IndexedRandom;
+                if let Some(item) = items.choose(&mut rand::rng()) {
+                    let name = item.name.to_string();
+                    reward_equipment(&mut player, name);
+                }
+                1
+            },
+            "quest" => {
+                let gold_earned = rand::rng().random_range(20..=40);
+                if rand::rng().random_bool(0.5) {
+                    let items: Vec<&crate::core::catalog::GeneratedEquipment> = crate::core::catalog::GENERATED_EQUIPMENT
+                        .iter()
+                        .filter(|eq| eq.level <= player.level)
+                        .collect();
                     use rand::seq::IndexedRandom;
-                    let item = items
-                        .choose(&mut rand::rng())
-                        .copied()
-                        .unwrap_or(Consumable::HealingPotion);
-                    player.consumables.push(item);
-                    1
-                },
-                "quest" => {
-                    let gold_earned = rand::rng().random_range(20..=40);
-                    if rand::rng().random_bool(0.5) {
-                        let upgrade_types = vec![
-                            Weapon::IronHelmet,
-                            Weapon::IronChestplate,
-                            Weapon::IronBoots,
-                            Weapon::SteelSword,
-                            Weapon::IronShield,
-                            Weapon::WizardStaff,
-                            Weapon::MageRobes,
-                            Weapon::ClothShoes,
-                            Weapon::LeatherArmor,
-                            Weapon::SilentBoots,
-                            Weapon::AssassinDagger,
-                            Weapon::ThiefDagger,
-                            Weapon::OakWand,
-                            Weapon::LeafyGarb,
-                        ];
-                        use rand::seq::IndexedRandom;
-                        if let Some(&upg) = upgrade_types.choose(&mut rand::rng()) {
-                            match upg {
-                                Weapon::IronHelmet => player.helmet = Some(upg),
-                                Weapon::IronChestplate
-                                | Weapon::MageRobes
-                                | Weapon::LeatherArmor
-                                | Weapon::LeafyGarb => player.armor = Some(upg),
-                                Weapon::IronBoots
-                                | Weapon::ClothShoes
-                                | Weapon::SilentBoots
-                                | Weapon::LeatherBoots => player.boots = Some(upg),
-                                Weapon::WizardStaff => {
-                                    player.weapon_2h = Some(upg);
-                                    player.weapon_lh = None;
-                                    player.weapon_rh = None;
-                                },
-                                Weapon::SteelSword
-                                | Weapon::AssassinDagger
-                                | Weapon::ThiefDagger
-                                | Weapon::OakWand => {
-                                    player.weapon_lh = Some(upg);
-                                },
-                                Weapon::IronShield => {
-                                    player.weapon_rh = Some(upg);
-                                },
-                            }
-                        }
+                    if let Some(item) = items.choose(&mut rand::rng()) {
+                        reward_equipment(&mut player, item.name.to_string());
                     }
-                    player.gold += gold_earned;
-                    3
-                },
-                "train" => {
-                    let attr_idx = rand::rng().random_range(0..6);
-                    match attr_idx {
-                        0 => player.strength += 1,
-                        1 => player.dexterity += 1,
-                        2 => player.constitution += 1,
-                        3 => player.intelligence += 1,
-                        4 => player.wisdom += 1,
-                        _ => player.charisma += 1,
-                    };
-                    2
-                },
-                "craft" => {
-                    let items = vec![
-                        Weapon::IronHelmet,
-                        Weapon::IronChestplate,
-                        Weapon::IronBoots,
-                        Weapon::SteelSword,
-                        Weapon::IronShield,
-                    ];
-                    use rand::seq::IndexedRandom;
-                    let item =
-                        items.choose(&mut rand::rng()).copied().unwrap_or(Weapon::IronHelmet);
-                    match item {
-                        Weapon::IronHelmet => player.helmet = Some(item),
-                        Weapon::IronChestplate => player.armor = Some(item),
-                        Weapon::IronBoots => player.boots = Some(item),
-                        Weapon::SteelSword => player.weapon_lh = Some(item),
-                        Weapon::IronShield => player.weapon_rh = Some(item),
-                        _ => {},
-                    }
-                    2
-                },
-                "rest" => {
+                }
+                player.gold += gold_earned;
+                3
+            },
+            "train" => {
+                let attr_idx = rand::rng().random_range(0..6);
+                match attr_idx {
+                    0 => player.strength += 1,
+                    1 => player.dexterity += 1,
+                    2 => player.constitution += 1,
+                    3 => player.intelligence += 1,
+                    4 => player.wisdom += 1,
+                    _ => player.charisma += 1,
+                };
+                2
+            },
+            "craft" => {
+                let items: Vec<&crate::core::catalog::GeneratedEquipment> = crate::core::catalog::GENERATED_EQUIPMENT
+                    .iter()
+                    .filter(|eq| eq.level == player.level)
+                    .collect();
+                use rand::seq::IndexedRandom;
+                if let Some(item) = items.choose(&mut rand::rng()) {
+                    reward_equipment(&mut player, item.name.to_string());
+                }
+                2
+            },
+            "rest" => {
+                player.health = player.max_health().floor();
+                player.mana = player.max_mana().floor();
+                1
+            },
+            _ => 0,
+        };
+
+        // Deduct action points
+        if player.ap <= ap_cost {
+            player.level += 1;
+            player.ap = 10 + (player.level as u32) * 2;
+            player.strength += 1;
+            player.dexterity += 1;
+            player.constitution += 1;
+            player.intelligence += 1;
+            player.wisdom += 1;
+            player.charisma += 1;
+            play_audio_msg.write(PlayAudioMsg::new("victory"));
+        } else {
+            player.ap -= ap_cost;
+        }
+    }
+}
+
+pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
+    if let Some(weapon) = crate::core::catalog::get_equipment(key) {
+        // Remove from inventory first
+        if let Some(pos) = player.inventory.iter().position(|k| k == key) {
+            player.inventory.remove(pos);
+        }
+
+        match weapon.kind {
+            "consumable" => {
+                let name = weapon.name.to_lowercase();
+                if name.contains("health") {
+                    player.health = player.max_health().floor();
+                } else if name.contains("mana") {
+                    player.mana = player.max_mana().floor();
+                } else if name.contains("strength") {
+                    player.strength += 1;
+                } else if name.contains("dexterity") {
+                    player.dexterity += 1;
+                } else if name.contains("constitution") {
+                    player.constitution += 1;
+                } else if name.contains("intelligence") {
+                    player.intelligence += 1;
+                } else if name.contains("wisdom") {
+                    player.wisdom += 1;
+                } else if name.contains("charisma") {
+                    player.charisma += 1;
+                } else if name.contains("rejuvenation") {
                     player.health = player.max_health().floor();
                     player.mana = player.max_mana().floor();
-                    1
-                },
-                "inventory" => 0,
-                _ => 0,
-            };
+                } else if name.contains("antidote") {
+                    player.health = player.max_health().floor();
+                }
+                return Some("button");
+            },
+            "helmet" => {
+                if let Some(old) = player.helmet.replace(key.to_string()) {
+                    player.inventory.push(old);
+                }
+            },
+            "armor" => {
+                if let Some(old) = player.armor.replace(key.to_string()) {
+                    player.inventory.push(old);
+                }
+            },
+            "boots" => {
+                if let Some(old) = player.boots.replace(key.to_string()) {
+                    player.inventory.push(old);
+                }
+            },
+            "accessory" => {
+                if let Some(old) = player.accessory.replace(key.to_string()) {
+                    player.inventory.push(old);
+                }
+            },
+            "one_hand_weapon" => {
+                if let Some(old_2h) = player.weapon_2h.take() {
+                    player.inventory.push(old_2h);
+                }
+                if player.weapon_lh.is_none() {
+                    player.weapon_lh = Some(key.to_string());
+                } else if player.weapon_rh.is_none() {
+                    player.weapon_rh = Some(key.to_string());
+                } else {
+                    if let Some(old) = player.weapon_lh.replace(key.to_string()) {
+                        player.inventory.push(old);
+                    }
+                }
+            },
+            "two_hand_weapon" => {
+                if let Some(old_lh) = player.weapon_lh.take() {
+                    player.inventory.push(old_lh);
+                }
+                if let Some(old_rh) = player.weapon_rh.take() {
+                    player.inventory.push(old_rh);
+                }
+                if let Some(old_2h) = player.weapon_2h.replace(key.to_string()) {
+                    player.inventory.push(old_2h);
+                }
+            },
+            "offhand" => {
+                if let Some(old_2h) = player.weapon_2h.take() {
+                    player.inventory.push(old_2h);
+                }
+                if let Some(old) = player.weapon_rh.replace(key.to_string()) {
+                    player.inventory.push(old);
+                }
+            },
+            _ => {}
+        }
+    }
+    None
+}
 
-            // Deduct action points
-            if player.ap <= ap_cost {
-                player.level += 1;
-                player.ap = 10 + (player.level as u32) * 2;
-                player.strength += 1;
-                player.dexterity += 1;
-                player.constitution += 1;
-                player.intelligence += 1;
-                player.wisdom += 1;
-                player.charisma += 1;
-                play_audio_msg.write(PlayAudioMsg::new("victory"));
+pub fn unequip_item(player: &mut Player, key: &str) {
+    let mut removed = false;
+    if player.helmet.as_deref() == Some(key) {
+        player.helmet = None;
+        removed = true;
+    } else if player.armor.as_deref() == Some(key) {
+        player.armor = None;
+        removed = true;
+    } else if player.boots.as_deref() == Some(key) {
+        player.boots = None;
+        removed = true;
+    } else if player.weapon_lh.as_deref() == Some(key) {
+        player.weapon_lh = None;
+        removed = true;
+    } else if player.weapon_rh.as_deref() == Some(key) {
+        player.weapon_rh = None;
+        removed = true;
+    } else if player.weapon_2h.as_deref() == Some(key) {
+        player.weapon_2h = None;
+        removed = true;
+    } else if player.accessory.as_deref() == Some(key) {
+        player.accessory = None;
+        removed = true;
+    }
+    if removed {
+        player.inventory.push(key.to_string());
+    }
+}
+
+pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
+    let key_opt = match slot {
+        EquipSlot::Helmet => player.helmet.take(),
+        EquipSlot::Accessory => player.accessory.take(),
+        EquipSlot::WeaponLH => {
+            player.weapon_lh.take().or(player.weapon_2h.take())
+        },
+        EquipSlot::WeaponRH => player.weapon_rh.take(),
+        EquipSlot::Armor => player.armor.take(),
+        EquipSlot::Boots => player.boots.take(),
+    };
+    if let Some(key) = key_opt {
+        player.inventory.push(key);
+        true
+    } else {
+        false
+    }
+}
+
+pub fn reward_equipment(player: &mut Player, key: String) {
+    if let Some(weapon) = crate::core::catalog::get_equipment(&key) {
+        let is_empty = match weapon.kind {
+            "helmet" => player.helmet.is_none(),
+            "armor" => player.armor.is_none(),
+            "boots" => player.boots.is_none(),
+            "accessory" => player.accessory.is_none(),
+            "one_hand_weapon" => player.weapon_2h.is_none() && (player.weapon_lh.is_none() || player.weapon_rh.is_none()),
+            "two_hand_weapon" => player.weapon_lh.is_none() && player.weapon_rh.is_none() && player.weapon_2h.is_none(),
+            "offhand" => player.weapon_2h.is_none() && player.weapon_rh.is_none(),
+            _ => false,
+        };
+        if is_empty {
+            equip_item(player, &key);
+        } else {
+            player.inventory.push(key);
+        }
+    }
+}
+
+pub fn handle_equipment_interactions(
+    mut player: ResMut<Player>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    card_interaction_q: Query<(&Interaction, &EquipmentCard), (Changed<Interaction>, With<Button>)>,
+    slot_interaction_q: Query<(&Interaction, &EquipSlot), (Changed<Interaction>, With<Button>)>,
+) {
+    for (interaction, card) in &card_interaction_q {
+        if *interaction == Interaction::Pressed {
+            if card.is_equipped {
+                unequip_item(&mut player, &card.key);
+                play_audio_msg.write(PlayAudioMsg::new("click"));
             } else {
-                player.ap -= ap_cost;
+                let sound = equip_item(&mut player, &card.key).unwrap_or("click");
+                play_audio_msg.write(PlayAudioMsg::new(sound));
             }
         }
     }
+
+    for (interaction, slot) in &slot_interaction_q {
+        if *interaction == Interaction::Pressed {
+            if unequip_slot(&mut player, *slot) {
+                play_audio_msg.write(PlayAudioMsg::new("click"));
+            }
+        }
+    }
+}
+
+fn spawn_equipment_card(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    image_key: &str,
+    name: String,
+    lines: Vec<String>,
+    card: EquipmentCard,
+) {
+    parent
+        .spawn((
+            Node {
+                width: percent(100.),
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::FlexStart,
+                flex_shrink: 0.,
+                column_gap: Val::Px(8.),
+                padding: UiRect::all(Val::Px(6.)),
+                margin: UiRect::bottom(Val::Px(6.)),
+                border: UiRect::all(Val::Px(1.)),
+                ..default()
+            },
+            BackgroundColor(BAR_BG_COLOR),
+            BorderColor::all(BUTTON_BORDER_COLOR),
+            Button,
+            Interaction::default(),
+            Pickable::default(),
+            card,
+        ))
+        .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+        .observe(recolor::<Out>(BAR_BG_COLOR))
+        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+        .observe(cursor::<Out>(SystemCursorIcon::Default))
+        .with_children(|parent| {
+            spawn_placeholder(parent, assets, image_key, Val::Px(40.));
+
+            parent
+                .spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn((add_text(name, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
+
+                    for line in lines {
+                        parent.spawn((
+                            add_text(line, "medium", 1.6, assets),
+                            TextColor(Color::WHITE),
+                        ));
+                    }
+                });
+        });
 }

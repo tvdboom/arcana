@@ -1,6 +1,3 @@
-use crate::core::abilities::Ability;
-use crate::core::perks::Perk;
-use crate::core::weapons::Weapon;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
@@ -23,41 +20,41 @@ pub enum Ajah {
 }
 
 impl Ajah {
-    pub fn special_ability(&self) -> Ability {
+    pub fn special_ability(&self) -> &'static str {
         match self {
-            Ajah::Black => Ability::Shadowbolt,
-            Ajah::Red => Ability::Firebolt,
-            Ajah::Green => Ability::Regrowth,
-            Ajah::White => Ability::Frostbolt,
+            Ajah::Black => "novice ethereal cosmic flash",
+            Ajah::Red => "novice infused pyro blast",
+            Ajah::Green => "novice noble static nova",
+            Ajah::White => "novice vile mana barrier",
         }
     }
 }
 
 impl Class {
-    pub fn starting_ability(&self) -> Ability {
+    pub fn starting_ability(&self) -> &'static str {
         match self {
-            Class::Warrior => Ability::Slash,
-            Class::Mage(_) => Ability::Heal,
-            Class::Rogue => Ability::Backstab,
-            Class::Druid => Ability::Regrowth,
+            Class::Warrior => "novice swift cleaving strike",
+            Class::Mage(_) => "novice ashen lightning touch",
+            Class::Rogue => "novice clandestine devious slash",
+            Class::Druid => "novice sovereign sunfire howl",
         }
     }
 
-    pub fn starting_perk(&self) -> Perk {
+    pub fn starting_perk(&self) -> &'static str {
         match self {
-            Class::Warrior => Perk::IronSkin,
-            Class::Mage(_) => Perk::ArcaneFlow,
-            Class::Rogue => Perk::FleetFooted,
-            Class::Druid => Perk::WildBond,
+            Class::Warrior => "novice swift vanguard mastery",
+            Class::Mage(_) => "novice infused acolyte resilience",
+            Class::Rogue => "novice clandestine stalker reflexes",
+            Class::Druid => "novice sovereign dryad harmony",
         }
     }
 
-    pub fn starting_weapon(&self) -> Weapon {
+    pub fn starting_weapon(&self) -> &'static str {
         match self {
-            Class::Warrior => Weapon::SteelSword,
-            Class::Mage(_) => Weapon::WizardStaff,
-            Class::Rogue => Weapon::ThiefDagger,
-            Class::Druid => Weapon::OakWand,
+            Class::Warrior => "novice bronze mighty halberd",
+            Class::Mage(_) => "novice copper pyromancer greatsword",
+            Class::Rogue => "novice simple infiltrator dagger",
+            Class::Druid => "novice worn primal saber",
         }
     }
 }

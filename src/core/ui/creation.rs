@@ -14,7 +14,6 @@ use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
 use crate::core::utils::cursor;
-use crate::core::weapons::Weapon;
 use crate::utils::NameFromEnum;
 use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::window::SystemCursorIcon;
@@ -1304,21 +1303,21 @@ impl SelectionItem for Class {
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = *self;
-        player.abilities = vec![self.starting_ability()];
-        player.perks = vec![self.starting_perk()];
+        player.abilities = vec![self.starting_ability().to_string()];
+        player.perks = vec![self.starting_perk().to_string()];
 
         match self {
             Class::Warrior => {
-                player.weapon_rh = Some(Weapon::SteelSword);
+                player.weapon_lh = Some(self.starting_weapon().to_string());
             },
             Class::Mage(_) => {
-                player.weapon_2h = Some(Weapon::WizardStaff);
+                player.weapon_2h = Some(self.starting_weapon().to_string());
             },
             Class::Rogue => {
-                player.weapon_rh = Some(Weapon::ThiefDagger);
+                player.weapon_lh = Some(self.starting_weapon().to_string());
             },
             Class::Druid => {
-                player.weapon_rh = Some(Weapon::OakWand);
+                player.weapon_lh = Some(self.starting_weapon().to_string());
             },
         }
 
@@ -1333,11 +1332,12 @@ impl SelectionItem for Class {
 
     fn get_image_key(&self, player: &Player) -> String {
         let race_key = player.race.to_lowername();
+        let sex_key = player.sex.to_lowername();
         match self {
-            Class::Mage(_) => format!("mage_{}", race_key),
-            Class::Warrior => format!("warrior_{}", race_key),
-            Class::Rogue => format!("rogue_{}", race_key),
-            Class::Druid => format!("druid_{}", race_key),
+            Class::Mage(_) => format!("mage_{}_{}", race_key, sex_key),
+            Class::Warrior => format!("warrior_{}_{}", race_key, sex_key),
+            Class::Rogue => format!("rogue_{}_{}", race_key, sex_key),
+            Class::Druid => format!("druid_{}_{}", race_key, sex_key),
         }
     }
 }
@@ -1355,7 +1355,7 @@ impl SelectionItem for Ajah {
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = Class::Mage(*self);
-        player.abilities.push(self.special_ability());
+        player.abilities.push(self.special_ability().to_string());
         player.health = player.max_health().floor();
         player.mana = player.max_mana().floor();
         next_game_state.set(GameState::Playing);
@@ -1363,11 +1363,15 @@ impl SelectionItem for Ajah {
 
     fn get_image_key(&self, player: &Player) -> String {
         let race_key = player.race.to_lowername();
+        let sex_key = match player.sex {
+            Sex::Male => "male",
+            Sex::Female => "female",
+        };
         match self {
-            Ajah::Black => format!("mage_black_{}", race_key),
-            Ajah::Red => format!("mage_red_{}", race_key),
-            Ajah::Green => format!("mage_green_{}", race_key),
-            Ajah::White => format!("mage_white_{}", race_key),
+            Ajah::Black => format!("mage_black_{}_{}", race_key, sex_key),
+            Ajah::Red => format!("mage_red_{}_{}", race_key, sex_key),
+            Ajah::Green => format!("mage_green_{}_{}", race_key, sex_key),
+            Ajah::White => format!("mage_white_{}_{}", race_key, sex_key),
         }
     }
 }

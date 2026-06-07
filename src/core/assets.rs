@@ -3,6 +3,8 @@ use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
 use std::collections::HashMap;
 
+use crate::core::catalog::{GENERATED_ABILITIES, GENERATED_EQUIPMENT, GENERATED_PERKS};
+
 #[derive(Resource)]
 pub struct WorldAssets {
     pub audio: HashMap<&'static str, Handle<AudioSource>>,
@@ -56,26 +58,25 @@ impl FromWorld for WorldAssets {
             ("medium", assets.load("fonts/FiraMono-Medium.ttf")),
         ]);
 
-        let images: HashMap<&'static str, Handle<Image>> = HashMap::from([
+        let mut images: HashMap<&'static str, Handle<Image>> = HashMap::from([
             // Icons
             ("mute", assets.load("images/icons/mute.png")),
             ("sound", assets.load("images/icons/sound.png")),
             ("music", assets.load("images/icons/music.png")),
-            ("sword", assets.load("images/icons/sword.png")),
-            ("shield", assets.load("images/icons/shield.png")),
             ("armor_icon", assets.load("images/icons/armor.png")),
             ("attack_icon", assets.load("images/icons/attack.png")),
             ("initiative_icon", assets.load("images/icons/initiative.png")),
             ("helmet_icon", assets.load("images/icons/Icon_10.png")),
             ("boots_icon", assets.load("images/icons/Icon_11.png")),
             ("gold", assets.load("images/icons/gold.png")),
-            ("action_hunt", assets.load("images/icons/Icon_01.png")),
-            ("action_shop", assets.load("images/icons/Icon_02.png")),
-            ("action_quest", assets.load("images/icons/Icon_03.png")),
-            ("action_train", assets.load("images/icons/Icon_04.png")),
-            ("action_craft", assets.load("images/icons/Icon_08.png")),
-            ("action_rest", assets.load("images/icons/Icon_09.png")),
-            ("action_inventory", assets.load("images/icons/Icon_10.png")),
+            ("action_hunt", assets.load("images/icons/action_hunt.png")),
+            ("action_shop", assets.load("images/icons/action_shop.png")),
+            ("action_quest", assets.load("images/icons/action_quest.png")),
+            ("action_train", assets.load("images/icons/action_train.png")),
+            ("action_craft", assets.load("images/icons/action_craft.png")),
+            ("action_work", assets.load("images/icons/action_work.png")),
+            ("action_rest", assets.load("images/icons/action_rest.png")),
+            ("action_inventory", assets.load("images/icons/action_inventory.png")),
             // Background
             ("bg", assets.load("images/bg/bg.png")),
             ("bg2", assets.load("images/bg/bg2.png")),
@@ -144,11 +145,85 @@ impl FromWorld for WorldAssets {
             ("mage_white_elf", assets.load("images/classes/mage_white_elf_male.png")),
             ("mage_white_dwarf", assets.load("images/classes/mage_white_dwarf_male.png")),
             ("mage_white_orc", assets.load("images/classes/mage_white_orc_male.png")),
+            ("warrior_human_male", assets.load("images/classes/warrior_human_male.png")),
+            ("warrior_human_female", assets.load("images/classes/warrior_human_female.png")),
+            ("warrior_elf_male", assets.load("images/classes/warrior_elf_male.png")),
+            ("warrior_elf_female", assets.load("images/classes/warrior_elf_female.png")),
+            ("warrior_dwarf_male", assets.load("images/classes/warrior_dwarf_male.png")),
+            ("warrior_dwarf_female", assets.load("images/classes/warrior_dwarf_female.png")),
+            ("warrior_orc_male", assets.load("images/classes/warrior_orc_male.png")),
+            ("warrior_orc_female", assets.load("images/classes/warrior_orc_female.png")),
+            ("mage_human_male", assets.load("images/classes/mage_human_male.png")),
+            ("mage_human_female", assets.load("images/classes/mage_human_female.png")),
+            ("mage_elf_male", assets.load("images/classes/mage_elf_male.png")),
+            ("mage_elf_female", assets.load("images/classes/mage_elf_female.png")),
+            ("mage_dwarf_male", assets.load("images/classes/mage_dwarf_male.png")),
+            ("mage_dwarf_female", assets.load("images/classes/mage_dwarf_female.png")),
+            ("mage_orc_male", assets.load("images/classes/mage_orc_male.png")),
+            ("mage_orc_female", assets.load("images/classes/mage_orc_female.png")),
+            ("rogue_human_male", assets.load("images/classes/rogue_human_male.png")),
+            ("rogue_human_female", assets.load("images/classes/rogue_human_female.png")),
+            ("rogue_elf_male", assets.load("images/classes/rogue_elf_male.png")),
+            ("rogue_elf_female", assets.load("images/classes/rogue_elf_female.png")),
+            ("rogue_dwarf_male", assets.load("images/classes/rogue_dwarf_male.png")),
+            ("rogue_dwarf_female", assets.load("images/classes/rogue_dwarf_female.png")),
+            ("rogue_orc_male", assets.load("images/classes/rogue_orc_male.png")),
+            ("rogue_orc_female", assets.load("images/classes/rogue_orc_female.png")),
+            ("druid_human_male", assets.load("images/classes/druid_human_male.png")),
+            ("druid_human_female", assets.load("images/classes/druid_human_female.png")),
+            ("druid_elf_male", assets.load("images/classes/druid_elf_male.png")),
+            ("druid_elf_female", assets.load("images/classes/druid_elf_female.png")),
+            ("druid_dwarf_male", assets.load("images/classes/druid_dwarf_male.png")),
+            ("druid_dwarf_female", assets.load("images/classes/druid_dwarf_female.png")),
+            ("druid_orc_male", assets.load("images/classes/druid_orc_male.png")),
+            ("druid_orc_female", assets.load("images/classes/druid_orc_female.png")),
+            ("mage_black_human_male", assets.load("images/classes/mage_black_human_male.png")),
+            ("mage_black_human_female", assets.load("images/classes/mage_black_human_female.png")),
+            ("mage_black_elf_male", assets.load("images/classes/mage_black_elf_male.png")),
+            ("mage_black_elf_female", assets.load("images/classes/mage_black_elf_female.png")),
+            ("mage_black_dwarf_male", assets.load("images/classes/mage_black_dwarf_male.png")),
+            ("mage_black_dwarf_female", assets.load("images/classes/mage_black_dwarf_female.png")),
+            ("mage_black_orc_male", assets.load("images/classes/mage_black_orc_male.png")),
+            ("mage_black_orc_female", assets.load("images/classes/mage_black_orc_female.png")),
+            ("mage_red_human_male", assets.load("images/classes/mage_red_male.png")),
+            ("mage_red_human_female", assets.load("images/classes/mage_red_human_female.png")),
+            ("mage_red_elf_male", assets.load("images/classes/mage_red_elf_male.png")),
+            ("mage_red_elf_female", assets.load("images/classes/mage_red_elf_female.png")),
+            ("mage_red_dwarf_male", assets.load("images/classes/mage_red_dwarf_male.png")),
+            ("mage_red_dwarf_female", assets.load("images/classes/mage_red_dwarf_female.png")),
+            ("mage_red_orc_male", assets.load("images/classes/mage_red_orc_male.png")),
+            ("mage_red_orc_female", assets.load("images/classes/mage_red_orc_female.png")),
+            ("mage_green_human_male", assets.load("images/classes/mage_green_human_male.png")),
+            ("mage_green_human_female", assets.load("images/classes/mage_green_human_female.png")),
+            ("mage_green_elf_male", assets.load("images/classes/mage_green_elf_male.png")),
+            ("mage_green_elf_female", assets.load("images/classes/mage_green_elf_female.png")),
+            ("mage_green_dwarf_male", assets.load("images/classes/mage_green_dwarf_male.png")),
+            ("mage_green_dwarf_female", assets.load("images/classes/mage_green_dwarf_female.png")),
+            ("mage_green_orc_male", assets.load("images/classes/mage_green_orc_male.png")),
+            ("mage_green_orc_female", assets.load("images/classes/mage_green_orc_female.png")),
+            ("mage_white_human_male", assets.load("images/classes/mage_white_male.png")),
+            ("mage_white_human_female", assets.load("images/classes/mage_white_human_female.png")),
+            ("mage_white_elf_male", assets.load("images/classes/mage_white_elf_male.png")),
+            ("mage_white_elf_female", assets.load("images/classes/mage_white_elf_female.png")),
+            ("mage_white_dwarf_male", assets.load("images/classes/mage_white_dwarf_male.png")),
+            ("mage_white_dwarf_female", assets.load("images/classes/mage_white_dwarf_female.png")),
+            ("mage_white_orc_male", assets.load("images/classes/mage_white_orc_male.png")),
+            ("mage_white_orc_female", assets.load("images/classes/mage_white_orc_female.png")),
             ("wolf", assets.load("images/pets/wolf.png")),
             ("snake", assets.load("images/pets/snake.png")),
             ("eagle", assets.load("images/pets/eagle.png")),
             ("bear", assets.load("images/pets/bear.png")),
         ]);
+
+        for item in GENERATED_EQUIPMENT {
+            images.insert(item.name, assets.load(item.icon_path));
+        }
+        for ability in GENERATED_ABILITIES {
+            images.insert(ability.name, assets.load(ability.icon_path));
+        }
+        for perk in GENERATED_PERKS {
+            images.insert(perk.name, assets.load(perk.icon_path));
+        }
 
         Self {
             audio,

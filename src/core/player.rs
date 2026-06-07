@@ -1,20 +1,16 @@
-use crate::core::abilities::Ability;
 use crate::core::classes::Class;
 use crate::core::constants::{FANTASY_NAMES, PET_NAMES};
-use crate::core::consumables::Consumable;
-use crate::core::perks::Perk;
 use crate::core::pets::Pet;
 use crate::core::races::Race;
-use crate::core::weapons::Weapon;
 use bevy::prelude::*;
 use rand::prelude::IndexedRandom;
 use rand::rng;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use strum_macros::{EnumIter, EnumString};
+use strum_macros::{Display, EnumIter, EnumString};
 
-#[derive(EnumIter, Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[derive(EnumIter, Clone, Copy, Debug, Display, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum Sex {
     #[default]
     Male,
@@ -48,17 +44,18 @@ pub struct Player {
     pub intelligence: u8,
     pub wisdom: u8,
     pub charisma: u8,
-    pub abilities: Vec<Ability>,
-    pub perks: Vec<Perk>,
+    pub abilities: Vec<String>,
+    pub perks: Vec<String>,
     pub pet: Option<Pet>,
     pub pet_name: String,
-    pub helmet: Option<Weapon>,
-    pub armor: Option<Weapon>,
-    pub boots: Option<Weapon>,
-    pub weapon_lh: Option<Weapon>,
-    pub weapon_rh: Option<Weapon>,
-    pub weapon_2h: Option<Weapon>,
-    pub consumables: Vec<Consumable>,
+    pub helmet: Option<String>,
+    pub armor: Option<String>,
+    pub boots: Option<String>,
+    pub weapon_lh: Option<String>,
+    pub weapon_rh: Option<String>,
+    pub weapon_2h: Option<String>,
+    pub accessory: Option<String>,
+    pub inventory: Vec<String>,
     pub gold: u32,
 }
 
@@ -92,7 +89,8 @@ impl Default for Player {
             weapon_lh: None,
             weapon_rh: None,
             weapon_2h: None,
-            consumables: vec![],
+            accessory: None,
+            inventory: vec![],
             gold: 100,
         }
     }
@@ -153,11 +151,20 @@ impl Player {
     }
 
     /// All currently equipped pieces of gear.
-    pub fn equipped_weapons(&self) -> Vec<&Weapon> {
-        [&self.helmet, &self.armor, &self.boots, &self.weapon_lh, &self.weapon_rh, &self.weapon_2h]
-            .into_iter()
-            .flatten()
-            .collect()
+    pub fn equipped_equipment(&self) -> Vec<crate::core::catalog::GeneratedEquipment> {
+        [
+            &self.helmet,
+            &self.armor,
+            &self.boots,
+            &self.weapon_lh,
+            &self.weapon_rh,
+            &self.weapon_2h,
+            &self.accessory,
+        ]
+        .into_iter()
+        .flatten()
+        .filter_map(|key| crate::core::catalog::get_equipment(key))
+        .collect()
     }
 
     pub fn max_health(&self) -> f32 {
@@ -183,11 +190,14 @@ impl Player {
     /// Total physical attack damage (base from strength plus weapon bonuses).
     pub fn attack_damage(&self) -> i32 {
         let str_bonus = (self.strength() as i32 - 10) + 5; // base 5 + 1 per str above 10
-        str_bonus + self.equipped_weapons().iter().map(|w| w.stats().attack).sum::<i32>()
+        str_bonus + self.equipped_equipment().iter().map(|w| w.attack).sum::<i32>()
     }
 
-    pub fn weapon_attack_speed(&self, weapon: &Weapon) -> f32 {
-        self.adjust_attack_speed(weapon.stats().attack_speed)
+    pub fn weapon_attack_speed(&self, weapon_key: &str) -> f32 {
+        let weapon_speed = crate::core::catalog::get_equipment(weapon_key)
+            .map(|w| w.attack_speed)
+            .unwrap_or(1.0);
+        self.adjust_attack_speed(weapon_speed)
     }
 
     fn adjust_attack_speed(&self, weapon_speed: f32) -> f32 {
@@ -198,13 +208,13 @@ impl Player {
     /// Total armor rating (base from constitution plus equipment bonuses).
     pub fn armor_value(&self) -> i32 {
         self.constitution() as i32 / 4
-            + self.equipped_weapons().iter().map(|w| w.stats().armor).sum::<i32>()
+            + self.equipped_equipment().iter().map(|w| w.armor).sum::<i32>()
     }
 
     /// Initiative determines turn order (base from dexterity plus equipment bonuses).
     pub fn initiative(&self) -> i32 {
         let base_init = self.dexterity() as i32 / 2
-            + self.equipped_weapons().iter().map(|w| w.stats().initiative).sum::<i32>();
+            + self.equipped_equipment().iter().map(|w| w.initiative).sum::<i32>();
         if matches!(self.class, Class::Rogue) {
             base_init + 2
         } else {
