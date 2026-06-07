@@ -158,6 +158,7 @@ impl Plugin for GamePlugin {
                     update_playing_screen,
                     handle_playing_action_clicks,
                     scroll_system,
+                    update_right_scrollbar_system.after(scroll_system),
                     equip_slot_tooltip_system,
                     info_tooltip_system,
                     tooltip_follow_cursor_system,

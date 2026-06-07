@@ -68,6 +68,12 @@ pub struct AbilitiesList;
 #[derive(Component)]
 pub struct PerksList;
 
+#[derive(Component)]
+pub struct RightScrollbarTrack;
+
+#[derive(Component)]
+pub struct RightScrollbarThumb;
+
 /// The five equipment image-slots overlaid on the character portrait.
 #[derive(Component, Clone, Copy)]
 pub enum EquipSlot {
@@ -419,7 +425,8 @@ fn spawn_card(
             Node {
                 width: percent(100.),
                 flex_direction: FlexDirection::Row,
-                align_items: AlignItems::Center,
+                align_items: AlignItems::FlexStart,
+                flex_shrink: 0.,
                 column_gap: Val::Px(8.),
                 padding: UiRect::all(Val::Px(6.)),
                 margin: UiRect::bottom(Val::Px(6.)),
@@ -688,8 +695,8 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
                                 position_type: PositionType::Absolute,
                                 left: Val::Px(3.),
                                 bottom: Val::Px(3.),
-                                width: percent(50.),
-                                aspect_ratio: Some(0.82),
+                                width: percent(55.),
+                                aspect_ratio: Some(0.92),
                                 border: UiRect::all(Val::Px(2.)),
                                 ..default()
                             },
@@ -718,8 +725,8 @@ fn spawn_stats_column(
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
                 padding: UiRect {
-                    left: Val::Px(4.),
-                    right: Val::Px(4.),
+                    left: Val::Px(18.),
+                    right: Val::Px(18.),
                     top: Val::Px(8.),
                     bottom: Val::Px(8.),
                 },
@@ -941,7 +948,7 @@ fn spawn_stats_column(
 }
 
 fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_health: bool) {
-    let bar_height = Val::Px(32.);
+    let bar_height = Val::Px(36.);
     let font_size = 1.9;
     parent
         .spawn((
@@ -1007,17 +1014,100 @@ pub struct ScrollableContainer;
 
 pub fn scroll_system(
     mut mouse_wheel_events: MessageReader<bevy::input::mouse::MouseWheel>,
-    mut query: Query<(&mut ScrollPosition, &Node), With<ScrollableContainer>>,
+    mut query: Query<(&mut ScrollPosition, &ComputedNode), With<ScrollableContainer>>,
 ) {
     for event in mouse_wheel_events.read() {
-        for (mut scroll, _node) in &mut query {
+        for (mut scroll, computed) in &mut query {
             // Scroll offset speed factor
             scroll.y -= event.y * 30.0;
-            if scroll.y < 0.0 {
-                scroll.y = 0.0;
-            }
+            let max_scroll = (computed.content_size().y - computed.size().y).max(0.0);
+            scroll.y = scroll.y.clamp(0.0, max_scroll);
         }
     }
+}
+
+fn on_right_scrollbar_thumb_drag(
+    ev: On<Pointer<Drag>>,
+    mut scroll_q: Query<(&mut ScrollPosition, &ComputedNode), With<ScrollableContainer>>,
+    track_q: Query<&ComputedNode, With<RightScrollbarTrack>>,
+) {
+    let Ok((mut scroll, scroll_node)) = scroll_q.single_mut() else {
+        return;
+    };
+    let Ok(track_node) = track_q.single() else {
+        return;
+    };
+
+    let viewport_height = scroll_node.size().y;
+    let content_height = scroll_node.content_size().y;
+    let max_scroll = (content_height - viewport_height).max(0.0);
+    if max_scroll <= 0.0 || content_height <= 0.0 {
+        scroll.y = 0.0;
+        return;
+    }
+
+    let track_height = track_node.size().y;
+    if track_height <= 1.0 {
+        return;
+    }
+    let min_thumb_height = 32.0_f32.min(track_height);
+    let thumb_height =
+        (viewport_height / content_height * track_height).clamp(min_thumb_height, track_height);
+    let max_thumb_top = (track_height - thumb_height).max(1.0);
+    scroll.y = (scroll.y + ev.delta.y * max_scroll / max_thumb_top).clamp(0.0, max_scroll);
+}
+
+pub fn update_right_scrollbar_system(
+    mut scroll_q: Query<(&mut ScrollPosition, &ComputedNode), With<ScrollableContainer>>,
+    mut track_q: Query<
+        (&ComputedNode, &mut Visibility),
+        (With<RightScrollbarTrack>, Without<RightScrollbarThumb>, Without<ScrollableContainer>),
+    >,
+    mut thumb_q: Query<
+        &mut Node,
+        (With<RightScrollbarThumb>, Without<RightScrollbarTrack>, Without<ScrollableContainer>),
+    >,
+) {
+    let Ok((mut scroll, scroll_node)) = scroll_q.single_mut() else {
+        return;
+    };
+    let Ok((track_computed, mut track_visibility)) = track_q.single_mut() else {
+        return;
+    };
+    let Ok(mut thumb_node) = thumb_q.single_mut() else {
+        return;
+    };
+
+    let viewport_height = scroll_node.size().y;
+    let content_height = scroll_node.content_size().y;
+    let max_scroll = (content_height - viewport_height).max(0.0);
+
+    if max_scroll <= 1.0 || content_height <= viewport_height {
+        scroll.y = 0.0;
+        *track_visibility = Visibility::Hidden;
+        return;
+    }
+
+    *track_visibility = Visibility::Visible;
+    scroll.y = scroll.y.clamp(0.0, max_scroll);
+
+    let track_height = track_computed.size().y;
+    if track_height <= 1.0 {
+        *track_visibility = Visibility::Hidden;
+        return;
+    }
+    let min_thumb_height = 32.0_f32.min(track_height);
+    let thumb_height =
+        (viewport_height / content_height * track_height).clamp(min_thumb_height, track_height);
+    let max_thumb_top = (track_height - thumb_height).max(0.0);
+    let thumb_top = if max_scroll > 0.0 {
+        scroll.y / max_scroll * max_thumb_top
+    } else {
+        0.0
+    };
+
+    thumb_node.height = Val::Px(thumb_height);
+    thumb_node.top = Val::Px(thumb_top);
 }
 
 /// Shows/hides a tooltip when hovering over equipment slots.
@@ -1140,7 +1230,13 @@ fn spawn_right_column(
                 height: percent(100.),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
-                padding: UiRect::all(Val::Px(8.)),
+                padding: UiRect {
+                    left: Val::Px(8.),
+                    right: Val::Px(22.),
+                    top: Val::Px(8.),
+                    bottom: Val::Px(8.),
+                },
+                position_type: PositionType::Relative,
                 ..default()
             },
             BackgroundColor(PANEL_COLOR),
@@ -1152,7 +1248,7 @@ fn spawn_right_column(
                         width: percent(100.),
                         height: percent(100.),
                         flex_direction: FlexDirection::Column,
-                        overflow: Overflow::clip(),
+                        overflow: Overflow::scroll_y(),
                         ..default()
                     },
                     ScrollableContainer,
@@ -1166,6 +1262,7 @@ fn spawn_right_column(
                             flex_direction: FlexDirection::Row,
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::SpaceBetween,
+                            flex_shrink: 0.,
                             margin: UiRect::bottom(Val::Px(4.)),
                             ..default()
                         })
@@ -1211,6 +1308,7 @@ fn spawn_right_column(
                         Node {
                             width: percent(100.),
                             flex_direction: FlexDirection::Column,
+                            flex_shrink: 0.,
                             margin: UiRect::bottom(Val::Px(15.)),
                             ..default()
                         },
@@ -1223,6 +1321,7 @@ fn spawn_right_column(
                         TextColor(BUTTON_TEXT_COLOR),
                         LocalizedText("abilities".to_string()),
                         Node {
+                            flex_shrink: 0.,
                             margin: UiRect::bottom(Val::Px(4.)),
                             ..default()
                         },
@@ -1232,6 +1331,7 @@ fn spawn_right_column(
                         Node {
                             width: percent(100.),
                             flex_direction: FlexDirection::Column,
+                            flex_shrink: 0.,
                             margin: UiRect::bottom(Val::Px(15.)),
                             ..default()
                         },
@@ -1244,6 +1344,7 @@ fn spawn_right_column(
                         TextColor(BUTTON_TEXT_COLOR),
                         LocalizedText("perks".to_string()),
                         Node {
+                            flex_shrink: 0.,
                             margin: UiRect::bottom(Val::Px(4.)),
                             ..default()
                         },
@@ -1253,10 +1354,48 @@ fn spawn_right_column(
                         Node {
                             width: percent(100.),
                             flex_direction: FlexDirection::Column,
+                            flex_shrink: 0.,
                             ..default()
                         },
                         PerksList,
                     ));
+                });
+
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        width: Val::Px(10.),
+                        top: Val::Px(8.),
+                        bottom: Val::Px(8.),
+                        right: Val::Px(3.),
+                        border_radius: BorderRadius::all(Val::Px(5.)),
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
+                    Visibility::Hidden,
+                    RightScrollbarTrack,
+                ))
+                .with_children(|parent| {
+                    parent
+                        .spawn((
+                            Node {
+                                position_type: PositionType::Absolute,
+                                width: percent(100.),
+                                height: Val::Px(32.),
+                                top: Val::Px(0.),
+                                border_radius: BorderRadius::all(Val::Px(5.)),
+                                ..default()
+                            },
+                            BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
+                            Button,
+                            Interaction::default(),
+                            Pickable::default(),
+                            RightScrollbarThumb,
+                        ))
+                        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                        .observe(cursor::<Out>(SystemCursorIcon::Default))
+                        .observe(on_right_scrollbar_thumb_drag);
                 });
         });
 }
