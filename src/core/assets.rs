@@ -51,6 +51,9 @@ impl FromWorld for WorldAssets {
             ("defeat", assets.load("audio/defeat.ogg")),
             ("victory", assets.load("audio/victory.ogg")),
             ("explosion", assets.load("audio/explosion.ogg")),
+            ("rest", assets.load("audio/rest.ogg")),
+            ("work", assets.load("audio/work.ogg")),
+            ("study", assets.load("audio/study.ogg")),
         ]);
 
         let fonts = HashMap::from([
@@ -74,6 +77,9 @@ impl FromWorld for WorldAssets {
             ("action_craft", assets.load("images/icons/action_craft.png")),
             ("action_work", assets.load("images/icons/action_work.png")),
             ("action_rest", assets.load("images/icons/action_rest.png")),
+            ("action_study", assets.load("images/icons/action_study.png")),
+            ("ap", assets.load("images/icons/ap.png")),
+            ("equipped", assets.load("images/icons/equipped.png")),
             // Background
             ("bg", assets.load("images/bg/bg.png")),
             ("bg2", assets.load("images/bg/bg2.png")),
@@ -84,6 +90,8 @@ impl FromWorld for WorldAssets {
             ("border", assets.load("images/ui/border.png")),
             ("border_hover", assets.load("images/ui/border hover.png")),
             ("stone", assets.load("images/ui/stone.png")),
+            ("banner", assets.load("images/ui/banner.png")),
+            ("banner_large", assets.load("images/ui/banner large.png")),
             // Races
             ("dwarf", assets.load("images/races/dwarf_male.png")),
             ("dwarf_male", assets.load("images/races/dwarf_male.png")),
@@ -210,6 +218,18 @@ impl FromWorld for WorldAssets {
             ("snake", assets.load("images/pets/snake.png")),
             ("eagle", assets.load("images/pets/eagle.png")),
             ("bear", assets.load("images/pets/bear.png")),
+            ("bat", assets.load("images/pets/bat.png")),
+            ("crocodile", assets.load("images/pets/crocodile.png")),
+            ("hyena", assets.load("images/pets/hyena.png")),
+            ("infernal can", assets.load("images/pets/infernal can.png")),
+            ("lizard", assets.load("images/pets/lizard.png")),
+            ("pegasus", assets.load("images/pets/pegasus.png")),
+            ("rat", assets.load("images/pets/rat.png")),
+            ("spider", assets.load("images/pets/spider.png")),
+            ("three headed dog", assets.load("images/pets/three headed dog.png")),
+            ("tiger", assets.load("images/pets/tiger.png")),
+            ("unicorn", assets.load("images/pets/unicorn.png")),
+            ("vulture", assets.load("images/pets/vulture.png")),
         ]);
 
         for item in GENERATED_EQUIPMENT {

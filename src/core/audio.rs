@@ -15,7 +15,8 @@ use crate::core::utils::cursor;
 pub struct PlayingAudio(pub HashMap<&'static str, Handle<AudioInstance>>);
 
 impl PlayingAudio {
-    pub const DEFAULT_VOLUME: f32 = 1.;
+    pub const DEFAULT_VOLUME: f32 = 0.6;
+    pub const DEFAULT_MUSIC_VOLUME: f32 = 0.9;
     pub const TWEEN: AudioTween = AudioTween::new(Duration::from_secs(2), AudioEasing::OutPowi(2));
 }
 
@@ -138,7 +139,7 @@ pub fn update_audio(
                     assets.image("sound")
                 },
                 AudioSettings::Music => {
-                    play_audio_msg.write(PlayAudioMsg::new("music").volume(-40.).background());
+                    play_audio_msg.write(PlayAudioMsg::new("music").volume(PlayingAudio::DEFAULT_MUSIC_VOLUME).background());
                     assets.image("music")
                 },
             };
@@ -170,7 +171,7 @@ pub fn toggle_audio(
 }
 
 pub fn play_music(mut play_audio_msg: MessageWriter<PlayAudioMsg>) {
-    play_audio_msg.write(PlayAudioMsg::new("music").background());
+    play_audio_msg.write(PlayAudioMsg::new("music").volume(PlayingAudio::DEFAULT_MUSIC_VOLUME).background());
 }
 
 pub fn play_audio(

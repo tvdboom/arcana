@@ -127,7 +127,8 @@ const category_sources = {
     one_hand_weapon: [],
     two_hand_weapon: [],
     offhand: [],
-    consumable: []
+    consumable: [],
+    gloves: []
 };
 
 for (const src of all_png_sources) {
@@ -149,6 +150,8 @@ for (const src of all_png_sources) {
         category_sources.one_hand_weapon.push(src);
     } else if (fileName.startsWith('bow_') || fileName.startsWith('crossbow_') || fileName.startsWith('staff_') || fileName.startsWith('spear_') || fileName.startsWith('scythe_')) {
         category_sources.two_hand_weapon.push(src);
+    } else if (fileName.startsWith('gloves_')) {
+        category_sources.gloves.push(src);
     }
 }
 
@@ -158,6 +161,7 @@ if (category_sources.armor.length === 0) category_sources.armor = weapon_sources
 if (category_sources.boots.length === 0) category_sources.boots = weapon_sources;
 if (category_sources.offhand.length === 0) category_sources.offhand = weapon_sources;
 if (category_sources.consumable.length === 0) category_sources.consumable = weapon_sources;
+if (category_sources.gloves.length === 0) category_sources.gloves = weapon_sources;
 if (category_sources.one_hand_weapon.length === 0) category_sources.one_hand_weapon = weapon_sources;
 if (category_sources.two_hand_weapon.length === 0) category_sources.two_hand_weapon = weapon_sources;
 
@@ -167,6 +171,7 @@ category_sources.armor.sort();
 category_sources.boots.sort();
 category_sources.offhand.sort();
 category_sources.consumable.sort();
+category_sources.gloves.sort();
 category_sources.one_hand_weapon.sort();
 category_sources.two_hand_weapon.sort();
 accessory_sources.sort();
@@ -179,7 +184,8 @@ const pools = {
     two_hand_weapon: [...category_sources.two_hand_weapon],
     offhand: [...category_sources.offhand],
     accessory: [...accessory_sources],
-    consumable: [...category_sources.consumable]
+    consumable: [...category_sources.consumable],
+    gloves: [...category_sources.gloves]
 };
 
 console.log(`Loaded sources:
@@ -193,7 +199,8 @@ console.log(`Loaded sources:
  - Categorized Offhands: ${category_sources.offhand.length}
  - Categorized Consumables: ${category_sources.consumable.length}
  - Categorized 1H Weapons: ${category_sources.one_hand_weapon.length}
- - Categorized 2H Weapons: ${category_sources.two_hand_weapon.length}`);
+ - Categorized 2H Weapons: ${category_sources.two_hand_weapon.length}
+ - Categorized Gloves: ${category_sources.gloves.length}`);
 
 if (weapon_sources.length === 0 || ability_sources.length === 0 || perk_sources.length === 0 || accessory_sources.length === 0) {
     console.error('Error: Insufficient sources to generate icons!');
@@ -222,7 +229,7 @@ const destEquipmentDir = path.join(assetsDir, 'images', 'equipment');
 const destAbilitiesDir = path.join(assetsDir, 'images', 'abilities');
 const destPerksDir = path.join(assetsDir, 'images', 'perks');
 
-const subfolders = ['helmet', 'armor', 'boots', 'weapon', 'accessory', 'consumable'];
+const subfolders = ['helmet', 'armor', 'boots', 'weapon', 'accessory', 'consumable', 'gloves'];
 for (const sub of subfolders) {
     fs.mkdirSync(path.join(destEquipmentDir, sub), { recursive: true });
 }
@@ -231,7 +238,7 @@ fs.mkdirSync(destPerksDir, { recursive: true });
 
 // Constants for generation
 const classes = ['warrior', 'mage', 'rogue', 'druid'];
-const kinds = ['helmet', 'armor', 'boots', 'one_hand_weapon', 'two_hand_weapon', 'offhand'];
+const kinds = ['helmet', 'armor', 'boots', 'one_hand_weapon', 'two_hand_weapon', 'offhand', 'gloves'];
 
 const abilityNamesAdjs = {
     warrior: ["Cleaving", "Savage", "Furious", "Shield", "Mighty", "Ironclad", "Heavy", "Devastating", "Relentless", "Colossal"],
@@ -619,6 +626,31 @@ function classifyOffhand(fileName, index, lvl) {
     return { mat, word };
 }
 
+function classifyGloves(fileName, index, lvl) {
+    fileName = fileName.toLowerCase();
+    let mat = "";
+    const words = ["Gloves", "Gauntlets", "Handwraps", "Vambraces"];
+    let word = words[index % words.length];
+
+    if (fileName.includes("dragon")) {
+        mat = "Dragon";
+        word = "Gauntlets";
+    } else if (fileName.includes("witch")) {
+        mat = "Arcane";
+        word = "Handwraps";
+    } else if (fileName.includes("death")) {
+        mat = "Death";
+        word = "Gauntlets";
+    } else if (fileName.includes("archer")) {
+        mat = "Ranger";
+        word = "Gloves";
+    } else {
+        const mats = ["Leather", "Iron", "Steel", "Mithril", "Bronze", "Silver"];
+        mat = mats[lvl % mats.length];
+    }
+    return { mat, word };
+}
+
 function classifyConsumable(fileName, index, lvl) {
     fileName = fileName.toLowerCase();
     let word = "Potion";
@@ -694,6 +726,8 @@ function getRealisticItemName(kind, fileName, index, lvl) {
         res = classifyAccessory(fileName, index, lvl);
     } else if (kind === 'consumable') {
         res = classifyConsumable(fileName, index, lvl);
+    } else if (kind === 'gloves') {
+        res = classifyGloves(fileName, index, lvl);
     } else {
         res = { mat: "Standard", word: "Item" };
     }
@@ -767,6 +801,11 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
 
         if (kind_eq === 'boots') {
             initiative = 2;
+        }
+
+        if (kind_eq === 'gloves') {
+            armor = Math.floor(lvl * 0.3) + 1;
+            crit = 2;
         }
 
         const price_eq = lvl * 30 + 10 + (j % 5) * 5;

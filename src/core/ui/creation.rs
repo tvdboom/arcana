@@ -1255,13 +1255,16 @@ fn apply_age_stage(
     }
 }
 
-pub trait SelectionItem: NameFromEnum + Copy + Clone + Send + Sync + 'static {
+pub trait SelectionItem: NameFromEnum + Copy + Clone + Send + Sync + 'static + IntoEnumIterator {
     type DescComponent: Component;
     fn get_description(&self, lang: Language, localization: &Localization) -> String;
     fn create_desc_component(&self) -> Self::DescComponent;
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>);
     fn get_image_key(&self, _player: &Player) -> String {
         self.to_lowername()
+    }
+    fn items() -> Vec<Self> where Self: Sized {
+        Self::iter().collect()
     }
 }
 
@@ -1392,9 +1395,14 @@ impl SelectionItem for Pet {
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.pet = Some(*self);
+        player.pet_health = Some(self.stats().health as f32);
         player.health = player.max_health().floor();
         player.mana = player.max_mana().floor();
         next_game_state.set(GameState::Playing);
+    }
+
+    fn items() -> Vec<Self> {
+        vec![Pet::Rat, Pet::Snake, Pet::Wolf, Pet::Vulture]
     }
 }
 
@@ -1407,7 +1415,7 @@ pub fn setup_selection_screen<T>(
     has_back_button: bool,
     player: &Player,
 ) where
-    T: SelectionItem + IntoEnumIterator,
+    T: SelectionItem,
 {
     let lang = settings.language;
     let (mut root_node, pickable) = add_root_node(true);
@@ -1483,7 +1491,7 @@ pub fn setup_selection_screen<T>(
                     ..default()
                 })
                 .with_children(|parent| {
-                    for item in T::iter() {
+                    for item in T::items() {
                         let item_key = item.to_lowername();
                         let item_name = localization.get(&item_key, lang);
 

@@ -78,7 +78,9 @@ impl Plugin for GamePlugin {
             .init_resource::<PlayingAudio>()
             .init_resource::<Localization>()
             .init_resource::<Settings>()
-            .init_resource::<Player>();
+            .init_resource::<Player>()
+            .init_resource::<LevelUpPending>()
+            .init_resource::<RightTab>();
 
         // Sets
         configure_stages!(app, InGameSet, in_state(AppState::Game));
@@ -147,18 +149,20 @@ impl Plugin for GamePlugin {
                 OnEnter(GameState::Playing),
                 (setup_playing_screen, rebuild_playing_lists).chain(),
             )
-            .add_systems(OnExit(GameState::Playing), despawn::<TooltipNode>)
+            .add_systems(OnExit(GameState::Playing), (despawn::<TooltipNode>, despawn::<GoldToast>, despawn::<LevelUpOverlayCmp>))
             .add_systems(OnExit(AppState::Game), (despawn::<PlayingCmp>, despawn::<TooltipNode>))
             .add_systems(
                 Update,
                 (
                     update_playing_screen,
-                    handle_equipment_interactions,
+                    tab_button_hover_system,
                     scroll_system,
                     update_right_scrollbar_system.after(scroll_system),
                     equip_slot_tooltip_system,
                     info_tooltip_system,
                     tooltip_follow_cursor_system,
+                    tick_gold_toasts,
+                    manage_level_up_overlay,
                 )
                     .run_if(in_state(GameState::Playing)),
             )
@@ -166,7 +170,11 @@ impl Plugin for GamePlugin {
                 Update,
                 rebuild_playing_lists
                     .run_if(in_state(AppState::Game))
-                    .run_if(resource_changed::<Player>.or_else(resource_changed::<Settings>)),
+                    .run_if(
+                        resource_changed::<Player>
+                            .or_else(resource_changed::<Settings>)
+                            .or_else(resource_changed::<RightTab>)
+                    ),
             )
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)

@@ -48,6 +48,8 @@ pub struct Player {
     pub perks: Vec<String>,
     pub pet: Option<Pet>,
     pub pet_name: String,
+    #[serde(default)]
+    pub pet_health: Option<f32>,
     pub helmet: Option<String>,
     pub armor: Option<String>,
     pub boots: Option<String>,
@@ -55,8 +57,12 @@ pub struct Player {
     pub weapon_rh: Option<String>,
     pub weapon_2h: Option<String>,
     pub accessory: Option<String>,
+    pub gloves: Option<String>,
+    pub accessory2: Option<String>,
     pub inventory: Vec<String>,
     pub gold: u32,
+    pub bonus_max_health: f32,
+    pub bonus_max_mana: f32,
 }
 
 impl Default for Player {
@@ -83,6 +89,7 @@ impl Default for Player {
             perks: vec![],
             pet: None,
             pet_name,
+            pet_health: None,
             helmet: None,
             armor: None,
             boots: None,
@@ -90,8 +97,12 @@ impl Default for Player {
             weapon_rh: None,
             weapon_2h: None,
             accessory: None,
+            gloves: None,
+            accessory2: None,
             inventory: vec![],
             gold: 100,
+            bonus_max_health: 0.,
+            bonus_max_mana: 0.,
         }
     }
 }
@@ -160,6 +171,8 @@ impl Player {
             &self.weapon_rh,
             &self.weapon_2h,
             &self.accessory,
+            &self.gloves,
+            &self.accessory2,
         ]
         .into_iter()
         .flatten()
@@ -169,11 +182,8 @@ impl Player {
 
     pub fn max_health(&self) -> f32 {
         let base_max = 100. + (self.constitution() as f32 - 10.) * 10.;
-        if matches!(self.class, Class::Warrior) {
-            base_max + 20.
-        } else {
-            base_max
-        }
+        let class_bonus = if matches!(self.class, Class::Warrior) { 20. } else { 0. };
+        base_max + class_bonus + self.bonus_max_health
     }
 
     pub fn max_mana(&self) -> f32 {
@@ -184,7 +194,7 @@ impl Player {
             _ => {},
         }
         let wisdom_bonus = (self.wisdom() as i32 - 10) * 10;
-        (base_max + wisdom_bonus as f32).max(0.)
+        (base_max + wisdom_bonus as f32 + self.bonus_max_mana).max(0.)
     }
 
     /// Total physical attack damage (base from strength plus weapon bonuses).

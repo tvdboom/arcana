@@ -118,18 +118,18 @@ pub fn spawn_menu_button(
     let label = localization.get(&key, language);
 
     let (width, height) = match btn {
-        MenuBtn::Back => (Val::Px(200.), Val::Px(45.)),
+        MenuBtn::Back => (Val::Vh(22.22), Val::Vh(5.0)),
         MenuBtn::NewCharacter
         | MenuBtn::LoadCharacter
         | MenuBtn::Settings
         | MenuBtn::Quit
         | MenuBtn::Continue
-        | MenuBtn::SaveCharacter => (Val::Px(420.), Val::Px(75.)),
+        | MenuBtn::SaveCharacter => (Val::Vh(46.67), Val::Vh(8.33)),
         #[allow(unreachable_patterns)]
-        _ => (Val::Px(300.), Val::Px(55.)),
+        _ => (Val::Vh(33.33), Val::Vh(6.11)),
     };
 
-    let margin = UiRect::all(Val::Px(8.));
+    let margin = UiRect::all(Val::Vh(0.89));
 
     parent
         .spawn((
@@ -139,8 +139,8 @@ pub fn spawn_menu_button(
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 margin,
-                border: UiRect::all(Val::Px(2.)),
-                border_radius: BorderRadius::all(Val::Px(4.)),
+                border: UiRect::all(Val::Vh(0.22)),
+                border_radius: BorderRadius::all(Val::Vh(0.44)),
                 ..default()
             },
             BackgroundColor(NORMAL_BUTTON_COLOR),

@@ -52,8 +52,8 @@ impl Class {
     pub fn starting_weapon(&self) -> &'static str {
         match self {
             Class::Warrior => "novice bronze mighty bow",
-            Class::Mage(_) => "novice worn sorcerer axe",
-            Class::Rogue => "novice bronze infiltrator bow",
+            Class::Mage(_) => "novice worn primal axe",
+            Class::Rogue => "overlord mighty primal dagger",
             Class::Druid => "novice worn primal axe",
         }
     }

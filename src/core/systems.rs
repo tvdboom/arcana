@@ -16,6 +16,7 @@ pub fn check_keys_menu(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    mut level_up: ResMut<crate::core::ui::playing::LevelUpPending>,
 ) {
     if keyboard.just_released(KeyCode::Escape) {
         match app_state.get() {
@@ -54,6 +55,39 @@ pub fn check_keys_menu(
     }
 
     if keyboard.just_released(KeyCode::Enter) {
+        if level_up.active {
+            let ability_ok = level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
+            let perk_ok = level_up.perk_choices.is_empty() || level_up.perk_chosen.is_some();
+            if level_up.points_remaining == 0 && ability_ok && perk_ok {
+                player.strength += level_up.attr_gains[0] as u8;
+                player.dexterity += level_up.attr_gains[1] as u8;
+                player.constitution += level_up.attr_gains[2] as u8;
+                player.intelligence += level_up.attr_gains[3] as u8;
+                player.wisdom += level_up.attr_gains[4] as u8;
+                player.charisma += level_up.attr_gains[5] as u8;
+
+                if let Some(idx) = level_up.ability_chosen {
+                    if let Some(name) = level_up.ability_choices.get(idx) {
+                        player.abilities.push(name.clone());
+                    }
+                }
+                if let Some(idx) = level_up.perk_chosen {
+                    if let Some(name) = level_up.perk_choices.get(idx) {
+                        player.perks.push(name.clone());
+                    }
+                }
+
+                level_up.active = false;
+                level_up.attr_gains = [0; 6];
+                level_up.ability_chosen = None;
+                level_up.perk_chosen = None;
+                play_audio_msg.write(PlayAudioMsg::new("button"));
+            } else {
+                play_audio_msg.write(PlayAudioMsg::new("error"));
+            }
+            return;
+        }
+
         match app_state.get() {
             AppState::MainMenu => {
                 play_audio_msg.write(PlayAudioMsg::new("button"));
@@ -100,8 +134,7 @@ pub fn check_keys_menu(
                             ajah.on_select(&mut player, &mut next_game_state);
                         },
                         Class::Druid => {
-                            let pet = Pet::default();
-                            pet.on_select(&mut player, &mut next_game_state);
+                            Pet::default().on_select(&mut player, &mut next_game_state);
                         },
                         _ => {
                             next_game_state.set(GameState::CreateCharacter);
