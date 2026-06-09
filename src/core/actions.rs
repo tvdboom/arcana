@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rand::prelude::IndexedRandom;
 use rand::RngExt;
 use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumString};
@@ -8,9 +9,10 @@ use crate::core::audio::PlayAudioMsg;
 use crate::core::localization::Localization;
 use crate::core::player::Player;
 use crate::core::settings::Settings;
+use crate::core::menu::buttons::DisabledButton;
 use crate::core::ui::level_up::LevelUpPending;
 use crate::core::ui::toast::{ToastContainer, spawn_toast};
-use crate::core::ui::playing::{reward_equipment, translate_game_term, capitalize_words};
+use crate::core::ui::playing::{reward_equipment, capitalize_words};
 
 #[derive(EnumString, Debug, Display, Clone, Copy, PartialEq, Eq, Hash, Reflect, Serialize, Deserialize)]
 pub enum Action {
@@ -52,7 +54,7 @@ pub fn handle_playing_action_clicks(
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut level_up: ResMut<LevelUpPending>,
-    action_btn_q: Query<&ActionButton>,
+    action_btn_q: Query<&ActionButton, Without<DisabledButton>>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
     localization: Res<Localization>,
     settings: Res<Settings>,
@@ -166,11 +168,9 @@ pub fn handle_playing_action_clicks(
                             .collect();
                         
                         if !ability_pool.is_empty() {
-                            use rand::seq::IndexedRandom;
                             if let Some(ability) = ability_pool.choose(&mut rand::rng()) {
                                 player.abilities.push(ability.name.to_string());
-                                let name = translate_game_term(&ability.name, &localization, lang);
-                                localization.get("toast_train_learned_ability", lang).replace("{ability}", &name)
+                                localization.get("toast_train_learned_ability", lang).replace("{ability}", &ability.name)
                             } else {
                                 localization.get("toast_train_nothing_new", lang)
                             }

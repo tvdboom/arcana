@@ -158,6 +158,7 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     update_playing_screen,
+                    update_action_buttons,
                     tab_button_hover_system,
                     scroll_system,
                     update_right_scrollbar_system.after(scroll_system),

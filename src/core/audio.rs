@@ -188,11 +188,11 @@ pub fn play_audio(
 
             if let Some(handle) = playing_audio.get(&msg.name) {
                 if let Some(mut instance) = audio_instances.get_mut(handle) {
-                    if matches!(
+                    if msg.is_background && matches!(
                         instance.state(),
                         PlaybackState::Paused { .. } | PlaybackState::Pausing { .. }
                     ) {
-                        if !msg.is_background || settings.audio != AudioSettings::Sfx {
+                        if settings.audio != AudioSettings::Sfx {
                             instance.resume(PlayingAudio::TWEEN);
                         }
                     } else if !msg.is_background

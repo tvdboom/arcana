@@ -50,7 +50,7 @@ impl FromWorld for WorldAssets {
             ("horn", assets.load("audio/horn.ogg")),
             ("defeat", assets.load("audio/defeat.ogg")),
             ("levelup", assets.load("audio/levelup.ogg")),
-            ("explosion", assets.load("audio/explosion.ogg")),
+            ("inventory", assets.load("audio/inventory.ogg")),
             ("coins", assets.load("audio/coins.ogg")),
             ("rest", assets.load("audio/rest.ogg")),
             ("work", assets.load("audio/work.ogg")),
@@ -85,7 +85,8 @@ impl FromWorld for WorldAssets {
             // Background
             ("bg", assets.load("images/bg/bg.png")),
             ("bg2", assets.load("images/bg/bg2.png")),
-            ("bg3", assets.load("images/bg/bg3.png")),
+            ("base", assets.load("images/bg/base.png")),
+            ("shop", assets.load("images/bg/shop.png")),
             ("victory", assets.load("images/bg/victory.png")),
             ("defeat", assets.load("images/bg/defeat.png")),
             // UI Borders

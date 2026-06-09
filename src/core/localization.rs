@@ -25,6 +25,7 @@ impl FromWorld for Localization {
             .expect("Failed to parse es.json");
         let nl = serde_json::from_str(include_str!("../../assets/language/nl.json"))
             .expect("Failed to parse nl.json");
+
         Self {
             en,
             es,

@@ -27,6 +27,9 @@ pub enum Pet {
     Unicorn,
     Vulture,
     Wolf,
+    Puma,
+    Griffin,
+    Manticore,
 }
 
 impl Pet {
@@ -48,6 +51,9 @@ impl Pet {
             Pet::InfernalCan    => PetStats { health: 70,  armor: 5, attack: 9,  initiative: 5 },
             Pet::ThreeHeadedDog => PetStats { health: 90,  armor: 7, attack: 12, initiative: 3 },
             Pet::Unicorn        => PetStats { health: 90,  armor: 6, attack: 8,  initiative: 6 },
+            Pet::Puma           => PetStats { health: 65,  armor: 3, attack: 10, initiative: 8 },
+            Pet::Griffin        => PetStats { health: 85,  armor: 5, attack: 11, initiative: 9 },
+            Pet::Manticore      => PetStats { health: 95,  armor: 7, attack: 13, initiative: 5 },
         }
     }
 }

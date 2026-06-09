@@ -11,9 +11,6 @@ use crate::core::player::{Attribute, Player};
 use crate::core::settings::Language;
 use crate::core::utils::cursor;
 
-fn percent(pct: f32) -> Val {
-    Val::Percent(pct)
-}
 
 #[derive(Resource, Default)]
 pub struct LevelUpPending {
@@ -808,7 +805,7 @@ fn spawn_choice_card(
                     // Name (same as playing tab)
                     parent.spawn((
                         add_text(
-                            crate::core::ui::playing::translate_game_term(name, localization, lang),
+                            name,
                             "bold",
                             1.9,
                             assets,

@@ -11,12 +11,14 @@ use crate::core::classes::Class;
 use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
+use crate::core::menu::buttons::DisabledButton;
 use crate::core::player::{Attribute, Player};
 use crate::core::settings::{Language, Settings};
 use crate::core::ui::creation::SelectionItem;
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::window::SystemCursorIcon;
+pub use crate::core::ui::level_up::{LevelUpPending, manage_level_up_overlay};
 
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
@@ -125,10 +127,6 @@ pub enum InfoTooltip {
     Pet,
 }
 
-// Re-export level up items from the level_up module
-pub use crate::core::ui::level_up::{
-    LevelUpPending, manage_level_up_overlay,
-};
 
 fn portrait_key(player: &Player) -> String {
     match player.class {
@@ -173,162 +171,8 @@ pub fn capitalize_words(s: &str) -> String {
         .join(" ")
 }
 
-pub fn translate_game_term(name: &str, localization: &Localization, lang: Language) -> String {
-    let name_lower = name.to_lowercase();
-    if let Some(direct) = localization.get_opt(&name_lower, lang) {
-        return direct;
-    }
-    if lang == Language::English {
-        return capitalize_words(&name_lower);
-    }
-    
-    let words: Vec<String> = name_lower.split_whitespace().map(|w| w.to_string()).collect();
-    let mut trans_words = Vec::new();
-    for word in words {
-        let trans = match lang {
-            Language::Spanish => match word.as_str() {
-                "novice" => "novato",
-                "apprentice" => "aprendiz",
-                "adept" => "adepto",
-                "expert" => "experto",
-                "master" => "maestro",
-                "bronze" => "bronce",
-                "iron" => "hierro",
-                "steel" => "acero",
-                "mithril" => "mitril",
-                "adamant" => "adamantio",
-                "rawhide" => "cuero crudo",
-                "leather" => "cuero",
-                "cloth" => "tela",
-                "quilted" => "acolchado",
-                "enchanted" => "encantado",
-                "copper" => "cobre",
-                "pewter" => "peltre",
-                "silver" => "plata",
-                "gold" => "oro",
-                "platinum" => "platino",
-                "minor" => "menor",
-                "standard" => "estándar",
-                "major" => "mayor",
-                "helm" | "helmet" => "casco",
-                "tunic" => "túnica",
-                "hauberk" => "cota",
-                "robes" => "túnicas",
-                "garb" => "manto",
-                "boots" | "treads" | "greaves" | "soles" | "shoes" => "botas",
-                "axe" => "hacha",
-                "bow" => "arco",
-                "spear" => "lanza",
-                "dagger" => "daga",
-                "staff" => "bastón",
-                "wand" => "varita",
-                "tome" => "tomo",
-                "shield" => "escudo",
-                "handwraps" | "gauntlets" | "gloves" | "vambraces" => "guantes",
-                "necklace" => "collar",
-                "potion" => "poción",
-                "elixir" => "elixir",
-                "vial" => "vial",
-                "blend" => "mezcla",
-                "vanguard" => "vanguardia",
-                "pyromancer" => "piromante",
-                "silent" => "silencioso",
-                "primal" => "primigenio",
-                "mighty" => "poderoso",
-                "acolyte" => "acólito",
-                "assassin" => "asesino",
-                "wildheart" => "corazón salvaje",
-                "guardian" => "guardián",
-                "sorcerer" => "hechicero",
-                "infiltrator" => "infiltrador",
-                "verdant" => "verdoso",
-                "deception" => "engaño",
-                "valor" => "valor",
-                "focus" => "enfoque",
-                "earth" => "tierra",
-                "constitution" => "constitución",
-                "health" => "salud",
-                "mana" => "maná",
-                "rejuvenation" => "rejuvenecimiento",
-                _ => word.as_str(),
-            },
-            Language::Dutch => match word.as_str() {
-                "novice" => "novice",
-                "apprentice" => "leerling",
-                "adept" => "adept",
-                "expert" => "expert",
-                "master" => "meester",
-                "bronze" => "brons",
-                "iron" => "ijzer",
-                "steel" => "staal",
-                "mithril" => "mithril",
-                "adamant" => "adamant",
-                "rawhide" => "ruw leer",
-                "leather" => "leer",
-                "cloth" => "stof",
-                "quilted" => "gewatteerd",
-                "enchanted" => "betoverd",
-                "copper" => "koper",
-                "pewter" => "tin",
-                "silver" => "zilver",
-                "gold" => "goud",
-                "platinum" => "platina",
-                "minor" => "kleine",
-                "standard" => "standaard",
-                "major" => "grote",
-                "helm" | "helmet" => "helm",
-                "tunic" => "tuniek",
-                "hauberk" => "bolder",
-                "robes" => "gewaad",
-                "garb" => "dracht",
-                "boots" | "treads" | "greaves" | "soles" | "shoes" => "laarzen",
-                "axe" => "bijl",
-                "bow" => "boog",
-                "spear" => "speer",
-                "dagger" => "dolk",
-                "staff" => "staf",
-                "wand" => "stafje",
-                "tome" => "boek",
-                "shield" => "schild",
-                "handwraps" | "gauntlets" | "gloves" | "vambraces" => "handschoenen",
-                "necklace" => "halsketting",
-                "potion" => "drank",
-                "elixir" => "elixer",
-                "vial" => "flacon",
-                "blend" => "mengsel",
-                "vanguard" => "voorhoede",
-                "pyromancer" => "vuurmagiër",
-                "silent" => "stille",
-                "primal" => "oerkracht",
-                "mighty" => "machtige",
-                "acolyte" => "acoliet",
-                "assassin" => "sluipmoordenaar",
-                "wildheart" => "wildhart",
-                "guardian" => "beschermer",
-                "sorcerer" => "tovenaar",
-                "infiltrator" => "infiltrant",
-                "verdant" => "groene",
-                "deception" => "misleiding",
-                "valor" => "moed",
-                "focus" => "focus",
-                "earth" => "aarde",
-                "constitution" => "constitutie",
-                "health" => "gezondheid",
-                "mana" => "mana",
-                "rejuvenation" => "verjonging",
-                _ => word.as_str(),
-            },
-            _ => word.as_str(),
-        };
-        trans_words.push(trans.to_string());
-    }
-    
-    capitalize_words(&trans_words.join(" "))
-}
-
 fn name_with_level(name: String, level: u8, localization: &Localization, lang: Language) -> String {
-    let trans = translate_game_term(&name, localization, lang);
-    format!("{} (Lv. {})", trans, level)
+    format!("{} (Lv. {})", name, level)
 }
 
 fn ability_detail_line(
@@ -689,15 +533,21 @@ fn spawn_tooltip(
         .map(|line| line.chars().count())
         .max()
         .unwrap_or(12) as f32;
-    let line_count = 1 + wrapped_lines.len().max(1);
 
     let (window_width, window_height, cursor) = if let Ok(window) = windows.single() {
         (window.width(), window.height(), window.cursor_position())
     } else {
         (1600., 900., None)
     };
-    let tooltip_width = (max_chars * 9.5 + 32.).clamp(190., (window_width - 24.).max(190.));
-    let tooltip_height = (line_count as f32 * 24. + 24.).clamp(64., (window_height - 24.).max(64.));
+    let font_size_title = window_height * 0.019;
+    let font_size_desc = window_height * 0.016;
+    let char_width_desc = font_size_desc * 0.55;
+    let line_height_title = font_size_title * 1.35;
+    let line_height_desc = font_size_desc * 1.35;
+
+    let tooltip_width = (max_chars * char_width_desc + 32.).clamp(190., (window_width - 24.).max(190.));
+    let desc_lines_count = wrapped_lines.len() as f32;
+    let tooltip_height = (line_height_title + desc_lines_count * line_height_desc + 32.).clamp(64., (window_height - 24.).max(64.));
     let (left, top) = place_tooltip(
         cursor.unwrap_or(Vec2::new(100., 100.)),
         tooltip_width,
@@ -971,16 +821,14 @@ pub fn setup_playing_screen(
     let lang = settings.language;
 
     let (mut root_node, pickable) = add_root_node(true);
-    root_node.justify_content = JustifyContent::FlexStart;
     root_node.padding = UiRect::all(Val::Px(0.));
-    root_node.row_gap = Val::Px(4.);
 
     commands
         .spawn((
             root_node,
             pickable,
             ImageNode {
-                image: assets.image("bg3"),
+                image: assets.image("base"),
                 image_mode: NodeImageMode::Stretch,
                 color: Color::srgba(0.40, 0.40, 0.40, 1.0),
                 ..default()
@@ -988,95 +836,7 @@ pub fn setup_playing_screen(
             PlayingCmp,
         ))
         .with_children(|parent| {
-            // Character name, top centered with banner background.
-            parent
-                .spawn(Node {
-                    align_self: AlignSelf::Center,
-                    width: Val::Auto,
-                    min_width: Val::Vh(50.0),
-                    height: Val::Vh(7.11),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    padding: UiRect::horizontal(Val::Px(100.0)),
-                    margin: UiRect {
-                        top: Val::Vh(2.67),
-                        bottom: Val::Vh(1.78),
-                        ..default()
-                    },
-                    ..default()
-                })
-                .with_children(|parent| {
-                    // Background banner image stretches to match parent's size
-                    parent.spawn((
-                        Node {
-                            position_type: PositionType::Absolute,
-                            width: percent(100.0),
-                            height: percent(100.0),
-                            ..default()
-                        },
-                        ImageNode::new(assets.image("banner")).with_mode(NodeImageMode::Stretch),
-                    ));
-
-                    // Name text sits on top
-                    parent.spawn((
-                        add_text(playing_title(&player), "bold", 4.2, &assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
-                });
-
-            // Three main columns.
-            parent
-                .spawn(Node {
-                    width: percent(100.),
-                    height: percent(66.),
-                    flex_shrink: 0.,
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_items: AlignItems::Stretch,
-                    column_gap: Val::Px(0.),
-                    padding: UiRect::horizontal(Val::Px(26.)),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    // Column 1: Character portrait image
-                    spawn_image_column(parent, &assets, &player);
-
-                    // Column 2: Stats (level, bars, characteristics, attributes, combat)
-                    spawn_stats_column(parent, &assets, &localization, lang, &player);
-
-                    // Column 3: Scrollable equipment, abilities and perks
-                    spawn_right_column(parent, &assets, &localization, lang);
-                });
-
-            // Bottom row: Action buttons
-            parent
-                .spawn(Node {
-                    width: percent(100.),
-                    height: Val::Vh(14.5),
-                    flex_shrink: 0.,
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(4.),
-                    padding: UiRect {
-                        top: Val::Vh(1.5),
-                        bottom: Val::Px(4.),
-                        ..default()
-                    },
-                    ..default()
-                })
-                .with_children(|parent| {
-                    spawn_playing_action_button(parent, Action::Rest, &assets, &localization, lang);
-                    spawn_playing_action_button(parent, Action::Study, &assets, &localization, lang);
-                    spawn_playing_action_button(parent, Action::Work, &assets, &localization, lang);
-                    spawn_playing_action_button(parent, Action::Train, &assets, &localization, lang);
-                    spawn_playing_action_button(parent, Action::Craft, &assets, &localization, lang);
-                    spawn_playing_action_button(parent, Action::Shop, &assets, &localization, lang);
-                    spawn_playing_action_button(parent, Action::Hunt, &assets, &localization, lang);
-                    spawn_playing_action_button(parent, Action::Quest, &assets, &localization, lang);
-                });
-
-            // Toast container: stacks notifications top-right
+            // Toast container: stacks notifications top-right of the whole screen
             parent.spawn((
                 Node {
                     position_type: PositionType::Absolute,
@@ -1091,6 +851,109 @@ pub fn setup_playing_screen(
                 ToastContainer,
                 GlobalZIndex(600),
             ));
+
+            // Content column: maintains aspect ratio on wide screens, centered horizontally
+            parent
+                .spawn(Node {
+                    height: percent(100.),
+                    max_width: percent(100.),
+                    aspect_ratio: Some(16. / 9.),
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::FlexStart,
+                    align_items: AlignItems::Stretch,
+                    row_gap: Val::Px(4.),
+                    align_self: AlignSelf::Center,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    // Character name, top centered with banner background.
+                    parent
+                        .spawn(Node {
+                            align_self: AlignSelf::Center,
+                            width: Val::Auto,
+                            min_width: Val::Vh(50.0),
+                            height: Val::Vh(7.11),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            padding: UiRect::horizontal(Val::Px(100.0)),
+                            margin: UiRect {
+                                top: Val::Vh(2.67),
+                                bottom: Val::Vh(1.78),
+                                ..default()
+                            },
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            // Background banner image stretches to match parent's size
+                            parent.spawn((
+                                Node {
+                                    position_type: PositionType::Absolute,
+                                    width: percent(100.0),
+                                    height: percent(100.0),
+                                    ..default()
+                                },
+                                ImageNode::new(assets.image("banner")).with_mode(NodeImageMode::Stretch),
+                            ));
+
+                            // Name text sits on top
+                            parent.spawn((
+                                add_text(playing_title(&player), "bold", 4.2, &assets),
+                                TextColor(BUTTON_TEXT_COLOR),
+                            ));
+                        });
+
+                    // Three main columns.
+                    parent
+                        .spawn(Node {
+                            width: percent(100.),
+                            height: percent(66.),
+                            flex_shrink: 0.,
+                            flex_direction: FlexDirection::Row,
+                            justify_content: JustifyContent::SpaceBetween,
+                            align_items: AlignItems::Stretch,
+                            column_gap: Val::Px(0.),
+                            padding: UiRect::horizontal(Val::Px(26.)),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            // Column 1: Character portrait image
+                            spawn_image_column(parent, &assets, &player);
+
+                            // Column 2: Stats (level, bars, characteristics, attributes, combat)
+                            spawn_stats_column(parent, &assets, &localization, lang, &player);
+
+                            // Column 3: Scrollable equipment, abilities and perks
+                            spawn_right_column(parent, &assets, &localization, lang);
+                        });
+
+                    // Bottom row: Action buttons
+                    parent
+                        .spawn(Node {
+                            width: percent(100.),
+                            height: Val::Vh(14.5),
+                            flex_shrink: 0.,
+                            flex_direction: FlexDirection::Row,
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            column_gap: Val::Px(4.),
+                            padding: UiRect {
+                                top: Val::Vh(1.5),
+                                bottom: Val::Px(4.),
+                                ..default()
+                            },
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            spawn_playing_action_button(parent, Action::Rest, &assets, &localization, lang);
+                            spawn_playing_action_button(parent, Action::Study, &assets, &localization, lang);
+                            spawn_playing_action_button(parent, Action::Work, &assets, &localization, lang);
+                            spawn_playing_action_button(parent, Action::Train, &assets, &localization, lang);
+                            spawn_playing_action_button(parent, Action::Craft, &assets, &localization, lang);
+                            spawn_playing_action_button(parent, Action::Shop, &assets, &localization, lang);
+                            spawn_playing_action_button(parent, Action::Hunt, &assets, &localization, lang);
+                            spawn_playing_action_button(parent, Action::Quest, &assets, &localization, lang);
+                        });
+                });
         });
 }
 
@@ -2589,14 +2452,16 @@ pub fn update_playing_screen(
 pub fn highlight_border<E: std::fmt::Debug + Clone + Reflect>(
     color: Color,
     thickness: Val,
-) -> impl Fn(On<Pointer<E>>, Query<(&mut BorderColor, &mut Node)>) {
+) -> impl Fn(On<Pointer<E>>, Query<(&mut BorderColor, &mut Node, Option<&DisabledButton>)>) {
     move |ev, mut q| {
-        if let Ok((mut border_color, mut node)) = q.get_mut(ev.entity) {
-            border_color.top = color;
-            border_color.right = color;
-            border_color.bottom = color;
-            border_color.left = color;
-            node.border = UiRect::all(thickness);
+        if let Ok((mut border_color, mut node, disabled)) = q.get_mut(ev.entity) {
+            if disabled.is_none() {
+                border_color.top = color;
+                border_color.right = color;
+                border_color.bottom = color;
+                border_color.left = color;
+                node.border = UiRect::all(thickness);
+            }
         }
     }
 }
@@ -2847,6 +2712,8 @@ pub fn reward_equipment(player: &mut Player, key: String) {
 
 pub fn handle_equipment_card_click(
     event: On<Pointer<Click>>,
+    mut commands: Commands,
+    window_e: Single<Entity, With<Window>>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     card_q: Query<&EquipmentCard>,
@@ -2866,6 +2733,7 @@ pub fn handle_equipment_card_click(
                 player.inventory.remove(pos);
                 player.gold += sell_price;
                 play_audio_msg.write(PlayAudioMsg::new("coins"));
+                commands.entity(*window_e).insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
             }
             return;
         }
@@ -2918,6 +2786,8 @@ pub fn tick_gold_toasts(
 
 pub fn handle_equipment_slot_click(
     event: On<Pointer<Click>>,
+    mut commands: Commands,
+    window_e: Single<Entity, With<Window>>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     slot_q: Query<&EquipSlot>,
@@ -2963,6 +2833,7 @@ pub fn handle_equipment_slot_click(
                     
                     player.gold += sell_price;
                     play_audio_msg.write(PlayAudioMsg::new("coins"));
+                    commands.entity(*window_e).insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
                 }
             } else {
                 // Left-click: unequip item
@@ -3068,10 +2939,39 @@ fn spawn_equipment_card(
 
                     for line in lines {
                         parent.spawn((
-                            add_text(line, "medium", 1.6, assets),
-                            TextColor(Color::WHITE),
+                             add_text(line, "medium", 1.6, assets),
+                             TextColor(Color::WHITE),
                         ));
                     }
                 });
         });
 }
+
+pub fn update_action_buttons(
+    player: Res<Player>,
+    mut commands: Commands,
+    mut btn_q: Query<(Entity, &ActionButton, &mut BackgroundColor, &mut BorderColor, &mut ImageNode, Option<&DisabledButton>)>,
+) {
+    for (entity, action_btn, mut bg, mut border, mut img, disabled) in &mut btn_q {
+        let cost_ap = action_btn.0.ap_cost();
+        let cost_gold = action_btn.0.gold_cost();
+        let is_valid = player.ap >= cost_ap && player.gold >= cost_gold;
+
+        if is_valid {
+            if disabled.is_some() {
+                commands.entity(entity).remove::<DisabledButton>();
+                bg.0 = NORMAL_BUTTON_COLOR;
+                *border = BorderColor::all(BUTTON_BORDER_COLOR);
+                img.color = Color::WHITE;
+            }
+        } else {
+            if disabled.is_none() {
+                commands.entity(entity).insert(DisabledButton);
+                bg.0 = DISABLED_BUTTON_COLOR;
+                *border = BorderColor::all(DISABLED_BORDER_COLOR);
+                img.color = Color::srgb(0.3, 0.3, 0.3);
+            }
+        }
+    }
+}
+

@@ -1289,7 +1289,11 @@ impl SelectionItem for Race {
     }
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
+        let stage = player.age_stage();
         player.race = *self;
+        let (min_age, max_age) = player.race.age_stage_range(stage);
+        use rand::RngExt;
+        player.age = rand::rng().random_range(min_age..=max_age);
         next_game_state.set(GameState::ChooseClass);
     }
 
