@@ -10,7 +10,7 @@ use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
 use crate::core::pets::{Pet, PetKind};
-use crate::core::player::{Attribute, Player, Sex};
+use crate::core::player::{Attribute, Player, Sex, AgeStage};
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
@@ -18,6 +18,7 @@ use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::window::SystemCursorIcon;
+use rand::{rng, RngExt};
 
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
 pub struct SexButton(pub Sex);
@@ -40,7 +41,6 @@ pub struct PointsRemainingText;
 #[derive(Component)]
 pub struct CreateCharacterContinueBtn;
 
-pub const AGE_STAGES: &[&str] = &["youth", "young adult", "adult", "senior", "elder"];
 pub const AGE_SLIDER_WIDTH: f32 = 280.0;
 pub const AGE_VALUE_WIDTH: f32 = 240.0;
 
@@ -62,32 +62,22 @@ pub struct AgeStageButton(pub u32);
 #[derive(Component)]
 pub struct PetNameText;
 
-fn creation_attribute_value(player: &Player, attr: Attribute) -> u8 {
-    let age_modifier = player.age_modifier();
+
+fn creation_attribute_value(player: &Player, attr: Attribute) -> u32 {
     let value = match attr {
         Attribute::Strength => {
-            player.strength as i16
-                + if matches!(player.sex, Sex::Male) {
-                    1
-                } else {
-                    0
-                }
+            player.strength as i32 + player.sex.characteristic_mod(Attribute::Strength)
         },
-        Attribute::Dexterity => player.dexterity as i16,
-        Attribute::Constitution => player.constitution as i16 - age_modifier,
-        Attribute::Intelligence => player.intelligence as i16,
-        Attribute::Wisdom => player.wisdom as i16 + age_modifier,
+        Attribute::Dexterity => player.dexterity as i32,
+        Attribute::Constitution => player.constitution as i32 + player.stage.characteristic_mod(Attribute::Constitution),
+        Attribute::Intelligence => player.intelligence as i32,
+        Attribute::Wisdom => player.wisdom as i32 + player.stage.characteristic_mod(Attribute::Wisdom),
         Attribute::Charisma => {
-            player.charisma as i16
-                + if matches!(player.sex, Sex::Female) {
-                    1
-                } else {
-                    0
-                }
+            player.charisma as i32 + player.sex.characteristic_mod(Attribute::Charisma)
         },
     };
 
-    value.max(0) as u8
+    value.max(0) as u32
 }
 
 pub fn update_sex_button_colors(
@@ -112,12 +102,12 @@ fn spawn_sex_button(
     lang: Language,
 ) {
     let label = match sex {
-        Sex::Male => localization.get("male", lang),
-        Sex::Female => localization.get("female", lang),
+        Sex::Man => localization.get("man", lang),
+        Sex::Woman => localization.get("woman", lang),
     };
     let key_loc = match sex {
-        Sex::Male => "male".to_string(),
-        Sex::Female => "female".to_string(),
+        Sex::Man => "man".to_string(),
+        Sex::Woman => "woman".to_string(),
     };
 
     parent
@@ -677,14 +667,14 @@ pub fn setup_character_creation(
                                 .with_children(|parent| {
                                     spawn_sex_button(
                                         parent,
-                                        Sex::Male,
+                                        Sex::Man,
                                         &assets,
                                         &localization,
                                         lang,
                                     );
                                     spawn_sex_button(
                                         parent,
-                                        Sex::Female,
+                                        Sex::Woman,
                                         &assets,
                                         &localization,
                                         lang,
@@ -723,7 +713,6 @@ pub fn setup_character_creation(
                                 })
                                 .with_children(|parent| {
                                     // Slider track - the whole area is interactive
-                                    let frac = player.age_stage() as f32 / 4.0;
                                     parent
                                         .spawn((
                                             Node {
@@ -830,7 +819,7 @@ pub fn setup_character_creation(
                                                         height: Val::Px(24.),
                                                         top: Val::Px(3.),
                                                         left: Val::Px(
-                                                            frac * AGE_SLIDER_WIDTH - 12.,
+                                                            player.stage.frac() * AGE_SLIDER_WIDTH - 12.,
                                                         ),
                                                         border: UiRect::all(Val::Px(2.)),
                                                         border_radius: BorderRadius::all(Val::Px(
@@ -871,7 +860,7 @@ pub fn setup_character_creation(
                                             parent.spawn((
                                                 add_text(
                                                     localization.get(
-                                                        AGE_STAGES[player.age_stage() as usize],
+                                                        player.stage.to_lowername(),
                                                         lang,
                                                     ),
                                                     "bold",
@@ -1069,12 +1058,12 @@ fn on_age_slider_drag(
     set_age_value_position(&mut value_node_q, stage as f32 / 4.0 * AGE_SLIDER_WIDTH);
     
     // Generate random age within the range for this race and stage
-    let (min_age, max_age) = player.race.age_stage_range(stage);
-    use rand::RngExt;
-    player.age = rand::rng().random_range(min_age..=max_age);
+    let age_stage = AgeStage::from_u32(stage);
+    let (min_age, max_age) = player.race.age_stage_range(age_stage);
+    player.age = rng().random_range(min_age..=max_age);
 
     if let Ok(mut text) = text_q.single_mut() {
-        text.0 = localization.get(AGE_STAGES[stage as usize], settings.language);
+        text.0 = localization.get(age_stage.to_lowername(), settings.language);
     }
 
     for (mut text, val_attr) in attr_text_q.iter_mut() {
@@ -1102,7 +1091,7 @@ fn on_age_slider_release(
         };
         match handle_node.left {
             Val::Px(px) => px + 12.,
-            _ => player.age_stage() as f32 / 4.0 * AGE_SLIDER_WIDTH,
+            _ => player.stage.frac() * AGE_SLIDER_WIDTH,
         }
     };
     let stage = age_stage_from_relative_x(relative_x);
@@ -1250,16 +1239,16 @@ fn apply_age_stage(
     attr_text_q: &mut Query<(&mut Text, &AttributeValueText), Without<AgeValueText>>,
 ) {
     // Generate random age within the range for this race and stage
-    let (min_age, max_age) = player.race.age_stage_range(stage);
-    use rand::RngExt;
-    let new_age = rand::rng().random_range(min_age..=max_age);
+    let age_stage = AgeStage::from_u32(stage);
+    let (min_age, max_age) = player.race.age_stage_range(age_stage);
+    let new_age = rng().random_range(min_age..=max_age);
     let changed = player.age != new_age;
     player.age = new_age;
     let snapped_frac = stage as f32 / 4.0;
     set_age_slider_position(handle_q, value_node_q, snapped_frac * AGE_SLIDER_WIDTH);
 
     if let Ok(mut text) = text_q.single_mut() {
-        text.0 = localization.get(AGE_STAGES[stage as usize], settings.language);
+        text.0 = localization.get(age_stage.to_lowername(), settings.language);
     }
 
     if !changed {
@@ -1302,20 +1291,15 @@ impl SelectionItem for Race {
     }
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
-        let stage = player.age_stage();
+        let stage = player.stage;
         player.race = *self;
         let (min_age, max_age) = player.race.age_stage_range(stage);
-        use rand::RngExt;
-        player.age = rand::rng().random_range(min_age..=max_age);
+        player.age = rng().random_range(min_age..=max_age);
         next_game_state.set(GameState::ChooseClass);
     }
 
     fn get_image_key(&self, player: &Player) -> String {
-        let sex_key = match player.sex {
-            Sex::Male => "male",
-            Sex::Female => "female",
-        };
-        format!("{}_{}", self.to_lowername(), sex_key)
+        format!("{}_{}", self.to_lowername(), player.sex.to_lowername())
     }
 }
 
@@ -1356,8 +1340,8 @@ impl SelectionItem for Class {
         if matches!(*self, Class::Mage(_) | Class::Druid) {
             next_game_state.set(GameState::ChooseSubClass);
         } else {
-            player.health = player.max_health().floor();
-            player.mana = player.max_mana().floor();
+            player.health = player.max_health();
+            player.mana = player.max_mana();
             next_game_state.set(GameState::Playing);
         }
     }
@@ -1388,16 +1372,16 @@ impl SelectionItem for Ajah {
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = Class::Mage(*self);
         player.abilities.push(self.special_ability().to_string());
-        player.health = player.max_health().floor();
-        player.mana = player.max_mana().floor();
+        player.health = player.max_health();
+        player.mana = player.max_mana();
         next_game_state.set(GameState::Playing);
     }
 
     fn get_image_key(&self, player: &Player) -> String {
         let race_key = player.race.to_lowername();
         let sex_key = match player.sex {
-            Sex::Male => "male",
-            Sex::Female => "female",
+            Sex::Man => "man",
+            Sex::Woman => "woman",
         };
         match self {
             Ajah::Black => format!("mage_black_{}_{}", race_key, sex_key),
@@ -1427,8 +1411,8 @@ impl SelectionItem for PetKind {
             PET_NAMES.choose(&mut rand::rng()).copied().unwrap_or("Ash").to_string()
         };
         player.pet = Some(Pet::new(pet_name, *self));
-        player.health = player.max_health().floor();
-        player.mana = player.max_mana().floor();
+        player.health = player.max_health();
+        player.mana = player.max_mana();
         next_game_state.set(GameState::Playing);
     }
 

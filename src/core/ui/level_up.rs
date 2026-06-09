@@ -122,12 +122,12 @@ pub fn handle_level_up_confirm(
 
     play_audio_msg.write(PlayAudioMsg::new("button"));
 
-    player.strength += level_up.attr_gains[0] as u8;
-    player.dexterity += level_up.attr_gains[1] as u8;
-    player.constitution += level_up.attr_gains[2] as u8;
-    player.intelligence += level_up.attr_gains[3] as u8;
-    player.wisdom += level_up.attr_gains[4] as u8;
-    player.charisma += level_up.attr_gains[5] as u8;
+    player.strength += level_up.attr_gains[0] as u32;
+    player.dexterity += level_up.attr_gains[1] as u32;
+    player.constitution += level_up.attr_gains[2] as u32;
+    player.intelligence += level_up.attr_gains[3] as u32;
+    player.wisdom += level_up.attr_gains[4] as u32;
+    player.charisma += level_up.attr_gains[5] as u32;
 
     if let Some(idx) = level_up.ability_chosen {
         if let Some(name) = level_up.ability_choices.get(idx) {

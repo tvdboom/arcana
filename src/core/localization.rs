@@ -35,16 +35,14 @@ impl FromWorld for Localization {
 }
 
 impl Localization {
-    pub fn get(&self, key: &str, language: Language) -> String {
+    pub fn get(&self, key: impl Into<String>, language: Language) -> String {
+        let key = key.into();
         let map = match language {
             Language::English => &self.en,
             Language::Spanish => &self.es,
             Language::Dutch => &self.nl,
         };
-        map.get(key).cloned().unwrap_or_else(|| {
-            warn!("Missing localization key: '{key}'");
-            key.to_string()
-        })
+        map.get(&key).cloned().unwrap_or_else(|| panic!("Missing localization key: '{key}'"))
     }
 
     pub fn get_opt(&self, key: &str, language: Language) -> Option<String> {
@@ -87,7 +85,7 @@ pub fn format_race_description(
 
     let mut modifier_strs = Vec::new();
     for attr in Attribute::iter() {
-        let val = race.modifier(attr);
+        let val = race.characteristic_mod(attr);
         if val != 0 {
             let sign = if val > 0 {
                 "+"

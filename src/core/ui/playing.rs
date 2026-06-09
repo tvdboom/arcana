@@ -18,7 +18,7 @@ use crate::core::ui::creation::SelectionItem;
 pub use crate::core::ui::level_up::{manage_level_up_overlay, LevelUpPending};
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
-use bevy::window::SystemCursorIcon;
+use bevy::window::{CursorIcon, SystemCursorIcon};
 
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
@@ -2520,8 +2520,8 @@ pub fn update_playing_screen(
             PlayingStat::CharRace => localization.get(&player.race.to_lowername(), lang),
             PlayingStat::CharClass => localized_class_name(&player, &localization, lang),
             PlayingStat::CharSex => match player.sex {
-                crate::core::player::Sex::Male => localization.get("male", lang),
-                crate::core::player::Sex::Female => localization.get("female", lang),
+                crate::core::player::Sex::Man => localization.get("man", lang),
+                crate::core::player::Sex::Woman => localization.get("woman", lang),
             },
             PlayingStat::CharAge => {
                 format!("{} {}", player.age, localization.get("years", lang))
@@ -2536,13 +2536,13 @@ pub fn update_playing_screen(
             },
             PlayingStat::Health => format!(
                 "{} / {} {}",
-                player.health.max(0.) as i32,
+                player.health.max(0) as i32,
                 player.max_health() as i32,
                 localization.get("health", lang)
             ),
             PlayingStat::Mana => format!(
                 "{} / {} {}",
-                player.mana.max(0.) as i32,
+                player.mana.max(0) as i32,
                 player.max_mana() as i32,
                 localization.get("mana", lang)
             ),
@@ -2581,11 +2581,11 @@ pub fn update_playing_screen(
     }
 
     if let Ok(mut node) = hbar_q.single_mut() {
-        let ratio = (player.health / player.max_health()).clamp(0., 1.) * 100.;
+        let ratio = (player.health as f32 / player.max_health() as f32).clamp(0., 1.) * 100.;
         node.width = percent(ratio);
     }
     if let Ok(mut node) = mbar_q.single_mut() {
-        let ratio = (player.mana / player.max_mana()).clamp(0., 1.) * 100.;
+        let ratio = (player.mana as f32 / player.max_mana() as f32).clamp(0., 1.) * 100.;
         node.width = percent(ratio);
     }
     if let Some(ref pet) = player.pet {
@@ -2689,9 +2689,9 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
             "consumable" => {
                 let name = weapon.name.to_lowercase();
                 if name.contains("health") {
-                    player.health = player.max_health().floor();
+                    player.health = player.max_health();
                 } else if name.contains("mana") {
-                    player.mana = player.max_mana().floor();
+                    player.mana = player.max_mana();
                 } else if name.contains("strength") {
                     player.strength += 1;
                 } else if name.contains("dexterity") {
@@ -2705,10 +2705,10 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                 } else if name.contains("charisma") {
                     player.charisma += 1;
                 } else if name.contains("rejuvenation") {
-                    player.health = player.max_health().floor();
-                    player.mana = player.max_mana().floor();
+                    player.health = player.max_health();
+                    player.mana = player.max_mana();
                 } else if name.contains("antidote") {
-                    player.health = player.max_health().floor();
+                    player.health = player.max_health();
                 }
                 return Some("button");
             },
@@ -2887,8 +2887,8 @@ pub fn handle_equipment_card_click(
                 player.inventory.remove(pos);
                 player.gold += sell_price;
                 play_audio_msg.write(PlayAudioMsg::new("coins"));
-                commands.entity(*window_e).insert(bevy::window::CursorIcon::from(
-                    bevy::window::SystemCursorIcon::Default,
+                commands.entity(*window_e).insert(CursorIcon::from(
+                    SystemCursorIcon::Default,
                 ));
             }
             return;
@@ -2904,12 +2904,12 @@ pub fn handle_equipment_card_click(
                 if eq.kind == "consumable" {
                     let name = eq.name.to_lowercase();
                     let blocked = if name.contains("rejuvenation") {
-                        player.health >= player.max_health().floor()
-                            && player.mana >= player.max_mana().floor()
+                        player.health >= player.max_health()
+                            && player.mana >= player.max_mana()
                     } else if name.contains("health") || name.contains("antidote") {
-                        player.health >= player.max_health().floor()
+                        player.health >= player.max_health()
                     } else if name.contains("mana") {
-                        player.mana >= player.max_mana().floor()
+                        player.mana >= player.max_mana()
                     } else {
                         false
                     };
@@ -2989,8 +2989,8 @@ pub fn handle_equipment_slot_click(
 
                     player.gold += sell_price;
                     play_audio_msg.write(PlayAudioMsg::new("coins"));
-                    commands.entity(*window_e).insert(bevy::window::CursorIcon::from(
-                        bevy::window::SystemCursorIcon::Default,
+                    commands.entity(*window_e).insert(CursorIcon::from(
+                        SystemCursorIcon::Default,
                     ));
                 }
             } else {

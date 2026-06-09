@@ -1,4 +1,4 @@
-use crate::core::player::Attribute;
+use crate::core::player::{Attribute, AgeStage};
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
@@ -22,12 +22,11 @@ impl Race {
         }
     }
 
-    pub fn age_stage_range(&self, stage: u32) -> (u32, u32) {
+    pub fn age_stage_range(&self, stage: AgeStage) -> (u32, u32) {
         let (min, max) = self.age_range();
         let span = max - min + 1;
-        let stage = stage.clamp(0, 4);
-        let start = min + (span * stage) / 5;
-        let end = min + (span * (stage + 1)) / 5 - 1;
+        let start = min + (span * stage.index() as u32) / 5;
+        let end = min + (span * (stage.index() as u32 + 1)) / 5 - 1;
         (start, end.max(start))
     }
 
@@ -41,7 +40,7 @@ impl Race {
         }
     }
 
-    pub fn modifier(&self, attr: Attribute) -> i8 {
+    pub fn characteristic_mod(&self, attr: Attribute) -> i32 {
         match attr {
             Attribute::Strength => match self {
                 Race::Dwarf => 1,

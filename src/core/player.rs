@@ -1,20 +1,95 @@
 use crate::core::classes::Class;
-use crate::core::constants::FANTASY_NAMES;
+use crate::core::constants::{NAMES, START_CHARACTERISTIC};
 use crate::core::pets::Pet;
 use crate::core::races::Race;
 use bevy::prelude::*;
-use rand::prelude::IndexedRandom;
-use rand::rng;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use rand::prelude::IndexedRandom;
+use rand::rng;
+use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter, EnumString};
+use crate::core::catalog::{get_equipment, GeneratedEquipment};
 
 #[derive(EnumIter, Clone, Copy, Debug, Display, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum Sex {
     #[default]
-    Male,
-    Female,
+    Man,
+    Woman,
+}
+
+impl Sex {
+    pub fn characteristic_mod(&self, attr: Attribute) -> i32 {
+        match attr {
+            Attribute::Strength => match self {
+                Sex::Man => 1,
+                Sex::Woman => 0,
+            },
+            Attribute::Charisma => match self {
+                Sex::Man => 0,
+                Sex::Woman => 1,
+            },
+            _ => 0,
+        }
+    }
+}
+
+#[derive(EnumIter, Clone, Copy, Debug, Display, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub enum AgeStage {
+    Youth,
+    YoungAdult,
+    #[default]
+    Adult,
+    Senior,
+    Elder,
+}
+
+impl AgeStage {
+    pub fn from_u32(u: u32) -> Self {
+        match u {
+            0 => Self::Youth,
+            1 => Self::YoungAdult,
+            2 => Self::Adult,
+            3 => Self::Senior,
+            4 => Self::Elder,
+            _ => panic!("invalid stage {u}"),
+        }
+    }
+
+    pub fn index(&self) -> u32 {
+        match self {
+            AgeStage::Youth => 0,
+            AgeStage::YoungAdult => 1,
+            AgeStage::Adult => 2,
+            AgeStage::Senior => 3,
+            AgeStage::Elder => 4,
+        }
+    }
+
+    pub fn frac(&self) -> f32 {
+        self.index() as f32 / (Self::iter().len() - 1) as f32
+    }
+
+    pub fn characteristic_mod(&self, attr: Attribute) -> i32 {
+        match attr {
+            Attribute::Constitution => match self {
+                AgeStage::Youth => 2,
+                AgeStage::YoungAdult => 1,
+                AgeStage::Adult => 0,
+                AgeStage::Senior => -1,
+                AgeStage::Elder => -2,
+            },
+            Attribute::Wisdom => match self {
+                AgeStage::Youth => -2,
+                AgeStage::YoungAdult => -1,
+                AgeStage::Adult => 0,
+                AgeStage::Senior => 1,
+                AgeStage::Elder => 2,
+            },
+            _ => 0,
+        }
+    }
 }
 
 #[derive(EnumIter, Clone, Copy, Debug, EnumString, Serialize, Deserialize)]
@@ -33,17 +108,20 @@ pub struct Player {
     pub sex: Sex,
     pub race: Race,
     pub class: Class,
+    pub stage: AgeStage,
     pub age: u32,
     pub level: u8,
     pub ap: u32,
-    pub health: f32,
-    pub mana: f32,
-    pub strength: u8,
-    pub dexterity: u8,
-    pub constitution: u8,
-    pub intelligence: u8,
-    pub wisdom: u8,
-    pub charisma: u8,
+    pub health: u32,
+    pub mana: u32,
+    pub bonus_max_health: u32,
+    pub bonus_max_mana: u32,
+    pub strength: u32,
+    pub dexterity: u32,
+    pub constitution: u32,
+    pub intelligence: u32,
+    pub wisdom: u32,
+    pub charisma: u32,
     pub abilities: Vec<String>,
     pub perks: Vec<String>,
     pub pet: Option<Pet>,
@@ -58,36 +136,29 @@ pub struct Player {
     pub accessory2: Option<String>,
     pub inventory: Vec<String>,
     pub gold: u32,
-    pub bonus_max_health: f32,
-    pub bonus_max_mana: f32,
 }
 
 impl Default for Player {
     fn default() -> Self {
-        let name = FANTASY_NAMES.choose(&mut rng()).copied().unwrap().to_string();
-
-        // Generate a random age in the Adult stage (stage 2) for default Human race
-        let race = Race::default();
-        let (min_age, max_age) = race.age_stage_range(2);
-        use rand::RngExt;
-        let age = rand::rng().random_range(min_age..=max_age);
-
         Self {
-            name,
+            name: NAMES.choose(&mut rng()).unwrap().to_string(),
             sex: Sex::default(),
-            race,
+            race: Race::default(),
             class: Class::default(),
-            age,
+            stage: AgeStage::default(),
+            age: 0,
             level: 1,
             ap: 10,
-            health: 100.,
-            mana: 100.,
-            strength: 10,
-            dexterity: 10,
-            constitution: 10,
-            intelligence: 10,
-            wisdom: 10,
-            charisma: 10,
+            health: 100,
+            mana: 100,
+            bonus_max_health: 0,
+            bonus_max_mana: 0,
+            strength: START_CHARACTERISTIC,
+            dexterity: START_CHARACTERISTIC,
+            constitution: START_CHARACTERISTIC,
+            intelligence: START_CHARACTERISTIC,
+            wisdom: START_CHARACTERISTIC,
+            charisma: START_CHARACTERISTIC,
             abilities: vec![],
             perks: vec![],
             pet: None,
@@ -102,76 +173,59 @@ impl Default for Player {
             accessory2: None,
             inventory: vec![],
             gold: 100,
-            bonus_max_health: 0.,
-            bonus_max_mana: 0.,
         }
     }
 }
 
 impl Player {
-    /// Get the age stage (0=Youth, 1=Young Adult, 2=Adult, 3=Senior, 4=Elder) from actual age
-    pub fn age_stage(&self) -> u32 {
-        let (min, max) = self.race.age_range();
-        let span = max - min + 1;
-        let age_offset = self.age.saturating_sub(min);
-        let stage = (age_offset * 5) / span;
-        stage.clamp(0, 4)
+    pub fn strength(&self) -> u32 {
+        let race_mod = self.race.characteristic_mod(Attribute::Strength);
+        let sex_mod = self.sex.characteristic_mod(Attribute::Strength);
+        (self.strength as i32 + race_mod + sex_mod).max(0) as u32
     }
 
-    /// Age stage modifier: Youth=-2, Young Adult=-1, Adult=0, Senior=+1, Elder=+2.
-    /// This is added to wisdom and subtracted from constitution.
-    pub fn age_modifier(&self) -> i16 {
-        (self.age_stage() as i16) - 2
+    pub fn strength_mod(&self) -> u32 {
+        (self.strength() - START_CHARACTERISTIC).max(0)
     }
 
-    pub fn strength(&self) -> u8 {
-        let base = self.strength as i16;
-        let modifier = self.race.modifier(Attribute::Strength) as i16;
-        let sex_mod = if matches!(self.sex, Sex::Male) {
-            1
-        } else {
-            0
-        };
-        (base + modifier + sex_mod).max(0) as u8
+    pub fn dexterity(&self) -> u32 {
+        let race_mod = self.race.characteristic_mod(Attribute::Dexterity);
+        (self.dexterity as i32 + race_mod).max(0) as u32
     }
 
-    pub fn dexterity(&self) -> u8 {
-        let base = self.dexterity as i16;
-        let modifier = self.race.modifier(Attribute::Dexterity) as i16;
-        (base + modifier).max(0) as u8
+    pub fn constitution(&self) -> u32 {
+        let race_mod = self.race.characteristic_mod(Attribute::Constitution);
+        let age_mod = self.stage.characteristic_mod(Attribute::Constitution);
+        (self.constitution as i32 + race_mod - age_mod).max(0) as u32
     }
 
-    pub fn constitution(&self) -> u8 {
-        let base = self.constitution as i16;
-        let modifier = self.race.modifier(Attribute::Constitution) as i16;
-        (base + modifier - self.age_modifier()).max(0) as u8
+    pub fn constitution_mod(&self) -> u32 {
+        (self.constitution() - START_CHARACTERISTIC).max(0)
     }
 
-    pub fn intelligence(&self) -> u8 {
-        let base = self.intelligence as i16;
-        let modifier = self.race.modifier(Attribute::Intelligence) as i16;
-        (base + modifier).max(0) as u8
+    pub fn intelligence(&self) -> u32 {
+        let race_mod = self.race.characteristic_mod(Attribute::Intelligence);
+        (self.intelligence as i32 + race_mod).max(0) as u32
     }
 
-    pub fn wisdom(&self) -> u8 {
-        let base = self.wisdom as i16;
-        let modifier = self.race.modifier(Attribute::Wisdom) as i16;
-        (base + modifier + self.age_modifier()).max(0) as u8
+    pub fn wisdom(&self) -> u32 {
+        let race_mod = self.race.characteristic_mod(Attribute::Wisdom);
+        let age_mod = self.stage.characteristic_mod(Attribute::Wisdom);
+        (self.wisdom as i32 + race_mod + age_mod).max(0) as u32
     }
 
-    pub fn charisma(&self) -> u8 {
-        let base = self.charisma as i16;
-        let modifier = self.race.modifier(Attribute::Charisma) as i16;
-        let sex_mod = if matches!(self.sex, Sex::Female) {
-            1
-        } else {
-            0
-        };
-        (base + modifier + sex_mod).max(0) as u8
+    pub fn wisdom_mod(&self) -> u32 {
+        (self.wisdom() - START_CHARACTERISTIC).max(0)
+    }
+
+    pub fn charisma(&self) -> u32 {
+        let race_mod = self.race.characteristic_mod(Attribute::Charisma);
+        let sex_mod = self.sex.characteristic_mod(Attribute::Charisma);
+        (self.charisma as i32 + race_mod + sex_mod).max(0) as u32
     }
 
     /// All currently equipped pieces of gear.
-    pub fn equipped_equipment(&self) -> Vec<crate::core::catalog::GeneratedEquipment> {
+    pub fn equipped_equipment(&self) -> Vec<GeneratedEquipment> {
         [
             &self.helmet,
             &self.armor,
@@ -185,40 +239,38 @@ impl Player {
         ]
         .into_iter()
         .flatten()
-        .filter_map(|key| crate::core::catalog::get_equipment(key))
+        .filter_map(|key| get_equipment(key))
         .collect()
     }
 
-    pub fn max_health(&self) -> f32 {
-        let base_max = 100. + (self.constitution() as f32 - 10.) * 10.;
-        let class_bonus = if matches!(self.class, Class::Warrior) {
-            20.
+    pub fn max_health(&self) -> u32 {
+        let base = 100 + 10 * self.constitution_mod();
+        let class_mod = if self.class == Class::Warrior {
+            20
         } else {
-            0.
+            0
         };
-        base_max + class_bonus + self.bonus_max_health
+        base + class_mod + self.bonus_max_health
     }
 
-    pub fn max_mana(&self) -> f32 {
-        let mut base_max = 100.0_f32;
-        match self.class {
-            Class::Mage(_) => base_max += 30.,
-            Class::Druid => base_max += 10.,
-            _ => {},
-        }
-        let wisdom_bonus = (self.wisdom() as i32 - 10) * 10;
-        (base_max + wisdom_bonus as f32 + self.bonus_max_mana).max(0.)
+    pub fn max_mana(&self) -> u32 {
+        let base = 100 + 10 * self.wisdom_mod();
+        let class_mod = match self.class {
+            Class::Mage(_) => 30,
+            Class::Druid => 10,
+            _ => 0,
+        };
+        base + class_mod + self.bonus_max_mana
     }
 
     /// Total physical attack damage (base from strength plus weapon bonuses).
-    pub fn attack_damage(&self) -> i32 {
-        let str_bonus = (self.strength() as i32 - 10) + 5; // base 5 + 1 per str above 10
-        str_bonus + self.equipped_equipment().iter().map(|w| w.attack).sum::<i32>()
+    pub fn attack_damage(&self) -> u32 {
+        let equip_mod = self.equipped_equipment().iter().map(|w| w.attack).sum::<i32>();
+        (5 + self.strength_mod() as i32 + equip_mod) as u32
     }
 
     pub fn weapon_attack_speed(&self, weapon_key: &str) -> f32 {
-        let weapon_speed =
-            crate::core::catalog::get_equipment(weapon_key).map(|w| w.attack_speed).unwrap_or(1.0);
+        let weapon_speed = get_equipment(weapon_key).map(|w| w.attack_speed).unwrap_or(1.0);
         self.adjust_attack_speed(weapon_speed)
     }
 

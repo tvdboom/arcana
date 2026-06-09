@@ -1,6 +1,6 @@
 use bevy::prelude::{Color, Val};
 
-/// Menu
+/// UI
 pub const TITLE_TEXT_SIZE: f32 = 5.;
 pub const SUBTITLE_TEXT_SIZE: f32 = 4.;
 pub const BUTTON_TEXT_SIZE: f32 = 3.;
@@ -12,12 +12,15 @@ pub const BUTTON_BORDER_COLOR: Color = Color::srgb_u8(170, 140, 55);
 pub const BUTTON_TEXT_COLOR: Color = Color::srgb_u8(230, 205, 145);
 pub const DISABLED_BUTTON_COLOR: Color = Color::srgba_u8(10, 18, 45, 80);
 pub const DISABLED_BORDER_COLOR: Color = Color::srgba_u8(170, 140, 55, 80);
-
 pub const PLACEHOLDER_COLOR: Color = Color::srgba_u8(40, 40, 55, 220);
 pub const BAR_BG_COLOR: Color = Color::srgba_u8(0, 0, 0, 160);
 pub const ICON_ITEM: Val = Val::Vw(3.2);
 
-pub const FANTASY_NAMES: &[&str] = &[
+
+/// Game
+pub const START_CHARACTERISTIC: u32 = 10;
+
+pub const NAMES: &[&str] = &[
     "Eldrin",
     "Zephyrus",
     "Thorne",

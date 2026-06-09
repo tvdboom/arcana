@@ -64,12 +64,12 @@ pub fn check_keys_menu(
                 level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
             let perk_ok = level_up.perk_choices.is_empty() || level_up.perk_chosen.is_some();
             if level_up.points_remaining == 0 && ability_ok && perk_ok {
-                player.strength += level_up.attr_gains[0] as u8;
-                player.dexterity += level_up.attr_gains[1] as u8;
-                player.constitution += level_up.attr_gains[2] as u8;
-                player.intelligence += level_up.attr_gains[3] as u8;
-                player.wisdom += level_up.attr_gains[4] as u8;
-                player.charisma += level_up.attr_gains[5] as u8;
+                player.strength += level_up.attr_gains[0] as u32;
+                player.dexterity += level_up.attr_gains[1] as u32;
+                player.constitution += level_up.attr_gains[2] as u32;
+                player.intelligence += level_up.attr_gains[3] as u32;
+                player.wisdom += level_up.attr_gains[4] as u32;
+                player.charisma += level_up.attr_gains[5] as u32;
 
                 if let Some(idx) = level_up.ability_chosen {
                     if let Some(name) = level_up.ability_choices.get(idx) {
