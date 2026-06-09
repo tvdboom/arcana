@@ -2,9 +2,9 @@ pub mod actions;
 mod assets;
 mod audio;
 mod camera;
+pub mod catalog;
 pub mod classes;
 mod constants;
-pub mod catalog;
 pub mod localization;
 mod menu;
 #[cfg(not(target_arch = "wasm32"))]
@@ -35,7 +35,7 @@ use crate::core::systems::*;
 use crate::core::ui::creation::*;
 use crate::core::ui::level_up::LevelUpOverlayCmp;
 use crate::core::ui::playing::*;
-use crate::core::ui::toast::{GoldToast, tick_gold_toasts};
+use crate::core::ui::toast::{tick_gold_toasts, GoldToast};
 use crate::core::utils::{despawn, reset_cursor};
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
@@ -152,7 +152,10 @@ impl Plugin for GamePlugin {
                 OnEnter(GameState::Playing),
                 (setup_playing_screen, rebuild_playing_lists).chain(),
             )
-            .add_systems(OnExit(GameState::Playing), (despawn::<TooltipNode>, despawn::<GoldToast>, despawn::<LevelUpOverlayCmp>))
+            .add_systems(
+                OnExit(GameState::Playing),
+                (despawn::<TooltipNode>, despawn::<GoldToast>, despawn::<LevelUpOverlayCmp>),
+            )
             .add_systems(OnExit(AppState::Game), (despawn::<PlayingCmp>, despawn::<TooltipNode>))
             .add_systems(
                 Update,
@@ -172,13 +175,11 @@ impl Plugin for GamePlugin {
             )
             .add_systems(
                 Update,
-                rebuild_playing_lists
-                    .run_if(in_state(AppState::Game))
-                    .run_if(
-                        resource_changed::<Player>
-                            .or_else(resource_changed::<Settings>)
-                            .or_else(resource_changed::<RightTab>)
-                    ),
+                rebuild_playing_lists.run_if(in_state(AppState::Game)).run_if(
+                    resource_changed::<Player>
+                        .or_else(resource_changed::<Settings>)
+                        .or_else(resource_changed::<RightTab>),
+                ),
             )
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)

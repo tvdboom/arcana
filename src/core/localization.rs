@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::core::classes::{Ajah, Class};
-use crate::core::pets::Pet;
+use crate::core::pets::PetKind;
 use crate::core::player::Attribute;
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
@@ -75,7 +75,7 @@ pub struct LocalizedAjahDesc(pub Ajah);
 
 /// Marks a text entity with the pet description so it can be updated on language change.
 #[derive(Component)]
-pub struct LocalizedPetDesc(pub Pet);
+pub struct LocalizedPetDesc(pub PetKind);
 
 pub fn format_race_description(
     race: Race,
@@ -116,19 +116,15 @@ pub fn format_class_description(
     let desc = localization.get(&format!("{}_desc", class_key), language);
 
     let starting_ability = class.starting_ability();
-    let ability_name = crate::core::catalog::get_ability(starting_ability)
-        .map(|a| a.name)
-        .unwrap_or("Ability");
+    let ability_name =
+        crate::core::catalog::get_ability(starting_ability).map(|a| a.name).unwrap_or("Ability");
 
     let starting_perk = class.starting_perk();
-    let perk_name = crate::core::catalog::get_perk(starting_perk)
-        .map(|p| p.name)
-        .unwrap_or("Perk");
+    let perk_name = crate::core::catalog::get_perk(starting_perk).map(|p| p.name).unwrap_or("Perk");
 
     let starting_weapon = class.starting_weapon();
-    let weapon_name = crate::core::catalog::get_equipment(starting_weapon)
-        .map(|w| w.name)
-        .unwrap_or("Weapon");
+    let weapon_name =
+        crate::core::catalog::get_equipment(starting_weapon).map(|w| w.name).unwrap_or("Weapon");
 
     let starting_ability_label = localization.get("starting_ability", language);
     let starting_perk_label = localization.get("starting_perk", language);
@@ -176,16 +172,19 @@ pub fn format_ajah_description(
     let desc = localization.get(&format!("{}_desc", ajah_key), language);
 
     let special_ability = ajah.special_ability();
-    let ability_name = crate::core::catalog::get_ability(special_ability)
-        .map(|a| a.name)
-        .unwrap_or("Ability");
+    let ability_name =
+        crate::core::catalog::get_ability(special_ability).map(|a| a.name).unwrap_or("Ability");
 
     let special_ability_label = localization.get("special_ability", language);
 
     format!("{}\n\n{}: {}", desc, special_ability_label, ability_name)
 }
 
-pub fn format_pet_description(pet: Pet, language: Language, localization: &Localization) -> String {
+pub fn format_pet_description(
+    pet: PetKind,
+    language: Language,
+    localization: &Localization,
+) -> String {
     let pet_key = pet.to_lowername();
     localization.get(&format!("{}_desc", pet_key), language)
 }

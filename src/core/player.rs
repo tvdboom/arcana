@@ -1,5 +1,5 @@
 use crate::core::classes::Class;
-use crate::core::constants::{FANTASY_NAMES, PET_NAMES};
+use crate::core::constants::FANTASY_NAMES;
 use crate::core::pets::Pet;
 use crate::core::races::Race;
 use bevy::prelude::*;
@@ -47,9 +47,6 @@ pub struct Player {
     pub abilities: Vec<String>,
     pub perks: Vec<String>,
     pub pet: Option<Pet>,
-    pub pet_name: String,
-    #[serde(default)]
-    pub pet_health: Option<f32>,
     pub helmet: Option<String>,
     pub armor: Option<String>,
     pub boots: Option<String>,
@@ -67,15 +64,14 @@ pub struct Player {
 
 impl Default for Player {
     fn default() -> Self {
-        let name = FANTASY_NAMES.choose(&mut rng()).copied().unwrap_or("Arcana").to_string();
-        let pet_name = PET_NAMES.choose(&mut rng()).copied().unwrap_or("Ash").to_string();
-        
+        let name = FANTASY_NAMES.choose(&mut rng()).copied().unwrap().to_string();
+
         // Generate a random age in the Adult stage (stage 2) for default Human race
         let race = Race::default();
         let (min_age, max_age) = race.age_stage_range(2);
         use rand::RngExt;
         let age = rand::rng().random_range(min_age..=max_age);
-        
+
         Self {
             name,
             sex: Sex::default(),
@@ -95,8 +91,6 @@ impl Default for Player {
             abilities: vec![],
             perks: vec![],
             pet: None,
-            pet_name,
-            pet_health: None,
             helmet: None,
             armor: None,
             boots: None,
@@ -197,7 +191,11 @@ impl Player {
 
     pub fn max_health(&self) -> f32 {
         let base_max = 100. + (self.constitution() as f32 - 10.) * 10.;
-        let class_bonus = if matches!(self.class, Class::Warrior) { 20. } else { 0. };
+        let class_bonus = if matches!(self.class, Class::Warrior) {
+            20.
+        } else {
+            0.
+        };
         base_max + class_bonus + self.bonus_max_health
     }
 
@@ -219,9 +217,8 @@ impl Player {
     }
 
     pub fn weapon_attack_speed(&self, weapon_key: &str) -> f32 {
-        let weapon_speed = crate::core::catalog::get_equipment(weapon_key)
-            .map(|w| w.attack_speed)
-            .unwrap_or(1.0);
+        let weapon_speed =
+            crate::core::catalog::get_equipment(weapon_key).map(|w| w.attack_speed).unwrap_or(1.0);
         self.adjust_attack_speed(weapon_speed)
     }
 

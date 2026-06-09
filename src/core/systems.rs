@@ -1,7 +1,7 @@
 use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::{Ajah, Class};
 use crate::core::menu::systems::StartNewCharacterMsg;
-use crate::core::pets::Pet;
+use crate::core::pets::PetKind;
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
 use crate::core::ui::creation::SelectionItem;
@@ -60,7 +60,8 @@ pub fn check_keys_menu(
 
     if keyboard.just_released(KeyCode::Enter) {
         if level_up.active {
-            let ability_ok = level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
+            let ability_ok =
+                level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
             let perk_ok = level_up.perk_choices.is_empty() || level_up.perk_chosen.is_some();
             if level_up.points_remaining == 0 && ability_ok && perk_ok {
                 player.strength += level_up.attr_gains[0] as u8;
@@ -138,7 +139,8 @@ pub fn check_keys_menu(
                             ajah.on_select(&mut player, &mut next_game_state);
                         },
                         Class::Druid => {
-                            Pet::default().on_select(&mut player, &mut next_game_state);
+                            let kind = player.pet.as_ref().map(|p| p.kind).unwrap_or(PetKind::default());
+                            kind.on_select(&mut player, &mut next_game_state);
                         },
                         _ => {
                             next_game_state.set(GameState::CreateCharacter);

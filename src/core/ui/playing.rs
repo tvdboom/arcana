@@ -1,8 +1,8 @@
-use bevy::prelude::*;
 use bevy::ecs::system::SystemParam;
+use bevy::prelude::*;
 use strum::IntoEnumIterator;
 
-pub use crate::core::actions::{handle_playing_action_clicks, ActionButton, Action};
+pub use crate::core::actions::{handle_playing_action_clicks, Action, ActionButton};
 pub use crate::core::ui::toast::ToastContainer;
 
 use crate::core::assets::WorldAssets;
@@ -10,23 +10,23 @@ use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::Class;
 use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
-use crate::core::menu::utils::{add_root_node, add_text, recolor};
 use crate::core::menu::buttons::DisabledButton;
+use crate::core::menu::utils::{add_root_node, add_text, recolor};
 use crate::core::player::{Attribute, Player};
 use crate::core::settings::{Language, Settings};
 use crate::core::ui::creation::SelectionItem;
+pub use crate::core::ui::level_up::{manage_level_up_overlay, LevelUpPending};
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::window::SystemCursorIcon;
-pub use crate::core::ui::level_up::{LevelUpPending, manage_level_up_overlay};
 
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
 
 // Viewport-relative icon sizes (scale with window width)
-const ICON_ACTION: Val = Val::Vh(8.5);  // action button circles
-const ICON_BADGE: Val = Val::Vw(1.9);   // equipped badge overlay
-const ICON_STAT: Val = Val::Vw(2.4);    // gold / AP stat icons
+const ICON_ACTION: Val = Val::Vh(8.5); // action button circles
+const ICON_BADGE: Val = Val::Vw(1.9); // equipped badge overlay
+const ICON_STAT: Val = Val::Vw(2.4); // gold / AP stat icons
 
 #[derive(Component)]
 pub struct PlayingCmp;
@@ -92,9 +92,12 @@ pub enum RightTab {
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
 pub struct RightTabBtn(pub RightTab);
 
-#[derive(Component)] pub struct EquipmentListWrapper;
-#[derive(Component)] pub struct AbilitiesListWrapper;
-#[derive(Component)] pub struct PerksListWrapper;
+#[derive(Component)]
+pub struct EquipmentListWrapper;
+#[derive(Component)]
+pub struct AbilitiesListWrapper;
+#[derive(Component)]
+pub struct PerksListWrapper;
 
 /// The equipment image-slots overlaid on the character portrait.
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
@@ -127,7 +130,6 @@ pub enum InfoTooltip {
     Pet,
 }
 
-
 fn portrait_key(player: &Player) -> String {
     match player.class {
         Class::Mage(ajah) => ajah.get_image_key(player),
@@ -140,11 +142,12 @@ fn class_line(player: &Player, localization: &Localization, lang: Language) -> S
 }
 
 fn playing_title(player: &Player) -> String {
-    if player.pet.is_some() && !player.pet_name.trim().is_empty() {
-        format!("{} & {}", player.name, player.pet_name)
-    } else {
-        player.name.clone()
+    if let Some(ref pet) = player.pet {
+        if !pet.name.trim().is_empty() {
+            return format!("{} & {}", player.name, pet.name);
+        }
     }
+    player.name.clone()
 }
 
 fn localized_class_name(player: &Player, localization: &Localization, lang: Language) -> String {
@@ -171,7 +174,12 @@ pub fn capitalize_words(s: &str) -> String {
         .join(" ")
 }
 
-fn name_with_level(name: String, level: u8, localization: &Localization, lang: Language) -> String {
+fn name_with_level(
+    name: String,
+    level: u8,
+    _localization: &Localization,
+    _lang: Language,
+) -> String {
     format!("{} (Lv. {})", name, level)
 }
 
@@ -189,11 +197,7 @@ fn ability_detail_line(
     )];
 
     if stats.cooldown > 0 {
-        parts.push(format!(
-            "{}: {}s",
-            localization.get("cooldown", lang),
-            stats.cooldown
-        ));
+        parts.push(format!("{}: {}s", localization.get("cooldown", lang), stats.cooldown));
     }
 
     parts.join(" | ")
@@ -267,9 +271,7 @@ fn combat_breakdown(
                 localization.get("strength", lang),
                 player.strength() as i32 - 10,
             ));
-            lines.extend(weapon_bonus_lines(player, |weapon| {
-                weapon.attack
-            }));
+            lines.extend(weapon_bonus_lines(player, |weapon| weapon.attack));
             lines
         },
         PlayingStat::Armor => {
@@ -277,9 +279,7 @@ fn combat_breakdown(
                 localization.get("constitution", lang),
                 player.constitution() as i32 / 4,
             )];
-            lines.extend(weapon_bonus_lines(player, |weapon| {
-                weapon.armor
-            }));
+            lines.extend(weapon_bonus_lines(player, |weapon| weapon.armor));
             lines
         },
         PlayingStat::Initiative => {
@@ -287,9 +287,7 @@ fn combat_breakdown(
                 localization.get("dexterity", lang),
                 player.dexterity() as i32 / 2,
             )];
-            lines.extend(weapon_bonus_lines(player, |weapon| {
-                weapon.initiative
-            }));
+            lines.extend(weapon_bonus_lines(player, |weapon| weapon.initiative));
             if matches!(player.class, Class::Rogue) {
                 lines.push(signed_line(localization.get("rogue", lang), 2));
             }
@@ -345,10 +343,8 @@ fn spawn_pet_stat_box(
                 add_text(localization.get(label_key, lang), "medium", 1.6, assets),
                 TextColor(BUTTON_TEXT_COLOR),
             ));
-            parent.spawn((
-                add_text(value.to_string(), "bold", 3.0, assets),
-                TextColor(Color::WHITE),
-            ));
+            parent
+                .spawn((add_text(value.to_string(), "bold", 3.0, assets), TextColor(Color::WHITE)));
         });
 }
 
@@ -360,13 +356,15 @@ fn spawn_pet_tooltip(
     player: &Player,
     windows: &Query<&Window>,
 ) {
-    let Some(pet) = player.pet else { return };
-    let pet_type_name = capitalize_words(&pet.to_lowername());
-    let title = format!("{} ({})", player.pet_name, pet_type_name);
+    let Some(ref pet) = player.pet else {
+        return;
+    };
+    let pet_type_name = capitalize_words(&pet.kind.to_lowername());
+    let title = format!("{} ({})", pet.name, pet_type_name);
     let desc = localization
-        .get_opt(&format!("{}_desc", pet.to_lowername()), lang)
+        .get_opt(&format!("{}_desc", pet.kind.to_lowername()), lang)
         .unwrap_or_else(|| format!("A loyal {} companion.", pet_type_name.to_lowercase()));
-    let stats = pet.stats();
+    let stats = pet;
 
     let tooltip_width = 320.0_f32;
     let tooltip_height = 180.0_f32;
@@ -406,10 +404,7 @@ fn spawn_pet_tooltip(
         ))
         .with_children(|parent| {
             parent.spawn((add_text(title, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
-            parent.spawn((
-                add_text(desc, "medium", 1.6, assets),
-                TextColor(Color::WHITE),
-            ));
+            parent.spawn((add_text(desc, "medium", 1.6, assets), TextColor(Color::WHITE)));
             // Stat boxes row
             parent
                 .spawn(Node {
@@ -420,9 +415,33 @@ fn spawn_pet_tooltip(
                     ..default()
                 })
                 .with_children(|parent| {
-                    spawn_pet_stat_box(parent, assets, localization, lang, "attack", "attack_icon", stats.attack);
-                    spawn_pet_stat_box(parent, assets, localization, lang, "armor", "armor_icon", stats.armor);
-                    spawn_pet_stat_box(parent, assets, localization, lang, "initiative", "initiative_icon", stats.initiative);
+                    spawn_pet_stat_box(
+                        parent,
+                        assets,
+                        localization,
+                        lang,
+                        "attack",
+                        "attack_icon",
+                        stats.attack,
+                    );
+                    spawn_pet_stat_box(
+                        parent,
+                        assets,
+                        localization,
+                        lang,
+                        "armor",
+                        "armor_icon",
+                        stats.armor,
+                    );
+                    spawn_pet_stat_box(
+                        parent,
+                        assets,
+                        localization,
+                        lang,
+                        "initiative",
+                        "initiative_icon",
+                        stats.initiative,
+                    );
                 });
         });
 }
@@ -435,20 +454,30 @@ fn spawn_action_tooltip(
     desc: String,
     windows: &Query<&Window>,
 ) {
-    let wrapped: Vec<String> = wrap_tooltip_line(&desc, 60);
-    let desc_max = wrapped.iter().map(|l| l.chars().count()).max().unwrap_or(0);
-    // Title width: action name + " (  N)" — approximate as name len + 6 chars
-    let title_chars = (action_name.chars().count() + 8) as f32;
-    let max_chars = title_chars.max(desc_max as f32);
-
     let (window_width, window_height, cursor) = if let Ok(window) = windows.single() {
         (window.width(), window.height(), window.cursor_position())
     } else {
         (1600., 900., None)
     };
-    let tooltip_width = (max_chars * 9.5 + 32.).clamp(200., (window_width - 24.).max(200.));
-    let line_count = 1 + wrapped.len().max(1);
-    let tooltip_height = (line_count as f32 * 24. + 36.).clamp(64., (window_height - 24.).max(64.));
+
+    let wrap_limit = ((window_width / 1600.0) * 60.0).clamp(40.0, 90.0) as usize;
+    let wrapped: Vec<String> = wrap_tooltip_line(&desc, wrap_limit);
+    let desc_max = wrapped.iter().map(|l| l.chars().count()).max().unwrap_or(0);
+    // Title width: action name + " (  N)" — approximate as name len + 8 chars
+    let title_chars = (action_name.chars().count() + 8) as f32;
+    let max_chars = title_chars.max(desc_max as f32);
+
+    let font_size_title = window_height * 0.019;
+    let font_size_desc = window_height * 0.016;
+    let char_width_desc = font_size_desc * 0.55;
+    let line_height_title = font_size_title * 1.35;
+    let line_height_desc = font_size_desc * 1.35;
+
+    let tooltip_width =
+        (max_chars * char_width_desc + 32.).clamp(200., (window_width - 24.).max(200.));
+    let line_count = wrapped.len() as f32;
+    let tooltip_height = (line_height_title + line_count * line_height_desc + 36.)
+        .clamp(64., (window_height - 24.).max(64.));
     let (left, top) = place_tooltip(
         cursor.unwrap_or(Vec2::new(100., 100.)),
         tooltip_width,
@@ -501,7 +530,11 @@ fn spawn_action_tooltip(
                         TextColor(BUTTON_TEXT_COLOR),
                     ));
                     parent.spawn((
-                        Node { width: icon_size, height: icon_size, ..default() },
+                        Node {
+                            width: icon_size,
+                            height: icon_size,
+                            ..default()
+                        },
                         ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
                     ));
                     parent.spawn((
@@ -526,28 +559,32 @@ fn spawn_tooltip(
     windows: &Query<&Window>,
     price: Option<u32>,
 ) {
+    let (window_width, window_height, cursor) = if let Ok(window) = windows.single() {
+        (window.width(), window.height(), window.cursor_position())
+    } else {
+        (1600., 900., None)
+    };
+
+    let wrap_limit = ((window_width / 1600.0) * 60.0).clamp(40.0, 90.0) as usize;
     let wrapped_lines: Vec<String> =
-        lines.into_iter().flat_map(|line| wrap_tooltip_line(&line, 60)).collect();
+        lines.into_iter().flat_map(|line| wrap_tooltip_line(&line, wrap_limit)).collect();
     let max_chars = std::iter::once(title.as_str())
         .chain(wrapped_lines.iter().map(String::as_str))
         .map(|line| line.chars().count())
         .max()
         .unwrap_or(12) as f32;
 
-    let (window_width, window_height, cursor) = if let Ok(window) = windows.single() {
-        (window.width(), window.height(), window.cursor_position())
-    } else {
-        (1600., 900., None)
-    };
     let font_size_title = window_height * 0.019;
     let font_size_desc = window_height * 0.016;
     let char_width_desc = font_size_desc * 0.55;
     let line_height_title = font_size_title * 1.35;
     let line_height_desc = font_size_desc * 1.35;
 
-    let tooltip_width = (max_chars * char_width_desc + 32.).clamp(190., (window_width - 24.).max(190.));
+    let tooltip_width =
+        (max_chars * char_width_desc + 32.).clamp(190., (window_width - 24.).max(190.));
     let desc_lines_count = wrapped_lines.len() as f32;
-    let tooltip_height = (line_height_title + desc_lines_count * line_height_desc + 32.).clamp(64., (window_height - 24.).max(64.));
+    let tooltip_height = (line_height_title + desc_lines_count * line_height_desc + 32.)
+        .clamp(64., (window_height - 24.).max(64.));
     let (left, top) = place_tooltip(
         cursor.unwrap_or(Vec2::new(100., 100.)),
         tooltip_width,
@@ -582,8 +619,8 @@ fn spawn_tooltip(
         .with_children(|parent| {
             // Price display at top-right corner (if provided)
             if let Some(price_value) = price {
-                parent.spawn((
-                    Node {
+                parent
+                    .spawn((Node {
                         position_type: PositionType::Absolute,
                         right: Val::Px(10.),
                         top: Val::Px(10.),
@@ -591,28 +628,26 @@ fn spawn_tooltip(
                         align_items: AlignItems::Center,
                         column_gap: Val::Px(4.),
                         ..default()
-                    },
-                ))
-                .with_children(|parent| {
-                    // Gold icon
-                    parent.spawn((
-                        Node {
-                            width: ICON_BADGE,
-                            height: ICON_BADGE,
-                            ..default()
-                        },
-                        ImageNode::new(assets.image("gold"))
-                            .with_mode(NodeImageMode::Stretch),
-                    ));
-                    
-                    // Price number
-                    parent.spawn((
-                        add_text(format!("{}", price_value), "bold", 1.9, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
-                });
+                    },))
+                    .with_children(|parent| {
+                        // Gold icon
+                        parent.spawn((
+                            Node {
+                                width: ICON_BADGE,
+                                height: ICON_BADGE,
+                                ..default()
+                            },
+                            ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                        ));
+
+                        // Price number
+                        parent.spawn((
+                            add_text(format!("{}", price_value), "bold", 1.9, assets),
+                            TextColor(BUTTON_TEXT_COLOR),
+                        ));
+                    });
             }
-            
+
             parent.spawn((add_text(title, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
             if !wrapped_lines.is_empty() {
                 parent.spawn((
@@ -677,7 +712,12 @@ fn place_tooltip(
 }
 
 /// A bordered placeholder box (used wherever an item/ability image will go later).
-fn spawn_placeholder(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, image_key: &str, size: Val) {
+fn spawn_placeholder(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    image_key: &str,
+    size: Val,
+) {
     parent.spawn((
         Node {
             width: size,
@@ -807,15 +847,11 @@ pub fn setup_playing_screen(
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
-    mut player: ResMut<Player>,
+    player: Res<Player>,
     existing_screen_q: Query<Entity, With<PlayingCmp>>,
 ) {
     if existing_screen_q.iter().next().is_some() {
         return;
-    }
-
-    if player.pet.is_some() && player.pet_health.is_none() {
-        player.pet_health = Some(player.pet.unwrap().stats().health as f32);
     }
 
     let lang = settings.language;
@@ -892,7 +928,8 @@ pub fn setup_playing_screen(
                                     height: percent(100.0),
                                     ..default()
                                 },
-                                ImageNode::new(assets.image("banner")).with_mode(NodeImageMode::Stretch),
+                                ImageNode::new(assets.image("banner"))
+                                    .with_mode(NodeImageMode::Stretch),
                             ));
 
                             // Name text sits on top
@@ -944,14 +981,62 @@ pub fn setup_playing_screen(
                             ..default()
                         })
                         .with_children(|parent| {
-                            spawn_playing_action_button(parent, Action::Rest, &assets, &localization, lang);
-                            spawn_playing_action_button(parent, Action::Study, &assets, &localization, lang);
-                            spawn_playing_action_button(parent, Action::Work, &assets, &localization, lang);
-                            spawn_playing_action_button(parent, Action::Train, &assets, &localization, lang);
-                            spawn_playing_action_button(parent, Action::Craft, &assets, &localization, lang);
-                            spawn_playing_action_button(parent, Action::Shop, &assets, &localization, lang);
-                            spawn_playing_action_button(parent, Action::Hunt, &assets, &localization, lang);
-                            spawn_playing_action_button(parent, Action::Quest, &assets, &localization, lang);
+                            spawn_playing_action_button(
+                                parent,
+                                Action::Rest,
+                                &assets,
+                                &localization,
+                                lang,
+                            );
+                            spawn_playing_action_button(
+                                parent,
+                                Action::Study,
+                                &assets,
+                                &localization,
+                                lang,
+                            );
+                            spawn_playing_action_button(
+                                parent,
+                                Action::Work,
+                                &assets,
+                                &localization,
+                                lang,
+                            );
+                            spawn_playing_action_button(
+                                parent,
+                                Action::Train,
+                                &assets,
+                                &localization,
+                                lang,
+                            );
+                            spawn_playing_action_button(
+                                parent,
+                                Action::Craft,
+                                &assets,
+                                &localization,
+                                lang,
+                            );
+                            spawn_playing_action_button(
+                                parent,
+                                Action::Shop,
+                                &assets,
+                                &localization,
+                                lang,
+                            );
+                            spawn_playing_action_button(
+                                parent,
+                                Action::Hunt,
+                                &assets,
+                                &localization,
+                                lang,
+                            );
+                            spawn_playing_action_button(
+                                parent,
+                                Action::Quest,
+                                &assets,
+                                &localization,
+                                lang,
+                            );
                         });
                 });
         });
@@ -960,15 +1045,13 @@ pub fn setup_playing_screen(
 /// Column 1: Character portrait image with equipment slot overlays and pet.
 fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, player: &Player) {
     parent
-        .spawn((
-            Node {
-                width: percent(33.5),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Stretch,
-                padding: UiRect::all(Val::Px(6.)),
-                ..default()
-            },
-        ))
+        .spawn((Node {
+            width: percent(33.5),
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Stretch,
+            padding: UiRect::all(Val::Px(6.)),
+            ..default()
+        },))
         .with_children(|parent| {
             // Portrait (relative container for equipment slot / pet overlays)
             parent
@@ -1001,25 +1084,26 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
                         })
                         .with_children(|parent| {
                             for slot in [EquipSlot::Accessory, EquipSlot::Accessory2] {
-                                parent.spawn((
-                                    Node {
-                                        width: percent(100.),
-                                        aspect_ratio: Some(1.),
-                                        border: UiRect::all(Val::Px(1.)),
-                                        ..default()
-                                    },
-                                    BackgroundColor(PLACEHOLDER_COLOR),
-                                    BorderColor::all(BUTTON_BORDER_COLOR),
-                                    ImageNode::new(assets.image("stone"))
-                                        .with_mode(NodeImageMode::Stretch),
-                                    Interaction::default(),
-                                    Button,
-                                    Pickable::default(),
-                                    slot,
-                                ))
-                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                .observe(handle_equipment_slot_click);
+                                parent
+                                    .spawn((
+                                        Node {
+                                            width: percent(100.),
+                                            aspect_ratio: Some(1.),
+                                            border: UiRect::all(Val::Px(1.)),
+                                            ..default()
+                                        },
+                                        BackgroundColor(PLACEHOLDER_COLOR),
+                                        BorderColor::all(BUTTON_BORDER_COLOR),
+                                        ImageNode::new(assets.image("stone"))
+                                            .with_mode(NodeImageMode::Stretch),
+                                        Interaction::default(),
+                                        Button,
+                                        Pickable::default(),
+                                        slot,
+                                    ))
+                                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                    .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                    .observe(handle_equipment_slot_click);
                             }
                         });
 
@@ -1045,31 +1129,32 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
                                 EquipSlot::Gloves,
                                 EquipSlot::Boots,
                             ] {
-                                parent.spawn((
-                                    Node {
-                                        width: percent(100.),
-                                        aspect_ratio: Some(1.),
-                                        border: UiRect::all(Val::Px(1.)),
-                                        ..default()
-                                    },
-                                    BackgroundColor(PLACEHOLDER_COLOR),
-                                    BorderColor::all(BUTTON_BORDER_COLOR),
-                                    ImageNode::new(assets.image("stone"))
-                                        .with_mode(NodeImageMode::Stretch),
-                                    Interaction::default(),
-                                    Button,
-                                    Pickable::default(),
-                                    slot,
-                                ))
-                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                .observe(handle_equipment_slot_click);
+                                parent
+                                    .spawn((
+                                        Node {
+                                            width: percent(100.),
+                                            aspect_ratio: Some(1.),
+                                            border: UiRect::all(Val::Px(1.)),
+                                            ..default()
+                                        },
+                                        BackgroundColor(PLACEHOLDER_COLOR),
+                                        BorderColor::all(BUTTON_BORDER_COLOR),
+                                        ImageNode::new(assets.image("stone"))
+                                            .with_mode(NodeImageMode::Stretch),
+                                        Interaction::default(),
+                                        Button,
+                                        Pickable::default(),
+                                        slot,
+                                    ))
+                                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                    .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                    .observe(handle_equipment_slot_click);
                             }
                         });
 
                     // Pet image, bottom-left overlay — larger
                     if player.pet.is_some() {
-                        let pet = player.pet.unwrap();
+                        let pet = player.pet.as_ref().unwrap();
                         parent
                             .spawn((
                                 Node {
@@ -1084,7 +1169,7 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
                                     ..default()
                                 },
                                 BorderColor::all(BUTTON_BORDER_COLOR),
-                                ImageNode::new(assets.image(pet.to_lowername()))
+                                ImageNode::new(assets.image(pet.kind.to_lowername()))
                                     .with_mode(NodeImageMode::Stretch),
                                 PetImage,
                                 Interaction::default(),
@@ -1155,22 +1240,20 @@ fn spawn_stats_column(
     player: &Player,
 ) {
     parent
-        .spawn((
-            Node {
-                width: percent(32.),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Stretch,
-                padding: UiRect {
-                    left: Val::Px(12.),
-                    right: Val::Px(12.),
-                    top: Val::Px(8.),
-                    bottom: Val::Px(8.),
-                },
-                row_gap: Val::Px(4.),
-                overflow: Overflow::clip(),
-                ..default()
+        .spawn((Node {
+            width: percent(32.),
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Stretch,
+            padding: UiRect {
+                left: Val::Px(12.),
+                right: Val::Px(12.),
+                top: Val::Px(8.),
+                bottom: Val::Px(8.),
             },
-        ))
+            row_gap: Val::Px(4.),
+            overflow: Overflow::clip(),
+            ..default()
+        },))
         .with_children(|parent| {
             // Level / class text + AP on the right
             parent
@@ -1607,10 +1690,18 @@ pub fn equip_slot_tooltip_system(
 
             if let Some(key) = equipped_key {
                 if let Some(weapon) = crate::core::catalog::get_equipment(key) {
-                    let name = name_with_level(weapon.name.to_string(), weapon.level, &localization, lang);
+                    let name =
+                        name_with_level(weapon.name.to_string(), weapon.level, &localization, lang);
                     let stat_lines = weapon_stat_lines(&weapon, &player, &localization, lang);
 
-                    spawn_tooltip(&mut commands, &assets, name, stat_lines, &windows, Some(weapon.price));
+                    spawn_tooltip(
+                        &mut commands,
+                        &assets,
+                        name,
+                        stat_lines,
+                        &windows,
+                        Some(weapon.price),
+                    );
                 }
             }
         }
@@ -1717,9 +1808,10 @@ pub fn info_tooltip_system(
             InfoTooltip::Gold => {
                 (localization.get("gold", lang), vec![localization.get("gold_desc", lang)])
             },
-            InfoTooltip::ActionPoints => {
-                (localization.get("active_points", lang), vec![localization.get("active_points_desc", lang)])
-            },
+            InfoTooltip::ActionPoints => (
+                localization.get("active_points", lang),
+                vec![localization.get("active_points_desc", lang)],
+            ),
             InfoTooltip::Combat(stat) => {
                 let title_key = match stat {
                     PlayingStat::Attack => "attack",
@@ -1782,22 +1874,20 @@ fn spawn_right_column(
     lang: Language,
 ) {
     parent
-        .spawn((
-            Node {
-                width: percent(33.5),
-                height: percent(91.5),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Stretch,
-                padding: UiRect {
-                    left: Val::Px(8.),
-                    right: Val::Px(22.),
-                    top: Val::Px(8.),
-                    bottom: Val::Px(0.),
-                },
-                position_type: PositionType::Relative,
-                ..default()
+        .spawn((Node {
+            width: percent(33.5),
+            height: percent(91.5),
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Stretch,
+            padding: UiRect {
+                left: Val::Px(8.),
+                right: Val::Px(22.),
+                top: Val::Px(8.),
+                bottom: Val::Px(0.),
             },
-        ))
+            position_type: PositionType::Relative,
+            ..default()
+        },))
         .with_children(|parent| {
             // Tab row + gold icon at the top
             parent
@@ -2047,10 +2137,60 @@ pub struct RebuildPlayingListsQueries<'w, 's> {
     pub slot_q: Query<'w, 's, (&'static EquipSlot, &'static mut ImageNode)>,
     pub slot_vis_q: Query<'w, 's, (&'static EquipSlot, &'static mut Visibility)>,
     pub children_q: Query<'w, 's, &'static Children>,
-    pub equip_wrap_q: Query<'w, 's, (&'static mut Node, &'static mut Visibility), (With<EquipmentListWrapper>, Without<AbilitiesListWrapper>, Without<PerksListWrapper>, Without<EquipSlot>, Without<RightTabBtn>)>,
-    pub abil_wrap_q: Query<'w, 's, (&'static mut Node, &'static mut Visibility), (With<AbilitiesListWrapper>, Without<EquipmentListWrapper>, Without<PerksListWrapper>, Without<EquipSlot>, Without<RightTabBtn>)>,
-    pub perk_wrap_q: Query<'w, 's, (&'static mut Node, &'static mut Visibility), (With<PerksListWrapper>, Without<EquipmentListWrapper>, Without<AbilitiesListWrapper>, Without<EquipSlot>, Without<RightTabBtn>)>,
-    pub tab_btn_q: Query<'w, 's, (Entity, &'static RightTabBtn, &'static mut BackgroundColor, &'static mut BorderColor, &'static mut Node), (With<RightTabBtn>, Without<EquipmentListWrapper>, Without<AbilitiesListWrapper>, Without<PerksListWrapper>, Without<EquipSlot>)>,
+    pub equip_wrap_q: Query<
+        'w,
+        's,
+        (&'static mut Node, &'static mut Visibility),
+        (
+            With<EquipmentListWrapper>,
+            Without<AbilitiesListWrapper>,
+            Without<PerksListWrapper>,
+            Without<EquipSlot>,
+            Without<RightTabBtn>,
+        ),
+    >,
+    pub abil_wrap_q: Query<
+        'w,
+        's,
+        (&'static mut Node, &'static mut Visibility),
+        (
+            With<AbilitiesListWrapper>,
+            Without<EquipmentListWrapper>,
+            Without<PerksListWrapper>,
+            Without<EquipSlot>,
+            Without<RightTabBtn>,
+        ),
+    >,
+    pub perk_wrap_q: Query<
+        'w,
+        's,
+        (&'static mut Node, &'static mut Visibility),
+        (
+            With<PerksListWrapper>,
+            Without<EquipmentListWrapper>,
+            Without<AbilitiesListWrapper>,
+            Without<EquipSlot>,
+            Without<RightTabBtn>,
+        ),
+    >,
+    pub tab_btn_q: Query<
+        'w,
+        's,
+        (
+            Entity,
+            &'static RightTabBtn,
+            &'static mut BackgroundColor,
+            &'static mut BorderColor,
+            &'static mut Node,
+        ),
+        (
+            With<RightTabBtn>,
+            Without<EquipmentListWrapper>,
+            Without<AbilitiesListWrapper>,
+            Without<PerksListWrapper>,
+            Without<EquipSlot>,
+        ),
+    >,
     pub text_color_q: Query<'w, 's, &'static mut TextColor>,
     pub scroll_q: Query<'w, 's, &'static mut ScrollPosition, With<ScrollableContainer>>,
 }
@@ -2098,7 +2238,11 @@ pub fn rebuild_playing_lists(
             EquipSlot::Boots => player.boots.is_some(),
             EquipSlot::Gloves => player.gloves.is_some(),
         };
-        *vis = if visible { Visibility::Inherited } else { Visibility::Hidden };
+        *vis = if visible {
+            Visibility::Inherited
+        } else {
+            Visibility::Hidden
+        };
     }
 
     let clear = |commands: &mut Commands, entity: Entity, children_q: &Query<&Children>| {
@@ -2131,7 +2275,9 @@ pub fn rebuild_playing_lists(
             // Collect equipped items and sort by level then name
             let mut equipped_items: Vec<crate::core::catalog::GeneratedEquipment> = equipped_slots
                 .iter()
-                .filter_map(|(slot_val, _)| slot_val.as_deref().and_then(crate::core::catalog::get_equipment))
+                .filter_map(|(slot_val, _)| {
+                    slot_val.as_deref().and_then(crate::core::catalog::get_equipment)
+                })
                 .collect();
             equipped_items.sort_by(|a, b| a.level.cmp(&b.level).then(a.name.cmp(&b.name)));
             for weapon in &equipped_items {
@@ -2213,10 +2359,7 @@ pub fn rebuild_playing_lists(
                     &ability.name,
                     name_with_level(ability.name.to_string(), ability.level, &localization, lang),
                     None,
-                    vec![
-                        ability_detail_line(&ability, &localization, lang),
-                        desc,
-                    ],
+                    vec![ability_detail_line(&ability, &localization, lang), desc],
                 );
             }
         });
@@ -2232,11 +2375,8 @@ pub fn rebuild_playing_lists(
                     TextColor(Color::WHITE),
                 ));
             }
-            let mut sorted_perks: Vec<_> = player
-                .perks
-                .iter()
-                .filter_map(|key| crate::core::catalog::get_perk(key))
-                .collect();
+            let mut sorted_perks: Vec<_> =
+                player.perks.iter().filter_map(|key| crate::core::catalog::get_perk(key)).collect();
             sorted_perks.sort_by(|a, b| a.level.cmp(&b.level).then(a.name.cmp(&b.name)));
             for perk in &sorted_perks {
                 let desc = localization
@@ -2359,9 +2499,18 @@ pub fn update_playing_screen(
     localization: Res<Localization>,
     mut text_q: Query<(&mut Text, &StatLabel)>,
     mut attr_q: Query<(&mut Text, &AttrValue), Without<StatLabel>>,
-    mut hbar_q: Query<&mut Node, (With<HealthBarFill>, Without<ManaBarFill>, Without<PetHealthBarFill>)>,
-    mut mbar_q: Query<&mut Node, (With<ManaBarFill>, Without<HealthBarFill>, Without<PetHealthBarFill>)>,
-    mut pet_hbar_q: Query<&mut Node, (With<PetHealthBarFill>, Without<HealthBarFill>, Without<ManaBarFill>)>,
+    mut hbar_q: Query<
+        &mut Node,
+        (With<HealthBarFill>, Without<ManaBarFill>, Without<PetHealthBarFill>),
+    >,
+    mut mbar_q: Query<
+        &mut Node,
+        (With<ManaBarFill>, Without<HealthBarFill>, Without<PetHealthBarFill>),
+    >,
+    mut pet_hbar_q: Query<
+        &mut Node,
+        (With<PetHealthBarFill>, Without<HealthBarFill>, Without<ManaBarFill>),
+    >,
 ) {
     let lang = settings.language;
 
@@ -2403,9 +2552,9 @@ pub fn update_playing_screen(
             PlayingStat::Initiative => format!("{}", player.initiative()),
             PlayingStat::ActionPoints => format!("{}", player.ap),
             PlayingStat::PetHealth => {
-                if let Some(pet) = player.pet {
-                    let pet_max = pet.stats().health as f32;
-                    let pet_current = player.pet_health.unwrap_or(pet_max);
+                if let Some(ref pet) = player.pet {
+                    let pet_max = pet.max_health as f32;
+                    let pet_current = pet.health as f32;
                     format!(
                         "{} / {} {}",
                         pet_current.max(0.) as i32,
@@ -2439,10 +2588,10 @@ pub fn update_playing_screen(
         let ratio = (player.mana / player.max_mana()).clamp(0., 1.) * 100.;
         node.width = percent(ratio);
     }
-    if let Some(pet) = player.pet {
+    if let Some(ref pet) = player.pet {
         if let Ok(mut node) = pet_hbar_q.single_mut() {
-            let pet_max = pet.stats().health as f32;
-            let pet_current = player.pet_health.unwrap_or(pet_max);
+            let pet_max = pet.max_health as f32;
+            let pet_current = pet.health as f32;
             let ratio = (pet_current / pet_max).clamp(0., 1.) * 100.;
             node.width = percent(ratio);
         }
@@ -2627,7 +2776,7 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                     player.inventory.push(old);
                 }
             },
-            _ => {}
+            _ => {},
         }
     }
     None
@@ -2673,9 +2822,7 @@ pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
         EquipSlot::Helmet => player.helmet.take(),
         EquipSlot::Accessory => player.accessory.take(),
         EquipSlot::Accessory2 => player.accessory2.take(),
-        EquipSlot::WeaponLH => {
-            player.weapon_lh.take().or(player.weapon_2h.take())
-        },
+        EquipSlot::WeaponLH => player.weapon_lh.take().or(player.weapon_2h.take()),
         EquipSlot::WeaponRH => player.weapon_rh.take(),
         EquipSlot::Armor => player.armor.take(),
         EquipSlot::Boots => player.boots.take(),
@@ -2697,8 +2844,15 @@ pub fn reward_equipment(player: &mut Player, key: String) {
             "boots" => player.boots.is_none(),
             "gloves" => player.gloves.is_none(),
             "accessory" => player.accessory.is_none() || player.accessory2.is_none(),
-            "one_hand_weapon" => player.weapon_2h.is_none() && (player.weapon_lh.is_none() || player.weapon_rh.is_none()),
-            "two_hand_weapon" => player.weapon_lh.is_none() && player.weapon_rh.is_none() && player.weapon_2h.is_none(),
+            "one_hand_weapon" => {
+                player.weapon_2h.is_none()
+                    && (player.weapon_lh.is_none() || player.weapon_rh.is_none())
+            },
+            "two_hand_weapon" => {
+                player.weapon_lh.is_none()
+                    && player.weapon_rh.is_none()
+                    && player.weapon_2h.is_none()
+            },
             "offhand" => player.weapon_2h.is_none() && player.weapon_rh.is_none(),
             _ => false,
         };
@@ -2722,22 +2876,24 @@ pub fn handle_equipment_card_click(
         // Right-click: sell item for full price
         if event.button == PointerButton::Secondary {
             let sell_price = card.price;
-            
+
             // If equipped, unequip first
             if card.is_equipped {
                 unequip_item(&mut player, &card.key);
             }
-            
+
             // Remove from inventory
             if let Some(pos) = player.inventory.iter().position(|k| k == &card.key) {
                 player.inventory.remove(pos);
                 player.gold += sell_price;
                 play_audio_msg.write(PlayAudioMsg::new("coins"));
-                commands.entity(*window_e).insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
+                commands.entity(*window_e).insert(bevy::window::CursorIcon::from(
+                    bevy::window::SystemCursorIcon::Default,
+                ));
             }
             return;
         }
-        
+
         // Left-click: equip/unequip
         if card.is_equipped {
             unequip_item(&mut player, &card.key);
@@ -2804,15 +2960,15 @@ pub fn handle_equipment_slot_click(
             EquipSlot::Boots => player.boots.as_ref(),
             EquipSlot::Gloves => player.gloves.as_ref(),
         };
-        
+
         if let Some(key) = equipped_key {
             let key_str = key.to_string();
-            
+
             // Right-click: sell equipped item for full price
             if event.button == PointerButton::Secondary {
                 if let Some(eq) = crate::core::catalog::get_equipment(&key_str) {
                     let sell_price = eq.price;
-                    
+
                     // Directly unequip from the slot without adding to inventory
                     match slot {
                         EquipSlot::Helmet => player.helmet = None,
@@ -2830,10 +2986,12 @@ pub fn handle_equipment_slot_click(
                         EquipSlot::Boots => player.boots = None,
                         EquipSlot::Gloves => player.gloves = None,
                     }
-                    
+
                     player.gold += sell_price;
                     play_audio_msg.write(PlayAudioMsg::new("coins"));
-                    commands.entity(*window_e).insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
+                    commands.entity(*window_e).insert(bevy::window::CursorIcon::from(
+                        bevy::window::SystemCursorIcon::Default,
+                    ));
                 }
             } else {
                 // Left-click: unequip item
@@ -2883,8 +3041,8 @@ fn spawn_equipment_card(
         .observe(handle_equipment_card_click)
         .with_children(|parent| {
             // Top-right corner: equipped badge (if equipped) + price display
-            parent.spawn((
-                Node {
+            parent
+                .spawn((Node {
                     position_type: PositionType::Absolute,
                     right: Val::Px(4.),
                     top: Val::Px(4.),
@@ -2892,40 +3050,38 @@ fn spawn_equipment_card(
                     align_items: AlignItems::Center,
                     column_gap: Val::Px(4.),
                     ..default()
-                },
-            ))
-            .with_children(|parent| {
-                // Equipped badge (left of price)
-                if is_equipped {
+                },))
+                .with_children(|parent| {
+                    // Equipped badge (left of price)
+                    if is_equipped {
+                        parent.spawn((
+                            Node {
+                                width: ICON_BADGE,
+                                height: ICON_BADGE,
+                                ..default()
+                            },
+                            ImageNode::new(assets.image("equipped"))
+                                .with_mode(NodeImageMode::Stretch),
+                        ));
+                    }
+
+                    // Gold icon (same size as equipped badge)
                     parent.spawn((
                         Node {
                             width: ICON_BADGE,
                             height: ICON_BADGE,
                             ..default()
                         },
-                        ImageNode::new(assets.image("equipped"))
-                            .with_mode(NodeImageMode::Stretch),
+                        ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
                     ));
-                }
-                
-                // Gold icon (same size as equipped badge)
-                parent.spawn((
-                    Node {
-                        width: ICON_BADGE,
-                        height: ICON_BADGE,
-                        ..default()
-                    },
-                    ImageNode::new(assets.image("gold"))
-                        .with_mode(NodeImageMode::Stretch),
-                ));
-                
-                // Price number (same color as weapon name)
-                parent.spawn((
-                    add_text(format!("{}", price), "bold", 1.9, assets),
-                    TextColor(BUTTON_TEXT_COLOR),
-                ));
-            });
-            
+
+                    // Price number (same color as weapon name)
+                    parent.spawn((
+                        add_text(format!("{}", price), "bold", 1.9, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                    ));
+                });
+
             spawn_placeholder(parent, assets, image_key, ICON_ITEM);
 
             parent
@@ -2935,12 +3091,13 @@ fn spawn_equipment_card(
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn((add_text(name, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
+                    parent
+                        .spawn((add_text(name, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
 
                     for line in lines {
                         parent.spawn((
-                             add_text(line, "medium", 1.6, assets),
-                             TextColor(Color::WHITE),
+                            add_text(line, "medium", 1.6, assets),
+                            TextColor(Color::WHITE),
                         ));
                     }
                 });
@@ -2950,7 +3107,14 @@ fn spawn_equipment_card(
 pub fn update_action_buttons(
     player: Res<Player>,
     mut commands: Commands,
-    mut btn_q: Query<(Entity, &ActionButton, &mut BackgroundColor, &mut BorderColor, &mut ImageNode, Option<&DisabledButton>)>,
+    mut btn_q: Query<(
+        Entity,
+        &ActionButton,
+        &mut BackgroundColor,
+        &mut BorderColor,
+        &mut ImageNode,
+        Option<&DisabledButton>,
+    )>,
 ) {
     for (entity, action_btn, mut bg, mut border, mut img, disabled) in &mut btn_q {
         let cost_ap = action_btn.0.ap_cost();
@@ -2974,4 +3138,3 @@ pub fn update_action_buttons(
         }
     }
 }
-

@@ -1,6 +1,6 @@
-use bevy::prelude::*;
 use crate::core::assets::WorldAssets;
 use crate::core::menu::utils::add_text;
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct GoldToast {
@@ -31,13 +31,12 @@ pub fn spawn_toast(
                 },
                 BackgroundColor(bg),
                 BorderColor::all(border),
-                GoldToast { timer: 3.5 },
+                GoldToast {
+                    timer: 3.5,
+                },
             ))
             .with_children(|parent| {
-                parent.spawn((
-                    add_text(toast_text, "bold", 2.2, assets),
-                    TextColor(text_color),
-                ));
+                parent.spawn((add_text(toast_text, "bold", 2.2, assets), TextColor(text_color)));
             });
     });
 }

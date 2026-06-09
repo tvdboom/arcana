@@ -1,3 +1,4 @@
+use bevy::input::ButtonState;
 use bevy::prelude::*;
 use strum::IntoEnumIterator;
 
@@ -8,7 +9,7 @@ use crate::core::constants::*;
 use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
-use crate::core::pets::Pet;
+use crate::core::pets::{Pet, PetKind};
 use crate::core::player::{Attribute, Player, Sex};
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
@@ -175,9 +176,10 @@ pub fn handle_name_input(
 ) {
     let mut changed = false;
     for event in events.read() {
-        if event.state != bevy::input::ButtonState::Pressed {
+        if event.state != ButtonState::Pressed {
             continue;
         }
+
         match &event.logical_key {
             Key::Character(c) => {
                 // limit name to 16 characters
@@ -217,35 +219,39 @@ pub fn handle_pet_name_input(
 ) {
     let mut changed = false;
     for event in events.read() {
-        if event.state != bevy::input::ButtonState::Pressed {
+        if event.state != ButtonState::Pressed {
             continue;
         }
-        match &event.logical_key {
-            Key::Character(c) => {
-                if player.pet_name.len() < 16
-                    && c.chars().all(|ch| ch.is_alphanumeric() || ch == ' ')
-                {
-                    player.pet_name.push_str(c);
+
+        if let Some(ref mut pet) = player.pet {
+            match &event.logical_key {
+                Key::Character(c) => {
+                    if pet.name.len() < 16 && c.chars().all(|ch| ch.is_alphanumeric() || ch == ' ')
+                    {
+                        pet.name.push_str(c);
+                        changed = true;
+                    }
+                },
+                Key::Backspace => {
+                    pet.name.pop();
                     changed = true;
-                }
-            },
-            Key::Backspace => {
-                player.pet_name.pop();
-                changed = true;
-            },
-            Key::Space => {
-                if player.pet_name.len() < 16 {
-                    player.pet_name.push(' ');
-                    changed = true;
-                }
-            },
-            _ => {},
+                },
+                Key::Space => {
+                    if pet.name.len() < 16 {
+                        pet.name.push(' ');
+                        changed = true;
+                    }
+                },
+                _ => {},
+            }
         }
     }
 
     if changed {
-        for mut text in &mut text_q {
-            text.0 = player.pet_name.clone();
+        if let Some(ref pet) = player.pet {
+            for mut text in &mut text_q {
+                text.0 = pet.name.clone();
+            }
         }
     }
 }
@@ -864,8 +870,10 @@ pub fn setup_character_creation(
                                         .with_children(|parent| {
                                             parent.spawn((
                                                 add_text(
-                                                    localization
-                                                        .get(AGE_STAGES[player.age_stage() as usize], lang),
+                                                    localization.get(
+                                                        AGE_STAGES[player.age_stage() as usize],
+                                                        lang,
+                                                    ),
                                                     "bold",
                                                     BUTTON_TEXT_SIZE,
                                                     &assets,
@@ -1064,7 +1072,7 @@ fn on_age_slider_drag(
     let (min_age, max_age) = player.race.age_stage_range(stage);
     use rand::RngExt;
     player.age = rand::rng().random_range(min_age..=max_age);
-    
+
     if let Ok(mut text) = text_q.single_mut() {
         text.0 = localization.get(AGE_STAGES[stage as usize], settings.language);
     }
@@ -1264,7 +1272,9 @@ fn apply_age_stage(
     }
 }
 
-pub trait SelectionItem: NameFromEnum + Copy + Clone + Send + Sync + 'static + IntoEnumIterator {
+pub trait SelectionItem:
+    NameFromEnum + Copy + Clone + Send + Sync + 'static + IntoEnumIterator
+{
     type DescComponent: Component;
     fn get_description(&self, lang: Language, localization: &Localization) -> String;
     fn create_desc_component(&self) -> Self::DescComponent;
@@ -1272,7 +1282,10 @@ pub trait SelectionItem: NameFromEnum + Copy + Clone + Send + Sync + 'static + I
     fn get_image_key(&self, _player: &Player) -> String {
         self.to_lowername()
     }
-    fn items() -> Vec<Self> where Self: Sized {
+    fn items() -> Vec<Self>
+    where
+        Self: Sized,
+    {
         Self::iter().collect()
     }
 }
@@ -1395,7 +1408,7 @@ impl SelectionItem for Ajah {
     }
 }
 
-impl SelectionItem for Pet {
+impl SelectionItem for PetKind {
     type DescComponent = LocalizedPetDesc;
 
     fn get_description(&self, lang: Language, localization: &Localization) -> String {
@@ -1407,15 +1420,25 @@ impl SelectionItem for Pet {
     }
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
-        player.pet = Some(*self);
-        player.pet_health = Some(self.stats().health as f32);
+        let pet_name = if let Some(ref pet) = player.pet {
+            pet.name.clone()
+        } else {
+            use rand::seq::IndexedRandom;
+            PET_NAMES.choose(&mut rand::rng()).copied().unwrap_or("Ash").to_string()
+        };
+        player.pet = Some(Pet::new(pet_name, *self));
         player.health = player.max_health().floor();
         player.mana = player.max_mana().floor();
         next_game_state.set(GameState::Playing);
     }
 
     fn items() -> Vec<Self> {
-        vec![Pet::Rat, Pet::Snake, Pet::Wolf, Pet::Vulture]
+        vec![
+            PetKind::Rat,
+            PetKind::Snake,
+            PetKind::Wolf,
+            PetKind::Vulture,
+        ]
     }
 }
 
@@ -1484,8 +1507,9 @@ pub fn setup_selection_screen<T>(
                                 BorderColor::all(BUTTON_BORDER_COLOR),
                             ))
                             .with_children(|parent| {
+                                let pet_name = player.pet.as_ref().map(|p| p.name.clone()).unwrap_or_default();
                                 parent.spawn((
-                                    add_text(player.pet_name.clone(), "medium", BUTTON_TEXT_SIZE, &assets),
+                                    add_text(pet_name, "medium", BUTTON_TEXT_SIZE, &assets),
                                     TextColor(Color::WHITE),
                                     PetNameText,
                                 ));
@@ -1499,6 +1523,7 @@ pub fn setup_selection_screen<T>(
                     width: percent(96.),
                     height: if title_key == "choose pet" { percent(64.) } else { percent(70.) },
                     flex_direction: FlexDirection::Row,
+                    flex_wrap: if title_key == "choose pet" { FlexWrap::Wrap } else { FlexWrap::NoWrap },
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
@@ -1668,7 +1693,7 @@ pub fn setup_subclass_selection(
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
-    player: Res<Player>,
+    mut player: ResMut<Player>,
 ) {
     match player.class {
         Class::Mage(_) => {
@@ -1683,7 +1708,13 @@ pub fn setup_subclass_selection(
             );
         },
         Class::Druid => {
-            setup_selection_screen::<Pet>(
+            if player.pet.is_none() {
+                use rand::seq::IndexedRandom;
+                let pet_name =
+                    PET_NAMES.choose(&mut rand::rng()).copied().unwrap_or("Ash").to_string();
+                player.pet = Some(Pet::new(pet_name, PetKind::Wolf));
+            }
+            setup_selection_screen::<PetKind>(
                 commands,
                 settings,
                 assets,

@@ -139,7 +139,11 @@ pub fn update_audio(
                     assets.image("sound")
                 },
                 AudioSettings::Music => {
-                    play_audio_msg.write(PlayAudioMsg::new("music").volume(PlayingAudio::DEFAULT_MUSIC_VOLUME).background());
+                    play_audio_msg.write(
+                        PlayAudioMsg::new("music")
+                            .volume(PlayingAudio::DEFAULT_MUSIC_VOLUME)
+                            .background(),
+                    );
                     assets.image("music")
                 },
             };
@@ -171,7 +175,8 @@ pub fn toggle_audio(
 }
 
 pub fn play_music(mut play_audio_msg: MessageWriter<PlayAudioMsg>) {
-    play_audio_msg.write(PlayAudioMsg::new("music").volume(PlayingAudio::DEFAULT_MUSIC_VOLUME).background());
+    play_audio_msg
+        .write(PlayAudioMsg::new("music").volume(PlayingAudio::DEFAULT_MUSIC_VOLUME).background());
 }
 
 pub fn play_audio(
@@ -188,10 +193,12 @@ pub fn play_audio(
 
             if let Some(handle) = playing_audio.get(&msg.name) {
                 if let Some(mut instance) = audio_instances.get_mut(handle) {
-                    if msg.is_background && matches!(
-                        instance.state(),
-                        PlaybackState::Paused { .. } | PlaybackState::Pausing { .. }
-                    ) {
+                    if msg.is_background
+                        && matches!(
+                            instance.state(),
+                            PlaybackState::Paused { .. } | PlaybackState::Pausing { .. }
+                        )
+                    {
                         if settings.audio != AudioSettings::Sfx {
                             instance.resume(PlayingAudio::TWEEN);
                         }

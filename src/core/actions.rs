@@ -1,20 +1,22 @@
+use crate::core::assets::WorldAssets;
+use crate::core::audio::PlayAudioMsg;
+use crate::core::localization::Localization;
+use crate::core::menu::buttons::DisabledButton;
+use crate::core::player::Player;
+use crate::core::settings::Settings;
+use crate::core::ui::level_up::LevelUpPending;
+use crate::core::ui::playing::{capitalize_words, reward_equipment};
+use crate::core::ui::toast::{spawn_toast, ToastContainer};
+use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use rand::prelude::IndexedRandom;
 use rand::RngExt;
 use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumString};
-use crate::utils::NameFromEnum;
-use crate::core::assets::WorldAssets;
-use crate::core::audio::PlayAudioMsg;
-use crate::core::localization::Localization;
-use crate::core::player::Player;
-use crate::core::settings::Settings;
-use crate::core::menu::buttons::DisabledButton;
-use crate::core::ui::level_up::LevelUpPending;
-use crate::core::ui::toast::{ToastContainer, spawn_toast};
-use crate::core::ui::playing::{reward_equipment, capitalize_words};
 
-#[derive(EnumString, Debug, Display, Clone, Copy, PartialEq, Eq, Hash, Reflect, Serialize, Deserialize)]
+#[derive(
+    EnumString, Debug, Display, Clone, Copy, PartialEq, Eq, Hash, Reflect, Serialize, Deserialize,
+)]
 pub enum Action {
     Rest,
     Study,
@@ -96,8 +98,11 @@ pub fn handle_playing_action_clicks(
                 player.gold += gold_earned;
                 if let Some(container) = container_entity {
                     spawn_toast(
-                        &mut commands, &assets,
-                        localization.get("toast_gold_earned", lang).replace("{gold}", &gold_earned.to_string()),
+                        &mut commands,
+                        &assets,
+                        localization
+                            .get("toast_gold_earned", lang)
+                            .replace("{gold}", &gold_earned.to_string()),
                         Color::srgba(0.18, 0.13, 0.02, 0.93),
                         Color::srgb(0.85, 0.65, 0.15),
                         Color::srgb(1.0, 0.88, 0.30),
@@ -108,10 +113,11 @@ pub fn handle_playing_action_clicks(
             },
             Action::Shop => {
                 let lvl = player.level;
-                let items: Vec<&crate::core::catalog::GeneratedEquipment> = crate::core::catalog::GENERATED_EQUIPMENT
-                    .iter()
-                    .filter(|eq| eq.kind == "consumable" && eq.level <= lvl)
-                    .collect();
+                let items: Vec<&crate::core::catalog::GeneratedEquipment> =
+                    crate::core::catalog::GENERATED_EQUIPMENT
+                        .iter()
+                        .filter(|eq| eq.kind == "consumable" && eq.level <= lvl)
+                        .collect();
                 use rand::seq::IndexedRandom;
                 if let Some(item) = items.choose(&mut rand::rng()) {
                     let name = item.name.to_string();
@@ -122,10 +128,11 @@ pub fn handle_playing_action_clicks(
             Action::Quest => {
                 let gold_earned = rand::rng().random_range(20..=40);
                 if rand::rng().random_bool(0.5) {
-                    let items: Vec<&crate::core::catalog::GeneratedEquipment> = crate::core::catalog::GENERATED_EQUIPMENT
-                        .iter()
-                        .filter(|eq| eq.level <= player.level)
-                        .collect();
+                    let items: Vec<&crate::core::catalog::GeneratedEquipment> =
+                        crate::core::catalog::GENERATED_EQUIPMENT
+                            .iter()
+                            .filter(|eq| eq.level <= player.level)
+                            .collect();
                     use rand::seq::IndexedRandom;
                     if let Some(item) = items.choose(&mut rand::rng()) {
                         reward_equipment(&mut player, item.name.to_string());
@@ -140,21 +147,21 @@ pub fn handle_playing_action_clicks(
                 let max_mp = player.max_mana();
                 let hp_cost = rand::rng().random_range(max_hp * 0.1..=max_hp * 0.3);
                 let mp_cost = rand::rng().random_range(max_mp * 0.1..=max_mp * 0.3);
-                
+
                 player.health = (player.health - hp_cost).max(1.0);
                 player.mana = (player.mana - mp_cost).max(0.0);
-                
+
                 let str_bonus = player.strength() as f64;
                 let dex_bonus = player.dexterity() as f64;
                 let combined = str_bonus + dex_bonus;
-                
+
                 // Base 30% chance of something happening, +1% per combined str+dex point
                 let success_chance = (30.0 + combined) / 100.0;
-                
+
                 let toast_msg = if rand::rng().random_bool(success_chance) {
                     // Something good happened
                     let roll = rand::rng().random_range(0..100);
-                    
+
                     if roll < 25 {
                         // Learn a new ability (if available)
                         let class_hint = player.class.to_lowername();
@@ -166,11 +173,13 @@ pub fn handle_playing_action_clicks(
                                     && !player.abilities.contains(&ab.name.to_string())
                             })
                             .collect();
-                        
+
                         if !ability_pool.is_empty() {
                             if let Some(ability) = ability_pool.choose(&mut rand::rng()) {
                                 player.abilities.push(ability.name.to_string());
-                                localization.get("toast_train_learned_ability", lang).replace("{ability}", &ability.name)
+                                localization
+                                    .get("toast_train_learned_ability", lang)
+                                    .replace("{ability}", &ability.name)
                             } else {
                                 localization.get("toast_train_nothing_new", lang)
                             }
@@ -195,10 +204,11 @@ pub fn handle_playing_action_clicks(
                 } else {
                     localization.get("toast_train_no_improvement", lang)
                 };
-                
+
                 if let Some(container) = container_entity {
                     spawn_toast(
-                        &mut commands, &assets,
+                        &mut commands,
+                        &assets,
                         toast_msg,
                         Color::srgba(0.08, 0.10, 0.20, 0.93),
                         Color::srgb(0.90, 0.55, 0.35),
@@ -209,10 +219,11 @@ pub fn handle_playing_action_clicks(
                 2
             },
             Action::Craft => {
-                let items: Vec<&crate::core::catalog::GeneratedEquipment> = crate::core::catalog::GENERATED_EQUIPMENT
-                    .iter()
-                    .filter(|eq| eq.level == player.level)
-                    .collect();
+                let items: Vec<&crate::core::catalog::GeneratedEquipment> =
+                    crate::core::catalog::GENERATED_EQUIPMENT
+                        .iter()
+                        .filter(|eq| eq.level == player.level)
+                        .collect();
                 use rand::seq::IndexedRandom;
                 if let Some(item) = items.choose(&mut rand::rng()) {
                     reward_equipment(&mut player, item.name.to_string());
@@ -237,12 +248,13 @@ pub fn handle_playing_action_clicks(
                 let mana_gained = (player.mana - mana_before).round() as i32;
 
                 let mut pet_gained = 0;
-                if player.pet.is_some() {
-                    let pet = player.pet.unwrap();
-                    let pet_max_hp = pet.stats().health as f32;
-                    let pet_health_before = player.pet_health.unwrap_or(pet_max_hp);
+                let mut pet_name = String::new();
+                if let Some(ref mut pet) = player.pet {
+                    pet_name = pet.name.clone();
+                    let pet_max_hp = pet.max_health as f32;
+                    let pet_health_before = pet.health as f32;
                     let new_pet_health = (pet_health_before + recover_amount).min(pet_max_hp);
-                    player.pet_health = Some(new_pet_health);
+                    pet.health = new_pet_health.round() as i32;
                     pet_gained = (new_pet_health - pet_health_before).round() as i32;
                 }
 
@@ -252,9 +264,10 @@ pub fn handle_playing_action_clicks(
                 let mut bonus_lines = Vec::new();
                 if pet_gained > 0 {
                     bonus_lines.push(
-                        localization.get("toast_rest_pet", lang)
-                            .replace("{pet}", &player.pet_name)
-                            .replace("{gain}", &pet_gained.to_string())
+                        localization
+                            .get("toast_rest_pet", lang)
+                            .replace("{pet}", &pet_name)
+                            .replace("{gain}", &pet_gained.to_string()),
                     );
                 }
                 if rand::rng().random_bool(max_chance) {
@@ -262,8 +275,9 @@ pub fn handle_playing_action_clicks(
                     player.bonus_max_health += gain;
                     player.health = (player.health + gain).min(player.max_health().floor());
                     bonus_lines.push(
-                        localization.get("toast_rest_max_hp", lang)
-                            .replace("{gain}", &(gain as i32).to_string())
+                        localization
+                            .get("toast_rest_max_hp", lang)
+                            .replace("{gain}", &(gain as i32).to_string()),
                     );
                 }
                 if rand::rng().random_bool(max_chance) {
@@ -271,21 +285,22 @@ pub fn handle_playing_action_clicks(
                     player.bonus_max_mana += gain;
                     player.mana = (player.mana + gain).min(player.max_mana().floor());
                     bonus_lines.push(
-                        localization.get("toast_rest_max_mp", lang)
-                            .replace("{gain}", &(gain as i32).to_string())
+                        localization
+                            .get("toast_rest_max_mp", lang)
+                            .replace("{gain}", &(gain as i32).to_string()),
                     );
                 }
 
-                let mut toast_parts = vec![
-                    localization.get("toast_rest_recovered", lang)
-                        .replace("{hp}", &health_gained.to_string())
-                        .replace("{mp}", &mana_gained.to_string()),
-                ];
+                let mut toast_parts = vec![localization
+                    .get("toast_rest_recovered", lang)
+                    .replace("{hp}", &health_gained.to_string())
+                    .replace("{mp}", &mana_gained.to_string())];
                 toast_parts.extend(bonus_lines);
                 let toast_msg = toast_parts.join("  ");
                 if let Some(container) = container_entity {
                     spawn_toast(
-                        &mut commands, &assets,
+                        &mut commands,
+                        &assets,
                         toast_msg,
                         Color::srgba(0.08, 0.16, 0.12, 0.93),
                         Color::srgb(0.25, 0.75, 0.50),
@@ -315,33 +330,38 @@ pub fn handle_playing_action_clicks(
 
                 // Roll for perk first (higher chance)
                 if rand::rng().random_bool(perk_chance) {
-                    let candidates: Vec<&crate::core::catalog::GeneratedPerk> = crate::core::catalog::GENERATED_PERKS
-                        .iter()
-                        .filter(|pk| {
-                            (pk.level == target_level || pk.level == player.level)
-                                && pk.class_hint == class_hint
-                                && !player.perks.contains(&pk.name.to_string())
-                        })
-                        .collect();
+                    let candidates: Vec<&crate::core::catalog::GeneratedPerk> =
+                        crate::core::catalog::GENERATED_PERKS
+                            .iter()
+                            .filter(|pk| {
+                                (pk.level == target_level || pk.level == player.level)
+                                    && pk.class_hint == class_hint
+                                    && !player.perks.contains(&pk.name.to_string())
+                            })
+                            .collect();
                     if let Some(perk) = candidates.choose(&mut rand::rng()) {
                         let name = capitalize_words(&perk.name.to_string());
                         player.perks.push(perk.name.to_string());
-                        toast_msg = localization.get("toast_study_perk", lang).replace("{perk}", &name);
+                        toast_msg =
+                            localization.get("toast_study_perk", lang).replace("{perk}", &name);
                     }
                 // Otherwise roll for ability (lower chance)
                 } else if rand::rng().random_bool(ability_chance) {
-                    let candidates: Vec<&crate::core::catalog::GeneratedAbility> = crate::core::catalog::GENERATED_ABILITIES
-                        .iter()
-                        .filter(|ab| {
-                            (ab.level == target_level || ab.level == player.level)
-                                && ab.class_hint == class_hint
-                                && !player.abilities.contains(&ab.name.to_string())
-                        })
-                        .collect();
+                    let candidates: Vec<&crate::core::catalog::GeneratedAbility> =
+                        crate::core::catalog::GENERATED_ABILITIES
+                            .iter()
+                            .filter(|ab| {
+                                (ab.level == target_level || ab.level == player.level)
+                                    && ab.class_hint == class_hint
+                                    && !player.abilities.contains(&ab.name.to_string())
+                            })
+                            .collect();
                     if let Some(ability) = candidates.choose(&mut rand::rng()) {
                         let name = capitalize_words(&ability.name.to_string());
                         player.abilities.push(ability.name.to_string());
-                        toast_msg = localization.get("toast_study_ability", lang).replace("{ability}", &name);
+                        toast_msg = localization
+                            .get("toast_study_ability", lang)
+                            .replace("{ability}", &name);
                     }
                 }
 
@@ -351,13 +371,18 @@ pub fn handle_playing_action_clicks(
                     if toast_msg == localization.get("toast_study_nothing", lang) {
                         toast_msg = localization.get("toast_study_wisdom", lang);
                     } else {
-                        toast_msg = format!("{}  {}", toast_msg, localization.get("toast_study_wisdom", lang));
+                        toast_msg = format!(
+                            "{}  {}",
+                            toast_msg,
+                            localization.get("toast_study_wisdom", lang)
+                        );
                     }
                 }
 
                 if let Some(container) = container_entity {
                     spawn_toast(
-                        &mut commands, &assets,
+                        &mut commands,
+                        &assets,
                         toast_msg,
                         Color::srgba(0.08, 0.10, 0.20, 0.93),
                         Color::srgb(0.35, 0.55, 0.90),
@@ -401,7 +426,9 @@ pub fn handle_playing_action_clicks(
                 })
                 .collect();
             for _ in 0..3 {
-                if ability_pool.is_empty() { break; }
+                if ability_pool.is_empty() {
+                    break;
+                }
                 let idx = rand::rng().random_range(0..ability_pool.len());
                 ability_choices.push(ability_pool[idx].name.to_string());
                 ability_pool.remove(idx);
@@ -417,14 +444,24 @@ pub fn handle_playing_action_clicks(
                 })
                 .collect();
             for _ in 0..3 {
-                if perk_pool.is_empty() { break; }
+                if perk_pool.is_empty() {
+                    break;
+                }
                 let idx = rand::rng().random_range(0..perk_pool.len());
                 perk_choices.push(perk_pool[idx].name.to_string());
                 perk_pool.remove(idx);
             }
 
-            let ability_chosen = if !ability_choices.is_empty() { Some(0) } else { None };
-            let perk_chosen = if !perk_choices.is_empty() { Some(0) } else { None };
+            let ability_chosen = if !ability_choices.is_empty() {
+                Some(0)
+            } else {
+                None
+            };
+            let perk_chosen = if !perk_choices.is_empty() {
+                Some(0)
+            } else {
+                None
+            };
 
             *level_up = LevelUpPending {
                 active: true,

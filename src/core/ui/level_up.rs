@@ -11,7 +11,6 @@ use crate::core::player::{Attribute, Player};
 use crate::core::settings::Language;
 use crate::core::utils::cursor;
 
-
 #[derive(Resource, Default)]
 pub struct LevelUpPending {
     pub active: bool,
@@ -24,22 +23,22 @@ pub struct LevelUpPending {
     pub perk_chosen: Option<usize>,
 }
 
-#[derive(Component)] 
+#[derive(Component)]
 pub struct LevelUpOverlayCmp;
 
-#[derive(Component)] 
+#[derive(Component)]
 pub struct LevelUpAttrPlusBtn(pub Attribute);
 
-#[derive(Component)] 
+#[derive(Component)]
 pub struct LevelUpAttrMinusBtn(pub Attribute);
 
-#[derive(Component)] 
+#[derive(Component)]
 pub struct LevelUpAbilityChoiceBtn(pub usize);
 
-#[derive(Component)] 
+#[derive(Component)]
 pub struct LevelUpPerkChoiceBtn(pub usize);
 
-#[derive(Component)] 
+#[derive(Component)]
 pub struct LevelUpConfirmBtn;
 
 fn attr_to_idx(attr: Attribute) -> usize {
@@ -279,11 +278,11 @@ pub fn manage_level_up_overlay(
     if overlay_exists {
         for (mut z_index, mut pickable) in overlay_q.iter_mut() {
             if is_game_menu {
-                *z_index = GlobalZIndex(100);  // Below game menu (which is likely 500+)
+                *z_index = GlobalZIndex(100); // Below game menu (which is likely 500+)
                 pickable.should_block_lower = false;
                 pickable.is_hoverable = false;
             } else {
-                *z_index = GlobalZIndex(500);  // Above everything else
+                *z_index = GlobalZIndex(500); // Above everything else
                 pickable.should_block_lower = true;
                 pickable.is_hoverable = true;
             }
@@ -381,7 +380,11 @@ fn spawn_level_up_overlay(
                                 .with_children(|parent| {
                                     parent.spawn((
                                         add_text(
-                                            format!("{} {}", localization.get("level", lang), level_up.new_level),
+                                            format!(
+                                                "{} {}",
+                                                localization.get("level", lang),
+                                                level_up.new_level
+                                            ),
                                             "bold",
                                             3.8,
                                             assets,
@@ -410,14 +413,29 @@ fn spawn_level_up_overlay(
                                         })
                                         .with_children(|parent| {
                                             parent.spawn((
-                                                add_text(localization.get("assign_points", lang).to_string(), "bold", 2.2, assets),
+                                                add_text(
+                                                    localization
+                                                        .get("assign_points", lang)
+                                                        .to_string(),
+                                                    "bold",
+                                                    2.2,
+                                                    assets,
+                                                ),
                                                 TextColor(BUTTON_TEXT_COLOR),
                                             ));
 
-                                            let pts_color = if level_up.points_remaining > 0 { GOLD } else { Color::WHITE };
+                                            let pts_color = if level_up.points_remaining > 0 {
+                                                GOLD
+                                            } else {
+                                                Color::WHITE
+                                            };
                                             parent.spawn((
                                                 add_text(
-                                                    format!("{}: {}", localization.get("points remaining", lang), level_up.points_remaining),
+                                                    format!(
+                                                        "{}: {}",
+                                                        localization.get("points remaining", lang),
+                                                        level_up.points_remaining
+                                                    ),
                                                     "bold",
                                                     1.8,
                                                     assets,
@@ -426,17 +444,48 @@ fn spawn_level_up_overlay(
                                             ));
 
                                             let attrs = [
-                                                (Attribute::Strength, localization.get("strength", lang), player.strength(), 0),
-                                                (Attribute::Dexterity, localization.get("dexterity", lang), player.dexterity(), 1),
-                                                (Attribute::Constitution, localization.get("constitution", lang), player.constitution(), 2),
-                                                (Attribute::Intelligence, localization.get("intelligence", lang), player.intelligence(), 3),
-                                                (Attribute::Wisdom, localization.get("wisdom", lang), player.wisdom(), 4),
-                                                (Attribute::Charisma, localization.get("charisma", lang), player.charisma(), 5),
+                                                (
+                                                    Attribute::Strength,
+                                                    localization.get("strength", lang),
+                                                    player.strength(),
+                                                    0,
+                                                ),
+                                                (
+                                                    Attribute::Dexterity,
+                                                    localization.get("dexterity", lang),
+                                                    player.dexterity(),
+                                                    1,
+                                                ),
+                                                (
+                                                    Attribute::Constitution,
+                                                    localization.get("constitution", lang),
+                                                    player.constitution(),
+                                                    2,
+                                                ),
+                                                (
+                                                    Attribute::Intelligence,
+                                                    localization.get("intelligence", lang),
+                                                    player.intelligence(),
+                                                    3,
+                                                ),
+                                                (
+                                                    Attribute::Wisdom,
+                                                    localization.get("wisdom", lang),
+                                                    player.wisdom(),
+                                                    4,
+                                                ),
+                                                (
+                                                    Attribute::Charisma,
+                                                    localization.get("charisma", lang),
+                                                    player.charisma(),
+                                                    5,
+                                                ),
                                             ];
 
                                             for (attr, name, base_val, idx) in attrs {
                                                 let gain = level_up.attr_gains[idx];
-                                                let can_plus = level_up.points_remaining > 0 && gain < 2;
+                                                let can_plus =
+                                                    level_up.points_remaining > 0 && gain < 2;
                                                 let can_minus = gain > 0;
 
                                                 parent
@@ -444,17 +493,28 @@ fn spawn_level_up_overlay(
                                                         Node {
                                                             flex_direction: FlexDirection::Row,
                                                             align_items: AlignItems::Center,
-                                                            justify_content: JustifyContent::SpaceBetween,
-                                                            padding: UiRect::axes(Val::Px(10.), Val::Px(4.)),
+                                                            justify_content:
+                                                                JustifyContent::SpaceBetween,
+                                                            padding: UiRect::axes(
+                                                                Val::Px(10.),
+                                                                Val::Px(4.),
+                                                            ),
                                                             border: UiRect::all(Val::Px(1.)),
                                                             ..default()
                                                         },
-                                                        BackgroundColor(Color::srgba(0.015, 0.025, 0.06, 0.65)),
+                                                        BackgroundColor(Color::srgba(
+                                                            0.015, 0.025, 0.06, 0.65,
+                                                        )),
                                                         BorderColor::all(BUTTON_BORDER_COLOR),
                                                     ))
                                                     .with_children(|parent| {
                                                         parent.spawn((
-                                                            add_text(name.to_string(), "bold", 1.8, assets),
+                                                            add_text(
+                                                                name.to_string(),
+                                                                "bold",
+                                                                1.8,
+                                                                assets,
+                                                            ),
                                                             TextColor(BUTTON_TEXT_COLOR),
                                                         ));
 
@@ -468,17 +528,28 @@ fn spawn_level_up_overlay(
                                                             })
                                                             .with_children(|parent| {
                                                                 parent.spawn((
-                                                                    add_text(format!("{}", base_val), "medium", 1.8, assets),
+                                                                    add_text(
+                                                                        format!("{}", base_val),
+                                                                        "medium",
+                                                                        1.8,
+                                                                        assets,
+                                                                    ),
                                                                     TextColor(Color::WHITE),
                                                                 ));
 
-                                                                let gain_color = if gain > 0 { 
-                                                                    Color::srgb(1.0, 0.85, 0.2) // GOLD color
-                                                                } else { 
-                                                                    Color::srgba(1., 1., 1., 0.3) 
+                                                                let gain_color = if gain > 0 {
+                                                                    Color::srgb(1.0, 0.85, 0.2)
+                                                                // GOLD color
+                                                                } else {
+                                                                    Color::srgba(1., 1., 1., 0.3)
                                                                 };
                                                                 parent.spawn((
-                                                                    add_text(format!("+{}", gain), "bold", 1.8, assets),
+                                                                    add_text(
+                                                                        format!("+{}", gain),
+                                                                        "bold",
+                                                                        1.8,
+                                                                        assets,
+                                                                    ),
                                                                     TextColor(gain_color),
                                                                     Node {
                                                                         width: Val::Px(24.),
@@ -487,68 +558,124 @@ fn spawn_level_up_overlay(
                                                                 ));
 
                                                                 // Minus Button
-                                                                let minus_col = if can_minus { NORMAL_BUTTON_COLOR } else { Color::srgba(0.05, 0.09, 0.22, 0.3) };
-                                                                let mut m_btn = parent
-                                                                    .spawn((
-                                                                        Node {
-                                                                            width: Val::Px(20.),
-                                                                            height: Val::Px(20.),
-                                                                            align_items: AlignItems::Center,
-                                                                            justify_content: JustifyContent::Center,
-                                                                            border: UiRect::all(Val::Px(1.)),
-                                                                            ..default()
-                                                                        },
-                                                                        BackgroundColor(minus_col),
-                                                                        BorderColor::all(BUTTON_BORDER_COLOR),
-                                                                        Button,
-                                                                        Interaction::default(),
-                                                                        Pickable::default(),
-                                                                        LevelUpAttrMinusBtn(attr),
-                                                                    ));
+                                                                let minus_col = if can_minus {
+                                                                    NORMAL_BUTTON_COLOR
+                                                                } else {
+                                                                    Color::srgba(
+                                                                        0.05, 0.09, 0.22, 0.3,
+                                                                    )
+                                                                };
+                                                                let mut m_btn = parent.spawn((
+                                                                    Node {
+                                                                        width: Val::Px(20.),
+                                                                        height: Val::Px(20.),
+                                                                        align_items:
+                                                                            AlignItems::Center,
+                                                                        justify_content:
+                                                                            JustifyContent::Center,
+                                                                        border: UiRect::all(
+                                                                            Val::Px(1.),
+                                                                        ),
+                                                                        ..default()
+                                                                    },
+                                                                    BackgroundColor(minus_col),
+                                                                    BorderColor::all(
+                                                                        BUTTON_BORDER_COLOR,
+                                                                    ),
+                                                                    Button,
+                                                                    Interaction::default(),
+                                                                    Pickable::default(),
+                                                                    LevelUpAttrMinusBtn(attr),
+                                                                ));
                                                                 if !can_minus {
                                                                     m_btn.insert(DisabledButton);
                                                                 }
                                                                 m_btn
-                                                                    .observe(handle_attr_minus_click)
-                                                                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                                                    .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                                                    .observe(
+                                                                        handle_attr_minus_click,
+                                                                    )
+                                                                    .observe(cursor::<Over>(
+                                                                        SystemCursorIcon::Pointer,
+                                                                    ))
+                                                                    .observe(cursor::<Out>(
+                                                                        SystemCursorIcon::Default,
+                                                                    ))
                                                                     .with_children(|parent| {
                                                                         parent.spawn((
-                                                                            add_text("-", "bold", 1.4, assets),
-                                                                            TextColor(if can_minus { Color::WHITE } else { Color::srgba(1., 1., 1., 0.2) }),
+                                                                            add_text(
+                                                                                "-", "bold", 1.4,
+                                                                                assets,
+                                                                            ),
+                                                                            TextColor(
+                                                                                if can_minus {
+                                                                                    Color::WHITE
+                                                                                } else {
+                                                                                    Color::srgba(
+                                                                                        1., 1., 1.,
+                                                                                        0.2,
+                                                                                    )
+                                                                                },
+                                                                            ),
                                                                         ));
                                                                     });
 
                                                                 // Plus Button
-                                                                let plus_col = if can_plus { NORMAL_BUTTON_COLOR } else { Color::srgba(0.05, 0.09, 0.22, 0.3) };
-                                                                let mut p_btn = parent
-                                                                    .spawn((
-                                                                        Node {
-                                                                            width: Val::Px(20.),
-                                                                            height: Val::Px(20.),
-                                                                            align_items: AlignItems::Center,
-                                                                            justify_content: JustifyContent::Center,
-                                                                            border: UiRect::all(Val::Px(1.)),
-                                                                            ..default()
-                                                                        },
-                                                                        BackgroundColor(plus_col),
-                                                                        BorderColor::all(BUTTON_BORDER_COLOR),
-                                                                        Button,
-                                                                        Interaction::default(),
-                                                                        Pickable::default(),
-                                                                        LevelUpAttrPlusBtn(attr),
-                                                                    ));
+                                                                let plus_col = if can_plus {
+                                                                    NORMAL_BUTTON_COLOR
+                                                                } else {
+                                                                    Color::srgba(
+                                                                        0.05, 0.09, 0.22, 0.3,
+                                                                    )
+                                                                };
+                                                                let mut p_btn = parent.spawn((
+                                                                    Node {
+                                                                        width: Val::Px(20.),
+                                                                        height: Val::Px(20.),
+                                                                        align_items:
+                                                                            AlignItems::Center,
+                                                                        justify_content:
+                                                                            JustifyContent::Center,
+                                                                        border: UiRect::all(
+                                                                            Val::Px(1.),
+                                                                        ),
+                                                                        ..default()
+                                                                    },
+                                                                    BackgroundColor(plus_col),
+                                                                    BorderColor::all(
+                                                                        BUTTON_BORDER_COLOR,
+                                                                    ),
+                                                                    Button,
+                                                                    Interaction::default(),
+                                                                    Pickable::default(),
+                                                                    LevelUpAttrPlusBtn(attr),
+                                                                ));
                                                                 if !can_plus {
                                                                     p_btn.insert(DisabledButton);
                                                                 }
                                                                 p_btn
                                                                     .observe(handle_attr_plus_click)
-                                                                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                                                    .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                                                    .observe(cursor::<Over>(
+                                                                        SystemCursorIcon::Pointer,
+                                                                    ))
+                                                                    .observe(cursor::<Out>(
+                                                                        SystemCursorIcon::Default,
+                                                                    ))
                                                                     .with_children(|parent| {
                                                                         parent.spawn((
-                                                                            add_text("+", "bold", 1.4, assets),
-                                                                            TextColor(if can_plus { Color::WHITE } else { Color::srgba(1., 1., 1., 0.2) }),
+                                                                            add_text(
+                                                                                "+", "bold", 1.4,
+                                                                                assets,
+                                                                            ),
+                                                                            TextColor(
+                                                                                if can_plus {
+                                                                                    Color::WHITE
+                                                                                } else {
+                                                                                    Color::srgba(
+                                                                                        1., 1., 1.,
+                                                                                        0.2,
+                                                                                    )
+                                                                                },
+                                                                            ),
                                                                         ));
                                                                     });
                                                             });
@@ -576,13 +703,25 @@ fn spawn_level_up_overlay(
                                                     })
                                                     .with_children(|parent| {
                                                         parent.spawn((
-                                                            add_text(localization.get("choose_ability", lang).to_string(), "bold", 2.2, assets),
+                                                            add_text(
+                                                                localization
+                                                                    .get("choose_ability", lang)
+                                                                    .to_string(),
+                                                                "bold",
+                                                                2.2,
+                                                                assets,
+                                                            ),
                                                             TextColor(BUTTON_TEXT_COLOR),
                                                         ));
 
                                                         // Abilities stacked vertically
-                                                        for (i, name) in level_up.ability_choices.iter().enumerate() {
-                                                            let is_selected = level_up.ability_chosen == Some(i);
+                                                        for (i, name) in level_up
+                                                            .ability_choices
+                                                            .iter()
+                                                            .enumerate()
+                                                        {
+                                                            let is_selected =
+                                                                level_up.ability_chosen == Some(i);
                                                             spawn_choice_card(
                                                                 parent,
                                                                 assets,
@@ -590,7 +729,7 @@ fn spawn_level_up_overlay(
                                                                 lang,
                                                                 name,
                                                                 is_selected,
-                                                                true,  // is_ability
+                                                                true, // is_ability
                                                                 i,
                                                             );
                                                         }
@@ -607,13 +746,23 @@ fn spawn_level_up_overlay(
                                                     })
                                                     .with_children(|parent| {
                                                         parent.spawn((
-                                                            add_text(localization.get("choose_perk", lang).to_string(), "bold", 2.2, assets),
+                                                            add_text(
+                                                                localization
+                                                                    .get("choose_perk", lang)
+                                                                    .to_string(),
+                                                                "bold",
+                                                                2.2,
+                                                                assets,
+                                                            ),
                                                             TextColor(BUTTON_TEXT_COLOR),
                                                         ));
 
                                                         // Perks stacked vertically
-                                                        for (i, name) in level_up.perk_choices.iter().enumerate() {
-                                                            let is_selected = level_up.perk_chosen == Some(i);
+                                                        for (i, name) in
+                                                            level_up.perk_choices.iter().enumerate()
+                                                        {
+                                                            let is_selected =
+                                                                level_up.perk_chosen == Some(i);
                                                             spawn_choice_card(
                                                                 parent,
                                                                 assets,
@@ -621,7 +770,7 @@ fn spawn_level_up_overlay(
                                                                 lang,
                                                                 name,
                                                                 is_selected,
-                                                                false,  // is_perk
+                                                                false, // is_perk
                                                                 i,
                                                             );
                                                         }
@@ -643,7 +792,7 @@ fn spawn_level_up_overlay(
                             flex_direction: FlexDirection::Column,
                             align_items: AlignItems::Center,
                             row_gap: Val::Px(4.),
-                            height: Val::Px(70.),  // Fixed height to prevent button shifting
+                            height: Val::Px(70.), // Fixed height to prevent button shifting
                             justify_content: JustifyContent::Center,
                             margin: UiRect::bottom(Val::Px(48.)), // Move confirm button up more (from 32px to 48px)
                             ..default()
@@ -656,21 +805,20 @@ fn spawn_level_up_overlay(
                                 Color::srgba(0.05, 0.09, 0.22, 0.5)
                             };
 
-                            let mut c_btn = parent
-                                                                .spawn((
-                                                                    Node {
-                                                                        align_self: AlignSelf::Center,
-                                                                        padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
-                                                                        border: UiRect::all(Val::Px(1.)),
-                                                                        ..default()
-                                                                    },
-                                                                    BackgroundColor(bg_color),
-                                                                    BorderColor::all(BUTTON_BORDER_COLOR),
-                                                                    Button,
-                                                                    Interaction::default(),
-                                                                    Pickable::default(),
-                                                                    LevelUpConfirmBtn,
-                                                                ));
+                            let mut c_btn = parent.spawn((
+                                Node {
+                                    align_self: AlignSelf::Center,
+                                    padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
+                                    border: UiRect::all(Val::Px(1.)),
+                                    ..default()
+                                },
+                                BackgroundColor(bg_color),
+                                BorderColor::all(BUTTON_BORDER_COLOR),
+                                Button,
+                                Interaction::default(),
+                                Pickable::default(),
+                                LevelUpConfirmBtn,
+                            ));
                             if !confirm_ready {
                                 c_btn.insert(DisabledButton);
                             }
@@ -711,36 +859,37 @@ fn spawn_choice_card(
     const SELECTED_BORDER: Color = Color::srgb(1.0, 0.85, 0.2);
     const UNSELECTED_BORDER: Color = BUTTON_BORDER_COLOR;
 
-    let border_col = if is_selected { SELECTED_BORDER } else { UNSELECTED_BORDER };
-    let border_thickness = if is_selected { 2. } else { 1. };
+    let border_col = if is_selected {
+        SELECTED_BORDER
+    } else {
+        UNSELECTED_BORDER
+    };
+    let border_thickness = if is_selected {
+        2.
+    } else {
+        1.
+    };
 
     let img_name = name.to_string();
-    
+
     // Get details for description
     let desc = if is_ability {
         if let Some(ab) = crate::core::catalog::get_ability(name) {
-            localization
-                .get_opt(&format!("{}_desc", ab.name), lang)
-                .unwrap_or_else(|| {
-                    format!(
-                        "A powerful {} ability that consumes {} mana.",
-                        ab.magic_type.to_lowercase(),
-                        ab.mana_cost
-                    )
-                })
+            localization.get_opt(&format!("{}_desc", ab.name), lang).unwrap_or_else(|| {
+                format!(
+                    "A powerful {} ability that consumes {} mana.",
+                    ab.magic_type.to_lowercase(),
+                    ab.mana_cost
+                )
+            })
         } else {
             String::new()
         }
     } else {
         if let Some(pk) = crate::core::catalog::get_perk(name) {
-            localization
-                .get_opt(&format!("{}_desc", pk.name), lang)
-                .unwrap_or_else(|| {
-                    format!(
-                        "An impressive passive perk that empowers your {} capabilities.",
-                        pk.theme
-                    )
-                })
+            localization.get_opt(&format!("{}_desc", pk.name), lang).unwrap_or_else(|| {
+                format!("An impressive passive perk that empowers your {} capabilities.", pk.theme)
+            })
         } else {
             String::new()
         }
@@ -803,21 +952,11 @@ fn spawn_choice_card(
                 })
                 .with_children(|parent| {
                     // Name (same as playing tab)
-                    parent.spawn((
-                        add_text(
-                            name,
-                            "bold",
-                            1.9,
-                            assets,
-                        ),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
+                    parent
+                        .spawn((add_text(name, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
 
                     // Description
-                    parent.spawn((
-                        add_text(desc, "medium", 1.6, assets),
-                        TextColor(Color::WHITE),
-                    ));
+                    parent.spawn((add_text(desc, "medium", 1.6, assets), TextColor(Color::WHITE)));
                 });
         });
 }
