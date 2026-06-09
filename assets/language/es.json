@@ -221,5 +221,21 @@
   "assign_points": "Asigna 2 puntos de atributo",
   "confirm_level_up": "CONFIRMAR SUBIDA DE NIVEL",
   "complete_selections": "COMPLETA TODAS LAS SELECCIONES",
-  "press_enter_confirm": "Presiona Enter para confirmar"
+  "press_enter_confirm": "Presiona Enter para confirmar",
+  "toast_gold_earned": "¡+ {gold} oro ganado!",
+  "toast_train_learned_ability": "¡Aprendiste una nueva habilidad: {ability}!",
+  "toast_train_nothing_new": "Entrenaste duro, pero no aprendiste nada nuevo.",
+  "toast_train_plus_5_hp": "¡+5 Vida Máxima!",
+  "toast_train_plus_10_hp": "¡+10 Vida Máxima!",
+  "toast_train_plus_str": "¡+1 Fuerza!",
+  "toast_train_plus_dex": "¡+1 Destreza!",
+  "toast_train_no_improvement": "Sesión de entrenamiento completada. Sin mejoras aún.",
+  "toast_rest_recovered": "Recuperaste {hp} de vida, {mp} de maná.",
+  "toast_rest_pet": "¡{pet} +{gain} de vida!",
+  "toast_rest_max_hp": "¡+{gain} vida máxima!",
+  "toast_rest_max_mp": "¡+{gain} maná máximo!",
+  "toast_study_perk": "¡Aprendiste la ventaja: {perk}!",
+  "toast_study_ability": "¡Aprendiste la habilidad: {ability}!",
+  "toast_study_nothing": "No aprendiste nada nuevo.",
+  "toast_study_wisdom": "¡+1 Sabiduría!"
 }

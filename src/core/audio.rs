@@ -12,25 +12,25 @@ use crate::core::settings::{AudioSettings, Settings};
 use crate::core::utils::cursor;
 
 #[derive(Resource, Default, Deref, DerefMut)]
-pub struct PlayingAudio(pub HashMap<&'static str, Handle<AudioInstance>>);
+pub struct PlayingAudio(pub HashMap<String, Handle<AudioInstance>>);
 
 impl PlayingAudio {
     pub const DEFAULT_VOLUME: f32 = 0.6;
-    pub const DEFAULT_MUSIC_VOLUME: f32 = 0.9;
+    pub const DEFAULT_MUSIC_VOLUME: f32 = -20.;
     pub const TWEEN: AudioTween = AudioTween::new(Duration::from_secs(2), AudioEasing::OutPowi(2));
 }
 
 #[derive(Message, Clone)]
 pub struct PlayAudioMsg {
-    pub name: &'static str,
+    pub name: String,
     pub volume: f32,
     pub is_background: bool,
 }
 
 impl PlayAudioMsg {
-    pub fn new(name: &'static str) -> Self {
+    pub fn new(name: impl Into<String>) -> Self {
         Self {
-            name,
+            name: name.into(),
             volume: PlayingAudio::DEFAULT_VOLUME,
             is_background: false,
         }
@@ -49,26 +49,26 @@ impl PlayAudioMsg {
 
 #[derive(Message, Clone)]
 pub struct PauseAudioMsg {
-    pub name: &'static str,
+    pub name: String,
 }
 
 impl PauseAudioMsg {
-    pub fn new(name: &'static str) -> Self {
+    pub fn new(name: impl Into<String>) -> Self {
         Self {
-            name,
+            name: name.into(),
         }
     }
 }
 
 #[derive(Message, Clone)]
 pub struct StopAudioMsg {
-    pub name: &'static str,
+    pub name: String,
 }
 
 impl StopAudioMsg {
-    pub fn new(name: &'static str) -> Self {
+    pub fn new(name: impl Into<String>) -> Self {
         Self {
-            name,
+            name: name.into(),
         }
     }
 }
@@ -93,7 +93,7 @@ pub fn setup_audio(mut commands: Commands, assets: Local<WorldAssets>) {
                 top: percent(2.),
                 ..default()
             },
-            ZIndex(5),
+            GlobalZIndex(10000),
         ))
         .observe(cursor::<Over>(SystemCursorIcon::Pointer))
         .observe(cursor::<Out>(SystemCursorIcon::Default))
@@ -186,7 +186,7 @@ pub fn play_audio(
         if settings.audio != AudioSettings::Mute {
             let mut new_sound = false;
 
-            if let Some(handle) = playing_audio.get(msg.name) {
+            if let Some(handle) = playing_audio.get(&msg.name) {
                 if let Some(mut instance) = audio_instances.get_mut(handle) {
                     if matches!(
                         instance.state(),
@@ -211,9 +211,9 @@ pub fn play_audio(
             } else if msg.is_background {
                 if settings.audio != AudioSettings::Sfx {
                     playing_audio.insert(
-                        msg.name,
+                        msg.name.clone(),
                         audio
-                            .play(assets.audio(msg.name))
+                            .play(assets.audio(&msg.name))
                             .fade_in(PlayingAudio::TWEEN)
                             .with_volume(msg.volume)
                             .looped()
@@ -226,8 +226,8 @@ pub fn play_audio(
 
             if new_sound {
                 playing_audio.insert(
-                    msg.name,
-                    audio.play(assets.audio(msg.name)).with_volume(msg.volume).handle(),
+                    msg.name.clone(),
+                    audio.play(assets.audio(&msg.name)).with_volume(msg.volume).handle(),
                 );
             }
         }
@@ -240,7 +240,7 @@ pub fn pause_audio(
     mut audio_instances: ResMut<Assets<AudioInstance>>,
 ) {
     for msg in pause_audio_msg.read() {
-        if let Some(handle) = playing_audio.get(msg.name) {
+        if let Some(handle) = playing_audio.get(&msg.name) {
             if let Some(mut instance) = audio_instances.get_mut(handle) {
                 instance.pause(PlayingAudio::TWEEN);
             }
@@ -254,10 +254,10 @@ pub fn stop_audio(
     mut audio_instances: ResMut<Assets<AudioInstance>>,
 ) {
     for msg in stop_audio_msg.read() {
-        if let Some(handle) = playing_audio.get(msg.name) {
+        if let Some(handle) = playing_audio.get(&msg.name) {
             if let Some(mut instance) = audio_instances.get_mut(handle) {
                 instance.stop(PlayingAudio::TWEEN);
-                playing_audio.remove(msg.name);
+                playing_audio.remove(&msg.name);
             }
         }
     }

@@ -4,10 +4,10 @@ use strum_macros::EnumIter;
 
 #[derive(EnumIter, Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Race {
-    Dwarf,
-    Elf,
     #[default]
     Human,
+    Elf,
+    Dwarf,
     Orc,
 }
 
@@ -15,9 +15,9 @@ impl Race {
     /// Plausible (min, max) age range in years for this race.
     pub fn age_range(&self) -> (u32, u32) {
         match self {
-            Race::Dwarf => (40, 300),
-            Race::Elf => (100, 750),
             Race::Human => (16, 80),
+            Race::Elf => (100, 1350),
+            Race::Dwarf => (60, 400),
             Race::Orc => (16, 60),
         }
     }

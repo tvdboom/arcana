@@ -221,5 +221,21 @@
   "assign_points": "Assign 2 attribute points",
   "confirm_level_up": "CONFIRM LEVEL UP",
   "complete_selections": "COMPLETE ALL SELECTIONS",
-  "press_enter_confirm": "Press Enter to Confirm"
+  "press_enter_confirm": "Press Enter to Confirm",
+  "toast_gold_earned": "+ {gold} gold earned!",
+  "toast_train_learned_ability": "Learned new ability: {ability}!",
+  "toast_train_nothing_new": "Trained hard, but learned nothing new.",
+  "toast_train_plus_5_hp": "+5 Max Health!",
+  "toast_train_plus_10_hp": "+10 Max Health!",
+  "toast_train_plus_str": "+1 Strength!",
+  "toast_train_plus_dex": "+1 Dexterity!",
+  "toast_train_no_improvement": "Training session complete. No improvement yet.",
+  "toast_rest_recovered": "Recovered {hp} health, {mp} mana.",
+  "toast_rest_pet": "{pet} +{gain} health!",
+  "toast_rest_max_hp": "+{gain} max health!",
+  "toast_rest_max_mp": "+{gain} max mana!",
+  "toast_study_perk": "Learned perk: {perk}!",
+  "toast_study_ability": "Learned ability: {ability}!",
+  "toast_study_nothing": "Nothing new learned.",
+  "toast_study_wisdom": "+1 Wisdom!"
 }

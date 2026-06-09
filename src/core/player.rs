@@ -69,12 +69,19 @@ impl Default for Player {
     fn default() -> Self {
         let name = FANTASY_NAMES.choose(&mut rng()).copied().unwrap_or("Arcana").to_string();
         let pet_name = PET_NAMES.choose(&mut rng()).copied().unwrap_or("Ash").to_string();
+        
+        // Generate a random age in the Adult stage (stage 2) for default Human race
+        let race = Race::default();
+        let (min_age, max_age) = race.age_stage_range(2);
+        use rand::RngExt;
+        let age = rand::rng().random_range(min_age..=max_age);
+        
         Self {
             name,
             sex: Sex::default(),
-            race: Race::default(),
+            race,
             class: Class::default(),
-            age: 2,
+            age,
             level: 1,
             ap: 10,
             health: 100.,
@@ -108,11 +115,19 @@ impl Default for Player {
 }
 
 impl Player {
+    /// Get the age stage (0=Youth, 1=Young Adult, 2=Adult, 3=Senior, 4=Elder) from actual age
+    pub fn age_stage(&self) -> u32 {
+        let (min, max) = self.race.age_range();
+        let span = max - min + 1;
+        let age_offset = self.age.saturating_sub(min);
+        let stage = (age_offset * 5) / span;
+        stage.clamp(0, 4)
+    }
+
     /// Age stage modifier: Youth=-2, Young Adult=-1, Adult=0, Senior=+1, Elder=+2.
     /// This is added to wisdom and subtracted from constitution.
     pub fn age_modifier(&self) -> i16 {
-        // age stores the stage index: 0=Youth, 1=Young Adult, 2=Adult, 3=Senior, 4=Elder
-        (self.age as i16).clamp(0, 4) - 2
+        (self.age_stage() as i16) - 2
     }
 
     pub fn strength(&self) -> u8 {
@@ -234,7 +249,7 @@ impl Player {
 
     /// (height_cm, weight_kg). Height and weight are derived deterministically from name and race.
     pub fn vitals(&self) -> (u32, u32) {
-        let (_age_r, height_r, weight_r) = self.race.vital_ranges();
+        let (_age_r, height_r, _weight_r) = self.race.vital_ranges();
 
         let mut hasher = DefaultHasher::new();
         self.name.hash(&mut hasher);
@@ -246,19 +261,29 @@ impl Player {
             range.0 + ((seed.rotate_left(salt as u32 * 17) ^ salt) % span) as u32
         };
 
-        (pick(height_r, 2), pick(weight_r, 3))
-    }
+        let height = pick(height_r, 2);
 
-    pub fn actual_age(&self) -> u32 {
-        let range = self.race.age_stage_range(self.age);
+        // Generate a random seed based on the race, name, and the generated height
+        let mut weight_hasher = DefaultHasher::new();
+        self.name.hash(&mut weight_hasher);
+        format!("{:?}", self.race).hash(&mut weight_hasher);
+        height.hash(&mut weight_hasher);
+        let weight_seed = weight_hasher.finish();
 
-        let mut hasher = DefaultHasher::new();
-        self.name.hash(&mut hasher);
-        format!("{:?}", self.race).hash(&mut hasher);
-        self.age.hash(&mut hasher);
-        let seed = hasher.finish();
+        // Get a random float from 0.0 to 1.0 based on name, race, and height
+        let rand_val = (weight_seed % 1000) as f32 / 1000.0;
 
-        let span = (range.1 - range.0 + 1) as u64;
-        range.0 + (seed % span) as u32
+        // Calculate weight based on height (using race-specific BMI ranges)
+        let height_m = height as f32 / 100.0;
+        let bmi = match self.race {
+            Race::Elf => 16.5 + rand_val * 3.0,
+            Race::Human => 21.0 + rand_val * 4.0,
+            Race::Dwarf => 45.0 + rand_val * 10.0,
+            Race::Orc => 31.0 + rand_val * 6.0,
+        };
+
+        let weight = (height_m * height_m * bmi).round() as u32;
+
+        (height, weight)
     }
 }

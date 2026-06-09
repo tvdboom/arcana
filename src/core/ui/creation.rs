@@ -717,7 +717,7 @@ pub fn setup_character_creation(
                                 })
                                 .with_children(|parent| {
                                     // Slider track - the whole area is interactive
-                                    let frac = player.age as f32 / 4.0;
+                                    let frac = player.age_stage() as f32 / 4.0;
                                     parent
                                         .spawn((
                                             Node {
@@ -865,7 +865,7 @@ pub fn setup_character_creation(
                                             parent.spawn((
                                                 add_text(
                                                     localization
-                                                        .get(AGE_STAGES[player.age as usize], lang),
+                                                        .get(AGE_STAGES[player.age_stage() as usize], lang),
                                                     "bold",
                                                     BUTTON_TEXT_SIZE,
                                                     &assets,
@@ -1059,7 +1059,12 @@ fn on_age_slider_drag(
     set_age_slider_position(&mut handle_q, &mut value_node_q, relative_x);
     let stage = age_stage_from_relative_x(relative_x);
     set_age_value_position(&mut value_node_q, stage as f32 / 4.0 * AGE_SLIDER_WIDTH);
-    player.age = stage;
+    
+    // Generate random age within the range for this race and stage
+    let (min_age, max_age) = player.race.age_stage_range(stage);
+    use rand::RngExt;
+    player.age = rand::rng().random_range(min_age..=max_age);
+    
     if let Ok(mut text) = text_q.single_mut() {
         text.0 = localization.get(AGE_STAGES[stage as usize], settings.language);
     }
@@ -1089,7 +1094,7 @@ fn on_age_slider_release(
         };
         match handle_node.left {
             Val::Px(px) => px + 12.,
-            _ => player.age as f32 / 4.0 * AGE_SLIDER_WIDTH,
+            _ => player.age_stage() as f32 / 4.0 * AGE_SLIDER_WIDTH,
         }
     };
     let stage = age_stage_from_relative_x(relative_x);
@@ -1236,8 +1241,12 @@ fn apply_age_stage(
     text_q: &mut Query<&mut Text, (With<AgeValueText>, Without<AttributeValueText>)>,
     attr_text_q: &mut Query<(&mut Text, &AttributeValueText), Without<AgeValueText>>,
 ) {
-    let changed = player.age != stage;
-    player.age = stage;
+    // Generate random age within the range for this race and stage
+    let (min_age, max_age) = player.race.age_stage_range(stage);
+    use rand::RngExt;
+    let new_age = rand::rng().random_range(min_age..=max_age);
+    let changed = player.age != new_age;
+    player.age = new_age;
     let snapped_frac = stage as f32 / 4.0;
     set_age_slider_position(handle_q, value_node_q, snapped_frac * AGE_SLIDER_WIDTH);
 

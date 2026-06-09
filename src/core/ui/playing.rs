@@ -2,6 +2,9 @@ use bevy::prelude::*;
 use bevy::ecs::system::SystemParam;
 use strum::IntoEnumIterator;
 
+pub use crate::core::actions::{handle_playing_action_clicks, ActionButton, Action};
+pub use crate::core::ui::toast::ToastContainer;
+
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::Class;
@@ -15,22 +18,16 @@ use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::window::SystemCursorIcon;
 
-const BAR_BG_COLOR: Color = Color::srgba_u8(0, 0, 0, 160);
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
-const PLACEHOLDER_COLOR: Color = Color::srgba_u8(40, 40, 55, 220);
 
 // Viewport-relative icon sizes (scale with window width)
-const ICON_ITEM: Val = Val::Vw(3.2);    // equipment / ability / perk card icons
 const ICON_ACTION: Val = Val::Vh(8.5);  // action button circles
 const ICON_BADGE: Val = Val::Vw(1.9);   // equipped badge overlay
 const ICON_STAT: Val = Val::Vw(2.4);    // gold / AP stat icons
 
 #[derive(Component)]
 pub struct PlayingCmp;
-
-#[derive(Component)]
-pub struct ActionButton(pub &'static str);
 
 /// Simple text stats that are refreshed every frame.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -75,14 +72,6 @@ pub struct AbilitiesList;
 
 #[derive(Component)]
 pub struct PerksList;
-
-#[derive(Component)]
-pub struct GoldToast {
-    pub timer: f32,
-}
-
-#[derive(Component)]
-pub struct ToastContainer;
 
 #[derive(Component)]
 pub struct RightScrollbarTrack;
@@ -132,31 +121,14 @@ pub enum InfoTooltip {
     Gold,
     ActionPoints,
     Combat(PlayingStat),
-    Action(&'static str),
+    Action(Action),
     Pet,
 }
 
-#[derive(Resource, Default)]
-pub struct LevelUpPending {
-    pub active: bool,
-    pub new_level: u8,
-    pub points_remaining: u8,
-    pub attr_gains: [i8; 6],
-    pub ability_choices: Vec<String>,
-    pub perk_choices: Vec<String>,
-    pub ability_chosen: Option<usize>,
-    pub perk_chosen: Option<usize>,
-}
-
-#[derive(Component)] pub struct LevelUpOverlayCmp;
-#[derive(Component)] pub struct LevelUpAttrPlusBtn(pub Attribute);
-#[derive(Component)] pub struct LevelUpAttrMinusBtn(pub Attribute);
-#[allow(unused)]
-#[derive(Component)] pub struct LevelUpAttrPointsDisplay;
-#[derive(Component)] pub struct LevelUpAbilityChoiceBtn(pub usize);
-#[derive(Component)] pub struct LevelUpPerkChoiceBtn(pub usize);
-#[allow(unused)]
-#[derive(Component)] pub struct LevelUpConfirmBtn;
+// Re-export level up items from the level_up module
+pub use crate::core::ui::level_up::{
+    LevelUpPending, manage_level_up_overlay,
+};
 
 fn portrait_key(player: &Player) -> String {
     match player.class {
@@ -708,6 +680,7 @@ fn spawn_tooltip(
     title: String,
     lines: Vec<String>,
     windows: &Query<&Window>,
+    price: Option<u32>,
 ) {
     let wrapped_lines: Vec<String> =
         lines.into_iter().flat_map(|line| wrap_tooltip_line(&line, 60)).collect();
@@ -757,6 +730,39 @@ fn spawn_tooltip(
             },
         ))
         .with_children(|parent| {
+            // Price display at top-right corner (if provided)
+            if let Some(price_value) = price {
+                parent.spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        right: Val::Px(10.),
+                        top: Val::Px(10.),
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(4.),
+                        ..default()
+                    },
+                ))
+                .with_children(|parent| {
+                    // Gold icon
+                    parent.spawn((
+                        Node {
+                            width: ICON_BADGE,
+                            height: ICON_BADGE,
+                            ..default()
+                        },
+                        ImageNode::new(assets.image("gold"))
+                            .with_mode(NodeImageMode::Stretch),
+                    ));
+                    
+                    // Price number
+                    parent.spawn((
+                        add_text(format!("{}", price_value), "bold", 1.9, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                    ));
+                });
+            }
+            
             parent.spawn((add_text(title, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
             if !wrapped_lines.is_empty() {
                 parent.spawn((
@@ -984,23 +990,34 @@ pub fn setup_playing_screen(
         .with_children(|parent| {
             // Character name, top centered with banner background.
             parent
-                .spawn((
-                    Node {
-                        align_self: AlignSelf::Center,
-                        width: Val::Vh(50.0),
-                        height: Val::Vh(7.11),
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        margin: UiRect {
-                            top: Val::Vh(2.67),
-                            bottom: Val::Vh(1.78),
-                            ..default()
-                        },
+                .spawn(Node {
+                    align_self: AlignSelf::Center,
+                    width: Val::Auto,
+                    min_width: Val::Vh(50.0),
+                    height: Val::Vh(7.11),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    padding: UiRect::horizontal(Val::Px(100.0)),
+                    margin: UiRect {
+                        top: Val::Vh(2.67),
+                        bottom: Val::Vh(1.78),
                         ..default()
                     },
-                    ImageNode::new(assets.image("banner")).with_mode(NodeImageMode::Stretch),
-                ))
+                    ..default()
+                })
                 .with_children(|parent| {
+                    // Background banner image stretches to match parent's size
+                    parent.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            width: percent(100.0),
+                            height: percent(100.0),
+                            ..default()
+                        },
+                        ImageNode::new(assets.image("banner")).with_mode(NodeImageMode::Stretch),
+                    ));
+
+                    // Name text sits on top
                     parent.spawn((
                         add_text(playing_title(&player), "bold", 4.2, &assets),
                         TextColor(BUTTON_TEXT_COLOR),
@@ -1049,14 +1066,14 @@ pub fn setup_playing_screen(
                     ..default()
                 })
                 .with_children(|parent| {
-                    spawn_playing_action_button(parent, "rest", &assets, &localization, lang);
-                    spawn_playing_action_button(parent, "study", &assets, &localization, lang);
-                    spawn_playing_action_button(parent, "work", &assets, &localization, lang);
-                    spawn_playing_action_button(parent, "craft", &assets, &localization, lang);
-                    spawn_playing_action_button(parent, "shop", &assets, &localization, lang);
-                    spawn_playing_action_button(parent, "train", &assets, &localization, lang);
-                    spawn_playing_action_button(parent, "hunt", &assets, &localization, lang);
-                    spawn_playing_action_button(parent, "quest", &assets, &localization, lang);
+                    spawn_playing_action_button(parent, Action::Rest, &assets, &localization, lang);
+                    spawn_playing_action_button(parent, Action::Study, &assets, &localization, lang);
+                    spawn_playing_action_button(parent, Action::Work, &assets, &localization, lang);
+                    spawn_playing_action_button(parent, Action::Train, &assets, &localization, lang);
+                    spawn_playing_action_button(parent, Action::Craft, &assets, &localization, lang);
+                    spawn_playing_action_button(parent, Action::Shop, &assets, &localization, lang);
+                    spawn_playing_action_button(parent, Action::Hunt, &assets, &localization, lang);
+                    spawn_playing_action_button(parent, Action::Quest, &assets, &localization, lang);
                 });
 
             // Toast container: stacks notifications top-right
@@ -1730,7 +1747,7 @@ pub fn equip_slot_tooltip_system(
                     let name = name_with_level(weapon.name.to_string(), weapon.level, &localization, lang);
                     let stat_lines = weapon_stat_lines(&weapon, &player, &localization, lang);
 
-                    spawn_tooltip(&mut commands, &assets, name, stat_lines, &windows);
+                    spawn_tooltip(&mut commands, &assets, name, stat_lines, &windows, Some(weapon.price));
                 }
             }
         }
@@ -1772,17 +1789,11 @@ pub fn info_tooltip_system(
         }
 
         if let InfoTooltip::Action(act) = tooltip {
-            let ap_cost = match *act {
-                "rest" | "study" | "work" => 1u32,
-                "shop" => 0,
-                "craft" | "train" | "hunt" => 2,
-                "quest" => 3,
-                _ => 1,
-            };
-            let action_name = localization.get(act, lang);
-            let desc_key = format!("{}_desc", act);
-            let desc = match *act {
-                "work" => {
+            let ap_cost = act.ap_cost();
+            let action_name = localization.get(act.to_lowername().as_str(), lang);
+            let desc_key = format!("{}_desc", act.to_lowername());
+            let desc = match act {
+                Action::Work => {
                     let charisma = player.charisma() as i32;
                     let level = player.level as i32;
                     let base = charisma * level;
@@ -1796,7 +1807,7 @@ pub fn info_tooltip_system(
                         .replace("{min}", &min_gold.to_string())
                         .replace("{max}", &max_gold.to_string())
                 },
-                "rest" => {
+                Action::Rest => {
                     let wisdom = player.wisdom() as i32;
                     let level = player.level as i32;
                     let base = wisdom * level;
@@ -1813,7 +1824,7 @@ pub fn info_tooltip_system(
                         .replace("{max}", &max_r.to_string())
                         .replace("{pct}", &max_pct.to_string())
                 },
-                "study" => {
+                Action::Study => {
                     let int_bonus = (player.intelligence() as f32 - 10.).max(0.) * 0.025;
                     let perk_pct = ((0.333 + int_bonus).min(0.65) * 100.) as u32;
                     let abil_pct = ((0.200 + int_bonus).min(0.45) * 100.) as u32;
@@ -1826,12 +1837,12 @@ pub fn info_tooltip_system(
                         .replace("{abil}", &abil_pct.to_string())
                 },
                 _ => localization.get_opt(&desc_key, lang)
-                    .unwrap_or_else(|| match *act {
-                        "hunt" => "Go hunting in the wild to earn gold.".to_string(),
-                        "shop" => "Buy a random consumable item.".to_string(),
-                        "quest" => "Embark on an adventure to earn gold and find new equipment.".to_string(),
-                        "train" => "Train hard to increase a random attribute.".to_string(),
-                        "craft" => "Craft a piece of equipment suitable for your level.".to_string(),
+                    .unwrap_or_else(|| match act {
+                        Action::Hunt => "Go hunting in the wild to earn gold.".to_string(),
+                        Action::Shop => "Buy a random consumable item.".to_string(),
+                        Action::Quest => "Embark on an adventure to earn gold and find new equipment.".to_string(),
+                        Action::Train => "Train hard to improve your combat abilities. Scales with Strength and Dexterity.".to_string(),
+                        Action::Craft => "Craft a piece of equipment suitable for your level.".to_string(),
                         _ => "Perform an action.".to_string(),
                     }),
             };
@@ -1861,7 +1872,7 @@ pub fn info_tooltip_system(
             InfoTooltip::Action(_) | InfoTooltip::Pet => unreachable!(),
         };
 
-        spawn_tooltip(&mut commands, &assets, title, lines, &windows);
+        spawn_tooltip(&mut commands, &assets, title, lines, &windows, None);
     }
 }
 
@@ -1891,9 +1902,13 @@ fn handle_tab_click(
     ev: On<Pointer<Click>>,
     btn_q: Query<&RightTabBtn>,
     mut right_tab: ResMut<RightTab>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     if let Ok(btn) = btn_q.get(ev.entity) {
-        *right_tab = btn.0;
+        if *right_tab != btn.0 {
+            *right_tab = btn.0;
+            play_audio_msg.write(PlayAudioMsg::new("button"));
+        }
     }
 }
 
@@ -1966,7 +1981,10 @@ fn spawn_right_column(
                                         BorderColor::all(BUTTON_BORDER_COLOR),
                                         Button,
                                         Interaction::default(),
-                                        Pickable::default(),
+                                        Pickable {
+                                            should_block_lower: true,
+                                            is_hoverable: true,
+                                        },
                                         RightTabBtn(tab),
                                     ))
                                     .observe(handle_tab_click)
@@ -2264,6 +2282,7 @@ pub fn rebuild_playing_lists(
                     EquipmentCard {
                         key: weapon.name.to_string(),
                         is_equipped: true,
+                        price: weapon.price,
                     },
                 );
             }
@@ -2286,6 +2305,7 @@ pub fn rebuild_playing_lists(
                     EquipmentCard {
                         key: weapon.name.to_string(),
                         is_equipped: false,
+                        price: weapon.price,
                     },
                 );
             }
@@ -2492,7 +2512,7 @@ pub fn update_playing_screen(
                 crate::core::player::Sex::Female => localization.get("female", lang),
             },
             PlayingStat::CharAge => {
-                format!("{} {}", player.actual_age(), localization.get("years", lang))
+                format!("{} {}", player.age, localization.get("years", lang))
             },
             PlayingStat::CharHeight => {
                 let (height, _) = player.vitals();
@@ -2583,12 +2603,12 @@ pub fn highlight_border<E: std::fmt::Debug + Clone + Reflect>(
 
 pub fn spawn_playing_action_button(
     parent: &mut ChildSpawnerCommands,
-    action: &'static str,
+    action: Action,
     assets: &WorldAssets,
     localization: &Localization,
     lang: Language,
 ) {
-    let action_label = localization.get(action, lang);
+    let action_label = localization.get(action.to_lowername().as_str(), lang);
     parent
         .spawn(Node {
             flex_direction: FlexDirection::Column,
@@ -2612,7 +2632,7 @@ pub fn spawn_playing_action_button(
                     },
                     BackgroundColor(NORMAL_BUTTON_COLOR),
                     BorderColor::all(BUTTON_BORDER_COLOR),
-                    ImageNode::new(assets.image(format!("action_{}", action)))
+                    ImageNode::new(assets.image(format!("action_{}", action.to_lowername())))
                         .with_mode(NodeImageMode::Stretch),
                     Button,
                     ActionButton(action),
@@ -2632,7 +2652,7 @@ pub fn spawn_playing_action_button(
             parent.spawn((
                 add_text(action_label, "bold", 1.8, assets),
                 TextColor(BUTTON_TEXT_COLOR),
-                LocalizedText(action.to_string()),
+                LocalizedText(action.to_lowername().to_string()),
             ));
         });
 }
@@ -2641,958 +2661,7 @@ pub fn spawn_playing_action_button(
 pub struct EquipmentCard {
     pub key: String,
     pub is_equipped: bool,
-}
-
-pub fn handle_playing_action_clicks(
-    event: On<Pointer<Click>>,
-    mut commands: Commands,
-    assets: Res<WorldAssets>,
-    mut player: ResMut<Player>,
-    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    mut level_up: ResMut<LevelUpPending>,
-    action_btn_q: Query<&ActionButton>,
-    toast_container_q: Query<Entity, With<ToastContainer>>,
-) {
-    use rand::RngExt;
-
-    if let Ok(action) = action_btn_q.get(event.entity) {
-        let cost_gold = match action.0 {
-            "craft" => 15,
-            "shop" => 30,
-            _ => 0,
-        };
-
-        if player.gold < cost_gold {
-            play_audio_msg.write(PlayAudioMsg::new("error"));
-            return;
-        }
-
-        // Play action sound (work/study/rest use their own sound, others use generic button)
-        if matches!(action.0, "work" | "study" | "rest") {
-            play_audio_msg.write(PlayAudioMsg::new(action.0));
-        } else {
-            play_audio_msg.write(PlayAudioMsg::new("button"));
-        }
-        player.gold -= cost_gold;
-
-        // Helper to spawn a toast into the stacking container
-        let spawn_toast = |commands: &mut Commands,
-                           assets: &WorldAssets,
-                           msg: String,
-                           bg: Color,
-                           border: Color,
-                           text_color: Color,
-                           container_q: &Query<Entity, With<ToastContainer>>| {
-            if let Ok(container) = container_q.single() {
-                let toast_text = msg.clone();
-                commands.entity(container).with_children(|parent| {
-                    parent
-                        .spawn((
-                            Node {
-                                padding: UiRect::axes(Val::Px(14.), Val::Px(9.)),
-                                border: UiRect::all(Val::Px(2.)),
-                                border_radius: BorderRadius::all(Val::Px(8.)),
-                                ..default()
-                            },
-                            BackgroundColor(bg),
-                            BorderColor::all(border),
-                            GoldToast { timer: 3.5 },
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn((
-                                add_text(toast_text, "bold", 2.2, assets),
-                                TextColor(text_color),
-                            ));
-                        });
-                });
-            }
-        };
-
-        // Handle the specific action
-        let ap_cost = match action.0 {
-            "hunt" => {
-                let gold_earned = rand::rng().random_range(10..=20);
-                player.gold += gold_earned;
-                2
-            },
-            "work" => {
-                let charisma = player.charisma() as i32;
-                let level = player.level as i32;
-                let base = charisma * level;
-                let min_gold = (base * 4 / 5).max(1) as u32;
-                let max_gold = (base * 6 / 5).max(2) as u32;
-                let gold_earned = rand::rng().random_range(min_gold..=max_gold);
-                player.gold += gold_earned;
-                spawn_toast(
-                    &mut commands, &assets,
-                    format!("+ {} gold earned!", gold_earned),
-                    Color::srgba(0.18, 0.13, 0.02, 0.93),
-                    Color::srgb(0.85, 0.65, 0.15),
-                    Color::srgb(1.0, 0.88, 0.30),
-                    &toast_container_q,
-                );
-                1
-            },
-            "shop" => {
-                let lvl = player.level;
-                let items: Vec<&crate::core::catalog::GeneratedEquipment> = crate::core::catalog::GENERATED_EQUIPMENT
-                    .iter()
-                    .filter(|eq| eq.kind == "consumable" && eq.level <= lvl)
-                    .collect();
-                use rand::seq::IndexedRandom;
-                if let Some(item) = items.choose(&mut rand::rng()) {
-                    let name = item.name.to_string();
-                    reward_equipment(&mut player, name);
-                }
-                0
-            },
-            "quest" => {
-                let gold_earned = rand::rng().random_range(20..=40);
-                if rand::rng().random_bool(0.5) {
-                    let items: Vec<&crate::core::catalog::GeneratedEquipment> = crate::core::catalog::GENERATED_EQUIPMENT
-                        .iter()
-                        .filter(|eq| eq.level <= player.level)
-                        .collect();
-                    use rand::seq::IndexedRandom;
-                    if let Some(item) = items.choose(&mut rand::rng()) {
-                        reward_equipment(&mut player, item.name.to_string());
-                    }
-                }
-                player.gold += gold_earned;
-                3
-            },
-            "train" => {
-                let attr_idx = rand::rng().random_range(0..6);
-                match attr_idx {
-                    0 => player.strength += 1,
-                    1 => player.dexterity += 1,
-                    2 => player.constitution += 1,
-                    3 => player.intelligence += 1,
-                    4 => player.wisdom += 1,
-                    _ => player.charisma += 1,
-                };
-                2
-            },
-            "craft" => {
-                let items: Vec<&crate::core::catalog::GeneratedEquipment> = crate::core::catalog::GENERATED_EQUIPMENT
-                    .iter()
-                    .filter(|eq| eq.level == player.level)
-                    .collect();
-                use rand::seq::IndexedRandom;
-                if let Some(item) = items.choose(&mut rand::rng()) {
-                    reward_equipment(&mut player, item.name.to_string());
-                }
-                2
-            },
-            "rest" => {
-                let wisdom = player.wisdom() as i32;
-                let level = player.level as i32;
-                let base = wisdom * level;
-                let min_recover = (base * 4 / 5).max(1) as f32;
-                let max_recover = (base * 6 / 5).max(2) as f32;
-                let recover_amount = rand::rng().random_range(min_recover..=max_recover);
-
-                let max_hp = player.max_health().floor();
-                let max_mp = player.max_mana().floor();
-                let health_before = player.health;
-                let mana_before = player.mana;
-                player.health = (player.health + recover_amount).min(max_hp);
-                player.mana = (player.mana + recover_amount).min(max_mp);
-                let health_gained = (player.health - health_before).round() as i32;
-                let mana_gained = (player.mana - mana_before).round() as i32;
-
-                let mut pet_gained = 0;
-                if player.pet.is_some() {
-                    let pet = player.pet.unwrap();
-                    let pet_max_hp = pet.stats().health as f32;
-                    let pet_health_before = player.pet_health.unwrap_or(pet_max_hp);
-                    let new_pet_health = (pet_health_before + recover_amount).min(pet_max_hp);
-                    player.pet_health = Some(new_pet_health);
-                    pet_gained = (new_pet_health - pet_health_before).round() as i32;
-                }
-
-                // Small chance of permanently increasing max health / max mana
-                let wisdom_bonus = (player.wisdom() as f32 - 10.).max(0.) * 0.005;
-                let max_chance = (0.05 + wisdom_bonus).min(0.20) as f64;
-                let mut bonus_lines = Vec::new();
-                if pet_gained > 0 {
-                    bonus_lines.push(format!("{} +{} health!", player.pet_name, pet_gained));
-                }
-                if rand::rng().random_bool(max_chance) {
-                    let gain = rand::rng().random_range(2.0_f32..=5.0_f32).round();
-                    player.bonus_max_health += gain;
-                    player.health = (player.health + gain).min(player.max_health().floor());
-                    bonus_lines.push(format!("+{} max health!", gain as i32));
-                }
-                if rand::rng().random_bool(max_chance) {
-                    let gain = rand::rng().random_range(2.0_f32..=5.0_f32).round();
-                    player.bonus_max_mana += gain;
-                    player.mana = (player.mana + gain).min(player.max_mana().floor());
-                    bonus_lines.push(format!("+{} max mana!", gain as i32));
-                }
-
-                let mut toast_parts = vec![
-                    format!("Recovered {} health, {} mana.", health_gained, mana_gained),
-                ];
-                toast_parts.extend(bonus_lines);
-                let toast_msg = toast_parts.join("  ");
-                spawn_toast(
-                    &mut commands, &assets,
-                    toast_msg,
-                    Color::srgba(0.08, 0.16, 0.12, 0.93),
-                    Color::srgb(0.25, 0.75, 0.50),
-                    Color::srgb(0.60, 1.0, 0.75),
-                    &toast_container_q,
-                );
-                1
-            },
-            "study" => {
-                use rand::seq::IndexedRandom;
-                let int_bonus = (player.intelligence() as f32 - 10.).max(0.) * 0.025;
-                let perk_chance = (0.333 + int_bonus).min(0.65) as f64;
-                let ability_chance = (0.200 + int_bonus).min(0.45) as f64;
-                let wisdom_chance = 0.05_f64;
-                let class_hint = player.class.to_lowername();
-
-                // Weighted level selection: 50% current, 25% lower, 25% higher
-                let level_offset: i8 = match rand::rng().random_range(0u8..4) {
-                    0 => 1,
-                    1 | 2 => 0,
-                    _ => -1,
-                };
-                let target_level = (player.level as i8 + level_offset).clamp(1, 20) as u8;
-
-                let mut toast_msg = "Nothing new learned.".to_string();
-
-                // Roll for perk first (higher chance)
-                if rand::rng().random_bool(perk_chance) {
-                    let candidates: Vec<&crate::core::catalog::GeneratedPerk> = crate::core::catalog::GENERATED_PERKS
-                        .iter()
-                        .filter(|pk| {
-                            (pk.level == target_level || pk.level == player.level)
-                                && pk.class_hint == class_hint
-                                && !player.perks.contains(&pk.name.to_string())
-                        })
-                        .collect();
-                    if let Some(perk) = candidates.choose(&mut rand::rng()) {
-                        let name = capitalize_words(&perk.name.to_string());
-                        player.perks.push(perk.name.to_string());
-                        toast_msg = format!("Learned perk: {}!", name);
-                    }
-                // Otherwise roll for ability (lower chance)
-                } else if rand::rng().random_bool(ability_chance) {
-                    let candidates: Vec<&crate::core::catalog::GeneratedAbility> = crate::core::catalog::GENERATED_ABILITIES
-                        .iter()
-                        .filter(|ab| {
-                            (ab.level == target_level || ab.level == player.level)
-                                && ab.class_hint == class_hint
-                                && !player.abilities.contains(&ab.name.to_string())
-                        })
-                        .collect();
-                    if let Some(ability) = candidates.choose(&mut rand::rng()) {
-                        let name = capitalize_words(&ability.name.to_string());
-                        player.abilities.push(ability.name.to_string());
-                        toast_msg = format!("Learned ability: {}!", name);
-                    }
-                }
-
-                // Rare wisdom bonus (independent)
-                if rand::rng().random_bool(wisdom_chance) {
-                    player.wisdom += 1;
-                    if toast_msg == "Nothing new learned." {
-                        toast_msg = "+1 Wisdom!".to_string();
-                    } else {
-                        toast_msg = format!("{} +1 Wisdom!", toast_msg);
-                    }
-                }
-
-                spawn_toast(
-                    &mut commands, &assets,
-                    toast_msg,
-                    Color::srgba(0.08, 0.10, 0.20, 0.93),
-                    Color::srgb(0.35, 0.55, 0.90),
-                    Color::srgb(0.75, 0.90, 1.0),
-                    &toast_container_q,
-                );
-                1
-            },
-            _ => 0,
-        };
-
-        // Deduct action points
-        if player.ap <= ap_cost {
-            let old_max_health = player.max_health();
-            let old_max_mana = player.max_mana();
-
-            player.level += 1;
-            player.ap = 10 + (player.level as u32) * 2;
-            // Base stat gains (+1 to all per level)
-            player.strength += 1;
-            player.dexterity += 1;
-            player.constitution += 1;
-            player.intelligence += 1;
-            player.wisdom += 1;
-            player.charisma += 1;
-            // Bonus health/mana increase
-            player.bonus_max_health += 10.;
-            player.bonus_max_mana += 10.;
-
-            let health_diff = player.max_health() - old_max_health;
-            let mana_diff = player.max_mana() - old_max_mana;
-
-            player.health = (player.health + health_diff).min(player.max_health().floor());
-            player.mana = (player.mana + mana_diff).min(player.max_mana().floor());
-
-            // Generate ability and perk choices for the new level
-            let class_hint = player.class.to_lowername();
-            let new_level = player.level;
-
-            let mut ability_choices = Vec::new();
-            let mut ability_pool: Vec<_> = crate::core::catalog::GENERATED_ABILITIES
-                .iter()
-                .filter(|ab| {
-                    ab.level == new_level
-                        && ab.class_hint == class_hint
-                        && !player.abilities.contains(&ab.name.to_string())
-                })
-                .collect();
-            for _ in 0..3 {
-                if ability_pool.is_empty() { break; }
-                let idx = rand::rng().random_range(0..ability_pool.len());
-                ability_choices.push(ability_pool[idx].name.to_string());
-                ability_pool.remove(idx);
-            }
-
-            let mut perk_choices = Vec::new();
-            let mut perk_pool: Vec<_> = crate::core::catalog::GENERATED_PERKS
-                .iter()
-                .filter(|pk| {
-                    pk.level == new_level
-                        && pk.class_hint == class_hint
-                        && !player.perks.contains(&pk.name.to_string())
-                })
-                .collect();
-            for _ in 0..3 {
-                if perk_pool.is_empty() { break; }
-                let idx = rand::rng().random_range(0..perk_pool.len());
-                perk_choices.push(perk_pool[idx].name.to_string());
-                perk_pool.remove(idx);
-            }
-
-            let ability_chosen = if ability_choices.is_empty() { Some(0) } else { None };
-            let perk_chosen = if perk_choices.is_empty() { Some(0) } else { None };
-
-            *level_up = LevelUpPending {
-                active: true,
-                new_level,
-                points_remaining: 2,
-                attr_gains: [0; 6],
-                ability_choices,
-                perk_choices,
-                ability_chosen,
-                perk_chosen,
-            };
-
-            play_audio_msg.write(PlayAudioMsg::new("victory"));
-        } else {
-            player.ap -= ap_cost;
-        }
-    }
-}
-
-fn attr_to_idx(attr: Attribute) -> usize {
-    match attr {
-        Attribute::Strength => 0,
-        Attribute::Dexterity => 1,
-        Attribute::Constitution => 2,
-        Attribute::Intelligence => 3,
-        Attribute::Wisdom => 4,
-        Attribute::Charisma => 5,
-    }
-}
-
-pub fn handle_attr_plus_click(
-    event: On<Pointer<Click>>,
-    btn_q: Query<&LevelUpAttrPlusBtn>,
-    mut level_up: ResMut<LevelUpPending>,
-) {
-    if let Ok(btn) = btn_q.get(event.entity) {
-        let idx = attr_to_idx(btn.0);
-        if level_up.points_remaining > 0 && level_up.attr_gains[idx] < 2 {
-            level_up.attr_gains[idx] += 1;
-            level_up.points_remaining -= 1;
-        }
-    }
-}
-
-pub fn handle_attr_minus_click(
-    event: On<Pointer<Click>>,
-    btn_q: Query<&LevelUpAttrMinusBtn>,
-    mut level_up: ResMut<LevelUpPending>,
-) {
-    if let Ok(btn) = btn_q.get(event.entity) {
-        let idx = attr_to_idx(btn.0);
-        if level_up.attr_gains[idx] > 0 {
-            level_up.attr_gains[idx] -= 1;
-            level_up.points_remaining += 1;
-        }
-    }
-}
-
-pub fn handle_ability_choice_click(
-    event: On<Pointer<Click>>,
-    btn_q: Query<&LevelUpAbilityChoiceBtn>,
-    mut level_up: ResMut<LevelUpPending>,
-) {
-    if let Ok(btn) = btn_q.get(event.entity) {
-        level_up.ability_chosen = Some(btn.0);
-    }
-}
-
-pub fn handle_perk_choice_click(
-    event: On<Pointer<Click>>,
-    btn_q: Query<&LevelUpPerkChoiceBtn>,
-    mut level_up: ResMut<LevelUpPending>,
-) {
-    if let Ok(btn) = btn_q.get(event.entity) {
-        level_up.perk_chosen = Some(btn.0);
-    }
-}
-
-pub fn handle_level_up_confirm(
-    _event: On<Pointer<Click>>,
-    mut player: ResMut<Player>,
-    mut level_up: ResMut<LevelUpPending>,
-) {
-    let ability_ok = level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
-    let perk_ok = level_up.perk_choices.is_empty() || level_up.perk_chosen.is_some();
-    if level_up.points_remaining != 0 || !ability_ok || !perk_ok {
-        return;
-    }
-
-    player.strength += level_up.attr_gains[0] as u8;
-    player.dexterity += level_up.attr_gains[1] as u8;
-    player.constitution += level_up.attr_gains[2] as u8;
-    player.intelligence += level_up.attr_gains[3] as u8;
-    player.wisdom += level_up.attr_gains[4] as u8;
-    player.charisma += level_up.attr_gains[5] as u8;
-
-    if let Some(idx) = level_up.ability_chosen {
-        if let Some(name) = level_up.ability_choices.get(idx) {
-            player.abilities.push(name.clone());
-        }
-    }
-    if let Some(idx) = level_up.perk_chosen {
-        if let Some(name) = level_up.perk_choices.get(idx) {
-            player.perks.push(name.clone());
-        }
-    }
-
-    level_up.active = false;
-    level_up.attr_gains = [0; 6];
-    level_up.ability_chosen = None;
-    level_up.perk_chosen = None;
-}
-
-pub fn manage_level_up_overlay(
-    level_up: Res<LevelUpPending>,
-    overlay_q: Query<Entity, With<LevelUpOverlayCmp>>,
-    player: Res<Player>,
-    mut commands: Commands,
-    assets: Res<WorldAssets>,
-    settings: Res<Settings>,
-    localization: Res<Localization>,
-) {
-    let overlay_exists = !overlay_q.is_empty();
-
-    if !level_up.active && overlay_exists {
-        for entity in overlay_q.iter() {
-            commands.entity(entity).despawn();
-        }
-        return;
-    }
-
-    let lang = settings.language;
-
-    if level_up.active && !overlay_exists {
-        spawn_level_up_overlay(&mut commands, &assets, &level_up, &player, &localization, lang);
-    } else if level_up.active && overlay_exists && level_up.is_changed() {
-        for entity in overlay_q.iter() {
-            commands.entity(entity).despawn();
-        }
-        spawn_level_up_overlay(&mut commands, &assets, &level_up, &player, &localization, lang);
-    }
-}
-
-fn spawn_level_up_overlay(
-    commands: &mut Commands,
-    assets: &WorldAssets,
-    level_up: &LevelUpPending,
-    player: &Player,
-    localization: &Localization,
-    lang: Language,
-) {
-    const GOLD: Color = Color::srgb(1.0, 0.85, 0.2);
-    const SELECTED_BORDER: Color = Color::srgb(1.0, 0.85, 0.2);
-    const UNSELECTED_BORDER: Color = BUTTON_BORDER_COLOR;
-
-    let ability_ok = level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
-    let perk_ok = level_up.perk_choices.is_empty() || level_up.perk_chosen.is_some();
-    let confirm_ready = level_up.points_remaining == 0 && ability_ok && perk_ok;
-
-    commands
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                width: Val::Vw(100.),
-                height: Val::Vh(100.),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
-            BackgroundColor(Color::srgba(0., 0., 0., 0.85)),
-            GlobalZIndex(500),
-            Pickable {
-                should_block_lower: true,
-                is_hoverable: true,
-            },
-            LevelUpOverlayCmp,
-        ))
-        .with_children(|parent| {
-            // Main Panel
-            parent
-                .spawn((
-                    Node {
-                        width: Val::Vw(74.),
-                        height: Val::Vh(84.),
-                        flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::Stretch,
-                        justify_content: JustifyContent::SpaceBetween,
-                        padding: UiRect::axes(Val::Px(32.), Val::Px(20.)),
-                        ..default()
-                    },
-                    ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
-                ))
-                .with_children(|parent| {
-                    // Header / Title
-                    parent
-                        .spawn(Node {
-                            flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::Center,
-                            margin: UiRect::bottom(Val::Px(6.)),
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            parent.spawn((
-                                add_text(
-                                    format!("{} {}", localization.get("level", lang), level_up.new_level),
-                                    "bold",
-                                    3.0,
-                                    assets,
-                                ),
-                                TextColor(BUTTON_TEXT_COLOR),
-                            ));
-                            parent.spawn((
-                                add_text(
-                                    localization.get("level_up_subtitle", lang).to_string(),
-                                    "medium",
-                                    1.3,
-                                    assets,
-                                ),
-                                TextColor(Color::srgba(1., 1., 1., 0.7)),
-                            ));
-                        });
-
-                    // Two-Column Grid Area
-                    parent
-                        .spawn(Node {
-                            flex_direction: FlexDirection::Row,
-                            justify_content: JustifyContent::SpaceBetween,
-                            align_items: AlignItems::Stretch,
-                            height: percent(70.),
-                            column_gap: Val::Px(24.),
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            // --- LEFT COLUMN: Attributes ---
-                            parent
-                                .spawn(Node {
-                                    width: percent(46.),
-                                    flex_direction: FlexDirection::Column,
-                                    row_gap: Val::Px(4.),
-                                    ..default()
-                                })
-                                .with_children(|parent| {
-                                    parent.spawn((
-                                        add_text(localization.get("assign_points", lang).to_string(), "bold", 1.8, assets),
-                                        TextColor(BUTTON_TEXT_COLOR),
-                                    ));
-
-                                    let pts_color = if level_up.points_remaining > 0 { GOLD } else { Color::WHITE };
-                                    parent.spawn((
-                                        add_text(
-                                            format!("{}: {}", localization.get("points remaining", lang), level_up.points_remaining),
-                                            "bold",
-                                            1.5,
-                                            assets,
-                                        ),
-                                        TextColor(pts_color),
-                                    ));
-
-                                    let attrs = [
-                                        (Attribute::Strength, localization.get("strength", lang), player.strength, 0),
-                                        (Attribute::Dexterity, localization.get("dexterity", lang), player.dexterity, 1),
-                                        (Attribute::Constitution, localization.get("constitution", lang), player.constitution, 2),
-                                        (Attribute::Intelligence, localization.get("intelligence", lang), player.intelligence, 3),
-                                        (Attribute::Wisdom, localization.get("wisdom", lang), player.wisdom, 4),
-                                        (Attribute::Charisma, localization.get("charisma", lang), player.charisma, 5),
-                                    ];
-
-                                    for (attr, name, base_val, idx) in attrs {
-                                        let gain = level_up.attr_gains[idx];
-                                        let can_plus = level_up.points_remaining > 0 && gain < 2;
-                                        let can_minus = gain > 0;
-
-                                        parent
-                                            .spawn((
-                                                Node {
-                                                    flex_direction: FlexDirection::Row,
-                                                    align_items: AlignItems::Center,
-                                                    justify_content: JustifyContent::SpaceBetween,
-                                                    padding: UiRect::axes(Val::Px(10.), Val::Px(4.)),
-                                                    border: UiRect::all(Val::Px(1.)),
-                                                    ..default()
-                                                },
-                                                BackgroundColor(Color::srgba(0.015, 0.025, 0.06, 0.65)),
-                                                BorderColor::all(BUTTON_BORDER_COLOR),
-                                            ))
-                                            .with_children(|parent| {
-                                                parent.spawn((
-                                                    add_text(name.to_string(), "bold", 1.5, assets),
-                                                    TextColor(BUTTON_TEXT_COLOR),
-                                                ));
-
-                                                // Right side of attribute row (values and buttons)
-                                                parent
-                                                    .spawn(Node {
-                                                        flex_direction: FlexDirection::Row,
-                                                        align_items: AlignItems::Center,
-                                                        column_gap: Val::Px(12.),
-                                                        ..default()
-                                                    })
-                                                    .with_children(|parent| {
-                                                        parent.spawn((
-                                                            add_text(format!("{}", base_val), "medium", 1.5, assets),
-                                                            TextColor(Color::WHITE),
-                                                        ));
-
-                                                        let gain_color = if gain > 0 { Color::srgb(0.3, 1.0, 0.3) } else { Color::srgba(1., 1., 1., 0.3) };
-                                                        parent.spawn((
-                                                            add_text(format!("+{}", gain), "bold", 1.5, assets),
-                                                            TextColor(gain_color),
-                                                            Node {
-                                                                width: Val::Px(24.),
-                                                                ..default()
-                                                            },
-                                                        ));
-
-                                                        // Minus Button
-                                                        let minus_col = if can_minus { NORMAL_BUTTON_COLOR } else { Color::srgba(0.05, 0.09, 0.22, 0.3) };
-                                                        parent
-                                                            .spawn((
-                                                                Node {
-                                                                    width: Val::Px(24.),
-                                                                    height: Val::Px(24.),
-                                                                    align_items: AlignItems::Center,
-                                                                    justify_content: JustifyContent::Center,
-                                                                    border: UiRect::all(Val::Px(1.)),
-                                                                    ..default()
-                                                                },
-                                                                BackgroundColor(minus_col),
-                                                                BorderColor::all(BUTTON_BORDER_COLOR),
-                                                                Button,
-                                                                Interaction::default(),
-                                                                Pickable::default(),
-                                                                LevelUpAttrMinusBtn(attr),
-                                                            ))
-                                                            .observe(handle_attr_minus_click)
-                                                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                                            .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                                            .with_children(|parent| {
-                                                                parent.spawn((
-                                                                    add_text("-", "bold", 1.6, assets),
-                                                                    TextColor(if can_minus { Color::WHITE } else { Color::srgba(1., 1., 1., 0.2) }),
-                                                                ));
-                                                            });
-
-                                                        // Plus Button
-                                                        let plus_col = if can_plus { NORMAL_BUTTON_COLOR } else { Color::srgba(0.05, 0.09, 0.22, 0.3) };
-                                                        parent
-                                                            .spawn((
-                                                                Node {
-                                                                    width: Val::Px(24.),
-                                                                    height: Val::Px(24.),
-                                                                    align_items: AlignItems::Center,
-                                                                    justify_content: JustifyContent::Center,
-                                                                    border: UiRect::all(Val::Px(1.)),
-                                                                    ..default()
-                                                                },
-                                                                BackgroundColor(plus_col),
-                                                                BorderColor::all(BUTTON_BORDER_COLOR),
-                                                                Button,
-                                                                Interaction::default(),
-                                                                Pickable::default(),
-                                                                LevelUpAttrPlusBtn(attr),
-                                                            ))
-                                                            .observe(handle_attr_plus_click)
-                                                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                                            .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                                            .with_children(|parent| {
-                                                                parent.spawn((
-                                                                    add_text("+", "bold", 1.6, assets),
-                                                                    TextColor(if can_plus { Color::WHITE } else { Color::srgba(1., 1., 1., 0.2) }),
-                                                                ));
-                                                            });
-                                                    });
-                                            });
-                                    }
-                                });
-
-                            // --- RIGHT COLUMN: Abilities & Perks ---
-                            parent
-                                .spawn(Node {
-                                    width: percent(50.),
-                                    flex_direction: FlexDirection::Column,
-                                    row_gap: Val::Px(10.),
-                                    justify_content: JustifyContent::FlexStart,
-                                    ..default()
-                                })
-                                .with_children(|parent| {
-                                    // --- Abilities Section ---
-                                    if !level_up.ability_choices.is_empty() {
-                                        parent
-                                            .spawn(Node {
-                                                flex_direction: FlexDirection::Column,
-                                                row_gap: Val::Px(8.),
-                                                ..default()
-                                            })
-                                            .with_children(|parent| {
-                                                parent.spawn((
-                                                    add_text(localization.get("choose_ability", lang).to_string(), "bold", 1.8, assets),
-                                                    TextColor(BUTTON_TEXT_COLOR),
-                                                ));
-
-                                                parent
-                                                    .spawn(Node {
-                                                        flex_direction: FlexDirection::Row,
-                                                        column_gap: Val::Px(6.),
-                                                        justify_content: JustifyContent::SpaceBetween,
-                                                        ..default()
-                                                    })
-                                                    .with_children(|parent| {
-                                                        for (i, name) in level_up.ability_choices.iter().enumerate() {
-                                                            let is_selected = level_up.ability_chosen == Some(i);
-                                                            let border_col = if is_selected { SELECTED_BORDER } else { UNSELECTED_BORDER };
-                                                            let border_thickness = if is_selected { 3. } else { 1. };
-                                                            let ab_name = name.clone();
-                                                            parent
-                                                                .spawn((
-                                                                    Node {
-                                                                        flex_direction: FlexDirection::Column,
-                                                                        align_items: AlignItems::Center,
-                                                                        justify_content: JustifyContent::Center,
-                                                                        padding: UiRect::all(Val::Px(4.)),
-                                                                        border: UiRect::all(Val::Px(border_thickness)),
-                                                                        row_gap: Val::Px(2.),
-                                                                        width: percent(32.),
-                                                                        height: Val::Px(95.),
-                                                                        ..default()
-                                                                    },
-                                                                    BackgroundColor(if is_selected {
-                                                                        Color::srgba(0.20, 0.16, 0.04, 0.95)
-                                                                    } else {
-                                                                        PLACEHOLDER_COLOR
-                                                                    }),
-                                                                    BorderColor::all(border_col),
-                                                                    Button,
-                                                                    Interaction::default(),
-                                                                    Pickable::default(),
-                                                                    LevelUpAbilityChoiceBtn(i),
-                                                                ))
-                                                                .observe(handle_ability_choice_click)
-                                                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                                                .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                                                .with_children(|parent| {
-                                                                    parent.spawn((
-                                                                        Node {
-                                                                            width: Val::Px(28.),
-                                                                            height: Val::Px(28.),
-                                                                            flex_shrink: 0.,
-                                                                            ..default()
-                                                                        },
-                                                                        ImageNode::new(assets.image(ab_name.as_str()))
-                                                                            .with_mode(NodeImageMode::Stretch),
-                                                                    ));
-                                                                    parent.spawn((
-                                                                        add_text(translate_game_term(name, localization, lang), "bold", 1.2, assets),
-                                                                        TextColor(BUTTON_TEXT_COLOR),
-                                                                        Node {
-                                                                            align_self: AlignSelf::Center,
-                                                                            ..default()
-                                                                        },
-                                                                    ));
-                                                                    if let Some(ab) = crate::core::catalog::get_ability(name.as_str()) {
-                                                                        parent.spawn((
-                                                                            add_text(format!("Lv. {}", ab.level), "medium", 1.1, assets),
-                                                                            TextColor(Color::WHITE),
-                                                                        ));
-                                                                    }
-                                                                });
-                                                        }
-                                                    });
-                                            });
-                                    }
-
-                                    // --- Perks Section ---
-                                    if !level_up.perk_choices.is_empty() {
-                                        parent
-                                            .spawn(Node {
-                                                flex_direction: FlexDirection::Column,
-                                                row_gap: Val::Px(8.),
-                                                ..default()
-                                            })
-                                            .with_children(|parent| {
-                                                parent.spawn((
-                                                    add_text(localization.get("choose_perk", lang).to_string(), "bold", 1.8, assets),
-                                                    TextColor(BUTTON_TEXT_COLOR),
-                                                ));
-
-                                                parent
-                                                    .spawn(Node {
-                                                        flex_direction: FlexDirection::Row,
-                                                        column_gap: Val::Px(6.),
-                                                        justify_content: JustifyContent::SpaceBetween,
-                                                        ..default()
-                                                    })
-                                                    .with_children(|parent| {
-                                                        for (i, name) in level_up.perk_choices.iter().enumerate() {
-                                                            let is_selected = level_up.perk_chosen == Some(i);
-                                                            let border_col = if is_selected { SELECTED_BORDER } else { UNSELECTED_BORDER };
-                                                            let border_thickness = if is_selected { 3. } else { 1. };
-                                                            let pk_name = name.clone();
-                                                            parent
-                                                                .spawn((
-                                                                    Node {
-                                                                        flex_direction: FlexDirection::Column,
-                                                                        align_items: AlignItems::Center,
-                                                                        justify_content: JustifyContent::Center,
-                                                                        padding: UiRect::all(Val::Px(4.)),
-                                                                        border: UiRect::all(Val::Px(border_thickness)),
-                                                                        row_gap: Val::Px(2.),
-                                                                        width: percent(32.),
-                                                                        height: Val::Px(95.),
-                                                                        ..default()
-                                                                    },
-                                                                    BackgroundColor(if is_selected {
-                                                                        Color::srgba(0.20, 0.16, 0.04, 0.95)
-                                                                    } else {
-                                                                        PLACEHOLDER_COLOR
-                                                                    }),
-                                                                    BorderColor::all(border_col),
-                                                                    Button,
-                                                                    Interaction::default(),
-                                                                    Pickable::default(),
-                                                                    LevelUpPerkChoiceBtn(i),
-                                                                ))
-                                                                .observe(handle_perk_choice_click)
-                                                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                                                .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                                                .with_children(|parent| {
-                                                                    parent.spawn((
-                                                                        Node {
-                                                                            width: Val::Px(28.),
-                                                                            height: Val::Px(28.),
-                                                                            flex_shrink: 0.,
-                                                                            ..default()
-                                                                        },
-                                                                        ImageNode::new(assets.image(pk_name.as_str()))
-                                                                            .with_mode(NodeImageMode::Stretch),
-                                                                    ));
-                                                                    parent.spawn((
-                                                                        add_text(translate_game_term(name, localization, lang), "bold", 1.2, assets),
-                                                                        TextColor(BUTTON_TEXT_COLOR),
-                                                                        Node {
-                                                                            align_self: AlignSelf::Center,
-                                                                            ..default()
-                                                                        },
-                                                                    ));
-                                                                    if let Some(pk) = crate::core::catalog::get_perk(name.as_str()) {
-                                                                        parent.spawn((
-                                                                            add_text(format!("Lv. {}", pk.level), "medium", 1.1, assets),
-                                                                            TextColor(Color::WHITE),
-                                                                        ));
-                                                                    }
-                                                                });
-                                                        }
-                                                    });
-                                            });
-                                    }
-                                });
-                        });
-
-                    // --- Bottom Footer Area with Confirm Button ---
-                    let confirm_bg = if confirm_ready { GOLD } else { Color::srgba(0.08, 0.12, 0.22, 0.5) };
-                    let confirm_txt = if confirm_ready { Color::BLACK } else { Color::srgba(1.0, 0.85, 0.2, 0.3) };
-                    let confirm_label = if confirm_ready {
-                        localization.get("confirm_level_up", lang)
-                    } else {
-                        localization.get("complete_selections", lang)
-                    };
-
-                    parent
-                        .spawn(Node {
-                            flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::Center,
-                            row_gap: Val::Px(4.),
-                            margin: UiRect::top(Val::Px(8.)),
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            parent
-                                .spawn((
-                                    Node {
-                                        align_self: AlignSelf::Center,
-                                        padding: UiRect::axes(Val::Px(36.), Val::Px(8.)),
-                                        border: UiRect::all(Val::Px(2.)),
-                                        ..default()
-                                    },
-                                    BackgroundColor(confirm_bg),
-                                    BorderColor::all(if confirm_ready { GOLD } else { BUTTON_BORDER_COLOR }),
-                                    Button,
-                                    Interaction::default(),
-                                    Pickable::default(),
-                                    LevelUpConfirmBtn,
-                                ))
-                                .observe(handle_level_up_confirm)
-                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                .with_children(|parent| {
-                                    parent.spawn((
-                                        add_text(confirm_label.to_string(), "bold", 1.8, assets),
-                                        TextColor(confirm_txt),
-                                    ));
-                                });
-
-                            if confirm_ready {
-                                parent.spawn((
-                                    add_text(localization.get("press_enter_confirm", lang).to_string(), "medium", 1.2, assets),
-                                    TextColor(GOLD),
-                                ));
-                            }
-                        });
-                });
-        });
+    pub price: u32,
 }
 
 pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
@@ -3783,6 +2852,25 @@ pub fn handle_equipment_card_click(
     card_q: Query<&EquipmentCard>,
 ) {
     if let Ok(card) = card_q.get(event.entity) {
+        // Right-click: sell item for full price
+        if event.button == PointerButton::Secondary {
+            let sell_price = card.price;
+            
+            // If equipped, unequip first
+            if card.is_equipped {
+                unequip_item(&mut player, &card.key);
+            }
+            
+            // Remove from inventory
+            if let Some(pos) = player.inventory.iter().position(|k| k == &card.key) {
+                player.inventory.remove(pos);
+                player.gold += sell_price;
+                play_audio_msg.write(PlayAudioMsg::new("coins"));
+            }
+            return;
+        }
+        
+        // Left-click: equip/unequip
         if card.is_equipped {
             unequip_item(&mut player, &card.key);
             play_audio_msg.write(PlayAudioMsg::new("click"));
@@ -3813,6 +2901,7 @@ pub fn handle_equipment_card_click(
     }
 }
 
+/*
 pub fn tick_gold_toasts(
     mut commands: Commands,
     time: Res<Time>,
@@ -3825,6 +2914,7 @@ pub fn tick_gold_toasts(
         }
     }
 }
+*/
 
 pub fn handle_equipment_slot_click(
     event: On<Pointer<Click>>,
@@ -3833,8 +2923,53 @@ pub fn handle_equipment_slot_click(
     slot_q: Query<&EquipSlot>,
 ) {
     if let Ok(slot) = slot_q.get(event.entity) {
-        if unequip_slot(&mut player, *slot) {
-            play_audio_msg.write(PlayAudioMsg::new("click"));
+        // Get the equipped item key for this slot
+        let equipped_key = match slot {
+            EquipSlot::Helmet => player.helmet.as_ref(),
+            EquipSlot::Accessory => player.accessory.as_ref(),
+            EquipSlot::Accessory2 => player.accessory2.as_ref(),
+            EquipSlot::WeaponLH => player.weapon_lh.as_ref().or(player.weapon_2h.as_ref()),
+            EquipSlot::WeaponRH => player.weapon_rh.as_ref(),
+            EquipSlot::Armor => player.armor.as_ref(),
+            EquipSlot::Boots => player.boots.as_ref(),
+            EquipSlot::Gloves => player.gloves.as_ref(),
+        };
+        
+        if let Some(key) = equipped_key {
+            let key_str = key.to_string();
+            
+            // Right-click: sell equipped item for full price
+            if event.button == PointerButton::Secondary {
+                if let Some(eq) = crate::core::catalog::get_equipment(&key_str) {
+                    let sell_price = eq.price;
+                    
+                    // Directly unequip from the slot without adding to inventory
+                    match slot {
+                        EquipSlot::Helmet => player.helmet = None,
+                        EquipSlot::Accessory => player.accessory = None,
+                        EquipSlot::Accessory2 => player.accessory2 = None,
+                        EquipSlot::WeaponLH => {
+                            if player.weapon_lh.is_some() {
+                                player.weapon_lh = None;
+                            } else {
+                                player.weapon_2h = None;
+                            }
+                        },
+                        EquipSlot::WeaponRH => player.weapon_rh = None,
+                        EquipSlot::Armor => player.armor = None,
+                        EquipSlot::Boots => player.boots = None,
+                        EquipSlot::Gloves => player.gloves = None,
+                    }
+                    
+                    player.gold += sell_price;
+                    play_audio_msg.write(PlayAudioMsg::new("coins"));
+                }
+            } else {
+                // Left-click: unequip item
+                if unequip_slot(&mut player, *slot) {
+                    play_audio_msg.write(PlayAudioMsg::new("click"));
+                }
+            }
         }
     }
 }
@@ -3848,6 +2983,7 @@ fn spawn_equipment_card(
     card: EquipmentCard,
 ) {
     let is_equipped = card.is_equipped;
+    let price = card.price;
     parent
         .spawn((
             Node {
@@ -3859,6 +2995,7 @@ fn spawn_equipment_card(
                 padding: UiRect::all(Val::Px(6.)),
                 margin: UiRect::bottom(Val::Px(6.)),
                 border: UiRect::all(Val::Px(1.)),
+                position_type: PositionType::Relative,
                 ..default()
             },
             BackgroundColor(BAR_BG_COLOR),
@@ -3874,25 +3011,56 @@ fn spawn_equipment_card(
         .observe(cursor::<Out>(SystemCursorIcon::Default))
         .observe(handle_equipment_card_click)
         .with_children(|parent| {
-            if is_equipped {
+            // Top-right corner: equipped badge (if equipped) + price display
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(4.),
+                    top: Val::Px(4.),
+                    flex_direction: FlexDirection::Row,
+                    align_items: AlignItems::Center,
+                    column_gap: Val::Px(4.),
+                    ..default()
+                },
+            ))
+            .with_children(|parent| {
+                // Equipped badge (left of price)
+                if is_equipped {
+                    parent.spawn((
+                        Node {
+                            width: ICON_BADGE,
+                            height: ICON_BADGE,
+                            ..default()
+                        },
+                        ImageNode::new(assets.image("equipped"))
+                            .with_mode(NodeImageMode::Stretch),
+                    ));
+                }
+                
+                // Gold icon (same size as equipped badge)
                 parent.spawn((
                     Node {
-                        position_type: PositionType::Absolute,
-                        right: Val::Px(4.),
-                        top: Val::Px(4.),
                         width: ICON_BADGE,
                         height: ICON_BADGE,
                         ..default()
                     },
-                    ImageNode::new(assets.image("equipped"))
+                    ImageNode::new(assets.image("gold"))
                         .with_mode(NodeImageMode::Stretch),
                 ));
-            }
+                
+                // Price number (same color as weapon name)
+                parent.spawn((
+                    add_text(format!("{}", price), "bold", 1.9, assets),
+                    TextColor(BUTTON_TEXT_COLOR),
+                ));
+            });
+            
             spawn_placeholder(parent, assets, image_key, ICON_ITEM);
 
             parent
                 .spawn(Node {
                     flex_direction: FlexDirection::Column,
+                    row_gap: Val::Px(4.),
                     ..default()
                 })
                 .with_children(|parent| {

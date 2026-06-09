@@ -221,5 +221,21 @@
   "assign_points": "Verdeel 2 attribuutpunten",
   "confirm_level_up": "BEVESTIG NIVEAU VERHOGING",
   "complete_selections": "VOLTOOI ALLE SELECTIES",
-  "press_enter_confirm": "Druk op Enter om te bevestigen"
+  "press_enter_confirm": "Druk op Enter om te bevestigen",
+  "toast_gold_earned": "+ {gold} goud verdiend!",
+  "toast_train_learned_ability": "Nieuwe vaardigheid geleerd: {ability}!",
+  "toast_train_nothing_new": "Hard getraind, maar niets nieuws geleerd.",
+  "toast_train_plus_5_hp": "+5 Max Gezondheid!",
+  "toast_train_plus_10_hp": "+10 Max Gezondheid!",
+  "toast_train_plus_str": "+1 Kracht!",
+  "toast_train_plus_dex": "+1 Behendigheid!",
+  "toast_train_no_improvement": "Trainingssessie voltooid. Nog geen verbetering.",
+  "toast_rest_recovered": "{hp} gezondheid, {mp} mana hersteld.",
+  "toast_rest_pet": "{pet} +{gain} gezondheid!",
+  "toast_rest_max_hp": "+{gain} max gezondheid!",
+  "toast_rest_max_mp": "+{gain} max mana!",
+  "toast_study_perk": "Perk geleerd: {perk}!",
+  "toast_study_ability": "Vaardigheid geleerd: {ability}!",
+  "toast_study_nothing": "Niets nieuws geleerd.",
+  "toast_study_wisdom": "+1 Wijsheid!"
 }

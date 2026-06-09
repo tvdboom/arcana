@@ -19,6 +19,10 @@ pub fn check_keys_menu(
     mut level_up: ResMut<crate::core::ui::playing::LevelUpPending>,
 ) {
     if keyboard.just_released(KeyCode::Escape) {
+        if level_up.active {
+            // Disable game menu / escape key when level up overlay is active
+            return;
+        }
         match app_state.get() {
             AppState::Settings => {
                 play_audio_msg.write(PlayAudioMsg::new("button"));
