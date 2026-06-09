@@ -101,15 +101,7 @@ fn spawn_sex_button(
     localization: &Localization,
     lang: Language,
 ) {
-    let label = match sex {
-        Sex::Man => localization.get("man", lang),
-        Sex::Woman => localization.get("woman", lang),
-    };
-    let key_loc = match sex {
-        Sex::Man => "man".to_string(),
-        Sex::Woman => "woman".to_string(),
-    };
-
+    let label = localization.get(sex.to_lowername(), lang);
     parent
         .spawn((
             Node {
@@ -134,7 +126,7 @@ fn spawn_sex_button(
             parent.spawn((
                 add_text(label, "bold", BUTTON_TEXT_SIZE - 0.5, assets),
                 TextColor(BUTTON_TEXT_COLOR),
-                LocalizedText(key_loc),
+                LocalizedText(sex.to_lowername()),
             ));
         });
 }
@@ -1073,7 +1065,7 @@ fn on_age_slider_drag(
 }
 
 fn on_age_slider_release(
-    _: On<Pointer<Release>>,
+    _: On<Pointer<DragEnd>>,
     mut player: ResMut<Player>,
     settings: Res<Settings>,
     localization: Res<Localization>,
