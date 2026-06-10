@@ -1,12 +1,19 @@
-use serde::Deserialize;
 use crate::core::inventory::effects::Effect;
-use crate::core::inventory::equipment::EquipmentKind;
+use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 pub enum Hand {
     OneHand,
     TwoHand,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+pub enum Category {
+    Melee,
+    Range,
+    Magic,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -18,15 +25,15 @@ pub struct Weapon {
     /// Name of the image the weapon corresponds to
     pub image: String,
 
-    /// Description key in the language files
-    pub desc_key: String,
-
     /// Kind of weapon
-    pub kind: EquipmentKind,
+    pub kind: Kind,
 
+    /// Weapon category
+    pub category: Category,
+    
     /// Whether the weapon is carried in one or two hands
     pub hand: Hand,
-    
+
     /// Level or upgrade tier of the weapon
     pub level: u32,
 
@@ -46,5 +53,5 @@ pub struct Weapon {
     pub modifiers: Vec<Modifier>,
 
     /// Effects triggered on landing a successful hit
-    pub effect: Vec<Effect>,
+    pub effects: Vec<Effect>,
 }

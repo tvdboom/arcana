@@ -10,6 +10,7 @@ use crate::core::menu::utils::add_text;
 use crate::core::player::{Attribute, Player};
 use crate::core::settings::Language;
 use crate::core::utils::cursor;
+use crate::utils::NameFromEnum;
 
 #[derive(Resource, Default)]
 pub struct LevelUpPending {
@@ -394,7 +395,7 @@ fn spawn_level_up_overlay(
                                         add_text(
                                             format!(
                                                 "{} {}",
-                                                localization.get("level", lang),
+                                                localization.get("general.level", lang),
                                                 level_up.new_level
                                             ),
                                             "bold",
@@ -427,7 +428,7 @@ fn spawn_level_up_overlay(
                                             parent.spawn((
                                                 add_text(
                                                     localization
-                                                        .get("assign_points", lang)
+                                                        .get("general.assign_points", lang)
                                                         .to_string(),
                                                     "bold",
                                                     2.2,
@@ -445,7 +446,8 @@ fn spawn_level_up_overlay(
                                                 add_text(
                                                     format!(
                                                         "{}: {}",
-                                                        localization.get("points remaining", lang),
+                                                        localization
+                                                            .get("general.points_remaining", lang),
                                                         level_up.points_remaining
                                                     ),
                                                     "bold",
@@ -458,37 +460,73 @@ fn spawn_level_up_overlay(
                                             let attrs = [
                                                 (
                                                     Attribute::Strength,
-                                                    localization.get("strength", lang),
+                                                    localization.get(
+                                                        &format!(
+                                                            "attribute.{}",
+                                                            Attribute::Strength.to_lowername()
+                                                        ),
+                                                        lang,
+                                                    ),
                                                     player.strength(),
                                                     0,
                                                 ),
                                                 (
                                                     Attribute::Dexterity,
-                                                    localization.get("dexterity", lang),
+                                                    localization.get(
+                                                        &format!(
+                                                            "attribute.{}",
+                                                            Attribute::Dexterity.to_lowername()
+                                                        ),
+                                                        lang,
+                                                    ),
                                                     player.dexterity(),
                                                     1,
                                                 ),
                                                 (
                                                     Attribute::Constitution,
-                                                    localization.get("constitution", lang),
+                                                    localization.get(
+                                                        &format!(
+                                                            "attribute.{}",
+                                                            Attribute::Constitution.to_lowername()
+                                                        ),
+                                                        lang,
+                                                    ),
                                                     player.constitution(),
                                                     2,
                                                 ),
                                                 (
                                                     Attribute::Intelligence,
-                                                    localization.get("intelligence", lang),
+                                                    localization.get(
+                                                        &format!(
+                                                            "attribute.{}",
+                                                            Attribute::Intelligence.to_lowername()
+                                                        ),
+                                                        lang,
+                                                    ),
                                                     player.intelligence(),
                                                     3,
                                                 ),
                                                 (
                                                     Attribute::Wisdom,
-                                                    localization.get("wisdom", lang),
+                                                    localization.get(
+                                                        &format!(
+                                                            "attribute.{}",
+                                                            Attribute::Wisdom.to_lowername()
+                                                        ),
+                                                        lang,
+                                                    ),
                                                     player.wisdom(),
                                                     4,
                                                 ),
                                                 (
                                                     Attribute::Charisma,
-                                                    localization.get("charisma", lang),
+                                                    localization.get(
+                                                        &format!(
+                                                            "attribute.{}",
+                                                            Attribute::Charisma.to_lowername()
+                                                        ),
+                                                        lang,
+                                                    ),
                                                     player.charisma(),
                                                     5,
                                                 ),
@@ -717,7 +755,10 @@ fn spawn_level_up_overlay(
                                                         parent.spawn((
                                                             add_text(
                                                                 localization
-                                                                    .get("choose_ability", lang)
+                                                                    .get(
+                                                                        "general.choose_ability",
+                                                                        lang,
+                                                                    )
                                                                     .to_string(),
                                                                 "bold",
                                                                 2.2,
@@ -760,7 +801,10 @@ fn spawn_level_up_overlay(
                                                         parent.spawn((
                                                             add_text(
                                                                 localization
-                                                                    .get("choose_perk", lang)
+                                                                    .get(
+                                                                        "general.choose_perk",
+                                                                        lang,
+                                                                    )
                                                                     .to_string(),
                                                                 "bold",
                                                                 2.2,
@@ -794,9 +838,9 @@ fn spawn_level_up_overlay(
 
                     // --- Bottom Footer Area with Confirm Button (fixed height to prevent shifting) ---
                     let confirm_label = if confirm_ready {
-                        localization.get("confirm_level_up", lang)
+                        localization.get("general.confirm_level_up", lang)
                     } else {
-                        localization.get("complete_selections", lang)
+                        localization.get("general.complete_selections", lang)
                     };
 
                     parent
@@ -884,27 +928,36 @@ fn spawn_choice_card(
 
     let img_name = name.to_string();
 
+    let key_name = if is_ability {
+        format!("ability.{}", name.replace(" ", "_").to_lowercase())
+    } else {
+        format!("perk.{}", name.replace(" ", "_").to_lowercase())
+    };
+    let title = localization.get_opt(&key_name, lang).unwrap_or_else(|| name.to_string());
+
     // Get details for description
     let desc = if is_ability {
-        if let Some(ab) = crate::core::catalog::get_ability(name) {
-            localization.get_opt(&format!("{}_desc", ab.name), lang).unwrap_or_else(|| {
+        let key_desc = format!("ability.{}_desc", name.replace(" ", "_").to_lowercase());
+        localization.get_opt(&key_desc, lang).unwrap_or_else(|| {
+            if let Some(ab) = crate::core::catalog::get_ability(name) {
                 format!(
                     "A powerful {} ability that consumes {} mana.",
-                    ab.magic_type.to_lowercase(),
+                    ab.kind.to_string().to_lowercase(),
                     ab.mana_cost
                 )
-            })
-        } else {
-            String::new()
-        }
+            } else {
+                String::new()
+            }
+        })
     } else {
-        if let Some(pk) = crate::core::catalog::get_perk(name) {
-            localization.get_opt(&format!("{}_desc", pk.name), lang).unwrap_or_else(|| {
-                format!("An impressive passive perk that empowers your {} capabilities.", pk.theme)
-            })
-        } else {
-            String::new()
-        }
+        let key_desc = format!("perk.{}_desc", name.replace(" ", "_").to_lowercase());
+        localization.get_opt(&key_desc, lang).unwrap_or_else(|| {
+            if let Some(pk) = crate::core::catalog::get_perk(name) {
+                format!("An impressive passive perk that empowers your {} capabilities.", pk.kind)
+            } else {
+                String::new()
+            }
+        })
     };
 
     let mut entity_cmd = parent.spawn((
@@ -964,8 +1017,10 @@ fn spawn_choice_card(
                 })
                 .with_children(|parent| {
                     // Name (same as playing tab)
-                    parent
-                        .spawn((add_text(name, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
+                    parent.spawn((
+                        add_text(&title, "bold", 1.9, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                    ));
 
                     // Description
                     parent.spawn((add_text(desc, "medium", 1.6, assets), TextColor(Color::WHITE)));

@@ -4,6 +4,7 @@ use strum::IntoEnumIterator;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
+use crate::core::catalog::{all_abilities, all_perks, all_weapons};
 use crate::core::classes::{Ajah, Class};
 use crate::core::constants::*;
 use crate::core::localization::*;
@@ -18,7 +19,10 @@ use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::window::SystemCursorIcon;
+use rand::prelude::IteratorRandom;
 use rand::{rng, RngExt};
+use crate::core::inventory::equipment::Kind;
+use crate::core::inventory::weapons::Category;
 
 const AGE_SLIDER_WIDTH: f32 = 280.0;
 const AGE_VALUE_WIDTH: f32 = 240.0;
@@ -542,13 +546,13 @@ pub fn setup_character_creation(
                 .with_children(|parent| {
                     parent.spawn((
                         add_text(
-                            localization.get("create your character", lang),
+                            localization.get("general.create your character", lang),
                             "bold",
                             TITLE_TEXT_SIZE,
                             &assets,
                         ),
                         TextColor(BUTTON_TEXT_COLOR),
-                        LocalizedText("create your character".to_string()),
+                        LocalizedText("general.create your character".to_string()),
                     ));
                 });
 
@@ -576,13 +580,13 @@ pub fn setup_character_creation(
                         .with_children(|parent| {
                             parent.spawn((
                                 add_text(
-                                    localization.get("name", lang),
+                                    localization.get("general.name", lang),
                                     "bold",
                                     SUBTITLE_TEXT_SIZE,
                                     &assets,
                                 ),
                                 TextColor(BUTTON_TEXT_COLOR),
-                                LocalizedText("name".to_string()),
+                                LocalizedText("general.name".to_string()),
                                 Node {
                                     margin: UiRect::bottom(percent(5.)),
                                     ..default()
@@ -619,13 +623,13 @@ pub fn setup_character_creation(
 
                             parent.spawn((
                                 add_text(
-                                    localization.get("change name hint", lang),
+                                    localization.get("general.change name hint", lang),
                                     "medium",
                                     LABEL_TEXT_SIZE,
                                     &assets,
                                 ),
                                 TextColor(Color::srgba_u8(180, 180, 180, 255)),
-                                LocalizedText("change name hint".to_string()),
+                                LocalizedText("general.change name hint".to_string()),
                                 Node {
                                     margin: UiRect::top(percent(3.)),
                                     ..default()
@@ -635,13 +639,13 @@ pub fn setup_character_creation(
                             // Sex selection (Male/Female buttons)
                             parent.spawn((
                                 add_text(
-                                    localization.get("sex", lang),
+                                    localization.get("general.sex", lang),
                                     "bold",
                                     SUBTITLE_TEXT_SIZE,
                                     &assets,
                                 ),
                                 TextColor(BUTTON_TEXT_COLOR),
-                                LocalizedText("sex".to_string()),
+                                LocalizedText("general.sex".to_string()),
                                 Node {
                                     margin: UiRect {
                                         top: percent(5.),
@@ -679,13 +683,13 @@ pub fn setup_character_creation(
                             // Age stage selection
                             parent.spawn((
                                 add_text(
-                                    localization.get("age", lang),
+                                    localization.get("general.age", lang),
                                     "bold",
                                     SUBTITLE_TEXT_SIZE,
                                     &assets,
                                 ),
                                 TextColor(BUTTON_TEXT_COLOR),
-                                LocalizedText("age".to_string()),
+                                LocalizedText("general.age".to_string()),
                                 Node {
                                     margin: UiRect {
                                         top: percent(5.),
@@ -855,8 +859,16 @@ pub fn setup_character_creation(
                                         .with_children(|parent| {
                                             parent.spawn((
                                                 add_text(
-                                                    localization
-                                                        .get(player.stage.to_lowername(), lang),
+                                                    localization.get(
+                                                        format!(
+                                                            "general.{}",
+                                                            player
+                                                                .stage
+                                                                .to_lowername()
+                                                                .replace(" ", "_")
+                                                        ),
+                                                        lang,
+                                                    ),
                                                     "bold",
                                                     BUTTON_TEXT_SIZE,
                                                     &assets,
@@ -890,7 +902,7 @@ pub fn setup_character_creation(
                                 as i32;
                             let remaining = 60 - current_sum;
 
-                            let points_label = localization.get("points remaining", lang);
+                            let points_label = localization.get("general.points_remaining", lang);
                             parent.spawn((
                                 add_text(
                                     format!("{}: {}", points_label, remaining),
@@ -917,8 +929,10 @@ pub fn setup_character_creation(
                                 })
                                 .with_children(|parent| {
                                     for attr in Attribute::iter() {
-                                        let translated_attr_name =
-                                            localization.get(attr.to_lowername().as_str(), lang);
+                                        let translated_attr_name = localization.get(
+                                            &format!("attribute.{}", attr.to_lowername()),
+                                            lang,
+                                        );
                                         let val = creation_attribute_value(&player, attr) as i32;
 
                                         // Row for this attribute
@@ -943,7 +957,10 @@ pub fn setup_character_creation(
                                                         &assets,
                                                     ),
                                                     TextColor(BUTTON_TEXT_COLOR),
-                                                    LocalizedText(attr.to_lowername()),
+                                                    LocalizedText(format!(
+                                                        "attribute.{}",
+                                                        attr.to_lowername()
+                                                    )),
                                                     Node {
                                                         width: percent(55.),
                                                         ..default()
@@ -1057,7 +1074,10 @@ fn on_age_slider_drag(
     player.age = rng().random_range(min_age..=max_age);
 
     if let Ok(mut text) = text_q.single_mut() {
-        text.0 = localization.get(age_stage.to_lowername(), settings.language);
+        text.0 = localization.get(
+            format!("general.{}", age_stage.to_lowername().replace(" ", "_")),
+            settings.language,
+        );
     }
 
     for (mut text, val_attr) in attr_text_q.iter_mut() {
@@ -1242,7 +1262,10 @@ fn apply_age_stage(
     set_age_slider_position(handle_q, value_node_q, snapped_frac * AGE_SLIDER_WIDTH);
 
     if let Ok(mut text) = text_q.single_mut() {
-        text.0 = localization.get(age_stage.to_lowername(), settings.language);
+        text.0 = localization.get(
+            format!("general.{}", age_stage.to_lowername().replace(" ", "_")),
+            settings.language,
+        );
     }
 
     if !changed {
@@ -1310,32 +1333,47 @@ impl SelectionItem for Class {
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = *self;
-        player.abilities = vec![self.starting_ability().to_string()];
-        player.perks = vec![self.starting_perk().to_string()];
 
-        let weapon_name = self.starting_weapon();
-        let mut is_two_hand = false;
-        if let Some(eq) = crate::core::catalog::get_equipment(weapon_name) {
-            if eq.kind == "two_hand_weapon" {
-                is_two_hand = true;
-            }
-        } else {
-            if matches!(self, Class::Mage(_)) {
-                is_two_hand = true;
-            }
-        }
+        let ability = all_abilities()
+            .iter()
+            .filter(|a| a.level == 1 && match *self {
+                Class::Assassin | Class::Warrior => !a.kind.is_magic(),
+                _ => a.kind.is_magic(),
+            })
+            .choose(&mut rng())
+            .unwrap();
 
-        if is_two_hand {
-            player.weapon_2h = Some(weapon_name.to_string());
-        } else {
-            player.weapon_lh = Some(weapon_name.to_string());
-        }
+        player.abilities = vec![ability.name.clone()];
+
+        let perk = all_perks()
+            .iter()
+            .filter(|a| a.level == 1 && match *self {
+                Class::Assassin | Class::Warrior => !a.kind.is_magic(),
+                _ => a.kind.is_magic(),
+            })
+            .choose(&mut rng())
+            .unwrap();
+
+        player.perks = vec![perk.name.clone()];
+
+        let weapon = all_weapons()
+            .iter()
+            .filter(|a| a.level == 1 && match *self {
+                Class::Assassin => a.kind == Kind::Assassination,
+                Class::Druid => a.kind == Kind::Nature,
+                Class::Mage(_) => a.kind.is_magic(),
+                Class::Warrior => a.kind == Kind::Bulwark && a.category == Category::Melee,
+            })
+            .choose(&mut rng())
+            .unwrap();
+
+        player.weapon_lh = Some(weapon.name.clone());
+        player.health = player.max_health();
+        player.mana = player.max_mana();
 
         if matches!(*self, Class::Mage(_) | Class::Druid) {
             next_game_state.set(GameState::ChooseSubClass);
         } else {
-            player.health = player.max_health();
-            player.mana = player.max_mana();
             next_game_state.set(GameState::Playing);
         }
     }
@@ -1365,9 +1403,19 @@ impl SelectionItem for Ajah {
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = Class::Mage(*self);
-        player.abilities.push(self.special_ability().to_string());
-        player.health = player.max_health();
-        player.mana = player.max_mana();
+
+        let ability = all_abilities()
+            .iter()
+            .filter(|a| a.level == 1 && match *self {
+                Ajah::Black => a.kind == Kind::Shadow,
+                Ajah::Green => a.kind == Kind::Nature,
+                Ajah::Red => a.kind == Kind::Fire,
+                Ajah::White => a.kind == Kind::Holy,
+            })
+            .choose(&mut rng())
+            .unwrap();
+
+        player.abilities.push(ability.name.clone());
         next_game_state.set(GameState::Playing);
     }
 
@@ -1503,7 +1551,18 @@ pub fn setup_selection_screen<T>(
                 })
                 .with_children(|parent| {
                     for item in T::items() {
-                        let item_key = item.to_lowername();
+                        let prefix = match title_key {
+                            "choose race" => "race",
+                            "choose class" => "class",
+                            "choose subclass" => "ajah",
+                            "choose pet" => "pet",
+                            _ => "",
+                        };
+                        let item_key = if prefix.is_empty() {
+                            item.to_lowername()
+                        } else {
+                            format!("{}.{}", prefix, item.to_lowername())
+                        };
                         let item_name = localization.get(&item_key, lang);
 
                         // Card

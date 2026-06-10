@@ -1,5 +1,8 @@
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
+use crate::core::catalog::{all_abilities, all_equipment, all_perks};
+use crate::core::inventory::armor::EquipmentSlot;
+use crate::core::inventory::equipment::Equipment;
 use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;
 use crate::core::player::Player;
@@ -127,45 +130,6 @@ pub fn handle_playing_action_clicks(
                     }
                 };
 
-                // // Small chance of permanently increasing max health / max mana
-                // let wisdom_bonus = (player.wisdom() as f32 - 10.).max(0.) * 0.005;
-                // let max_chance = (0.05 + wisdom_bonus).min(0.20) as f64;
-                // let mut bonus_lines = Vec::new();
-                // if pet_gained > 0 {
-                //     bonus_lines.push(
-                //         localization
-                //             .get("toast_rest_pet", lang)
-                //             .replace("{pet}", &pet_name)
-                //             .replace("{gain}", &pet_gained.to_string()),
-                //     );
-                // }
-                // if rng.random_bool(max_chance) {
-                //     let gain = rng.random_range(2.0_f32..=5.0_f32).round();
-                //     player.bonus_max_health += gain;
-                //     player.health = (player.health + gain).min(player.max_health().floor());
-                //     bonus_lines.push(
-                //         localization
-                //             .get("toast_rest_max_hp", lang)
-                //             .replace("{gain}", &(gain as i32).to_string()),
-                //     );
-                // }
-                // if rng.random_bool(max_chance) {
-                //     let gain = rng.random_range(2.0_f32..=5.0_f32).round();
-                //     player.bonus_max_mana += gain;
-                //     player.mana = (player.mana + gain).min(player.max_mana().floor());
-                //     bonus_lines.push(
-                //         localization
-                //             .get("toast_rest_max_mp", lang)
-                //             .replace("{gain}", &(gain as i32).to_string()),
-                //     );
-                // }
-                //
-                // let mut toast_parts = vec![localization
-                //     .get("toast_rest_recovered", lang)
-                //     .replace("{hp}", &health_gained.to_string())
-                //     .replace("{mp}", &mana_gained.to_string())];
-                // toast_parts.extend(bonus_lines);
-                // let toast_msg = toast_parts.join("  ");
                 spawn_toast(
                     &mut commands,
                     &assets,
@@ -173,6 +137,79 @@ pub fn handle_playing_action_clicks(
                     Color::srgba(0.08, 0.16, 0.12, 0.93),
                     Color::srgb(0.25, 0.75, 0.50),
                     Color::srgb(0.60, 1.0, 0.75),
+                    toast,
+                );
+            },
+            Action::Study => {
+                let int_bonus = (player.intelligence() as f32 - 10.).max(0.) * 0.025;
+                let perk_chance = (0.333 + int_bonus).min(0.65) as f64;
+                let ability_chance = (0.200 + int_bonus).min(0.45) as f64;
+                let wisdom_chance = 0.05_f64;
+
+                // Weighted level selection: 50% current, 25% lower, 25% higher
+                let level_offset: i8 = match rng.random_range(0u8..4) {
+                    0 => 1,
+                    1 | 2 => 0,
+                    _ => -1,
+                };
+                let target_level = (player.level as i8 + level_offset).clamp(1, 20) as u8;
+
+                let mut toast_msg = localization.get("toast_study_nothing", lang);
+
+                // Roll for perk first (higher chance)
+                if rng.random_bool(perk_chance) {
+                    let candidates: Vec<_> = all_perks()
+                        .iter()
+                        .filter(|pk| {
+                            (pk.level == target_level as u32 || pk.level == player.level as u32)
+                                && !player.perks.contains(&pk.name.to_string())
+                        })
+                        .collect();
+                    if let Some(perk) = candidates.choose(&mut rng) {
+                        let name = capitalize_words(&perk.name.to_string());
+                        player.perks.push(perk.name.to_string());
+                        toast_msg =
+                            localization.get("toast_study_perk", lang).replace("{perk}", &name);
+                    }
+                // Otherwise roll for ability (lower chance)
+                } else if rng.random_bool(ability_chance) {
+                    let candidates: Vec<_> = all_abilities()
+                        .iter()
+                        .filter(|ab| {
+                            (ab.level == target_level as u32 || ab.level == player.level as u32)
+                                && !player.abilities.contains(&ab.name.to_string())
+                        })
+                        .collect();
+                    if let Some(ability) = candidates.choose(&mut rng) {
+                        let name = capitalize_words(&ability.name.to_string());
+                        player.abilities.push(ability.name.to_string());
+                        toast_msg = localization
+                            .get("toast_study_ability", lang)
+                            .replace("{ability}", &name);
+                    }
+                }
+
+                // Rare wisdom bonus (independent)
+                if rng.random_bool(wisdom_chance) {
+                    player.wisdom += 1;
+                    if toast_msg == localization.get("toast_study_nothing", lang) {
+                        toast_msg = localization.get("toast_study_wisdom", lang);
+                    } else {
+                        toast_msg = format!(
+                            "{}  {}",
+                            toast_msg,
+                            localization.get("toast_study_wisdom", lang)
+                        );
+                    }
+                }
+
+                spawn_toast(
+                    &mut commands,
+                    &assets,
+                    toast_msg,
+                    Color::srgba(0.08, 0.10, 0.20, 0.93),
+                    Color::srgb(0.35, 0.55, 0.90),
+                    Color::srgb(0.75, 0.90, 1.0),
                     toast,
                 );
             },
@@ -202,28 +239,31 @@ pub fn handle_playing_action_clicks(
             },
             Action::Shop => {
                 let lvl = player.level;
-                let items: Vec<&crate::core::catalog::GeneratedEquipment> =
-                    crate::core::catalog::GENERATED_EQUIPMENT
-                        .iter()
-                        .filter(|eq| eq.kind == "consumable" && eq.level <= lvl)
-                        .collect();
-                use rand::seq::IndexedRandom;
+                let items: Vec<_> = all_equipment()
+                    .iter()
+                    .filter(|eq| match eq {
+                        Equipment::Armor(a) => {
+                            a.slot == EquipmentSlot::Consumable && a.level <= lvl as u32
+                        },
+                        _ => false,
+                    })
+                    .collect();
+
                 if let Some(item) = items.choose(&mut rng) {
-                    let name = item.name.to_string();
+                    let name = item.name().to_string();
                     reward_equipment(&mut player, name);
                 }
             },
             Action::Quest => {
                 let gold_earned = rng.random_range(20..=40);
                 if rng.random_bool(0.5) {
-                    let items: Vec<&crate::core::catalog::GeneratedEquipment> =
-                        crate::core::catalog::GENERATED_EQUIPMENT
-                            .iter()
-                            .filter(|eq| eq.level <= player.level)
-                            .collect();
-                    use rand::seq::IndexedRandom;
+                    let items: Vec<_> = all_equipment()
+                        .iter()
+                        .filter(|eq| eq.level() <= player.level as u32)
+                        .collect();
+
                     if let Some(item) = items.choose(&mut rng) {
-                        reward_equipment(&mut player, item.name.to_string());
+                        reward_equipment(&mut player, item.name().to_string());
                     }
                 }
                 player.gold += gold_earned;
@@ -249,12 +289,10 @@ pub fn handle_playing_action_clicks(
 
                     if roll < 25 {
                         // Learn a new ability (if available)
-                        let class_hint = player.class.to_lowername();
-                        let ability_pool: Vec<_> = crate::core::catalog::GENERATED_ABILITIES
+                        let ability_pool: Vec<_> = all_abilities()
                             .iter()
                             .filter(|ab| {
-                                ab.level <= player.level
-                                    && ab.class_hint == class_hint
+                                ab.level <= player.level as u32
                                     && !player.abilities.contains(&ab.name.to_string())
                             })
                             .collect();
@@ -301,94 +339,12 @@ pub fn handle_playing_action_clicks(
                 );
             },
             Action::Craft => {
-                let items: Vec<&crate::core::catalog::GeneratedEquipment> =
-                    crate::core::catalog::GENERATED_EQUIPMENT
-                        .iter()
-                        .filter(|eq| eq.level == player.level)
-                        .collect();
-                use rand::seq::IndexedRandom;
+                let items: Vec<_> =
+                    all_equipment().iter().filter(|eq| eq.level() == player.level as u32).collect();
+
                 if let Some(item) = items.choose(&mut rng) {
-                    reward_equipment(&mut player, item.name.to_string());
+                    reward_equipment(&mut player, item.name().to_string());
                 }
-            },
-            Action::Study => {
-                use rand::seq::IndexedRandom;
-                let int_bonus = (player.intelligence() as f32 - 10.).max(0.) * 0.025;
-                let perk_chance = (0.333 + int_bonus).min(0.65) as f64;
-                let ability_chance = (0.200 + int_bonus).min(0.45) as f64;
-                let wisdom_chance = 0.05_f64;
-                let class_hint = player.class.to_lowername();
-
-                // Weighted level selection: 50% current, 25% lower, 25% higher
-                let level_offset: i8 = match rng.random_range(0u8..4) {
-                    0 => 1,
-                    1 | 2 => 0,
-                    _ => -1,
-                };
-                let target_level = (player.level as i8 + level_offset).clamp(1, 20) as u8;
-
-                let mut toast_msg = localization.get("toast_study_nothing", lang);
-
-                // Roll for perk first (higher chance)
-                if rng.random_bool(perk_chance) {
-                    let candidates: Vec<&crate::core::catalog::GeneratedPerk> =
-                        crate::core::catalog::GENERATED_PERKS
-                            .iter()
-                            .filter(|pk| {
-                                (pk.level == target_level || pk.level == player.level)
-                                    && pk.class_hint == class_hint
-                                    && !player.perks.contains(&pk.name.to_string())
-                            })
-                            .collect();
-                    if let Some(perk) = candidates.choose(&mut rng) {
-                        let name = capitalize_words(&perk.name.to_string());
-                        player.perks.push(perk.name.to_string());
-                        toast_msg =
-                            localization.get("toast_study_perk", lang).replace("{perk}", &name);
-                    }
-                // Otherwise roll for ability (lower chance)
-                } else if rng.random_bool(ability_chance) {
-                    let candidates: Vec<&crate::core::catalog::GeneratedAbility> =
-                        crate::core::catalog::GENERATED_ABILITIES
-                            .iter()
-                            .filter(|ab| {
-                                (ab.level == target_level || ab.level == player.level)
-                                    && ab.class_hint == class_hint
-                                    && !player.abilities.contains(&ab.name.to_string())
-                            })
-                            .collect();
-                    if let Some(ability) = candidates.choose(&mut rng) {
-                        let name = capitalize_words(&ability.name.to_string());
-                        player.abilities.push(ability.name.to_string());
-                        toast_msg = localization
-                            .get("toast_study_ability", lang)
-                            .replace("{ability}", &name);
-                    }
-                }
-
-                // Rare wisdom bonus (independent)
-                if rng.random_bool(wisdom_chance) {
-                    player.wisdom += 1;
-                    if toast_msg == localization.get("toast_study_nothing", lang) {
-                        toast_msg = localization.get("toast_study_wisdom", lang);
-                    } else {
-                        toast_msg = format!(
-                            "{}  {}",
-                            toast_msg,
-                            localization.get("toast_study_wisdom", lang)
-                        );
-                    }
-                }
-
-                spawn_toast(
-                    &mut commands,
-                    &assets,
-                    toast_msg,
-                    Color::srgba(0.08, 0.10, 0.20, 0.93),
-                    Color::srgb(0.35, 0.55, 0.90),
-                    Color::srgb(0.75, 0.90, 1.0),
-                    toast,
-                );
             },
         };
 
@@ -398,7 +354,7 @@ pub fn handle_playing_action_clicks(
             let old_max_mana = player.max_mana();
 
             player.level += 1;
-            player.ap = 10 + (player.level as u32) * 2;
+            player.ap = 10;
             // No automatic attribute increases - player chooses 2 points
             // Bonus health/mana increase
             player.bonus_max_health += 10;
@@ -411,16 +367,13 @@ pub fn handle_playing_action_clicks(
             player.mana = (player.mana + mana_diff).min(player.max_mana());
 
             // Generate ability and perk choices for the new level
-            let class_hint = player.class.to_lowername();
             let new_level = player.level;
 
             let mut ability_choices = Vec::new();
-            let mut ability_pool: Vec<_> = crate::core::catalog::GENERATED_ABILITIES
+            let mut ability_pool: Vec<_> = all_abilities()
                 .iter()
                 .filter(|ab| {
-                    ab.level == new_level
-                        && ab.class_hint == class_hint
-                        && !player.abilities.contains(&ab.name.to_string())
+                    ab.level == new_level as u32 && !player.abilities.contains(&ab.name.to_string())
                 })
                 .collect();
             for _ in 0..3 {
@@ -433,12 +386,10 @@ pub fn handle_playing_action_clicks(
             }
 
             let mut perk_choices = Vec::new();
-            let mut perk_pool: Vec<_> = crate::core::catalog::GENERATED_PERKS
+            let mut perk_pool: Vec<_> = all_perks()
                 .iter()
                 .filter(|pk| {
-                    pk.level == new_level
-                        && pk.class_hint == class_hint
-                        && !player.perks.contains(&pk.name.to_string())
+                    pk.level == new_level as u32 && !player.perks.contains(&pk.name.to_string())
                 })
                 .collect();
             for _ in 0..3 {

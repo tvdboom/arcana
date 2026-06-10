@@ -2,6 +2,7 @@ pub mod actions;
 mod assets;
 mod audio;
 mod camera;
+pub mod catalog;
 pub mod classes;
 mod constants;
 mod inventory;

@@ -3,8 +3,6 @@ use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
 use std::collections::HashMap;
 
-use crate::core::catalog::{GENERATED_ABILITIES, GENERATED_EQUIPMENT, GENERATED_PERKS};
-
 #[derive(Resource)]
 pub struct WorldAssets {
     pub audio: HashMap<&'static str, Handle<AudioSource>>,
@@ -194,6 +192,23 @@ impl FromWorld for WorldAssets {
             ("unicorn", assets.load("images/pets/unicorn.png")),
             ("vulture", assets.load("images/pets/vulture.png")),
         ]);
+
+        for ability in crate::core::catalog::all_abilities() {
+            let key: &'static str = Box::leak(ability.name.clone().into_boxed_str());
+            images.insert(key, assets.load(ability.image.clone()));
+        }
+        for perk in crate::core::catalog::all_perks() {
+            let key: &'static str = Box::leak(perk.name.clone().into_boxed_str());
+            images.insert(key, assets.load(perk.image.clone()));
+        }
+        for weapon in crate::core::catalog::all_weapons() {
+            let key: &'static str = Box::leak(weapon.name.clone().into_boxed_str());
+            images.insert(key, assets.load(weapon.image.clone()));
+        }
+        for armor in crate::core::catalog::all_armor() {
+            let key: &'static str = Box::leak(armor.name.clone().into_boxed_str());
+            images.insert(key, assets.load(armor.image.clone()));
+        }
 
         Self {
             audio,

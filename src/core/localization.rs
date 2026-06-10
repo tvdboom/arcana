@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::core::classes::{Ajah, Class};
+use crate::core::inventory::equipment::Kind;
 use crate::core::pets::PetKind;
 use crate::core::player::Attribute;
 use crate::core::races::Race;
@@ -34,24 +35,100 @@ impl FromWorld for Localization {
     }
 }
 
+fn map_localization_key(key: &str) -> String {
+    let lower = key.to_lowercase();
+    if lower.contains('.') {
+        let parts: Vec<&str> = lower.splitn(2, '.').collect();
+        return format!("{}.{}", parts[0], parts[1].replace(" ", "_"));
+    }
+
+    // Check attributes
+    if ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
+        .contains(&lower.as_str())
+    {
+        return format!("attribute.{}", lower);
+    }
+    // Check races
+    if ["human", "human_desc", "elf", "elf_desc", "dwarf", "dwarf_desc", "orc", "orc_desc"]
+        .contains(&lower.as_str())
+    {
+        return format!("race.{}", lower);
+    }
+    // Check classes
+    if [
+        "warrior",
+        "warrior_desc",
+        "mage",
+        "mage_desc",
+        "assassin",
+        "assassin_desc",
+        "druid",
+        "druid_desc",
+    ]
+    .contains(&lower.as_str())
+    {
+        return format!("class.{}", lower);
+    }
+    // Check ajahs
+    if ["black", "black_desc", "red", "red_desc", "green", "green_desc", "white", "white_desc"]
+        .contains(&lower.as_str())
+    {
+        return format!("ajah.{}", lower);
+    }
+    // Check pets
+    let pets = [
+        "wolf",
+        "bear",
+        "snake",
+        "eagle",
+        "bat",
+        "crocodile",
+        "hyena",
+        "infernal can",
+        "lizard",
+        "pegasus",
+        "rat",
+        "spider",
+        "three headed dog",
+        "tiger",
+        "unicorn",
+        "vulture",
+        "puma",
+        "griffin",
+        "manticore",
+    ];
+    if pets.iter().any(|&p| lower == p || lower == format!("{}_desc", p)) {
+        let normalized = lower.replace(" ", "_");
+        return format!("pet.{}", normalized);
+    }
+
+    // Default to general
+    let normalized = lower.replace(" ", "_");
+    format!("general.{}", normalized)
+}
+
 impl Localization {
     pub fn get(&self, key: impl Into<String>, language: Language) -> String {
         let key = key.into();
+        let mapped_key = map_localization_key(&key);
         let map = match language {
             Language::English => &self.en,
             Language::Spanish => &self.es,
             Language::Dutch => &self.nl,
         };
-        map.get(&key).cloned().unwrap_or_else(|| panic!("Missing localization key: '{key}'"))
+        map.get(&mapped_key).cloned().unwrap_or_else(|| {
+            panic!("Missing localization key: '{}' (mapped from '{}')", mapped_key, key)
+        })
     }
 
     pub fn get_opt(&self, key: &str, language: Language) -> Option<String> {
+        let mapped_key = map_localization_key(key);
         let map = match language {
             Language::English => &self.en,
             Language::Spanish => &self.es,
             Language::Dutch => &self.nl,
         };
-        map.get(key).cloned()
+        map.get(&mapped_key).cloned()
     }
 }
 
@@ -81,7 +158,7 @@ pub fn format_race_description(
     localization: &Localization,
 ) -> String {
     let race_key = race.to_lowername();
-    let desc = localization.get(&format!("{}_desc", race_key), language);
+    let desc = localization.get(&format!("race.{}_desc", race_key), language);
 
     let mut modifier_strs = Vec::new();
     for attr in Attribute::iter() {
@@ -92,7 +169,8 @@ pub fn format_race_description(
             } else {
                 ""
             };
-            let attr_name = localization.get(attr.to_lowername().as_str(), language);
+            let attr_name =
+                localization.get(&format!("attribute.{}", attr.to_lowername()), language);
             modifier_strs.push(format!("{} {}{}", attr_name, sign, val));
         }
     }
@@ -100,7 +178,7 @@ pub fn format_race_description(
     if modifier_strs.is_empty() {
         desc
     } else {
-        let modifiers_label = localization.get("modifiers", language);
+        let modifiers_label = localization.get("general.modifiers", language);
         format!("{}\n\n{}: {}", desc, modifiers_label, modifier_strs.join(", "))
     }
 }
@@ -110,55 +188,34 @@ pub fn format_class_description(
     language: Language,
     localization: &Localization,
 ) -> String {
-    let class_key = class.to_lowername();
-    let desc = localization.get(&format!("{}_desc", class_key), language);
+    let desc = localization.get(&format!("class.{}_desc", class.to_lowername()), language);
 
-    let starting_ability = class.starting_ability();
-    let ability_name =
-        crate::core::catalog::get_ability(starting_ability).map(|a| a.name).unwrap_or("Ability");
-
-    let starting_perk = class.starting_perk();
-    let perk_name = crate::core::catalog::get_perk(starting_perk).map(|p| p.name).unwrap_or("Perk");
-
-    let starting_weapon = class.starting_weapon();
-    let weapon_name =
-        crate::core::catalog::get_equipment(starting_weapon).map(|w| w.name).unwrap_or("Weapon");
-
-    let starting_ability_label = localization.get("starting_ability", language);
-    let starting_perk_label = localization.get("starting_perk", language);
-    let starting_weapon_label = localization.get("starting_weapon", language);
-
+    let physical_label = localization.get("general.physical", language);
+    let magical_label = localization.get("general.magical", language);
+    let ability_label = localization.get("general.ability", language);
+    let perk_label = localization.get("general.perk", language);
     let bonus_desc = match class {
         Class::Warrior => {
-            let hp_label = localization.get("health", language);
-            format!("Max {}: +20", hp_label)
+            let hp_label = localization.get("general.health", language);
+            format!(" +1 {physical_label} {ability_label}\n +1 {physical_label} {perk_label}\n +20 max {hp_label}")
         },
         Class::Mage(_) => {
-            let mana_label = localization.get("mana", language);
-            format!("Max {}: +30", mana_label)
+            let mp_label = localization.get("general.mana", language);
+            format!(" +1 {magical_label} {ability_label}\n +1 {magical_label} {perk_label}\n +30 max {mp_label}")
         },
         Class::Assassin => {
-            let init_label = localization.get("initiative", language);
-            format!("{}: +2", init_label)
+            let init_label = localization.get("general.initiative", language);
+            format!(" +1 {physical_label} {ability_label}\n +1 {physical_label} {perk_label}\n +2 {init_label}")
         },
         Class::Druid => {
-            let pet_label = localization.get("pet", language);
-            let choose_pet_label = localization.get("choose pet", language);
-            format!("{}: {}", pet_label, choose_pet_label)
+            let nature_label = localization.get("general.nature", language);
+            let pet_label = localization.get("general.pet", language);
+            let choose_pet_label = localization.get("general.choose_pet", language);
+            format!(" +1 {magical_label} {ability_label} ({nature_label})\n +1 {magical_label} {perk_label}\n{pet_label}: {choose_pet_label}")
         },
     };
 
-    format!(
-        "{}\n\n{}: {}\n{}: {}\n{}: {}\n\n{}",
-        desc,
-        starting_ability_label,
-        ability_name,
-        starting_perk_label,
-        perk_name,
-        starting_weapon_label,
-        weapon_name,
-        bonus_desc
-    )
+    format!("{desc}\n\n{}", bonus_desc.to_lowercase())
 }
 
 pub fn format_ajah_description(
@@ -166,16 +223,22 @@ pub fn format_ajah_description(
     language: Language,
     localization: &Localization,
 ) -> String {
-    let ajah_key = ajah.to_lowername();
-    let desc = localization.get(&format!("{}_desc", ajah_key), language);
+    let desc = localization.get(&format!("ajah.{}_desc", ajah.to_lowername()), language);
 
-    let special_ability = ajah.special_ability();
-    let ability_name =
-        crate::core::catalog::get_ability(special_ability).map(|a| a.name).unwrap_or("Ability");
+    let magical_label = localization.get("general.magical", language);
+    let ability_label = localization.get("general.ability", language);
 
-    let special_ability_label = localization.get("special_ability", language);
+    let kind = match ajah {
+        Ajah::Black => Kind::Shadow,
+        Ajah::Green => Kind::Nature,
+        Ajah::Red => Kind::Fire,
+        Ajah::White => Kind::Holy,
+    };
 
-    format!("{}\n\n{}: {}", desc, special_ability_label, ability_name)
+    let kind_label = localization.get(format!("general.{}", kind.to_lowername()), language);
+    let bonus_desc = format!(" +1 {magical_label} {ability_label} ({kind_label})");
+
+    format!("{desc}\n\n{}", bonus_desc.to_lowercase())
 }
 
 pub fn format_pet_description(
@@ -184,7 +247,7 @@ pub fn format_pet_description(
     localization: &Localization,
 ) -> String {
     let pet_key = pet.to_lowername();
-    localization.get(&format!("{}_desc", pet_key), language)
+    localization.get(&format!("pet.{}_desc", pet_key), language)
 }
 
 /// Updates all LocalizedText and LocalizedRaceDesc entities whenever the Settings resource changes.

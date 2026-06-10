@@ -1,5 +1,7 @@
+use crate::core::catalog::get_equipment;
 use crate::core::classes::Class;
 use crate::core::constants::{NAMES, START_CHARACTERISTIC};
+use crate::core::inventory::equipment::Equipment;
 use crate::core::pets::Pet;
 use crate::core::races::Race;
 use bevy::prelude::*;
@@ -10,7 +12,6 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter, EnumString};
-use crate::core::inventory::equipment::Equipment;
 
 #[derive(EnumIter, Clone, Copy, Debug, Display, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum Sex {
@@ -183,7 +184,7 @@ impl Player {
     }
 
     pub fn strength_mod(&self) -> u32 {
-        (self.strength() - START_CHARACTERISTIC).max(0)
+        self.strength().checked_sub(START_CHARACTERISTIC).unwrap_or_default()
     }
 
     pub fn dexterity(&self) -> u32 {
@@ -198,7 +199,7 @@ impl Player {
     }
 
     pub fn constitution_mod(&self) -> u32 {
-        (self.constitution() - START_CHARACTERISTIC).max(0)
+        self.constitution().checked_sub(START_CHARACTERISTIC).unwrap_or_default()
     }
 
     pub fn intelligence(&self) -> u32 {
@@ -213,7 +214,7 @@ impl Player {
     }
 
     pub fn wisdom_mod(&self) -> u32 {
-        (self.wisdom() - START_CHARACTERISTIC).max(0)
+        self.wisdom().checked_sub(START_CHARACTERISTIC).unwrap_or_default()
     }
 
     pub fn charisma(&self) -> u32 {
@@ -262,12 +263,12 @@ impl Player {
 
     /// Total physical attack damage (base from strength plus weapon bonuses).
     pub fn attack_damage(&self) -> u32 {
-        let equip_mod = self.equipped_equipment().iter().map(|w| w.attack).sum::<i32>();
+        let equip_mod = self.equipped_equipment().iter().map(|w| w.attack()).sum::<i32>();
         (5 + self.strength_mod() as i32 + equip_mod) as u32
     }
 
     pub fn weapon_attack_speed(&self, weapon_key: &str) -> f32 {
-        let weapon_speed = get_equipment(weapon_key).map(|w| w.attack_speed).unwrap_or(1.0);
+        let weapon_speed = get_equipment(weapon_key).map(|w| w.attack_speed()).unwrap_or(1.0);
         self.adjust_attack_speed(weapon_speed)
     }
 
@@ -278,12 +279,12 @@ impl Player {
 
     pub fn defense_value(&self) -> i32 {
         self.constitution() as i32 / 4
-            + self.equipped_equipment().iter().map(|w| w.defense).sum::<i32>()
+            + self.equipped_equipment().iter().map(|w| w.defense()).sum::<i32>()
     }
 
     pub fn initiative(&self) -> i32 {
         let base_init = self.dexterity() as i32 / 2
-            + self.equipped_equipment().iter().map(|w| w.initiative).sum::<i32>();
+            + self.equipped_equipment().iter().map(|w| w.initiative()).sum::<i32>();
         if matches!(self.class, Class::Assassin) {
             base_init + 2
         } else {

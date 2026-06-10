@@ -1,32 +1,20 @@
-use serde::Deserialize;
 use crate::core::inventory::effects::Effect;
+use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-pub enum AbilityKind {
-    Fire,
-    Frost,
-    Lightning,
-    Nature,
-    Holy,
-    Shadow,
-    Cosmic,
-}
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Ability {
     /// Name of the ability (matches the english name)
-    /// Lowercase with space - >underscore matches the language key for name
+    /// Lowercase with space -> underscore matches the language key for name
+    /// Lowercase with space -> underscore and ends with _desc matches the description key
     pub name: String,
 
     /// Name of the image the ability corresponds to
     pub image: String,
 
-    /// Description key in the language files
-    pub desc_key: String,
-
     /// Kind of ability
-    pub kind: AbilityKind,
+    pub kind: Kind,
 
     /// Level of the ability
     pub level: u32,
@@ -48,7 +36,7 @@ pub struct Ability {
 
     /// Modifiers applied when activated
     pub modifiers: Vec<Modifier>,
-    
+
     /// Effects applied when hitting
-    pub effect: Vec<Effect>,
+    pub effects: Vec<Effect>,
 }

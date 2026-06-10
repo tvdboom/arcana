@@ -1,7 +1,7 @@
-use serde::Deserialize;
 use crate::core::inventory::effects::Effect;
-use crate::core::inventory::equipment::EquipmentKind;
+use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 pub enum EquipmentSlot {
@@ -22,11 +22,8 @@ pub struct Armor {
     /// Name of the image the armor corresponds to
     pub image: String,
 
-    /// Description key in the language files
-    pub desc_key: String,
-
     /// Kind of armor
-    pub kind: EquipmentKind,
+    pub kind: Kind,
 
     /// Level or upgrade tier of the armor piece
     pub level: u32,
@@ -44,5 +41,5 @@ pub struct Armor {
     pub modifiers: Vec<Modifier>,
 
     /// Optional passive effect triggered when struck by an enemy
-    pub effect: Option<Effect>,
+    pub effects: Vec<Effect>,
 }
