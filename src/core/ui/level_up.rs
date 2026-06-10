@@ -23,6 +23,9 @@ pub struct LevelUpPending {
     pub perk_chosen: Option<usize>,
 }
 
+#[derive(Message)]
+pub struct ApplyLevelUpMsg;
+
 #[derive(Component)]
 pub struct LevelUpOverlayCmp;
 
@@ -110,40 +113,49 @@ pub fn handle_perk_choice_click(
 
 pub fn handle_level_up_confirm(
     _event: On<Pointer<Click>>,
+    mut apply_level_up_msg: MessageWriter<ApplyLevelUpMsg>,
+) {
+    apply_level_up_msg.write(ApplyLevelUpMsg);
+}
+
+pub fn apply_level_up_system(
+    mut apply_level_up_msg: MessageReader<ApplyLevelUpMsg>,
     mut player: ResMut<Player>,
     mut level_up: ResMut<LevelUpPending>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
-    let ability_ok = level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
-    let perk_ok = level_up.perk_choices.is_empty() || level_up.perk_chosen.is_some();
-    if level_up.points_remaining != 0 || !ability_ok || !perk_ok {
-        return;
-    }
+    if !apply_level_up_msg.is_empty() {
+        let ability_ok = level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
+        let perk_ok = level_up.perk_choices.is_empty() || level_up.perk_chosen.is_some();
+        if level_up.points_remaining == 0 && ability_ok && perk_ok {
+            play_audio_msg.write(PlayAudioMsg::new("button"));
 
-    play_audio_msg.write(PlayAudioMsg::new("button"));
+            player.strength += level_up.attr_gains[0] as u32;
+            player.dexterity += level_up.attr_gains[1] as u32;
+            player.constitution += level_up.attr_gains[2] as u32;
+            player.intelligence += level_up.attr_gains[3] as u32;
+            player.wisdom += level_up.attr_gains[4] as u32;
+            player.charisma += level_up.attr_gains[5] as u32;
 
-    player.strength += level_up.attr_gains[0] as u32;
-    player.dexterity += level_up.attr_gains[1] as u32;
-    player.constitution += level_up.attr_gains[2] as u32;
-    player.intelligence += level_up.attr_gains[3] as u32;
-    player.wisdom += level_up.attr_gains[4] as u32;
-    player.charisma += level_up.attr_gains[5] as u32;
+            if let Some(idx) = level_up.ability_chosen {
+                if let Some(name) = level_up.ability_choices.get(idx) {
+                    player.abilities.push(name.clone());
+                }
+            }
+            if let Some(idx) = level_up.perk_chosen {
+                if let Some(name) = level_up.perk_choices.get(idx) {
+                    player.perks.push(name.clone());
+                }
+            }
 
-    if let Some(idx) = level_up.ability_chosen {
-        if let Some(name) = level_up.ability_choices.get(idx) {
-            player.abilities.push(name.clone());
+            level_up.active = false;
+            level_up.attr_gains = [0; 6];
+            level_up.ability_chosen = None;
+            level_up.perk_chosen = None;
         }
-    }
-    if let Some(idx) = level_up.perk_chosen {
-        if let Some(name) = level_up.perk_choices.get(idx) {
-            player.perks.push(name.clone());
-        }
-    }
 
-    level_up.active = false;
-    level_up.attr_gains = [0; 6];
-    level_up.ability_chosen = None;
-    level_up.perk_chosen = None;
+        apply_level_up_msg.clear();
+    }
 }
 
 pub fn handle_confirm_over(

@@ -2,9 +2,9 @@ pub mod actions;
 mod assets;
 mod audio;
 mod camera;
-pub mod catalog;
 pub mod classes;
 mod constants;
+mod inventory;
 pub mod localization;
 mod menu;
 #[cfg(not(target_arch = "wasm32"))]
@@ -33,7 +33,7 @@ use crate::core::settings::Settings;
 use crate::core::states::{AppState, GameState};
 use crate::core::systems::*;
 use crate::core::ui::creation::*;
-use crate::core::ui::level_up::LevelUpOverlayCmp;
+use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpOverlayCmp};
 use crate::core::ui::playing::*;
 use crate::core::ui::toast::{tick_gold_toasts, GoldToast};
 use crate::core::utils::{despawn, reset_cursor};
@@ -76,6 +76,7 @@ impl Plugin for GamePlugin {
             .add_message::<MuteAudioMsg>()
             .add_message::<ChangeAudioMsg>()
             .add_message::<StartNewCharacterMsg>()
+            .add_message::<ApplyLevelUpMsg>()
             // Resources
             .init_resource::<WorldAssets>()
             .init_resource::<PlayingAudio>()
@@ -125,6 +126,7 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     check_keys_menu,
+                    apply_level_up_system,
                     update_localized_text.run_if(resource_changed::<Settings>),
                     update_playing_screen.run_if(resource_changed::<Settings>),
                 ),

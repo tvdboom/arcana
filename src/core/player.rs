@@ -1,4 +1,3 @@
-use crate::core::catalog::{get_equipment, GeneratedEquipment};
 use crate::core::classes::Class;
 use crate::core::constants::{NAMES, START_CHARACTERISTIC};
 use crate::core::pets::Pet;
@@ -11,6 +10,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter, EnumString};
+use crate::core::inventory::equipment::Equipment;
 
 #[derive(EnumIter, Clone, Copy, Debug, Display, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum Sex {
@@ -127,12 +127,11 @@ pub struct Player {
     pub pet: Option<Pet>,
     pub helmet: Option<String>,
     pub armor: Option<String>,
+    pub gloves: Option<String>,
     pub boots: Option<String>,
     pub weapon_lh: Option<String>,
     pub weapon_rh: Option<String>,
-    pub weapon_2h: Option<String>,
     pub accessory: Option<String>,
-    pub gloves: Option<String>,
     pub accessory2: Option<String>,
     pub inventory: Vec<String>,
     pub gold: u32,
@@ -167,7 +166,6 @@ impl Default for Player {
             boots: None,
             weapon_lh: None,
             weapon_rh: None,
-            weapon_2h: None,
             accessory: None,
             gloves: None,
             accessory2: None,
@@ -225,14 +223,13 @@ impl Player {
     }
 
     /// All currently equipped pieces of gear.
-    pub fn equipped_equipment(&self) -> Vec<GeneratedEquipment> {
+    pub fn equipped_equipment(&self) -> Vec<Equipment> {
         [
             &self.helmet,
             &self.armor,
             &self.boots,
             &self.weapon_lh,
             &self.weapon_rh,
-            &self.weapon_2h,
             &self.accessory,
             &self.gloves,
             &self.accessory2,

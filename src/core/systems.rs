@@ -5,6 +5,7 @@ use crate::core::pets::PetKind;
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
 use crate::core::ui::creation::SelectionItem;
+use crate::core::ui::level_up::{ApplyLevelUpMsg, LevelUpPending};
 use bevy::prelude::*;
 
 pub fn check_keys_menu(
@@ -16,7 +17,8 @@ pub fn check_keys_menu(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    mut level_up: ResMut<crate::core::ui::playing::LevelUpPending>,
+    level_up: Res<LevelUpPending>,
+    mut apply_level_up_msg: MessageWriter<ApplyLevelUpMsg>,
 ) {
     if keyboard.just_released(KeyCode::Escape) {
         if level_up.active {
@@ -64,29 +66,7 @@ pub fn check_keys_menu(
                 level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
             let perk_ok = level_up.perk_choices.is_empty() || level_up.perk_chosen.is_some();
             if level_up.points_remaining == 0 && ability_ok && perk_ok {
-                player.strength += level_up.attr_gains[0] as u32;
-                player.dexterity += level_up.attr_gains[1] as u32;
-                player.constitution += level_up.attr_gains[2] as u32;
-                player.intelligence += level_up.attr_gains[3] as u32;
-                player.wisdom += level_up.attr_gains[4] as u32;
-                player.charisma += level_up.attr_gains[5] as u32;
-
-                if let Some(idx) = level_up.ability_chosen {
-                    if let Some(name) = level_up.ability_choices.get(idx) {
-                        player.abilities.push(name.clone());
-                    }
-                }
-                if let Some(idx) = level_up.perk_chosen {
-                    if let Some(name) = level_up.perk_choices.get(idx) {
-                        player.perks.push(name.clone());
-                    }
-                }
-
-                level_up.active = false;
-                level_up.attr_gains = [0; 6];
-                level_up.ability_chosen = None;
-                level_up.perk_chosen = None;
-                play_audio_msg.write(PlayAudioMsg::new("button"));
+                apply_level_up_msg.write(ApplyLevelUpMsg);
             } else {
                 play_audio_msg.write(PlayAudioMsg::new("error"));
             }

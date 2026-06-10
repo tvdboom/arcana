@@ -195,16 +195,6 @@ impl FromWorld for WorldAssets {
             ("vulture", assets.load("images/pets/vulture.png")),
         ]);
 
-        for item in GENERATED_EQUIPMENT {
-            images.insert(item.name, assets.load(item.icon_path));
-        }
-        for ability in GENERATED_ABILITIES {
-            images.insert(ability.name, assets.load(ability.icon_path));
-        }
-        for perk in GENERATED_PERKS {
-            images.insert(perk.name, assets.load(perk.icon_path));
-        }
-
         Self {
             audio,
             fonts,
