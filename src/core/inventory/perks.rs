@@ -24,3 +24,9 @@ pub struct Perk {
     /// Passive effects that are always applied
     pub effects: Vec<Effect>,
 }
+
+impl Perk {
+    pub fn description(&self) -> String {
+        format!("This is a test description for {}", self.name)
+    }
+}

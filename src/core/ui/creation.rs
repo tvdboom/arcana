@@ -7,6 +7,8 @@ use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::{all_abilities, all_perks, all_weapons};
 use crate::core::classes::{Ajah, Class};
 use crate::core::constants::*;
+use crate::core::inventory::equipment::Kind;
+use crate::core::inventory::weapons::Category;
 use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
@@ -20,9 +22,8 @@ use crate::utils::NameFromEnum;
 use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::window::SystemCursorIcon;
 use rand::prelude::IteratorRandom;
+use rand::seq::IndexedRandom;
 use rand::{rng, RngExt};
-use crate::core::inventory::equipment::Kind;
-use crate::core::inventory::weapons::Category;
 
 const AGE_SLIDER_WIDTH: f32 = 280.0;
 const AGE_VALUE_WIDTH: f32 = 240.0;
@@ -1279,7 +1280,7 @@ fn apply_age_stage(
 }
 
 pub trait SelectionItem:
-    NameFromEnum + Copy + Clone + Send + Sync + 'static + IntoEnumIterator
+    'static + NameFromEnum + Copy + Clone + Send + Sync + IntoEnumIterator
 {
     type DescComponent: Component;
     fn get_description(&self, lang: Language, localization: &Localization) -> String;
@@ -1336,9 +1337,12 @@ impl SelectionItem for Class {
 
         let ability = all_abilities()
             .iter()
-            .filter(|a| a.level == 1 && match *self {
-                Class::Assassin | Class::Warrior => !a.kind.is_magic(),
-                _ => a.kind.is_magic(),
+            .filter(|a| {
+                a.level == 1
+                    && match *self {
+                        Class::Assassin | Class::Warrior => !a.kind.is_magic(),
+                        _ => a.kind.is_magic(),
+                    }
             })
             .choose(&mut rng())
             .unwrap();
@@ -1347,9 +1351,12 @@ impl SelectionItem for Class {
 
         let perk = all_perks()
             .iter()
-            .filter(|a| a.level == 1 && match *self {
-                Class::Assassin | Class::Warrior => !a.kind.is_magic(),
-                _ => a.kind.is_magic(),
+            .filter(|a| {
+                a.level == 1
+                    && match *self {
+                        Class::Assassin | Class::Warrior => !a.kind.is_magic(),
+                        _ => a.kind.is_magic(),
+                    }
             })
             .choose(&mut rng())
             .unwrap();
@@ -1358,11 +1365,13 @@ impl SelectionItem for Class {
 
         let weapon = all_weapons()
             .iter()
-            .filter(|a| a.level == 1 && match *self {
-                Class::Assassin => a.kind == Kind::Assassination,
-                Class::Druid => a.kind == Kind::Nature,
-                Class::Mage(_) => a.kind.is_magic(),
-                Class::Warrior => a.kind == Kind::Bulwark && a.category == Category::Melee,
+            .filter(|a| {
+                a.level == 1
+                    && a.category == Category::Melee
+                    && match *self {
+                        Class::Assassin => a.kind == Kind::Assassination,
+                        _ => a.kind == Kind::Martial,
+                    }
             })
             .choose(&mut rng())
             .unwrap();
@@ -1406,11 +1415,14 @@ impl SelectionItem for Ajah {
 
         let ability = all_abilities()
             .iter()
-            .filter(|a| a.level == 1 && match *self {
-                Ajah::Black => a.kind == Kind::Shadow,
-                Ajah::Green => a.kind == Kind::Nature,
-                Ajah::Red => a.kind == Kind::Fire,
-                Ajah::White => a.kind == Kind::Holy,
+            .filter(|a| {
+                a.level == 1
+                    && match *self {
+                        Ajah::Black => a.kind == Kind::Shadow,
+                        Ajah::Green => a.kind == Kind::Nature,
+                        Ajah::Red => a.kind == Kind::Fire,
+                        Ajah::White => a.kind == Kind::Frost,
+                    }
             })
             .choose(&mut rng())
             .unwrap();
@@ -1449,12 +1461,9 @@ impl SelectionItem for PetKind {
         let pet_name = if let Some(ref pet) = player.pet {
             pet.name.clone()
         } else {
-            use rand::seq::IndexedRandom;
-            PET_NAMES.choose(&mut rand::rng()).copied().unwrap_or("Ash").to_string()
+            PET_NAMES.choose(&mut rng()).copied().unwrap().to_string()
         };
         player.pet = Some(Pet::new(pet_name, *self));
-        player.health = player.max_health();
-        player.mana = player.max_mana();
         next_game_state.set(GameState::Playing);
     }
 
@@ -1463,7 +1472,7 @@ impl SelectionItem for PetKind {
     }
 }
 
-pub fn setup_selection_screen<T>(
+pub fn setup_selection_screen<T: SelectionItem>(
     mut commands: Commands,
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
@@ -1471,9 +1480,7 @@ pub fn setup_selection_screen<T>(
     title_key: &'static str,
     has_back_button: bool,
     player: &Player,
-) where
-    T: SelectionItem,
-{
+) {
     let lang = settings.language;
     let (mut root_node, pickable) = add_root_node(true);
     root_node.justify_content = JustifyContent::FlexStart;

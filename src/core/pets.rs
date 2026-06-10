@@ -29,11 +29,11 @@ pub enum PetKind {
 pub struct Pet {
     pub name: String,
     pub kind: PetKind,
-    pub health: i32,
-    pub max_health: i32,
-    pub attack: i32,
-    pub defense: i32,
-    pub initiative: i32,
+    pub health: u32,
+    pub max_health: u32,
+    pub attack: u32,
+    pub defense: u32,
+    pub initiative: u32,
 }
 
 impl Pet {

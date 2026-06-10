@@ -210,8 +210,7 @@ pub fn format_class_description(
         Class::Druid => {
             let nature_label = localization.get("general.nature", language);
             let pet_label = localization.get("general.pet", language);
-            let choose_pet_label = localization.get("general.choose_pet", language);
-            format!(" +1 {magical_label} {ability_label} ({nature_label})\n +1 {magical_label} {perk_label}\n{pet_label}: {choose_pet_label}")
+            format!(" +1 {magical_label} {ability_label} ({nature_label})\n +1 {magical_label} {perk_label}\n +1 {pet_label}")
         },
     };
 
@@ -232,7 +231,7 @@ pub fn format_ajah_description(
         Ajah::Black => Kind::Shadow,
         Ajah::Green => Kind::Nature,
         Ajah::Red => Kind::Fire,
-        Ajah::White => Kind::Holy,
+        Ajah::White => Kind::Frost,
     };
 
     let kind_label = localization.get(format!("general.{}", kind.to_lowername()), language);

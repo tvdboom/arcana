@@ -192,4 +192,39 @@ pub enum Effect {
         attack_power_reduction: u32,
         duration: f32,
     },
+
+    /// Reduces damage taken from fire-based effects or spells.
+    FireResistance {
+        percentage: f32,
+    },
+
+    /// Reduces damage taken from frost-based effects or slows.
+    FrostResistance {
+        percentage: f32,
+    },
+
+    /// Reduces damage taken from lightning-based effects or stun durations.
+    LightningResistance {
+        percentage: f32,
+    },
+
+    /// Reduces damage taken from poison-based effects or toxins.
+    PoisonResistance {
+        percentage: f32,
+    },
+
+    /// Reduces damage taken from shadow-based effects or curses.
+    ShadowResistance {
+        percentage: f32,
+    },
+
+    /// Reduces damage taken from holy-based effects or radiant damage.
+    HolyResistance {
+        percentage: f32,
+    },
+
+    /// Reduces damage taken from bleed-based effects or physical lacerations.
+    BleedResistance {
+        percentage: f32,
+    },
 }

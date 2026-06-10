@@ -43,3 +43,9 @@ pub struct Armor {
     /// Optional passive effect triggered when struck by an enemy
     pub effects: Vec<Effect>,
 }
+
+impl Armor {
+    pub fn description(&self) -> String {
+        format!("This is a test description for {}", self.name)
+    }
+}

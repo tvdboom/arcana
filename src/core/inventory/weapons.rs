@@ -11,9 +11,10 @@ pub enum Hand {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 pub enum Category {
+    Magic,
     Melee,
     Range,
-    Magic,
+    Shield,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -30,7 +31,7 @@ pub struct Weapon {
 
     /// Weapon category
     pub category: Category,
-    
+
     /// Whether the weapon is carried in one or two hands
     pub hand: Hand,
 
@@ -54,4 +55,10 @@ pub struct Weapon {
 
     /// Effects triggered on landing a successful hit
     pub effects: Vec<Effect>,
+}
+
+impl Weapon {
+    pub fn description(&self) -> String {
+        format!("This is a test description for {}", self.name)
+    }
 }

@@ -7,8 +7,13 @@ pub use crate::core::ui::toast::ToastContainer;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
+use crate::core::catalog::{get_ability, get_equipment, get_perk};
 use crate::core::classes::Class;
 use crate::core::constants::*;
+use crate::core::inventory::abilities::Ability;
+use crate::core::inventory::armor::EquipmentSlot;
+use crate::core::inventory::equipment::{Equipment, Kind};
+use crate::core::inventory::weapons::Hand;
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::buttons::DisabledButton;
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
@@ -17,7 +22,7 @@ use crate::core::settings::{Language, Settings};
 use crate::core::ui::creation::SelectionItem;
 pub use crate::core::ui::level_up::{manage_level_up_overlay, LevelUpPending};
 use crate::core::utils::cursor;
-use crate::utils::NameFromEnum;
+use crate::utils::{capitalize_words, NameFromEnum};
 use bevy::window::{CursorIcon, SystemCursorIcon};
 
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
@@ -103,13 +108,13 @@ pub struct PerksListWrapper;
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
 pub enum EquipSlot {
     Helmet,
-    Accessory,
-    Accessory2,
+    Chestplate,
     WeaponLH,
     WeaponRH,
-    Armor,
-    Boots,
     Gloves,
+    Boots,
+    Accessory,
+    Accessory2,
 }
 
 #[derive(Component)]
@@ -161,19 +166,6 @@ fn localized_class_name(player: &Player, localization: &Localization, lang: Lang
     }
 }
 
-pub fn capitalize_words(s: &str) -> String {
-    s.split_whitespace()
-        .map(|word| {
-            let mut chars = word.chars();
-            match chars.next() {
-                None => String::new(),
-                Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
-            }
-        })
-        .collect::<Vec<String>>()
-        .join(" ")
-}
-
 fn name_with_level(
     name: &str,
     prefix: &str,
@@ -181,16 +173,13 @@ fn name_with_level(
     localization: &Localization,
     lang: Language,
 ) -> String {
+    let lv = localization.get("general.lv", lang);
     let key = format!("{}.{}", prefix, name.replace(" ", "_").to_lowercase());
     let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(name));
-    format!("{} (Lv. {})", localized_name, level)
+    format!("{localized_name} ({lv}. {level})")
 }
 
-fn ability_detail_line(
-    stats: &crate::core::inventory::abilities::Ability,
-    localization: &Localization,
-    lang: Language,
-) -> String {
+fn ability_detail_line(stats: &Ability, localization: &Localization, lang: Language) -> String {
     let mut parts = vec![format!(
         "{}: {} | {}: {}",
         localization.get("general.ability_type", lang),
@@ -208,7 +197,7 @@ fn ability_detail_line(
 
 /// Format the bonus characteristics of a weapon, e.g. "+6 attack | +10 crit | 1.2 as".
 fn weapon_stat_lines(
-    weapon: &crate::core::inventory::equipment::Equipment,
+    weapon: &Equipment,
     player: &Player,
     localization: &Localization,
     lang: Language,
@@ -251,7 +240,7 @@ fn weapon_bonus_lines(
     player: &Player,
     localization: &Localization,
     lang: Language,
-    value_for: impl Fn(&crate::core::inventory::equipment::Equipment) -> i32,
+    value_for: impl Fn(&Equipment) -> i32,
 ) -> Vec<String> {
     player
         .equipped_equipment()
@@ -259,8 +248,8 @@ fn weapon_bonus_lines(
         .filter_map(|weapon| {
             let value = value_for(&weapon);
             let prefix = match weapon {
-                crate::core::inventory::equipment::Equipment::Weapon(_) => "weapon",
-                crate::core::inventory::equipment::Equipment::Armor(_) => "armor",
+                Equipment::Weapon(_) => "weapon",
+                Equipment::Armor(_) => "armor",
             };
             let key = format!("{}.{}", prefix, weapon.name().replace(" ", "_").to_lowercase());
             let localized_name =
@@ -318,7 +307,7 @@ fn spawn_pet_stat_box(
     lang: Language,
     label_key: &str,
     image_key: &str,
-    value: i32,
+    value: u32,
 ) {
     parent
         .spawn((
@@ -477,6 +466,7 @@ fn spawn_action_tooltip(
     let wrap_limit = ((window_width / 1600.0) * 60.0).clamp(40.0, 90.0) as usize;
     let wrapped: Vec<String> = wrap_tooltip_line(&desc, wrap_limit);
     let desc_max = wrapped.iter().map(|l| l.chars().count()).max().unwrap_or(0);
+
     // Title width: action name + " (  N)" — approximate as name len + 8 chars
     let title_chars = (action_name.chars().count() + 8) as f32;
     let max_chars = title_chars.max(desc_max as f32);
@@ -556,6 +546,7 @@ fn spawn_action_tooltip(
                         TextColor(BUTTON_TEXT_COLOR),
                     ));
                 });
+            
             if !wrapped.is_empty() {
                 parent.spawn((
                     add_text(wrapped.join("\n"), "medium", 1.6, assets),
@@ -1137,7 +1128,7 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
                         .with_children(|parent| {
                             for slot in [
                                 EquipSlot::Helmet,
-                                EquipSlot::Armor,
+                                EquipSlot::Chestplate,
                                 EquipSlot::WeaponLH,
                                 EquipSlot::WeaponRH,
                                 EquipSlot::Gloves,
@@ -1710,16 +1701,16 @@ pub fn equip_slot_tooltip_system(
                 EquipSlot::Accessory2 => player.accessory2.as_deref(),
                 EquipSlot::WeaponLH => player.weapon_lh.as_deref(),
                 EquipSlot::WeaponRH => player.weapon_rh.as_deref(),
-                EquipSlot::Armor => player.armor.as_deref(),
+                EquipSlot::Chestplate => player.armor.as_deref(),
                 EquipSlot::Boots => player.boots.as_deref(),
                 EquipSlot::Gloves => player.gloves.as_deref(),
             };
 
             if let Some(key) = equipped_key {
-                if let Some(weapon) = crate::core::catalog::get_equipment(key) {
+                if let Some(weapon) = get_equipment(key) {
                     let prefix = match weapon {
-                        crate::core::inventory::equipment::Equipment::Weapon(_) => "weapon",
-                        crate::core::inventory::equipment::Equipment::Armor(_) => "armor",
+                        Equipment::Weapon(_) => "weapon",
+                        Equipment::Armor(_) => "armor",
                     };
                     let name = name_with_level(
                         weapon.name(),
@@ -1778,65 +1769,18 @@ pub fn info_tooltip_system(
             continue;
         }
 
-        if let InfoTooltip::Action(act) = tooltip {
-            let ap_cost = act.ap_cost();
-            let action_name = localization.get(&format!("general.{}", act.to_lowername()), lang);
-            let desc_key = format!("general.{}_desc", act.to_lowername());
-            let desc = match act {
-                Action::Work => {
-                    let charisma = player.charisma() as i32;
-                    let level = player.level as i32;
-                    let base = charisma * level;
-                    let min_gold = (base * 4 / 5).max(1);
-                    let max_gold = base * 6 / 5;
-                    let base_text = localization.get_opt("general.work_desc_base", lang)
-                        .unwrap_or_else(|| "Earn gold by working. Scales with Level and Charisma.".to_string());
-                    let format_str = localization.get_opt("general.work_desc_format", lang)
-                        .unwrap_or_else(|| "{} Earns: {min}-{max} Gold.".to_string());
-                    format_str.replace("{}", &base_text)
-                        .replace("{min}", &min_gold.to_string())
-                        .replace("{max}", &max_gold.to_string())
-                },
-                Action::Rest => {
-                    let wisdom = player.wisdom() as i32;
-                    let level = player.level as i32;
-                    let base = wisdom * level;
-                    let min_r = (base * 4 / 5).max(1);
-                    let max_r = base * 6 / 5;
-                    let wisdom_bonus = (player.wisdom() as f32 - 10.).max(0.) * 0.005;
-                    let max_pct = ((0.05 + wisdom_bonus).min(0.20) * 100.) as u32;
-                    let base_text = localization.get_opt("general.rest_desc_base", lang)
-                        .unwrap_or_else(|| "Rest to recover health and mana. Scales with Level and Wisdom.".to_string());
-                    let format_str = localization.get_opt("general.rest_desc_format", lang)
-                        .unwrap_or_else(|| "{} Recovers: {min}-{max} HP/MP. {pct}% chance of +max HP/MP.".to_string());
-                    format_str.replace("{}", &base_text)
-                        .replace("{min}", &min_r.to_string())
-                        .replace("{max}", &max_r.to_string())
-                        .replace("{pct}", &max_pct.to_string())
-                },
-                Action::Study => {
-                    let int_bonus = (player.intelligence() as f32 - 10.).max(0.) * 0.025;
-                    let perk_pct = ((0.333 + int_bonus).min(0.65) * 100.) as u32;
-                    let abil_pct = ((0.200 + int_bonus).min(0.45) * 100.) as u32;
-                    let base_text = localization.get_opt("general.study_desc_base", lang)
-                        .unwrap_or_else(|| "Study tomes and scrolls. Scales with Intelligence.".to_string());
-                    let format_str = localization.get_opt("general.study_desc_format", lang)
-                        .unwrap_or_else(|| "{} Perk: {perk}%, Ability: {abil}%, +1 Wisdom: 5%.".to_string());
-                    format_str.replace("{}", &base_text)
-                        .replace("{perk}", &perk_pct.to_string())
-                        .replace("{abil}", &abil_pct.to_string())
-                },
-                _ => localization.get_opt(&desc_key, lang)
-                    .unwrap_or_else(|| match act {
-                        Action::Hunt => "Go hunting in the wild to earn gold.".to_string(),
-                        Action::Shop => "Buy a random consumable item.".to_string(),
-                        Action::Quest => "Embark on an adventure to earn gold and find new equipment.".to_string(),
-                        Action::Train => "Train hard to improve your combat abilities. Scales with Strength and Dexterity.".to_string(),
-                        Action::Craft => "Craft a piece of equipment suitable for your level.".to_string(),
-                        _ => "Perform an action.".to_string(),
-                    }),
-            };
-            spawn_action_tooltip(&mut commands, &assets, action_name, ap_cost, desc, &windows);
+        if let InfoTooltip::Action(action) = tooltip {
+            let name = action.to_lowername();
+            let action_name = localization.get(&format!("general.{name}"), lang);
+            let desc = localization.get(&format!("general.{name}_desc"), lang);
+            spawn_action_tooltip(
+                &mut commands,
+                &assets,
+                action_name,
+                action.ap_cost(),
+                desc,
+                &windows,
+            );
             continue;
         }
 
@@ -2248,11 +2192,9 @@ pub fn rebuild_playing_lists(
     let is_lh_two_hand = player
         .weapon_lh
         .as_deref()
-        .and_then(|key| crate::core::catalog::get_equipment(key))
+        .and_then(|key| get_equipment(key))
         .map(|eq| match eq {
-            crate::core::inventory::equipment::Equipment::Weapon(w) => {
-                w.hand == crate::core::inventory::weapons::Hand::TwoHand
-            },
+            Equipment::Weapon(w) => w.hand == Hand::TwoHand,
             _ => false,
         })
         .unwrap_or(false);
@@ -2265,7 +2207,7 @@ pub fn rebuild_playing_lists(
             EquipSlot::Accessory2 => player.accessory2.as_deref(),
             EquipSlot::WeaponLH => player.weapon_lh.as_deref(),
             EquipSlot::WeaponRH => player.weapon_rh.as_deref(),
-            EquipSlot::Armor => player.armor.as_deref(),
+            EquipSlot::Chestplate => player.armor.as_deref(),
             EquipSlot::Boots => player.boots.as_deref(),
             EquipSlot::Gloves => player.gloves.as_deref(),
         };
@@ -2283,7 +2225,7 @@ pub fn rebuild_playing_lists(
             EquipSlot::Accessory2 => player.accessory2.is_some(),
             EquipSlot::WeaponLH => player.weapon_lh.is_some(),
             EquipSlot::WeaponRH => player.weapon_rh.is_some() && !is_lh_two_hand,
-            EquipSlot::Armor => player.armor.is_some(),
+            EquipSlot::Chestplate => player.armor.is_some(),
             EquipSlot::Boots => player.boots.is_some(),
             EquipSlot::Gloves => player.gloves.is_some(),
         };
@@ -2321,19 +2263,16 @@ pub fn rebuild_playing_lists(
             ];
 
             // Collect equipped items and sort by level then name
-            let mut equipped_items: Vec<crate::core::inventory::equipment::Equipment> =
-                equipped_slots
-                    .iter()
-                    .filter_map(|(slot_val, _)| {
-                        slot_val.as_deref().and_then(crate::core::catalog::get_equipment)
-                    })
-                    .collect();
+            let mut equipped_items: Vec<Equipment> = equipped_slots
+                .iter()
+                .filter_map(|(slot_val, _)| slot_val.as_deref().and_then(get_equipment))
+                .collect();
             equipped_items.sort_by(|a, b| a.level().cmp(&b.level()).then(a.name().cmp(b.name())));
             for weapon in &equipped_items {
                 empty = false;
                 let prefix = match weapon {
-                    crate::core::inventory::equipment::Equipment::Weapon(_) => "weapon",
-                    crate::core::inventory::equipment::Equipment::Armor(_) => "armor",
+                    Equipment::Weapon(_) => "weapon",
+                    Equipment::Armor(_) => "armor",
                 };
                 spawn_equipment_card(
                     parent,
@@ -2356,17 +2295,14 @@ pub fn rebuild_playing_lists(
             }
 
             // Inventory items (unequipped), sorted by level then name
-            let mut inventory_items: Vec<crate::core::inventory::equipment::Equipment> = player
-                .inventory
-                .iter()
-                .filter_map(|key| crate::core::catalog::get_equipment(key))
-                .collect();
+            let mut inventory_items: Vec<Equipment> =
+                player.inventory.iter().filter_map(|key| get_equipment(key)).collect();
             inventory_items.sort_by(|a, b| a.level().cmp(&b.level()).then(a.name().cmp(b.name())));
             for weapon in &inventory_items {
                 empty = false;
                 let prefix = match weapon {
-                    crate::core::inventory::equipment::Equipment::Weapon(_) => "weapon",
-                    crate::core::inventory::equipment::Equipment::Armor(_) => "armor",
+                    Equipment::Weapon(_) => "weapon",
+                    Equipment::Armor(_) => "armor",
                 };
                 spawn_equipment_card(
                     parent,
@@ -2406,18 +2342,10 @@ pub fn rebuild_playing_lists(
                     TextColor(Color::WHITE),
                 ));
             }
-            let mut sorted_abilities: Vec<_> = player
-                .abilities
-                .iter()
-                .filter_map(|key| crate::core::catalog::get_ability(key))
-                .collect();
+            let mut sorted_abilities: Vec<_> =
+                player.abilities.iter().filter_map(|key| get_ability(key)).collect();
             sorted_abilities.sort_by(|a, b| a.level.cmp(&b.level).then(a.name.cmp(&b.name)));
             for ability in &sorted_abilities {
-                let key_desc =
-                    format!("ability.{}_desc", ability.name.replace(" ", "_").to_lowercase());
-                let desc = localization.get_opt(&key_desc, lang).unwrap_or_else(|| {
-                    panic!("Missing localization for ability description: key '{key_desc}'");
-                });
                 spawn_card(
                     parent,
                     &assets,
@@ -2430,7 +2358,7 @@ pub fn rebuild_playing_lists(
                         lang,
                     ),
                     None,
-                    vec![ability_detail_line(&ability, &localization, lang), desc],
+                    vec![ability_detail_line(&ability, &localization, lang)],
                 );
             }
         });
@@ -2447,23 +2375,16 @@ pub fn rebuild_playing_lists(
                 ));
             }
             let mut sorted_perks: Vec<_> =
-                player.perks.iter().filter_map(|key| crate::core::catalog::get_perk(key)).collect();
+                player.perks.iter().filter_map(|key| get_perk(key)).collect();
             sorted_perks.sort_by(|a, b| a.level.cmp(&b.level).then(a.name.cmp(&b.name)));
             for perk in &sorted_perks {
-                let key_desc = format!("perk.{}_desc", perk.name.replace(" ", "_").to_lowercase());
-                let desc = localization.get_opt(&key_desc, lang).unwrap_or_else(|| {
-                    format!(
-                        "An impressive passive perk that empowers your {:?} capabilities.",
-                        perk.kind
-                    )
-                });
                 spawn_card(
                     parent,
                     &assets,
                     &perk.name,
                     name_with_level(&perk.name, "perk", perk.level as u8, &localization, lang),
                     None,
-                    vec![desc],
+                    vec![],
                 );
             }
         });
@@ -2751,15 +2672,15 @@ pub struct EquipmentCard {
 }
 
 pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
-    if let Some(equipment) = crate::core::catalog::get_equipment(key) {
+    if let Some(equipment) = get_equipment(key) {
         // Remove from inventory first
         if let Some(pos) = player.inventory.iter().position(|k| k == key) {
             player.inventory.remove(pos);
         }
 
         match equipment {
-            crate::core::inventory::equipment::Equipment::Armor(a) => match a.slot {
-                crate::core::inventory::armor::EquipmentSlot::Consumable => {
+            Equipment::Armor(a) => match a.slot {
+                EquipmentSlot::Consumable => {
                     let name = a.name.to_lowercase();
                     if name.contains("health") {
                         player.health = player.max_health();
@@ -2785,27 +2706,27 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                     }
                     return Some("button");
                 },
-                crate::core::inventory::armor::EquipmentSlot::Helmet => {
+                EquipmentSlot::Helmet => {
                     if let Some(old) = player.helmet.replace(key.to_string()) {
                         player.inventory.push(old);
                     }
                 },
-                crate::core::inventory::armor::EquipmentSlot::Chestplate => {
+                EquipmentSlot::Chestplate => {
                     if let Some(old) = player.armor.replace(key.to_string()) {
                         player.inventory.push(old);
                     }
                 },
-                crate::core::inventory::armor::EquipmentSlot::Boots => {
+                EquipmentSlot::Boots => {
                     if let Some(old) = player.boots.replace(key.to_string()) {
                         player.inventory.push(old);
                     }
                 },
-                crate::core::inventory::armor::EquipmentSlot::Gloves => {
+                EquipmentSlot::Gloves => {
                     if let Some(old) = player.gloves.replace(key.to_string()) {
                         player.inventory.push(old);
                     }
                 },
-                crate::core::inventory::armor::EquipmentSlot::Accessory => {
+                EquipmentSlot::Accessory => {
                     if player.accessory.is_none() {
                         player.accessory = Some(key.to_string());
                     } else if player.accessory2.is_none() {
@@ -2817,20 +2738,18 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                     }
                 },
             },
-            crate::core::inventory::equipment::Equipment::Weapon(w) => {
+            Equipment::Weapon(w) => {
                 let is_lh_two_hand = player
                     .weapon_lh
                     .as_deref()
-                    .and_then(|k| crate::core::catalog::get_equipment(k))
+                    .and_then(|k| get_equipment(k))
                     .map(|eq| match eq {
-                        crate::core::inventory::equipment::Equipment::Weapon(lh_w) => {
-                            lh_w.hand == crate::core::inventory::weapons::Hand::TwoHand
-                        },
+                        Equipment::Weapon(lh_w) => lh_w.hand == Hand::TwoHand,
                         _ => false,
                     })
                     .unwrap_or(false);
 
-                if w.hand == crate::core::inventory::weapons::Hand::TwoHand {
+                if w.hand == Hand::TwoHand {
                     // Two-handed weapon: unequip both hands, then place in weapon_lh
                     if let Some(old_lh) = player.weapon_lh.take() {
                         player.inventory.push(old_lh);
@@ -2839,7 +2758,7 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                         player.inventory.push(old_rh);
                     }
                     player.weapon_lh = Some(key.to_string());
-                } else if w.kind == crate::core::inventory::equipment::Kind::Bulwark {
+                } else if w.kind == Kind::Bulwark {
                     // Bulwark (shield/offhand): unequip two-handed weapon from LH if present, then place in weapon_rh
                     if is_lh_two_hand {
                         if let Some(old_lh) = player.weapon_lh.take() {
@@ -2912,7 +2831,7 @@ pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
         EquipSlot::Accessory2 => player.accessory2.take(),
         EquipSlot::WeaponLH => player.weapon_lh.take(),
         EquipSlot::WeaponRH => player.weapon_rh.take(),
-        EquipSlot::Armor => player.armor.take(),
+        EquipSlot::Chestplate => player.armor.take(),
         EquipSlot::Boots => player.boots.take(),
         EquipSlot::Gloves => player.gloves.take(),
     };
@@ -2925,40 +2844,39 @@ pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
 }
 
 pub fn reward_equipment(player: &mut Player, key: String) {
-    if let Some(equipment) = crate::core::catalog::get_equipment(&key) {
+    if let Some(equipment) = get_equipment(&key) {
         let is_empty = match equipment {
-            crate::core::inventory::equipment::Equipment::Armor(a) => match a.slot {
-                crate::core::inventory::armor::EquipmentSlot::Helmet => player.helmet.is_none(),
-                crate::core::inventory::armor::EquipmentSlot::Chestplate => player.armor.is_none(),
-                crate::core::inventory::armor::EquipmentSlot::Boots => player.boots.is_none(),
-                crate::core::inventory::armor::EquipmentSlot::Gloves => player.gloves.is_none(),
-                crate::core::inventory::armor::EquipmentSlot::Accessory => {
+            Equipment::Armor(a) => match a.slot {
+                EquipmentSlot::Helmet => player.helmet.is_none(),
+                EquipmentSlot::Chestplate => player.armor.is_none(),
+                EquipmentSlot::Boots => player.boots.is_none(),
+                EquipmentSlot::Gloves => player.gloves.is_none(),
+                EquipmentSlot::Accessory => {
                     player.accessory.is_none() || player.accessory2.is_none()
                 },
-                crate::core::inventory::armor::EquipmentSlot::Consumable => false,
+                EquipmentSlot::Consumable => false,
             },
-            crate::core::inventory::equipment::Equipment::Weapon(w) => {
+            Equipment::Weapon(w) => {
                 let is_lh_two_hand = player
                     .weapon_lh
                     .as_deref()
-                    .and_then(|k| crate::core::catalog::get_equipment(k))
+                    .and_then(|k| get_equipment(k))
                     .map(|eq| match eq {
-                        crate::core::inventory::equipment::Equipment::Weapon(lh_w) => {
-                            lh_w.hand == crate::core::inventory::weapons::Hand::TwoHand
-                        },
+                        Equipment::Weapon(lh_w) => lh_w.hand == Hand::TwoHand,
                         _ => false,
                     })
                     .unwrap_or(false);
 
-                if w.hand == crate::core::inventory::weapons::Hand::TwoHand {
+                if w.hand == Hand::TwoHand {
                     player.weapon_lh.is_none() && player.weapon_rh.is_none()
-                } else if w.kind == crate::core::inventory::equipment::Kind::Bulwark {
+                } else if w.kind == Kind::Bulwark {
                     player.weapon_rh.is_none() && !is_lh_two_hand
                 } else {
                     !is_lh_two_hand && (player.weapon_lh.is_none() || player.weapon_rh.is_none())
                 }
             },
         };
+
         if is_empty {
             equip_item(player, &key);
         } else {
@@ -3001,9 +2919,9 @@ pub fn handle_equipment_card_click(
             play_audio_msg.write(PlayAudioMsg::new("click"));
         } else {
             // Check consumable restrictions
-            if let Some(eq) = crate::core::catalog::get_equipment(&card.key) {
-                if let crate::core::inventory::equipment::Equipment::Armor(ref a) = eq {
-                    if a.slot == crate::core::inventory::armor::EquipmentSlot::Consumable {
+            if let Some(eq) = get_equipment(&card.key) {
+                if let Equipment::Armor(ref a) = eq {
+                    if a.slot == EquipmentSlot::Consumable {
                         let name = a.name.to_lowercase();
                         let blocked = if name.contains("rejuvenation") {
                             player.health >= player.max_health() && player.mana >= player.max_mana()
@@ -3058,7 +2976,7 @@ pub fn handle_equipment_slot_click(
             EquipSlot::Accessory2 => player.accessory2.as_ref(),
             EquipSlot::WeaponLH => player.weapon_lh.as_ref(),
             EquipSlot::WeaponRH => player.weapon_rh.as_ref(),
-            EquipSlot::Armor => player.armor.as_ref(),
+            EquipSlot::Chestplate => player.armor.as_ref(),
             EquipSlot::Boots => player.boots.as_ref(),
             EquipSlot::Gloves => player.gloves.as_ref(),
         };
@@ -3068,7 +2986,7 @@ pub fn handle_equipment_slot_click(
 
             // Right-click: sell equipped item for full price
             if event.button == PointerButton::Secondary {
-                if let Some(eq) = crate::core::catalog::get_equipment(&key_str) {
+                if let Some(eq) = get_equipment(&key_str) {
                     let sell_price = eq.price();
 
                     // Directly unequip from the slot without adding to inventory
@@ -3078,7 +2996,7 @@ pub fn handle_equipment_slot_click(
                         EquipSlot::Accessory2 => player.accessory2 = None,
                         EquipSlot::WeaponLH => player.weapon_lh = None,
                         EquipSlot::WeaponRH => player.weapon_rh = None,
-                        EquipSlot::Armor => player.armor = None,
+                        EquipSlot::Chestplate => player.armor = None,
                         EquipSlot::Boots => player.boots = None,
                         EquipSlot::Gloves => player.gloves = None,
                     }

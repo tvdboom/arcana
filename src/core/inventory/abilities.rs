@@ -40,3 +40,9 @@ pub struct Ability {
     /// Effects applied when hitting
     pub effects: Vec<Effect>,
 }
+
+impl Ability {
+    pub fn description(&self) -> String {
+        format!("This is a test description for {}", self.name)
+    }
+}

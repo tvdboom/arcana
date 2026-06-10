@@ -8,9 +8,9 @@ use crate::core::menu::buttons::DisabledButton;
 use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::ui::level_up::LevelUpPending;
-use crate::core::ui::playing::{capitalize_words, reward_equipment};
+use crate::core::ui::playing::reward_equipment;
 use crate::core::ui::toast::{spawn_toast, ToastContainer};
-use crate::utils::NameFromEnum;
+use crate::utils::{capitalize_words, NameFromEnum};
 use bevy::prelude::*;
 use rand::prelude::IndexedRandom;
 use rand::{rng, RngExt};
@@ -87,58 +87,93 @@ pub fn handle_playing_action_clicks(
 
         match action {
             Action::Rest => {
-                let msg = if player.health < max_hp || player.mana < max_mp {
-                    // Recover health and mana if below maximum
-                    // The recovered amount lies between 0 and 10% + 1% per wisdom modifier
-                    let max_recover_health = (player.max_health() as f32 * 0.1
-                        + 0.01 * player.wisdom_mod() as f32)
-                        as u32;
-                    let max_recover_mana =
-                        (player.max_mana() as f32 * 0.1 + 0.01 * player.wisdom_mod() as f32) as u32;
+                let mut spawn_toast = |msg| {
+                    spawn_toast(
+                        &mut commands,
+                        &assets,
+                        msg,
+                        Color::srgba(0.08, 0.16, 0.12, 0.93),
+                        Color::srgb(0.25, 0.75, 0.50),
+                        Color::srgb(0.60, 1.0, 0.75),
+                        toast,
+                    )
+                };
 
-                    let recover_health = rng.random_range(0..max_recover_health);
-                    let recover_mana = rng.random_range(0..max_recover_mana);
+                let player_missing = player.health < max_hp || player.mana < max_mp;
+                let pet_missing =
+                    player.pet.as_ref().map(|p| p.health < p.max_health).unwrap_or(false);
 
-                    let health_gained = recover_health.min(max_hp - player.health);
-                    let mana_gained = recover_mana.min(max_mp - player.mana);
+                if player_missing || pet_missing {
+                    let wisdom_mod = player.wisdom_mod();
+                    if player_missing {
+                        // Recover health and mana if below maximum
+                        // The recovered amount lies between 0 and 10% + 1% per wisdom mod
+                        let max_recover_health =
+                            (player.max_health() as f32 * 0.1 + 0.01 * wisdom_mod as f32) as u32;
+                        let max_recover_mana =
+                            (player.max_mana() as f32 * 0.1 + 0.01 * wisdom_mod as f32) as u32;
 
-                    player.health = (player.health + health_gained).min(max_hp);
-                    player.mana = (player.mana + mana_gained).min(max_mp);
+                        let recover_health = rng.random_range(0..max_recover_health);
+                        let recover_mana = rng.random_range(0..max_recover_mana);
 
-                    localization
-                        .get("toast_rest_recovered", lang)
-                        .replace("{hp}", &recover_health.to_string())
-                        .replace("{mp}", &recover_mana.to_string())
+                        let health_gained = recover_health.min(max_hp - player.health);
+                        let mana_gained = recover_mana.min(max_mp - player.mana);
+
+                        player.health = (player.health + health_gained).min(max_hp);
+                        player.mana = (player.mana + mana_gained).min(max_mp);
+
+                        spawn_toast(
+                            localization
+                                .get("toast_rest_recovered", lang)
+                                .replace("{hp}", &recover_health.to_string())
+                                .replace("{mp}", &recover_mana.to_string()),
+                        )
+                    }
+
+                    if pet_missing {
+                        let pet = player.pet.as_mut().unwrap();
+                        let max_recover_health =
+                            (pet.max_health as f32 * 0.1 + 0.01 * wisdom_mod as f32) as u32;
+
+                        let recover_health = rng.random_range(0..max_recover_health);
+                        let health_gained = recover_health.min(max_hp - pet.health);
+
+                        pet.health = (pet.health + health_gained).min(max_hp);
+
+                        spawn_toast(
+                            localization
+                                .get("toast_rest_recovered_pet", lang)
+                                .replace("{pet}", &pet.name),
+                        );
+                    }
                 } else {
                     // Gain increased max health or max mana
                     if rng.random_bool(0.25) {
-                        let bonus_health = rng.random_range(1..=5) * 5 * (1 + player.wisdom_mod());
+                        let bonus_health =
+                            rng.random_range(1..=5) * 5 * (1 + player.wisdom_mod()).max(0);
+                        player.health += bonus_health;
                         player.bonus_max_health += bonus_health;
 
-                        localization
-                            .get("toast_rest_max_hp", lang)
-                            .replace("{hp}", &bonus_health.to_string())
+                        spawn_toast(
+                            localization
+                                .get("toast_rest_max_hp", lang)
+                                .replace("{hp}", &bonus_health.to_string()),
+                        )
                     } else if rng.random_bool(0.25) {
-                        let bonus_mana = rng.random_range(1..=5) * 5 * (1 + player.wisdom_mod());
+                        let bonus_mana =
+                            rng.random_range(1..=5) * 5 * (1 + player.wisdom_mod()).max(0);
+                        player.mana += bonus_mana;
                         player.bonus_max_mana += bonus_mana;
 
-                        localization
-                            .get("toast_rest_max_mp", lang)
-                            .replace("{mp}", &bonus_mana.to_string())
+                        spawn_toast(
+                            localization
+                                .get("toast_rest_max_mp", lang)
+                                .replace("{mp}", &bonus_mana.to_string()),
+                        )
                     } else {
-                        localization.get("toast_rest_no_recovery", lang)
+                        spawn_toast(localization.get("toast_rest_no_recovery", lang))
                     }
                 };
-
-                spawn_toast(
-                    &mut commands,
-                    &assets,
-                    msg,
-                    Color::srgba(0.08, 0.16, 0.12, 0.93),
-                    Color::srgb(0.25, 0.75, 0.50),
-                    Color::srgb(0.60, 1.0, 0.75),
-                    toast,
-                );
             },
             Action::Study => {
                 let int_bonus = (player.intelligence() as f32 - 10.).max(0.) * 0.025;

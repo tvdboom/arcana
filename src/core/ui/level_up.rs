@@ -935,31 +935,6 @@ fn spawn_choice_card(
     };
     let title = localization.get_opt(&key_name, lang).unwrap_or_else(|| name.to_string());
 
-    // Get details for description
-    let desc = if is_ability {
-        let key_desc = format!("ability.{}_desc", name.replace(" ", "_").to_lowercase());
-        localization.get_opt(&key_desc, lang).unwrap_or_else(|| {
-            if let Some(ab) = crate::core::catalog::get_ability(name) {
-                format!(
-                    "A powerful {} ability that consumes {} mana.",
-                    ab.kind.to_string().to_lowercase(),
-                    ab.mana_cost
-                )
-            } else {
-                String::new()
-            }
-        })
-    } else {
-        let key_desc = format!("perk.{}_desc", name.replace(" ", "_").to_lowercase());
-        localization.get_opt(&key_desc, lang).unwrap_or_else(|| {
-            if let Some(pk) = crate::core::catalog::get_perk(name) {
-                format!("An impressive passive perk that empowers your {} capabilities.", pk.kind)
-            } else {
-                String::new()
-            }
-        })
-    };
-
     let mut entity_cmd = parent.spawn((
         Node {
             width: percent(100.),
@@ -1023,7 +998,7 @@ fn spawn_choice_card(
                     ));
 
                     // Description
-                    parent.spawn((add_text(desc, "medium", 1.6, assets), TextColor(Color::WHITE)));
+                    parent.spawn((add_text("", "medium", 1.6, assets), TextColor(Color::WHITE)));
                 });
         });
 }
