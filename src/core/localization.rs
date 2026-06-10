@@ -137,7 +137,7 @@ pub fn format_class_description(
             let mana_label = localization.get("mana", language);
             format!("Max {}: +30", mana_label)
         },
-        Class::Rogue => {
+        Class::Assassin => {
             let init_label = localization.get("initiative", language);
             format!("{}: +2", init_label)
         },

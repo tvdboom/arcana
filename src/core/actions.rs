@@ -87,8 +87,11 @@ pub fn handle_playing_action_clicks(
                 let msg = if player.health < max_hp || player.mana < max_mp {
                     // Recover health and mana if below maximum
                     // The recovered amount lies between 0 and 10% + 1% per wisdom modifier
-                    let max_recover_health = (player.max_health() as f32 * 0.1 + 0.01 * player.wisdom_mod() as f32) as u32;
-                    let max_recover_mana = (player.max_mana() as f32 * 0.1 + 0.01 * player.wisdom_mod() as f32) as u32;
+                    let max_recover_health = (player.max_health() as f32 * 0.1
+                        + 0.01 * player.wisdom_mod() as f32)
+                        as u32;
+                    let max_recover_mana =
+                        (player.max_mana() as f32 * 0.1 + 0.01 * player.wisdom_mod() as f32) as u32;
 
                     let recover_health = rng.random_range(0..max_recover_health);
                     let recover_mana = rng.random_range(0..max_recover_mana);

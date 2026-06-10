@@ -32,13 +32,13 @@ pub struct Pet {
     pub health: i32,
     pub max_health: i32,
     pub attack: i32,
-    pub armor: i32,
+    pub defense: i32,
     pub initiative: i32,
 }
 
 impl Pet {
     pub fn new(name: impl Into<String>, kind: PetKind) -> Self {
-        let (max_health, attack, armor, initiative) = match kind {
+        let (max_health, attack, defense, initiative) = match kind {
             PetKind::Bat => (40, 10, 10, 10),
             PetKind::Bear => (40, 10, 10, 10),
             PetKind::Crocodile => (40, 10, 10, 10),
@@ -66,7 +66,7 @@ impl Pet {
             health: max_health,
             max_health,
             attack,
-            armor,
+            defense,
             initiative,
         }
     }

@@ -16,7 +16,6 @@ pub const PLACEHOLDER_COLOR: Color = Color::srgba_u8(40, 40, 55, 220);
 pub const BAR_BG_COLOR: Color = Color::srgba_u8(0, 0, 0, 160);
 pub const ICON_ITEM: Val = Val::Vw(3.2);
 
-
 /// Game
 pub const START_CHARACTERISTIC: u32 = 10;
 

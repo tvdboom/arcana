@@ -5,7 +5,7 @@ use strum_macros::EnumIter;
 pub enum Class {
     Druid,
     Mage(Ajah),
-    Rogue,
+    Assassin,
     #[default]
     Warrior,
 }
@@ -35,7 +35,7 @@ impl Class {
         match self {
             Class::Warrior => "novice swift cleaving strike",
             Class::Mage(_) => "novice ashen lightning touch",
-            Class::Rogue => "novice clandestine devious slash",
+            Class::Assassin => "novice clandestine devious slash",
             Class::Druid => "novice sovereign sunfire howl",
         }
     }
@@ -44,7 +44,7 @@ impl Class {
         match self {
             Class::Warrior => "novice swift vanguard mastery",
             Class::Mage(_) => "novice infused acolyte resilience",
-            Class::Rogue => "novice clandestine stalker reflexes",
+            Class::Assassin => "novice clandestine stalker reflexes",
             Class::Druid => "novice sovereign dryad harmony",
         }
     }
@@ -53,7 +53,7 @@ impl Class {
         match self {
             Class::Warrior => "novice bronze mighty bow",
             Class::Mage(_) => "novice worn primal axe",
-            Class::Rogue => "overlord mighty primal dagger",
+            Class::Assassin => "overlord mighty primal dagger",
             Class::Druid => "novice worn primal axe",
         }
     }

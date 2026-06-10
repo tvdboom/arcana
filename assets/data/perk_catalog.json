@@ -16,7 +16,7 @@
   {
     "name": "novice clandestine stalker reflexes",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/novice clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -44,7 +44,7 @@
   {
     "name": "novice exalted spectre fortitude",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/novice exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -72,7 +72,7 @@
   {
     "name": "novice radiant dreadblade wisdom",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/novice radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -100,7 +100,7 @@
   {
     "name": "novice gargoyle scoundrel vigilance",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/novice gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -128,7 +128,7 @@
   {
     "name": "novice blood acrobat luck",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/novice blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -156,7 +156,7 @@
   {
     "name": "novice elder stalker reflexes",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/novice elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -184,7 +184,7 @@
   {
     "name": "novice abyssal spectre fortitude",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/novice abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -226,7 +226,7 @@
   {
     "name": "initiate clandestine stalker reflexes",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/initiate clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -254,7 +254,7 @@
   {
     "name": "initiate exalted spectre fortitude",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/initiate exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -282,7 +282,7 @@
   {
     "name": "initiate radiant dreadblade wisdom",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/initiate radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -310,7 +310,7 @@
   {
     "name": "initiate gargoyle scoundrel vigilance",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/initiate gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -338,7 +338,7 @@
   {
     "name": "initiate blood acrobat luck",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/initiate blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -366,7 +366,7 @@
   {
     "name": "initiate elder stalker reflexes",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/initiate elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -394,7 +394,7 @@
   {
     "name": "initiate abyssal spectre fortitude",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/initiate abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -436,7 +436,7 @@
   {
     "name": "apprentice clandestine stalker reflexes",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/apprentice clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -464,7 +464,7 @@
   {
     "name": "apprentice exalted spectre fortitude",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/apprentice exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -492,7 +492,7 @@
   {
     "name": "apprentice radiant dreadblade wisdom",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/apprentice radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -520,7 +520,7 @@
   {
     "name": "apprentice gargoyle scoundrel vigilance",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/apprentice gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -548,7 +548,7 @@
   {
     "name": "apprentice blood acrobat luck",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/apprentice blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -576,7 +576,7 @@
   {
     "name": "apprentice elder stalker reflexes",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/apprentice elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -604,7 +604,7 @@
   {
     "name": "apprentice abyssal spectre fortitude",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/apprentice abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -646,7 +646,7 @@
   {
     "name": "journeyman clandestine stalker reflexes",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/journeyman clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -674,7 +674,7 @@
   {
     "name": "journeyman exalted spectre fortitude",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/journeyman exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -702,7 +702,7 @@
   {
     "name": "journeyman radiant dreadblade wisdom",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/journeyman radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -730,7 +730,7 @@
   {
     "name": "journeyman gargoyle scoundrel vigilance",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/journeyman gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -758,7 +758,7 @@
   {
     "name": "journeyman blood acrobat luck",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/journeyman blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -786,7 +786,7 @@
   {
     "name": "journeyman elder stalker reflexes",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/journeyman elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -814,7 +814,7 @@
   {
     "name": "journeyman abyssal spectre fortitude",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/journeyman abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -856,7 +856,7 @@
   {
     "name": "adept clandestine stalker reflexes",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/adept clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -884,7 +884,7 @@
   {
     "name": "adept exalted spectre fortitude",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/adept exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -912,7 +912,7 @@
   {
     "name": "adept radiant dreadblade wisdom",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/adept radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -940,7 +940,7 @@
   {
     "name": "adept gargoyle scoundrel vigilance",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/adept gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -968,7 +968,7 @@
   {
     "name": "adept blood acrobat luck",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/adept blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -996,7 +996,7 @@
   {
     "name": "adept elder stalker reflexes",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/adept elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -1024,7 +1024,7 @@
   {
     "name": "adept abyssal spectre fortitude",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/adept abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -1066,7 +1066,7 @@
   {
     "name": "expert clandestine stalker reflexes",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/expert clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -1094,7 +1094,7 @@
   {
     "name": "expert exalted spectre fortitude",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/expert exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -1122,7 +1122,7 @@
   {
     "name": "expert radiant dreadblade wisdom",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/expert radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -1150,7 +1150,7 @@
   {
     "name": "expert gargoyle scoundrel vigilance",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/expert gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -1178,7 +1178,7 @@
   {
     "name": "expert blood acrobat luck",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/expert blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -1206,7 +1206,7 @@
   {
     "name": "expert elder stalker reflexes",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/expert elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -1234,7 +1234,7 @@
   {
     "name": "expert abyssal spectre fortitude",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/expert abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -1276,7 +1276,7 @@
   {
     "name": "elite clandestine stalker reflexes",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/elite clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -1304,7 +1304,7 @@
   {
     "name": "elite exalted spectre fortitude",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/elite exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -1332,7 +1332,7 @@
   {
     "name": "elite radiant dreadblade wisdom",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/elite radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -1360,7 +1360,7 @@
   {
     "name": "elite gargoyle scoundrel vigilance",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/elite gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -1388,7 +1388,7 @@
   {
     "name": "elite blood acrobat luck",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/elite blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -1416,7 +1416,7 @@
   {
     "name": "elite elder stalker reflexes",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/elite elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -1444,7 +1444,7 @@
   {
     "name": "elite abyssal spectre fortitude",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/elite abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -1486,7 +1486,7 @@
   {
     "name": "veteran clandestine stalker reflexes",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/veteran clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -1514,7 +1514,7 @@
   {
     "name": "veteran exalted spectre fortitude",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/veteran exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -1542,7 +1542,7 @@
   {
     "name": "veteran radiant dreadblade wisdom",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/veteran radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -1570,7 +1570,7 @@
   {
     "name": "veteran gargoyle scoundrel vigilance",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/veteran gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -1598,7 +1598,7 @@
   {
     "name": "veteran blood acrobat luck",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/veteran blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -1626,7 +1626,7 @@
   {
     "name": "veteran elder stalker reflexes",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/veteran elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -1654,7 +1654,7 @@
   {
     "name": "veteran abyssal spectre fortitude",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/veteran abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -1696,7 +1696,7 @@
   {
     "name": "master clandestine stalker reflexes",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/master clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -1724,7 +1724,7 @@
   {
     "name": "master exalted spectre fortitude",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/master exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -1752,7 +1752,7 @@
   {
     "name": "master radiant dreadblade wisdom",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/master radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -1780,7 +1780,7 @@
   {
     "name": "master gargoyle scoundrel vigilance",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/master gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -1808,7 +1808,7 @@
   {
     "name": "master blood acrobat luck",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/master blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -1836,7 +1836,7 @@
   {
     "name": "master elder stalker reflexes",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/master elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -1864,7 +1864,7 @@
   {
     "name": "master abyssal spectre fortitude",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/master abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -1906,7 +1906,7 @@
   {
     "name": "grandmaster clandestine stalker reflexes",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/grandmaster clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -1934,7 +1934,7 @@
   {
     "name": "grandmaster exalted spectre fortitude",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/grandmaster exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -1962,7 +1962,7 @@
   {
     "name": "grandmaster radiant dreadblade wisdom",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/grandmaster radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -1990,7 +1990,7 @@
   {
     "name": "grandmaster gargoyle scoundrel vigilance",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/grandmaster gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -2018,7 +2018,7 @@
   {
     "name": "grandmaster blood acrobat luck",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/grandmaster blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -2046,7 +2046,7 @@
   {
     "name": "grandmaster elder stalker reflexes",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/grandmaster elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -2074,7 +2074,7 @@
   {
     "name": "grandmaster abyssal spectre fortitude",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/grandmaster abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -2116,7 +2116,7 @@
   {
     "name": "sovereign clandestine stalker reflexes",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/sovereign clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -2144,7 +2144,7 @@
   {
     "name": "sovereign exalted spectre fortitude",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/sovereign exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -2172,7 +2172,7 @@
   {
     "name": "sovereign radiant dreadblade wisdom",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/sovereign radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -2200,7 +2200,7 @@
   {
     "name": "sovereign gargoyle scoundrel vigilance",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/sovereign gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -2228,7 +2228,7 @@
   {
     "name": "sovereign blood acrobat luck",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/sovereign blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -2256,7 +2256,7 @@
   {
     "name": "sovereign elder stalker reflexes",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/sovereign elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -2284,7 +2284,7 @@
   {
     "name": "sovereign abyssal spectre fortitude",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/sovereign abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -2326,7 +2326,7 @@
   {
     "name": "exalted clandestine stalker reflexes",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/exalted clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -2354,7 +2354,7 @@
   {
     "name": "exalted exalted spectre fortitude",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/exalted exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -2382,7 +2382,7 @@
   {
     "name": "exalted radiant dreadblade wisdom",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/exalted radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -2410,7 +2410,7 @@
   {
     "name": "exalted gargoyle scoundrel vigilance",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/exalted gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -2438,7 +2438,7 @@
   {
     "name": "exalted blood acrobat luck",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/exalted blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -2466,7 +2466,7 @@
   {
     "name": "exalted elder stalker reflexes",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/exalted elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -2494,7 +2494,7 @@
   {
     "name": "exalted abyssal spectre fortitude",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/exalted abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -2536,7 +2536,7 @@
   {
     "name": "gladiator clandestine stalker reflexes",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/gladiator clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -2564,7 +2564,7 @@
   {
     "name": "gladiator exalted spectre fortitude",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/gladiator exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -2592,7 +2592,7 @@
   {
     "name": "gladiator radiant dreadblade wisdom",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/gladiator radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -2620,7 +2620,7 @@
   {
     "name": "gladiator gargoyle scoundrel vigilance",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/gladiator gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -2648,7 +2648,7 @@
   {
     "name": "gladiator blood acrobat luck",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/gladiator blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -2676,7 +2676,7 @@
   {
     "name": "gladiator elder stalker reflexes",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/gladiator elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -2704,7 +2704,7 @@
   {
     "name": "gladiator abyssal spectre fortitude",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/gladiator abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -2746,7 +2746,7 @@
   {
     "name": "heroic clandestine stalker reflexes",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/heroic clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -2774,7 +2774,7 @@
   {
     "name": "heroic exalted spectre fortitude",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/heroic exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -2802,7 +2802,7 @@
   {
     "name": "heroic radiant dreadblade wisdom",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/heroic radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -2830,7 +2830,7 @@
   {
     "name": "heroic gargoyle scoundrel vigilance",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/heroic gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -2858,7 +2858,7 @@
   {
     "name": "heroic blood acrobat luck",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/heroic blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -2886,7 +2886,7 @@
   {
     "name": "heroic elder stalker reflexes",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/heroic elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -2914,7 +2914,7 @@
   {
     "name": "heroic abyssal spectre fortitude",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/heroic abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -2956,7 +2956,7 @@
   {
     "name": "champion clandestine stalker reflexes",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/champion clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -2984,7 +2984,7 @@
   {
     "name": "champion exalted spectre fortitude",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/champion exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -3012,7 +3012,7 @@
   {
     "name": "champion radiant dreadblade wisdom",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/champion radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -3040,7 +3040,7 @@
   {
     "name": "champion gargoyle scoundrel vigilance",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/champion gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -3068,7 +3068,7 @@
   {
     "name": "champion blood acrobat luck",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/champion blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -3096,7 +3096,7 @@
   {
     "name": "champion elder stalker reflexes",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/champion elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -3124,7 +3124,7 @@
   {
     "name": "champion abyssal spectre fortitude",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/champion abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -3166,7 +3166,7 @@
   {
     "name": "overlord clandestine stalker reflexes",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/overlord clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -3194,7 +3194,7 @@
   {
     "name": "overlord exalted spectre fortitude",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/overlord exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -3222,7 +3222,7 @@
   {
     "name": "overlord radiant dreadblade wisdom",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/overlord radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -3250,7 +3250,7 @@
   {
     "name": "overlord gargoyle scoundrel vigilance",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/overlord gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -3278,7 +3278,7 @@
   {
     "name": "overlord blood acrobat luck",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/overlord blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -3306,7 +3306,7 @@
   {
     "name": "overlord elder stalker reflexes",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/overlord elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -3334,7 +3334,7 @@
   {
     "name": "overlord abyssal spectre fortitude",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/overlord abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -3376,7 +3376,7 @@
   {
     "name": "epic clandestine stalker reflexes",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/epic clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -3404,7 +3404,7 @@
   {
     "name": "epic exalted spectre fortitude",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/epic exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -3432,7 +3432,7 @@
   {
     "name": "epic radiant dreadblade wisdom",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/epic radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -3460,7 +3460,7 @@
   {
     "name": "epic gargoyle scoundrel vigilance",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/epic gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -3488,7 +3488,7 @@
   {
     "name": "epic blood acrobat luck",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/epic blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -3516,7 +3516,7 @@
   {
     "name": "epic elder stalker reflexes",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/epic elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -3544,7 +3544,7 @@
   {
     "name": "epic abyssal spectre fortitude",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/epic abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -3586,7 +3586,7 @@
   {
     "name": "eldritch clandestine stalker reflexes",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/eldritch clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -3614,7 +3614,7 @@
   {
     "name": "eldritch exalted spectre fortitude",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/eldritch exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -3642,7 +3642,7 @@
   {
     "name": "eldritch radiant dreadblade wisdom",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/eldritch radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -3670,7 +3670,7 @@
   {
     "name": "eldritch gargoyle scoundrel vigilance",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/eldritch gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -3698,7 +3698,7 @@
   {
     "name": "eldritch blood acrobat luck",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/eldritch blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -3726,7 +3726,7 @@
   {
     "name": "eldritch elder stalker reflexes",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/eldritch elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -3754,7 +3754,7 @@
   {
     "name": "eldritch abyssal spectre fortitude",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/eldritch abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -3796,7 +3796,7 @@
   {
     "name": "mythic clandestine stalker reflexes",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/mythic clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -3824,7 +3824,7 @@
   {
     "name": "mythic exalted spectre fortitude",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/mythic exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -3852,7 +3852,7 @@
   {
     "name": "mythic radiant dreadblade wisdom",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/mythic radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -3880,7 +3880,7 @@
   {
     "name": "mythic gargoyle scoundrel vigilance",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/mythic gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -3908,7 +3908,7 @@
   {
     "name": "mythic blood acrobat luck",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/mythic blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -3936,7 +3936,7 @@
   {
     "name": "mythic elder stalker reflexes",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/mythic elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -3964,7 +3964,7 @@
   {
     "name": "mythic abyssal spectre fortitude",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/mythic abyssal spectre fortitude.png",
     "theme": "speed"
   },
@@ -4006,7 +4006,7 @@
   {
     "name": "legendary clandestine stalker reflexes",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/legendary clandestine stalker reflexes.png",
     "theme": "speed"
   },
@@ -4034,7 +4034,7 @@
   {
     "name": "legendary exalted spectre fortitude",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/legendary exalted spectre fortitude.png",
     "theme": "stealth"
   },
@@ -4062,7 +4062,7 @@
   {
     "name": "legendary radiant dreadblade wisdom",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/legendary radiant dreadblade wisdom.png",
     "theme": "survival"
   },
@@ -4090,7 +4090,7 @@
   {
     "name": "legendary gargoyle scoundrel vigilance",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/legendary gargoyle scoundrel vigilance.png",
     "theme": "speed"
   },
@@ -4118,7 +4118,7 @@
   {
     "name": "legendary blood acrobat luck",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/legendary blood acrobat luck.png",
     "theme": "stealth"
   },
@@ -4146,7 +4146,7 @@
   {
     "name": "legendary elder stalker reflexes",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/legendary elder stalker reflexes.png",
     "theme": "survival"
   },
@@ -4174,7 +4174,7 @@
   {
     "name": "legendary abyssal spectre fortitude",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/perks/legendary abyssal spectre fortitude.png",
     "theme": "speed"
   },

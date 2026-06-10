@@ -1,16 +1,16 @@
+use crate::core::catalog::{get_equipment, GeneratedEquipment};
 use crate::core::classes::Class;
 use crate::core::constants::{NAMES, START_CHARACTERISTIC};
 use crate::core::pets::Pet;
 use crate::core::races::Race;
 use bevy::prelude::*;
+use rand::prelude::IndexedRandom;
+use rand::rng;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use rand::prelude::IndexedRandom;
-use rand::rng;
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter, EnumString};
-use crate::core::catalog::{get_equipment, GeneratedEquipment};
 
 #[derive(EnumIter, Clone, Copy, Debug, Display, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum Sex {
@@ -279,17 +279,15 @@ impl Player {
         (weapon_speed + dex_bonus).max(0.3)
     }
 
-    /// Total armor rating (base from constitution plus equipment bonuses).
-    pub fn armor_value(&self) -> i32 {
+    pub fn defense_value(&self) -> i32 {
         self.constitution() as i32 / 4
-            + self.equipped_equipment().iter().map(|w| w.armor).sum::<i32>()
+            + self.equipped_equipment().iter().map(|w| w.defense).sum::<i32>()
     }
 
-    /// Initiative determines turn order (base from dexterity plus equipment bonuses).
     pub fn initiative(&self) -> i32 {
         let base_init = self.dexterity() as i32 / 2
             + self.equipped_equipment().iter().map(|w| w.initiative).sum::<i32>();
-        if matches!(self.class, Class::Rogue) {
+        if matches!(self.class, Class::Assassin) {
             base_init + 2
         } else {
             base_init
@@ -298,7 +296,7 @@ impl Player {
 
     /// (height_cm, weight_kg). Height and weight are derived deterministically from name and race.
     pub fn vitals(&self) -> (u32, u32) {
-        let (_age_r, height_r, _weight_r) = self.race.vital_ranges();
+        let (_, height_r, _) = self.race.vital_ranges();
 
         let mut hasher = DefaultHasher::new();
         self.name.hash(&mut hasher);

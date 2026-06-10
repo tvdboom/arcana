@@ -10,7 +10,7 @@ use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
 use crate::core::pets::{Pet, PetKind};
-use crate::core::player::{Attribute, Player, Sex, AgeStage};
+use crate::core::player::{AgeStage, Attribute, Player, Sex};
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
@@ -19,6 +19,9 @@ use crate::utils::NameFromEnum;
 use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::window::SystemCursorIcon;
 use rand::{rng, RngExt};
+
+const AGE_SLIDER_WIDTH: f32 = 280.0;
+const AGE_VALUE_WIDTH: f32 = 240.0;
 
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
 pub struct SexButton(pub Sex);
@@ -41,9 +44,6 @@ pub struct PointsRemainingText;
 #[derive(Component)]
 pub struct CreateCharacterContinueBtn;
 
-pub const AGE_SLIDER_WIDTH: f32 = 280.0;
-pub const AGE_VALUE_WIDTH: f32 = 240.0;
-
 #[derive(Component)]
 pub struct AgeSliderHandle;
 
@@ -62,16 +62,19 @@ pub struct AgeStageButton(pub u32);
 #[derive(Component)]
 pub struct PetNameText;
 
-
 fn creation_attribute_value(player: &Player, attr: Attribute) -> u32 {
     let value = match attr {
         Attribute::Strength => {
             player.strength as i32 + player.sex.characteristic_mod(Attribute::Strength)
         },
         Attribute::Dexterity => player.dexterity as i32,
-        Attribute::Constitution => player.constitution as i32 + player.stage.characteristic_mod(Attribute::Constitution),
+        Attribute::Constitution => {
+            player.constitution as i32 + player.stage.characteristic_mod(Attribute::Constitution)
+        },
         Attribute::Intelligence => player.intelligence as i32,
-        Attribute::Wisdom => player.wisdom as i32 + player.stage.characteristic_mod(Attribute::Wisdom),
+        Attribute::Wisdom => {
+            player.wisdom as i32 + player.stage.characteristic_mod(Attribute::Wisdom)
+        },
         Attribute::Charisma => {
             player.charisma as i32 + player.sex.characteristic_mod(Attribute::Charisma)
         },
@@ -811,7 +814,8 @@ pub fn setup_character_creation(
                                                         height: Val::Px(24.),
                                                         top: Val::Px(3.),
                                                         left: Val::Px(
-                                                            player.stage.frac() * AGE_SLIDER_WIDTH - 12.,
+                                                            player.stage.frac() * AGE_SLIDER_WIDTH
+                                                                - 12.,
                                                         ),
                                                         border: UiRect::all(Val::Px(2.)),
                                                         border_radius: BorderRadius::all(Val::Px(
@@ -851,10 +855,8 @@ pub fn setup_character_creation(
                                         .with_children(|parent| {
                                             parent.spawn((
                                                 add_text(
-                                                    localization.get(
-                                                        player.stage.to_lowername(),
-                                                        lang,
-                                                    ),
+                                                    localization
+                                                        .get(player.stage.to_lowername(), lang),
                                                     "bold",
                                                     BUTTON_TEXT_SIZE,
                                                     &assets,
@@ -1048,7 +1050,7 @@ fn on_age_slider_drag(
     set_age_slider_position(&mut handle_q, &mut value_node_q, relative_x);
     let stage = age_stage_from_relative_x(relative_x);
     set_age_value_position(&mut value_node_q, stage as f32 / 4.0 * AGE_SLIDER_WIDTH);
-    
+
     // Generate random age within the range for this race and stage
     let age_stage = AgeStage::from_u32(stage);
     let (min_age, max_age) = player.race.age_stage_range(age_stage);
@@ -1344,7 +1346,7 @@ impl SelectionItem for Class {
         match self {
             Class::Mage(_) => format!("mage_{}_{}", race_key, sex_key),
             Class::Warrior => format!("warrior_{}_{}", race_key, sex_key),
-            Class::Rogue => format!("rogue_{}_{}", race_key, sex_key),
+            Class::Assassin => format!("assassin_{}_{}", race_key, sex_key),
             Class::Druid => format!("druid_{}_{}", race_key, sex_key),
         }
     }
@@ -1409,12 +1411,7 @@ impl SelectionItem for PetKind {
     }
 
     fn items() -> Vec<Self> {
-        vec![
-            PetKind::Rat,
-            PetKind::Snake,
-            PetKind::Wolf,
-            PetKind::Vulture,
-        ]
+        vec![PetKind::Rat, PetKind::Snake, PetKind::Wolf, PetKind::Vulture]
     }
 }
 

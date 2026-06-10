@@ -20,7 +20,7 @@
   {
     "name": "novice clandestine devious slash",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/novice clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 5,
@@ -56,7 +56,7 @@
   {
     "name": "novice exalted phantom cut",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/novice exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -92,7 +92,7 @@
   {
     "name": "novice radiant shadow thrust",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/novice radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 3,
@@ -128,7 +128,7 @@
   {
     "name": "novice gargoyle vanish assault",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/novice gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 7,
@@ -164,7 +164,7 @@
   {
     "name": "novice blood cunning toxin",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/novice blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -200,7 +200,7 @@
   {
     "name": "novice elder devious slash",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/novice elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 5,
@@ -236,7 +236,7 @@
   {
     "name": "novice abyssal phantom cut",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/novice abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 4,
@@ -290,7 +290,7 @@
   {
     "name": "initiate clandestine devious slash",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/initiate clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 8,
@@ -326,7 +326,7 @@
   {
     "name": "initiate exalted phantom cut",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/initiate exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -362,7 +362,7 @@
   {
     "name": "initiate radiant shadow thrust",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/initiate radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 6,
@@ -398,7 +398,7 @@
   {
     "name": "initiate gargoyle vanish assault",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/initiate gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 10,
@@ -434,7 +434,7 @@
   {
     "name": "initiate blood cunning toxin",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/initiate blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -470,7 +470,7 @@
   {
     "name": "initiate elder devious slash",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/initiate elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 8,
@@ -506,7 +506,7 @@
   {
     "name": "initiate abyssal phantom cut",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/initiate abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 7,
@@ -560,7 +560,7 @@
   {
     "name": "apprentice clandestine devious slash",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/apprentice clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 11,
@@ -596,7 +596,7 @@
   {
     "name": "apprentice exalted phantom cut",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/apprentice exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -632,7 +632,7 @@
   {
     "name": "apprentice radiant shadow thrust",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/apprentice radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 9,
@@ -668,7 +668,7 @@
   {
     "name": "apprentice gargoyle vanish assault",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/apprentice gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 13,
@@ -704,7 +704,7 @@
   {
     "name": "apprentice blood cunning toxin",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/apprentice blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -740,7 +740,7 @@
   {
     "name": "apprentice elder devious slash",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/apprentice elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 11,
@@ -776,7 +776,7 @@
   {
     "name": "apprentice abyssal phantom cut",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/apprentice abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 10,
@@ -830,7 +830,7 @@
   {
     "name": "journeyman clandestine devious slash",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/journeyman clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 14,
@@ -866,7 +866,7 @@
   {
     "name": "journeyman exalted phantom cut",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/journeyman exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -902,7 +902,7 @@
   {
     "name": "journeyman radiant shadow thrust",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/journeyman radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 12,
@@ -938,7 +938,7 @@
   {
     "name": "journeyman gargoyle vanish assault",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/journeyman gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 16,
@@ -974,7 +974,7 @@
   {
     "name": "journeyman blood cunning toxin",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/journeyman blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -1010,7 +1010,7 @@
   {
     "name": "journeyman elder devious slash",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/journeyman elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 14,
@@ -1046,7 +1046,7 @@
   {
     "name": "journeyman abyssal phantom cut",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/journeyman abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 13,
@@ -1100,7 +1100,7 @@
   {
     "name": "adept clandestine devious slash",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/adept clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 17,
@@ -1136,7 +1136,7 @@
   {
     "name": "adept exalted phantom cut",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/adept exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -1172,7 +1172,7 @@
   {
     "name": "adept radiant shadow thrust",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/adept radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 15,
@@ -1208,7 +1208,7 @@
   {
     "name": "adept gargoyle vanish assault",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/adept gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 19,
@@ -1244,7 +1244,7 @@
   {
     "name": "adept blood cunning toxin",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/adept blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -1280,7 +1280,7 @@
   {
     "name": "adept elder devious slash",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/adept elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 17,
@@ -1316,7 +1316,7 @@
   {
     "name": "adept abyssal phantom cut",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/adept abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 16,
@@ -1370,7 +1370,7 @@
   {
     "name": "expert clandestine devious slash",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/expert clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 20,
@@ -1406,7 +1406,7 @@
   {
     "name": "expert exalted phantom cut",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/expert exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -1442,7 +1442,7 @@
   {
     "name": "expert radiant shadow thrust",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/expert radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 18,
@@ -1478,7 +1478,7 @@
   {
     "name": "expert gargoyle vanish assault",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/expert gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 22,
@@ -1514,7 +1514,7 @@
   {
     "name": "expert blood cunning toxin",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/expert blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -1550,7 +1550,7 @@
   {
     "name": "expert elder devious slash",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/expert elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 20,
@@ -1586,7 +1586,7 @@
   {
     "name": "expert abyssal phantom cut",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/expert abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 19,
@@ -1640,7 +1640,7 @@
   {
     "name": "elite clandestine devious slash",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/elite clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 23,
@@ -1676,7 +1676,7 @@
   {
     "name": "elite exalted phantom cut",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/elite exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -1712,7 +1712,7 @@
   {
     "name": "elite radiant shadow thrust",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/elite radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 21,
@@ -1748,7 +1748,7 @@
   {
     "name": "elite gargoyle vanish assault",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/elite gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 25,
@@ -1784,7 +1784,7 @@
   {
     "name": "elite blood cunning toxin",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/elite blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -1820,7 +1820,7 @@
   {
     "name": "elite elder devious slash",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/elite elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 23,
@@ -1856,7 +1856,7 @@
   {
     "name": "elite abyssal phantom cut",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/elite abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 22,
@@ -1910,7 +1910,7 @@
   {
     "name": "veteran clandestine devious slash",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/veteran clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 26,
@@ -1946,7 +1946,7 @@
   {
     "name": "veteran exalted phantom cut",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/veteran exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -1982,7 +1982,7 @@
   {
     "name": "veteran radiant shadow thrust",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/veteran radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 24,
@@ -2018,7 +2018,7 @@
   {
     "name": "veteran gargoyle vanish assault",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/veteran gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 28,
@@ -2054,7 +2054,7 @@
   {
     "name": "veteran blood cunning toxin",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/veteran blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -2090,7 +2090,7 @@
   {
     "name": "veteran elder devious slash",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/veteran elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 26,
@@ -2126,7 +2126,7 @@
   {
     "name": "veteran abyssal phantom cut",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/veteran abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 25,
@@ -2180,7 +2180,7 @@
   {
     "name": "master clandestine devious slash",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/master clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 29,
@@ -2216,7 +2216,7 @@
   {
     "name": "master exalted phantom cut",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/master exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -2252,7 +2252,7 @@
   {
     "name": "master radiant shadow thrust",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/master radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 27,
@@ -2288,7 +2288,7 @@
   {
     "name": "master gargoyle vanish assault",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/master gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 31,
@@ -2324,7 +2324,7 @@
   {
     "name": "master blood cunning toxin",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/master blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -2360,7 +2360,7 @@
   {
     "name": "master elder devious slash",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/master elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 29,
@@ -2396,7 +2396,7 @@
   {
     "name": "master abyssal phantom cut",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/master abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 28,
@@ -2450,7 +2450,7 @@
   {
     "name": "grandmaster clandestine devious slash",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/grandmaster clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 32,
@@ -2486,7 +2486,7 @@
   {
     "name": "grandmaster exalted phantom cut",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/grandmaster exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -2522,7 +2522,7 @@
   {
     "name": "grandmaster radiant shadow thrust",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/grandmaster radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 30,
@@ -2558,7 +2558,7 @@
   {
     "name": "grandmaster gargoyle vanish assault",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/grandmaster gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 34,
@@ -2594,7 +2594,7 @@
   {
     "name": "grandmaster blood cunning toxin",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/grandmaster blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -2630,7 +2630,7 @@
   {
     "name": "grandmaster elder devious slash",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/grandmaster elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 32,
@@ -2666,7 +2666,7 @@
   {
     "name": "grandmaster abyssal phantom cut",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/grandmaster abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 31,
@@ -2720,7 +2720,7 @@
   {
     "name": "sovereign clandestine devious slash",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/sovereign clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 35,
@@ -2756,7 +2756,7 @@
   {
     "name": "sovereign exalted phantom cut",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/sovereign exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -2792,7 +2792,7 @@
   {
     "name": "sovereign radiant shadow thrust",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/sovereign radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 33,
@@ -2828,7 +2828,7 @@
   {
     "name": "sovereign gargoyle vanish assault",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/sovereign gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 37,
@@ -2864,7 +2864,7 @@
   {
     "name": "sovereign blood cunning toxin",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/sovereign blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -2900,7 +2900,7 @@
   {
     "name": "sovereign elder devious slash",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/sovereign elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 35,
@@ -2936,7 +2936,7 @@
   {
     "name": "sovereign abyssal phantom cut",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/sovereign abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 34,
@@ -2990,7 +2990,7 @@
   {
     "name": "exalted clandestine devious slash",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/exalted clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 38,
@@ -3026,7 +3026,7 @@
   {
     "name": "exalted exalted phantom cut",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/exalted exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -3062,7 +3062,7 @@
   {
     "name": "exalted radiant shadow thrust",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/exalted radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 36,
@@ -3098,7 +3098,7 @@
   {
     "name": "exalted gargoyle vanish assault",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/exalted gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 40,
@@ -3134,7 +3134,7 @@
   {
     "name": "exalted blood cunning toxin",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/exalted blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -3170,7 +3170,7 @@
   {
     "name": "exalted elder devious slash",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/exalted elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 38,
@@ -3206,7 +3206,7 @@
   {
     "name": "exalted abyssal phantom cut",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/exalted abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 37,
@@ -3260,7 +3260,7 @@
   {
     "name": "gladiator clandestine devious slash",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/gladiator clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 41,
@@ -3296,7 +3296,7 @@
   {
     "name": "gladiator exalted phantom cut",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/gladiator exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -3332,7 +3332,7 @@
   {
     "name": "gladiator radiant shadow thrust",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/gladiator radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 39,
@@ -3368,7 +3368,7 @@
   {
     "name": "gladiator gargoyle vanish assault",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/gladiator gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 43,
@@ -3404,7 +3404,7 @@
   {
     "name": "gladiator blood cunning toxin",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/gladiator blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -3440,7 +3440,7 @@
   {
     "name": "gladiator elder devious slash",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/gladiator elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 41,
@@ -3476,7 +3476,7 @@
   {
     "name": "gladiator abyssal phantom cut",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/gladiator abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 40,
@@ -3530,7 +3530,7 @@
   {
     "name": "heroic clandestine devious slash",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/heroic clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 44,
@@ -3566,7 +3566,7 @@
   {
     "name": "heroic exalted phantom cut",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/heroic exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -3602,7 +3602,7 @@
   {
     "name": "heroic radiant shadow thrust",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/heroic radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 42,
@@ -3638,7 +3638,7 @@
   {
     "name": "heroic gargoyle vanish assault",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/heroic gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 46,
@@ -3674,7 +3674,7 @@
   {
     "name": "heroic blood cunning toxin",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/heroic blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -3710,7 +3710,7 @@
   {
     "name": "heroic elder devious slash",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/heroic elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 44,
@@ -3746,7 +3746,7 @@
   {
     "name": "heroic abyssal phantom cut",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/heroic abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 43,
@@ -3800,7 +3800,7 @@
   {
     "name": "champion clandestine devious slash",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/champion clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 47,
@@ -3836,7 +3836,7 @@
   {
     "name": "champion exalted phantom cut",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/champion exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -3872,7 +3872,7 @@
   {
     "name": "champion radiant shadow thrust",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/champion radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 45,
@@ -3908,7 +3908,7 @@
   {
     "name": "champion gargoyle vanish assault",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/champion gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 49,
@@ -3944,7 +3944,7 @@
   {
     "name": "champion blood cunning toxin",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/champion blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -3980,7 +3980,7 @@
   {
     "name": "champion elder devious slash",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/champion elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 47,
@@ -4016,7 +4016,7 @@
   {
     "name": "champion abyssal phantom cut",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/champion abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 46,
@@ -4070,7 +4070,7 @@
   {
     "name": "overlord clandestine devious slash",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/overlord clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 50,
@@ -4106,7 +4106,7 @@
   {
     "name": "overlord exalted phantom cut",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/overlord exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -4142,7 +4142,7 @@
   {
     "name": "overlord radiant shadow thrust",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/overlord radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 48,
@@ -4178,7 +4178,7 @@
   {
     "name": "overlord gargoyle vanish assault",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/overlord gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 52,
@@ -4214,7 +4214,7 @@
   {
     "name": "overlord blood cunning toxin",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/overlord blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -4250,7 +4250,7 @@
   {
     "name": "overlord elder devious slash",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/overlord elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 50,
@@ -4286,7 +4286,7 @@
   {
     "name": "overlord abyssal phantom cut",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/overlord abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 49,
@@ -4340,7 +4340,7 @@
   {
     "name": "epic clandestine devious slash",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/epic clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 53,
@@ -4376,7 +4376,7 @@
   {
     "name": "epic exalted phantom cut",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/epic exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -4412,7 +4412,7 @@
   {
     "name": "epic radiant shadow thrust",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/epic radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 51,
@@ -4448,7 +4448,7 @@
   {
     "name": "epic gargoyle vanish assault",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/epic gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 55,
@@ -4484,7 +4484,7 @@
   {
     "name": "epic blood cunning toxin",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/epic blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -4520,7 +4520,7 @@
   {
     "name": "epic elder devious slash",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/epic elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 53,
@@ -4556,7 +4556,7 @@
   {
     "name": "epic abyssal phantom cut",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/epic abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 52,
@@ -4610,7 +4610,7 @@
   {
     "name": "eldritch clandestine devious slash",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/eldritch clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 56,
@@ -4646,7 +4646,7 @@
   {
     "name": "eldritch exalted phantom cut",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/eldritch exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -4682,7 +4682,7 @@
   {
     "name": "eldritch radiant shadow thrust",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/eldritch radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 54,
@@ -4718,7 +4718,7 @@
   {
     "name": "eldritch gargoyle vanish assault",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/eldritch gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 58,
@@ -4754,7 +4754,7 @@
   {
     "name": "eldritch blood cunning toxin",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/eldritch blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -4790,7 +4790,7 @@
   {
     "name": "eldritch elder devious slash",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/eldritch elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 56,
@@ -4826,7 +4826,7 @@
   {
     "name": "eldritch abyssal phantom cut",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/eldritch abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 55,
@@ -4880,7 +4880,7 @@
   {
     "name": "mythic clandestine devious slash",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/mythic clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 59,
@@ -4916,7 +4916,7 @@
   {
     "name": "mythic exalted phantom cut",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/mythic exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -4952,7 +4952,7 @@
   {
     "name": "mythic radiant shadow thrust",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/mythic radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 57,
@@ -4988,7 +4988,7 @@
   {
     "name": "mythic gargoyle vanish assault",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/mythic gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 61,
@@ -5024,7 +5024,7 @@
   {
     "name": "mythic blood cunning toxin",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/mythic blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -5060,7 +5060,7 @@
   {
     "name": "mythic elder devious slash",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/mythic elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 59,
@@ -5096,7 +5096,7 @@
   {
     "name": "mythic abyssal phantom cut",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/mythic abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 58,
@@ -5150,7 +5150,7 @@
   {
     "name": "legendary clandestine devious slash",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/legendary clandestine devious slash.png",
     "magic_type": "Ice",
     "mana_cost": 62,
@@ -5186,7 +5186,7 @@
   {
     "name": "legendary exalted phantom cut",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/legendary exalted phantom cut.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -5222,7 +5222,7 @@
   {
     "name": "legendary radiant shadow thrust",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/legendary radiant shadow thrust.png",
     "magic_type": "Nature",
     "mana_cost": 60,
@@ -5258,7 +5258,7 @@
   {
     "name": "legendary gargoyle vanish assault",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/legendary gargoyle vanish assault.png",
     "magic_type": "Ice",
     "mana_cost": 64,
@@ -5294,7 +5294,7 @@
   {
     "name": "legendary blood cunning toxin",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/legendary blood cunning toxin.png",
     "magic_type": "Physical",
     "mana_cost": 0,
@@ -5330,7 +5330,7 @@
   {
     "name": "legendary elder devious slash",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/legendary elder devious slash.png",
     "magic_type": "Nature",
     "mana_cost": 62,
@@ -5366,7 +5366,7 @@
   {
     "name": "legendary abyssal phantom cut",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/abilities/legendary abyssal phantom cut.png",
     "magic_type": "Ice",
     "mana_cost": 61,

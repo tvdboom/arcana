@@ -45,7 +45,7 @@ pub enum PlayingStat {
     Mana,
     Money,
     Attack,
-    Armor,
+    Defense,
     Initiative,
     ActionPoints,
     PetHealth,
@@ -222,7 +222,7 @@ fn weapon_stat_lines(
         }
     };
     push(weapon.attack, "attack");
-    push(weapon.armor, "armor");
+    push(weapon.defense, "defense");
     push(weapon.crit, "crit");
     push(weapon.initiative, "initiative");
     if weapon.attack_speed > 0.0 {
@@ -274,12 +274,12 @@ fn combat_breakdown(
             lines.extend(weapon_bonus_lines(player, |weapon| weapon.attack));
             lines
         },
-        PlayingStat::Armor => {
+        PlayingStat::Defense => {
             let mut lines = vec![signed_line(
                 localization.get("constitution", lang),
                 player.constitution() as i32 / 4,
             )];
-            lines.extend(weapon_bonus_lines(player, |weapon| weapon.armor));
+            lines.extend(weapon_bonus_lines(player, |weapon| weapon.defense));
             lines
         },
         PlayingStat::Initiative => {
@@ -288,8 +288,8 @@ fn combat_breakdown(
                 player.dexterity() as i32 / 2,
             )];
             lines.extend(weapon_bonus_lines(player, |weapon| weapon.initiative));
-            if matches!(player.class, Class::Rogue) {
-                lines.push(signed_line(localization.get("rogue", lang), 2));
+            if matches!(player.class, Class::Assassin) {
+                lines.push(signed_line(localization.get("assassin", lang), 2));
             }
             lines
         },
@@ -429,9 +429,9 @@ fn spawn_pet_tooltip(
                         assets,
                         localization,
                         lang,
-                        "armor",
-                        "armor_icon",
-                        stats.armor,
+                        "defense",
+                        "defense_icon",
+                        stats.defense,
                     );
                     spawn_pet_stat_box(
                         parent,
@@ -782,7 +782,7 @@ fn spawn_card(
         });
 }
 
-/// One of the three combat-stat boxes (attack / armor / initiative).
+/// One of the three combat-stat boxes (attack / defense / initiative).
 fn spawn_combat_stat(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1469,9 +1469,9 @@ fn spawn_stats_column(
                         assets,
                         localization,
                         lang,
-                        "armor",
-                        "armor_icon",
-                        PlayingStat::Armor,
+                        "defense",
+                        "defense_icon",
+                        PlayingStat::Defense,
                     );
                     spawn_combat_stat(
                         parent,
@@ -1815,7 +1815,7 @@ pub fn info_tooltip_system(
             InfoTooltip::Combat(stat) => {
                 let title_key = match stat {
                     PlayingStat::Attack => "attack",
-                    PlayingStat::Armor => "armor",
+                    PlayingStat::Defense => "defense",
                     PlayingStat::Initiative => "initiative",
                     _ => "",
                 };
@@ -2548,7 +2548,7 @@ pub fn update_playing_screen(
             ),
             PlayingStat::Money => format!("{}", player.gold),
             PlayingStat::Attack => format!("{}", player.attack_damage()),
-            PlayingStat::Armor => format!("{}", player.armor_value()),
+            PlayingStat::Defense => format!("{}", player.defense_value()),
             PlayingStat::Initiative => format!("{}", player.initiative()),
             PlayingStat::ActionPoints => format!("{}", player.ap),
             PlayingStat::PetHealth => {
@@ -2887,9 +2887,7 @@ pub fn handle_equipment_card_click(
                 player.inventory.remove(pos);
                 player.gold += sell_price;
                 play_audio_msg.write(PlayAudioMsg::new("coins"));
-                commands.entity(*window_e).insert(CursorIcon::from(
-                    SystemCursorIcon::Default,
-                ));
+                commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
             }
             return;
         }
@@ -2904,8 +2902,7 @@ pub fn handle_equipment_card_click(
                 if eq.kind == "consumable" {
                     let name = eq.name.to_lowercase();
                     let blocked = if name.contains("rejuvenation") {
-                        player.health >= player.max_health()
-                            && player.mana >= player.max_mana()
+                        player.health >= player.max_health() && player.mana >= player.max_mana()
                     } else if name.contains("health") || name.contains("antidote") {
                         player.health >= player.max_health()
                     } else if name.contains("mana") {
@@ -2989,9 +2986,7 @@ pub fn handle_equipment_slot_click(
 
                     player.gold += sell_price;
                     play_audio_msg.write(PlayAudioMsg::new("coins"));
-                    commands.entity(*window_e).insert(CursorIcon::from(
-                        SystemCursorIcon::Default,
-                    ));
+                    commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
                 }
             } else {
                 // Left-click: unequip item

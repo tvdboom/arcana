@@ -237,27 +237,27 @@ fs.mkdirSync(destAbilitiesDir, { recursive: true });
 fs.mkdirSync(destPerksDir, { recursive: true });
 
 // Constants for generation
-const classes = ['warrior', 'mage', 'rogue', 'druid'];
+const classes = ['warrior', 'mage', 'assassin', 'druid'];
 const kinds = ['helmet', 'armor', 'boots', 'one_hand_weapon', 'two_hand_weapon', 'offhand', 'gloves'];
 
 const abilityNamesAdjs = {
     warrior: ["Cleaving", "Savage", "Furious", "Shield", "Mighty", "Ironclad", "Heavy", "Devastating", "Relentless", "Colossal"],
     mage: ["Arcane", "Pyro", "Frost", "Static", "Spell", "Mana", "Gravity", "Lightning", "Chilling", "Cosmic"],
-    rogue: ["Shadow", "Silent", "Devious", "Toxic", "Vanish", "Swift", "Phantom", "Precision", "Cunning", "Venomous"],
+    assassin: ["Shadow", "Silent", "Devious", "Toxic", "Vanish", "Swift", "Phantom", "Precision", "Cunning", "Venomous"],
     druid: ["Verdant", "Gale", "Root", "Sunfire", "Forest", "Wild", "Bear", "Hurricane", "Vine", "Thorn"]
 };
 
 const abilityNamesNouns = {
     warrior: ["Strike", "Leap", "Smash", "Slam", "Overpower", "Whirlwind", "Charge", "Block", "Pummel", "Rend"],
     mage: ["Bolt", "Blast", "Shard", "Nova", "Beam", "Barrier", "Storm", "Touch", "Singularity", "Flash"],
-    rogue: ["Thrust", "Dart", "Slash", "Vanish", "Assault", "Pierce", "Cut", "Gambit", "Toxin", "Stab"],
+    assassin: ["Thrust", "Dart", "Slash", "Vanish", "Assault", "Pierce", "Cut", "Gambit", "Toxin", "Stab"],
     druid: ["Mend", "Grasp", "Wolf", "Howl", "Armor", "Burst", "Wrath", "Embrace", "Roar", "Twister"]
 };
 
 const perkNamesClasses = {
     warrior: ["Vanguard", "Executioner", "Bastion", "Battlerage", "Juggernaut", "Centurion", "Gladiator", "Overlord", "Conqueror", "Titan"],
     mage: ["Archmage", "Acolyte", "Evoker", "Spellcraft", "Sage", "Pyromancy", "Cryomancy", "Aether", "Scribe", "Cosmologist"],
-    rogue: ["Dreadblade", "Infiltrator", "Stalker", "Duellist", "Scoundrel", "Cutthroat", "Spectre", "Trickster", "Acrobat", "Shinobi"],
+    assassin: ["Dreadblade", "Infiltrator", "Stalker", "Duellist", "Scoundrel", "Cutthroat", "Spectre", "Trickster", "Acrobat", "Shinobi"],
     druid: ["Beastmaster", "Wildshaper", "Stormcaller", "Dryad", "Primalist", "Animist", "Woodsman", "Earthkeeper", "Ancient", "Grovewarden"]
 };
 
@@ -740,7 +740,7 @@ function getRealisticItemName(kind, fileName, index, lvl) {
             warrior: ["Valor", "Might", "Fortitude", "Brutality"],
             skin: ["Valor", "Might", "Fortitude", "Brutality"],
             mage: ["Arcana", "Focus", "Intelligence", "Evocation"],
-            rogue: ["Cunning", "Velocity", "Deception", "Shadows"],
+            assassin: ["Cunning", "Velocity", "Deception", "Shadows"],
             druid: ["Thorns", "Wilds", "Restoration", "Earth"]
         };
         const classAdjs = classPrefixes[class_hint] || classPrefixes.warrior;
@@ -753,7 +753,7 @@ function getRealisticItemName(kind, fileName, index, lvl) {
         const classAdjectives = {
             warrior: ["Vanguard", "Warmonger", "Guardian", "Bulwark", "Mighty", "Challenger"],
             mage: ["Arcane", "Pyromancer", "Spellweaver", "Sorcerer", "Evoker", "Acolyte"],
-            rogue: ["Assassin", "Shadow", "Silent", "Phantom", "Infiltrator", "Stalker"],
+            assassin: ["Assassin", "Shadow", "Silent", "Phantom", "Infiltrator", "Stalker"],
             druid: ["Barkskin", "Wildheart", "Forest", "Primal", "Nature", "Verdant"]
         };
         const classAdjs = classAdjectives[class_hint_eq] || classAdjectives.warrior;
@@ -780,7 +780,7 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
         const name_eq = getRealisticItemName(kind_eq, path.basename(src_eq), j, lvl);
 
         let attack = 0;
-        let armor = 0;
+        let defense = 0;
         let crit = 0;
         let initiative = j % 5 - 1;
         let attack_speed = 0.0;
@@ -796,7 +796,7 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
         }
 
         if (['helmet', 'armor', 'boots', 'offhand'].includes(kind_eq)) {
-            armor = Math.floor(lvl * 0.51) + 1;
+            defense = Math.floor(lvl * 0.51) + 1;
         }
 
         if (kind_eq === 'boots') {
@@ -804,7 +804,7 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
         }
 
         if (kind_eq === 'gloves') {
-            armor = Math.floor(lvl * 0.3) + 1;
+            defense = Math.floor(lvl * 0.3) + 1;
             crit = 2;
         }
 
@@ -820,7 +820,7 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
             price: price_eq,
             stats: {
                 attack,
-                armor,
+                defense,
                 crit,
                 initiative,
                 attack_speed: parseFloat(attack_speed.toFixed(2))
@@ -841,7 +841,7 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
         const name_acc = getRealisticItemName("accessory", path.basename(src_acc), a, lvl);
 
         const attack = Math.floor(lvl * 0.41);
-        const armor = Math.floor(lvl * 0.41);
+        const defense = Math.floor(lvl * 0.41);
         const crit = (a % 3) * (lvl >= 5 ? 2 : 1);
         const initiative = (a % 5) - 2;
         const price_acc = lvl * 20 + 5 + (a % 5) * 5;
@@ -856,7 +856,7 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
             price: price_acc,
             stats: {
                 attack,
-                armor,
+                defense,
                 crit,
                 initiative,
                 attack_speed: 0.0
@@ -884,7 +884,7 @@ for (let lvl = 1; lvl <= totalLevels; lvl++) {
             price: lvl * 15 + 5,
             stats: {
                 attack: 0,
-                armor: 0,
+                defense: 0,
                 crit: 0,
                 initiative: 0,
                 attack_speed: 0.0
@@ -971,7 +971,7 @@ let rsContent = `// @generated by icon catalog generation. Do not edit by hand.
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
-pub struct GeneratedEquipment { pub name: &'static str, pub level: u8, pub class_hint: &'static str, pub kind: &'static str, pub icon_path: &'static str, pub attack: i32, pub armor: i32, pub crit: i32, pub initiative: i32, pub attack_speed: f32, pub price: u32 }
+pub struct GeneratedEquipment { pub name: &'static str, pub level: u8, pub class_hint: &'static str, pub kind: &'static str, pub icon_path: &'static str, pub attack: i32, pub defense: i32, pub crit: i32, pub initiative: i32, pub attack_speed: f32, pub price: u32 }
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct GeneratedAbility { pub name: &'static str, pub level: u8, pub class_hint: &'static str, pub magic_type: &'static str, pub mana_cost: u32, pub cooldown: u32, pub icon_path: &'static str }
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
@@ -980,7 +980,7 @@ pub struct GeneratedPerk { pub name: &'static str, pub level: u8, pub class_hint
 
 rsContent += `pub const GENERATED_EQUIPMENT: [GeneratedEquipment; ${finalEquipment.length}] = [\n`;
 for (const eq of finalEquipment) {
-    rsContent += `    GeneratedEquipment { name: "${eq.name.toLowerCase()}", level: ${eq.level}, class_hint: "${eq.class_hint}", kind: "${eq.kind}", icon_path: "${eq.icon_path}", attack: ${eq.stats.attack}, armor: ${eq.stats.armor}, crit: ${eq.stats.crit}, initiative: ${eq.stats.initiative}, attack_speed: ${eq.stats.attack_speed.toFixed(1)}, price: ${eq.price} },\n`;
+    rsContent += `    GeneratedEquipment { name: "${eq.name.toLowerCase()}", level: ${eq.level}, class_hint: "${eq.class_hint}", kind: "${eq.kind}", icon_path: "${eq.icon_path}", attack: ${eq.stats.attack}, defense: ${eq.stats.defense}, crit: ${eq.stats.crit}, initiative: ${eq.stats.initiative}, attack_speed: ${eq.stats.attack_speed.toFixed(1)}, price: ${eq.price} },\n`;
 }
 rsContent += `];\n\n`;
 

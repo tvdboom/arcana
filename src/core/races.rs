@@ -1,4 +1,4 @@
-use crate::core::player::{Attribute, AgeStage};
+use crate::core::player::{AgeStage, Attribute};
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
@@ -25,8 +25,8 @@ impl Race {
     pub fn age_stage_range(&self, stage: AgeStage) -> (u32, u32) {
         let (min, max) = self.age_range();
         let span = max - min + 1;
-        let start = min + (span * stage.index() as u32) / 5;
-        let end = min + (span * (stage.index() as u32 + 1)) / 5 - 1;
+        let start = min + (span * stage.index()) / 5;
+        let end = min + (span * (stage.index() + 1)) / 5 - 1;
         (start, end.max(start))
     }
 

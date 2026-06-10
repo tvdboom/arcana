@@ -8,7 +8,7 @@
     "price": 40,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -23,7 +23,7 @@
     "price": 45,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -32,13 +32,13 @@
   {
     "name": "novice rawhide silent treads",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/novice rawhide silent treads.png",
     "kind": "boots",
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -53,7 +53,7 @@
     "price": 55,
     "stats": {
       "attack": 3,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -68,7 +68,7 @@
     "price": 60,
     "stats": {
       "attack": 4,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -83,7 +83,7 @@
     "price": 40,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -92,13 +92,13 @@
   {
     "name": "novice iron assassin handwraps",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/gloves/novice iron assassin handwraps.png",
     "kind": "gloves",
     "price": 45,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -113,7 +113,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -128,7 +128,7 @@
     "price": 55,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -143,7 +143,7 @@
     "price": 60,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -152,13 +152,13 @@
   {
     "name": "novice worn infiltrator axe",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/novice worn infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 40,
     "stats": {
       "attack": 3,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -173,7 +173,7 @@
     "price": 45,
     "stats": {
       "attack": 4,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -188,7 +188,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -203,7 +203,7 @@
     "price": 55,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -212,13 +212,13 @@
   {
     "name": "novice steel silent guard's bascinet",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/novice steel silent guard's bascinet.png",
     "kind": "helmet",
     "price": 60,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -233,7 +233,7 @@
     "price": 40,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -248,7 +248,7 @@
     "price": 45,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -263,7 +263,7 @@
     "price": 50,
     "stats": {
       "attack": 3,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -272,13 +272,13 @@
   {
     "name": "novice bronze assassin spear",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/novice bronze assassin spear.png",
     "kind": "two_hand_weapon",
     "price": 55,
     "stats": {
       "attack": 4,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -293,7 +293,7 @@
     "price": 60,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -308,7 +308,7 @@
     "price": 40,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -323,7 +323,7 @@
     "price": 45,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -332,13 +332,13 @@
   {
     "name": "novice quilted cloth infiltrator tunic",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/novice quilted cloth infiltrator tunic.png",
     "kind": "armor",
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -353,7 +353,7 @@
     "price": 55,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -368,7 +368,7 @@
     "price": 60,
     "stats": {
       "attack": 3,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -383,7 +383,7 @@
     "price": 40,
     "stats": {
       "attack": 4,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -392,13 +392,13 @@
   {
     "name": "novice enchanted silent tome",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/novice enchanted silent tome.png",
     "kind": "offhand",
     "price": 45,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -413,7 +413,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -428,7 +428,7 @@
     "price": 55,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -443,7 +443,7 @@
     "price": 60,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -458,7 +458,7 @@
     "price": 25,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -473,7 +473,7 @@
     "price": 30,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 1,
       "initiative": -1,
       "attack_speed": 0
@@ -482,13 +482,13 @@
   {
     "name": "novice pewter necklace of deception",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/novice pewter necklace of deception.png",
     "kind": "accessory",
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -503,7 +503,7 @@
     "price": 40,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -518,7 +518,7 @@
     "price": 45,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 1,
       "initiative": 2,
       "attack_speed": 0
@@ -533,7 +533,7 @@
     "price": 25,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -2,
       "attack_speed": 0
@@ -542,13 +542,13 @@
   {
     "name": "novice platinum necklace of deception",
     "level": 1,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/novice platinum necklace of deception.png",
     "kind": "accessory",
     "price": 30,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -563,7 +563,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 1,
       "initiative": 0,
       "attack_speed": 0
@@ -578,7 +578,7 @@
     "price": 40,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -593,7 +593,7 @@
     "price": 45,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -608,7 +608,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -623,7 +623,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -638,7 +638,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -653,7 +653,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -668,7 +668,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -683,7 +683,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -698,7 +698,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -713,7 +713,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -728,7 +728,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -743,7 +743,7 @@
     "price": 20,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -758,7 +758,7 @@
     "price": 70,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -773,7 +773,7 @@
     "price": 75,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -782,13 +782,13 @@
   {
     "name": "initiate rawhide silent treads",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/initiate rawhide silent treads.png",
     "kind": "boots",
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -803,7 +803,7 @@
     "price": 85,
     "stats": {
       "attack": 4,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -818,7 +818,7 @@
     "price": 90,
     "stats": {
       "attack": 5,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -833,7 +833,7 @@
     "price": 70,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -842,13 +842,13 @@
   {
     "name": "initiate ranger assassin gloves",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/gloves/initiate ranger assassin gloves.png",
     "kind": "gloves",
     "price": 75,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -863,7 +863,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -878,7 +878,7 @@
     "price": 85,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -893,7 +893,7 @@
     "price": 90,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -902,13 +902,13 @@
   {
     "name": "initiate worn infiltrator axe",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/initiate worn infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 70,
     "stats": {
       "attack": 4,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -923,7 +923,7 @@
     "price": 75,
     "stats": {
       "attack": 5,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -938,7 +938,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -953,7 +953,7 @@
     "price": 85,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -962,13 +962,13 @@
   {
     "name": "initiate bronze silent bascinet",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/initiate bronze silent bascinet.png",
     "kind": "helmet",
     "price": 90,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -983,7 +983,7 @@
     "price": 70,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -998,7 +998,7 @@
     "price": 75,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1013,7 +1013,7 @@
     "price": 80,
     "stats": {
       "attack": 4,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -1022,13 +1022,13 @@
   {
     "name": "initiate bronze assassin bow",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/initiate bronze assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 85,
     "stats": {
       "attack": 5,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -1043,7 +1043,7 @@
     "price": 90,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -1058,7 +1058,7 @@
     "price": 70,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -1073,7 +1073,7 @@
     "price": 75,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1082,13 +1082,13 @@
   {
     "name": "initiate bronze infiltrator scale armor",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/initiate bronze infiltrator scale armor.png",
     "kind": "armor",
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -1103,7 +1103,7 @@
     "price": 85,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1118,7 +1118,7 @@
     "price": 90,
     "stats": {
       "attack": 4,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -1133,7 +1133,7 @@
     "price": 70,
     "stats": {
       "attack": 5,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -1142,13 +1142,13 @@
   {
     "name": "initiate enchanted silent tome",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/initiate enchanted silent tome.png",
     "kind": "offhand",
     "price": 75,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1163,7 +1163,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -1178,7 +1178,7 @@
     "price": 85,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1193,7 +1193,7 @@
     "price": 90,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -1208,7 +1208,7 @@
     "price": 45,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -1223,7 +1223,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 1,
       "initiative": -1,
       "attack_speed": 0
@@ -1232,13 +1232,13 @@
   {
     "name": "initiate pewter ring of deception",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/initiate pewter ring of deception.png",
     "kind": "accessory",
     "price": 55,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -1253,7 +1253,7 @@
     "price": 60,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -1268,7 +1268,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 1,
       "initiative": 2,
       "attack_speed": 0
@@ -1283,7 +1283,7 @@
     "price": 45,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -2,
       "attack_speed": 0
@@ -1292,13 +1292,13 @@
   {
     "name": "initiate silver ring of deception",
     "level": 2,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/initiate silver ring of deception.png",
     "kind": "accessory",
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -1313,7 +1313,7 @@
     "price": 55,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 1,
       "initiative": 0,
       "attack_speed": 0
@@ -1328,7 +1328,7 @@
     "price": 60,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -1343,7 +1343,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1358,7 +1358,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1373,7 +1373,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1388,7 +1388,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1403,7 +1403,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1418,7 +1418,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1433,7 +1433,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1448,7 +1448,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1463,7 +1463,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1478,7 +1478,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1493,7 +1493,7 @@
     "price": 35,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1508,7 +1508,7 @@
     "price": 100,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -1523,7 +1523,7 @@
     "price": 105,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1532,13 +1532,13 @@
   {
     "name": "apprentice rawhide silent treads",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/apprentice rawhide silent treads.png",
     "kind": "boots",
     "price": 110,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1553,7 +1553,7 @@
     "price": 115,
     "stats": {
       "attack": 5,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -1568,7 +1568,7 @@
     "price": 120,
     "stats": {
       "attack": 6,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -1583,7 +1583,7 @@
     "price": 100,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -1592,13 +1592,13 @@
   {
     "name": "apprentice dragon assassin gauntlets",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/gloves/apprentice dragon assassin gauntlets.png",
     "kind": "gloves",
     "price": 105,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -1613,7 +1613,7 @@
     "price": 110,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -1628,7 +1628,7 @@
     "price": 115,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1643,7 +1643,7 @@
     "price": 120,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1652,13 +1652,13 @@
   {
     "name": "apprentice worn infiltrator axe",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/apprentice worn infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 100,
     "stats": {
       "attack": 5,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -1673,7 +1673,7 @@
     "price": 105,
     "stats": {
       "attack": 6,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -1688,7 +1688,7 @@
     "price": 110,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -1703,7 +1703,7 @@
     "price": 115,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -1712,13 +1712,13 @@
   {
     "name": "apprentice steel silent guard's bascinet",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/apprentice steel silent guard's bascinet.png",
     "kind": "helmet",
     "price": 120,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -1733,7 +1733,7 @@
     "price": 100,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -1748,7 +1748,7 @@
     "price": 105,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1763,7 +1763,7 @@
     "price": 110,
     "stats": {
       "attack": 5,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -1772,13 +1772,13 @@
   {
     "name": "apprentice bronze assassin bow",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/apprentice bronze assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 115,
     "stats": {
       "attack": 6,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -1793,7 +1793,7 @@
     "price": 120,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -1808,7 +1808,7 @@
     "price": 100,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -1823,7 +1823,7 @@
     "price": 105,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1832,13 +1832,13 @@
   {
     "name": "apprentice steel infiltrator scale armor",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/apprentice steel infiltrator scale armor.png",
     "kind": "armor",
     "price": 110,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -1853,7 +1853,7 @@
     "price": 115,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1868,7 +1868,7 @@
     "price": 120,
     "stats": {
       "attack": 5,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -1883,7 +1883,7 @@
     "price": 100,
     "stats": {
       "attack": 6,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -1892,13 +1892,13 @@
   {
     "name": "apprentice enchanted silent tome",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/apprentice enchanted silent tome.png",
     "kind": "offhand",
     "price": 105,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -1913,7 +1913,7 @@
     "price": 110,
     "stats": {
       "attack": 0,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -1928,7 +1928,7 @@
     "price": 115,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -1943,7 +1943,7 @@
     "price": 120,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -1958,7 +1958,7 @@
     "price": 65,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -1973,7 +1973,7 @@
     "price": 70,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 1,
       "initiative": -1,
       "attack_speed": 0
@@ -1982,13 +1982,13 @@
   {
     "name": "apprentice pewter ring of deception",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/apprentice pewter ring of deception.png",
     "kind": "accessory",
     "price": 75,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -2003,7 +2003,7 @@
     "price": 80,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -2018,7 +2018,7 @@
     "price": 85,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 1,
       "initiative": 2,
       "attack_speed": 0
@@ -2033,7 +2033,7 @@
     "price": 65,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": -2,
       "attack_speed": 0
@@ -2042,13 +2042,13 @@
   {
     "name": "apprentice platinum lion ring of deception",
     "level": 3,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/apprentice platinum lion ring of deception.png",
     "kind": "accessory",
     "price": 70,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -2063,7 +2063,7 @@
     "price": 75,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 1,
       "initiative": 0,
       "attack_speed": 0
@@ -2078,7 +2078,7 @@
     "price": 80,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -2093,7 +2093,7 @@
     "price": 85,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -2108,7 +2108,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2123,7 +2123,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2138,7 +2138,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2153,7 +2153,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2168,7 +2168,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2183,7 +2183,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2198,7 +2198,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2213,7 +2213,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2228,7 +2228,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2243,7 +2243,7 @@
     "price": 50,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2258,7 +2258,7 @@
     "price": 130,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -2273,7 +2273,7 @@
     "price": 135,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2282,13 +2282,13 @@
   {
     "name": "journeyman rawhide silent treads",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/journeyman rawhide silent treads.png",
     "kind": "boots",
     "price": 140,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -2303,7 +2303,7 @@
     "price": 145,
     "stats": {
       "attack": 6,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -2318,7 +2318,7 @@
     "price": 150,
     "stats": {
       "attack": 7,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -2333,7 +2333,7 @@
     "price": 130,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -2342,13 +2342,13 @@
   {
     "name": "journeyman arcane assassin handwraps",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/gloves/journeyman arcane assassin handwraps.png",
     "kind": "gloves",
     "price": 135,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -2363,7 +2363,7 @@
     "price": 140,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -2378,7 +2378,7 @@
     "price": 145,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -2393,7 +2393,7 @@
     "price": 150,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -2402,13 +2402,13 @@
   {
     "name": "journeyman worn infiltrator axe",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/journeyman worn infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 130,
     "stats": {
       "attack": 6,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -2423,7 +2423,7 @@
     "price": 135,
     "stats": {
       "attack": 7,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -2438,7 +2438,7 @@
     "price": 140,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -2453,7 +2453,7 @@
     "price": 145,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -2462,13 +2462,13 @@
   {
     "name": "journeyman bronze silent bascinet",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/journeyman bronze silent bascinet.png",
     "kind": "helmet",
     "price": 150,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -2483,7 +2483,7 @@
     "price": 130,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -2498,7 +2498,7 @@
     "price": 135,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -2513,7 +2513,7 @@
     "price": 140,
     "stats": {
       "attack": 6,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -2522,13 +2522,13 @@
   {
     "name": "journeyman bronze assassin bow",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/journeyman bronze assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 145,
     "stats": {
       "attack": 7,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -2543,7 +2543,7 @@
     "price": 150,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -2558,7 +2558,7 @@
     "price": 130,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -2573,7 +2573,7 @@
     "price": 135,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2582,13 +2582,13 @@
   {
     "name": "journeyman bronze infiltrator scale armor",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/journeyman bronze infiltrator scale armor.png",
     "kind": "armor",
     "price": 140,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -2603,7 +2603,7 @@
     "price": 145,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -2618,7 +2618,7 @@
     "price": 150,
     "stats": {
       "attack": 6,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -2633,7 +2633,7 @@
     "price": 130,
     "stats": {
       "attack": 7,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -2642,13 +2642,13 @@
   {
     "name": "journeyman enchanted silent tome",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/journeyman enchanted silent tome.png",
     "kind": "offhand",
     "price": 135,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2663,7 +2663,7 @@
     "price": 140,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -2678,7 +2678,7 @@
     "price": 145,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -2693,7 +2693,7 @@
     "price": 150,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -2708,7 +2708,7 @@
     "price": 85,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -2723,7 +2723,7 @@
     "price": 90,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 1,
       "initiative": -1,
       "attack_speed": 0
@@ -2732,13 +2732,13 @@
   {
     "name": "journeyman pewter ring of deception",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/journeyman pewter ring of deception.png",
     "kind": "accessory",
     "price": 95,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -2753,7 +2753,7 @@
     "price": 100,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -2768,7 +2768,7 @@
     "price": 105,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 1,
       "initiative": 2,
       "attack_speed": 0
@@ -2783,7 +2783,7 @@
     "price": 85,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": -2,
       "attack_speed": 0
@@ -2792,13 +2792,13 @@
   {
     "name": "journeyman platinum ring of deception",
     "level": 4,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/journeyman platinum ring of deception.png",
     "kind": "accessory",
     "price": 90,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -2813,7 +2813,7 @@
     "price": 95,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 1,
       "initiative": 0,
       "attack_speed": 0
@@ -2828,7 +2828,7 @@
     "price": 100,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -2843,7 +2843,7 @@
     "price": 105,
     "stats": {
       "attack": 1,
-      "armor": 1,
+      "defense": 1,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -2858,7 +2858,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2873,7 +2873,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2888,7 +2888,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2903,7 +2903,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2918,7 +2918,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2933,7 +2933,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2948,7 +2948,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2963,7 +2963,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2978,7 +2978,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -2993,7 +2993,7 @@
     "price": 65,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3008,7 +3008,7 @@
     "price": 160,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -3023,7 +3023,7 @@
     "price": 165,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3032,13 +3032,13 @@
   {
     "name": "adept rawhide silent treads",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/adept rawhide silent treads.png",
     "kind": "boots",
     "price": 170,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3053,7 +3053,7 @@
     "price": 175,
     "stats": {
       "attack": 7,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -3068,7 +3068,7 @@
     "price": 180,
     "stats": {
       "attack": 9,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -3083,7 +3083,7 @@
     "price": 160,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -3092,13 +3092,13 @@
   {
     "name": "adept silver assassin handwraps",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/gloves/adept silver assassin handwraps.png",
     "kind": "gloves",
     "price": 165,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -3113,7 +3113,7 @@
     "price": 170,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -3128,7 +3128,7 @@
     "price": 175,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3143,7 +3143,7 @@
     "price": 180,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3152,13 +3152,13 @@
   {
     "name": "adept worn infiltrator axe",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/adept worn infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 160,
     "stats": {
       "attack": 7,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -3173,7 +3173,7 @@
     "price": 165,
     "stats": {
       "attack": 9,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -3188,7 +3188,7 @@
     "price": 170,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -3203,7 +3203,7 @@
     "price": 175,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -3212,13 +3212,13 @@
   {
     "name": "adept steel silent bascinet",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/adept steel silent bascinet.png",
     "kind": "helmet",
     "price": 180,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -3233,7 +3233,7 @@
     "price": 160,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -3248,7 +3248,7 @@
     "price": 165,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3263,7 +3263,7 @@
     "price": 170,
     "stats": {
       "attack": 7,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -3272,13 +3272,13 @@
   {
     "name": "adept bronze assassin bow",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/adept bronze assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 175,
     "stats": {
       "attack": 9,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -3293,7 +3293,7 @@
     "price": 180,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -3308,7 +3308,7 @@
     "price": 160,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -3323,7 +3323,7 @@
     "price": 165,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3332,13 +3332,13 @@
   {
     "name": "adept bronze infiltrator scale armor",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/adept bronze infiltrator scale armor.png",
     "kind": "armor",
     "price": 170,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -3353,7 +3353,7 @@
     "price": 175,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3368,7 +3368,7 @@
     "price": 180,
     "stats": {
       "attack": 7,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -3383,7 +3383,7 @@
     "price": 160,
     "stats": {
       "attack": 9,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -3392,13 +3392,13 @@
   {
     "name": "adept enchanted silent tome",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/adept enchanted silent tome.png",
     "kind": "offhand",
     "price": 165,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3413,7 +3413,7 @@
     "price": 170,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -3428,7 +3428,7 @@
     "price": 175,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3443,7 +3443,7 @@
     "price": 180,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -3458,7 +3458,7 @@
     "price": 105,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -3473,7 +3473,7 @@
     "price": 110,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -3482,13 +3482,13 @@
   {
     "name": "adept pewter ring of deception",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/adept pewter ring of deception.png",
     "kind": "accessory",
     "price": 115,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0
@@ -3503,7 +3503,7 @@
     "price": 120,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -3518,7 +3518,7 @@
     "price": 125,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -3533,7 +3533,7 @@
     "price": 105,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 4,
       "initiative": -2,
       "attack_speed": 0
@@ -3542,13 +3542,13 @@
   {
     "name": "adept platinum ring of deception",
     "level": 5,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/adept platinum ring of deception.png",
     "kind": "accessory",
     "price": 110,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -3563,7 +3563,7 @@
     "price": 115,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -3578,7 +3578,7 @@
     "price": 120,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 4,
       "initiative": 1,
       "attack_speed": 0
@@ -3593,7 +3593,7 @@
     "price": 125,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3608,7 +3608,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3623,7 +3623,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3638,7 +3638,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3653,7 +3653,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3668,7 +3668,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3683,7 +3683,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3698,7 +3698,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3713,7 +3713,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3728,7 +3728,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3743,7 +3743,7 @@
     "price": 80,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3758,7 +3758,7 @@
     "price": 190,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -3773,7 +3773,7 @@
     "price": 195,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -3782,13 +3782,13 @@
   {
     "name": "expert iron silent treads",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/expert iron silent treads.png",
     "kind": "boots",
     "price": 200,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3803,7 +3803,7 @@
     "price": 205,
     "stats": {
       "attack": 8,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -3818,7 +3818,7 @@
     "price": 210,
     "stats": {
       "attack": 10,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -3833,7 +3833,7 @@
     "price": 190,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -3842,13 +3842,13 @@
   {
     "name": "expert leather assassin handwraps",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/gloves/expert leather assassin handwraps.png",
     "kind": "gloves",
     "price": 195,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -3863,7 +3863,7 @@
     "price": 200,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -3878,7 +3878,7 @@
     "price": 205,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3893,7 +3893,7 @@
     "price": 210,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -3902,13 +3902,13 @@
   {
     "name": "expert tempered infiltrator axe",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/expert tempered infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 190,
     "stats": {
       "attack": 8,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -3923,7 +3923,7 @@
     "price": 195,
     "stats": {
       "attack": 10,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -3938,7 +3938,7 @@
     "price": 200,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -3953,7 +3953,7 @@
     "price": 205,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -3962,13 +3962,13 @@
   {
     "name": "expert iron silent bascinet",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/expert iron silent bascinet.png",
     "kind": "helmet",
     "price": 210,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -3983,7 +3983,7 @@
     "price": 190,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -3998,7 +3998,7 @@
     "price": 195,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4013,7 +4013,7 @@
     "price": 200,
     "stats": {
       "attack": 8,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -4022,13 +4022,13 @@
   {
     "name": "expert ironed assassin bow",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/expert ironed assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 205,
     "stats": {
       "attack": 10,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -4043,7 +4043,7 @@
     "price": 210,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -4058,7 +4058,7 @@
     "price": 190,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -4073,7 +4073,7 @@
     "price": 195,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4082,13 +4082,13 @@
   {
     "name": "expert iron infiltrator scale armor",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/expert iron infiltrator scale armor.png",
     "kind": "armor",
     "price": 200,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -4103,7 +4103,7 @@
     "price": 205,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4118,7 +4118,7 @@
     "price": 210,
     "stats": {
       "attack": 8,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -4133,7 +4133,7 @@
     "price": 190,
     "stats": {
       "attack": 10,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -4142,13 +4142,13 @@
   {
     "name": "expert enchanted silent tome",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/expert enchanted silent tome.png",
     "kind": "offhand",
     "price": 195,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4163,7 +4163,7 @@
     "price": 200,
     "stats": {
       "attack": 0,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -4178,7 +4178,7 @@
     "price": 205,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4193,7 +4193,7 @@
     "price": 210,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -4208,7 +4208,7 @@
     "price": 125,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -4223,7 +4223,7 @@
     "price": 130,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -4232,13 +4232,13 @@
   {
     "name": "expert emerald ring of deception",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/expert emerald ring of deception.png",
     "kind": "accessory",
     "price": 135,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0
@@ -4253,7 +4253,7 @@
     "price": 140,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -4268,7 +4268,7 @@
     "price": 145,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -4283,7 +4283,7 @@
     "price": 125,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 4,
       "initiative": -2,
       "attack_speed": 0
@@ -4292,13 +4292,13 @@
   {
     "name": "expert platinum dragon ring of deception",
     "level": 6,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/expert platinum dragon ring of deception.png",
     "kind": "accessory",
     "price": 130,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -4313,7 +4313,7 @@
     "price": 135,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -4328,7 +4328,7 @@
     "price": 140,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 4,
       "initiative": 1,
       "attack_speed": 0
@@ -4343,7 +4343,7 @@
     "price": 145,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4358,7 +4358,7 @@
     "price": 95,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4373,7 +4373,7 @@
     "price": 95,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4388,7 +4388,7 @@
     "price": 95,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4403,7 +4403,7 @@
     "price": 95,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4418,7 +4418,7 @@
     "price": 95,
     "stats": {
       "attack": 0,
-      "armor": 0,
+      "defense": 0,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4433,7 +4433,7 @@
     "price": 220,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -4448,7 +4448,7 @@
     "price": 225,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4457,13 +4457,13 @@
   {
     "name": "elite iron silent treads",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/elite iron silent treads.png",
     "kind": "boots",
     "price": 230,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4478,7 +4478,7 @@
     "price": 235,
     "stats": {
       "attack": 9,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -4493,7 +4493,7 @@
     "price": 240,
     "stats": {
       "attack": 11,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -4508,7 +4508,7 @@
     "price": 220,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -4517,13 +4517,13 @@
   {
     "name": "elite iron assassin handwraps",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/gloves/elite iron assassin handwraps.png",
     "kind": "gloves",
     "price": 225,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -4538,7 +4538,7 @@
     "price": 230,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -4553,7 +4553,7 @@
     "price": 235,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4568,7 +4568,7 @@
     "price": 240,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4577,13 +4577,13 @@
   {
     "name": "elite tempered infiltrator axe",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/elite tempered infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 220,
     "stats": {
       "attack": 9,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -4598,7 +4598,7 @@
     "price": 225,
     "stats": {
       "attack": 11,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -4613,7 +4613,7 @@
     "price": 230,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -4628,7 +4628,7 @@
     "price": 235,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -4637,13 +4637,13 @@
   {
     "name": "elite golden silent bascinet",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/elite golden silent bascinet.png",
     "kind": "helmet",
     "price": 240,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -4658,7 +4658,7 @@
     "price": 220,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -4673,7 +4673,7 @@
     "price": 225,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4688,7 +4688,7 @@
     "price": 230,
     "stats": {
       "attack": 9,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -4697,13 +4697,13 @@
   {
     "name": "elite ironed assassin bow",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/elite ironed assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 235,
     "stats": {
       "attack": 11,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -4718,7 +4718,7 @@
     "price": 240,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -4733,7 +4733,7 @@
     "price": 220,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -4748,7 +4748,7 @@
     "price": 225,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4757,13 +4757,13 @@
   {
     "name": "elite silk infiltrator robes",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/elite silk infiltrator robes.png",
     "kind": "armor",
     "price": 230,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -4778,7 +4778,7 @@
     "price": 235,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4793,7 +4793,7 @@
     "price": 240,
     "stats": {
       "attack": 9,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -4808,7 +4808,7 @@
     "price": 220,
     "stats": {
       "attack": 11,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -4817,13 +4817,13 @@
   {
     "name": "elite iron silent shield",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/elite iron silent shield.png",
     "kind": "offhand",
     "price": 225,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -4838,7 +4838,7 @@
     "price": 230,
     "stats": {
       "attack": 0,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 0
@@ -4853,7 +4853,7 @@
     "price": 235,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -4868,7 +4868,7 @@
     "price": 240,
     "stats": {
       "attack": 0,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -4883,7 +4883,7 @@
     "price": 145,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -4898,7 +4898,7 @@
     "price": 150,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -4907,13 +4907,13 @@
   {
     "name": "elite pewter ring of deception",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/elite pewter ring of deception.png",
     "kind": "accessory",
     "price": 155,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0
@@ -4928,7 +4928,7 @@
     "price": 160,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -4943,7 +4943,7 @@
     "price": 165,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -4958,7 +4958,7 @@
     "price": 145,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 4,
       "initiative": -2,
       "attack_speed": 0
@@ -4967,13 +4967,13 @@
   {
     "name": "elite sapphire ring of deception",
     "level": 7,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/elite sapphire ring of deception.png",
     "kind": "accessory",
     "price": 150,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -4988,7 +4988,7 @@
     "price": 155,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -5003,7 +5003,7 @@
     "price": 160,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 4,
       "initiative": 1,
       "attack_speed": 0
@@ -5018,7 +5018,7 @@
     "price": 165,
     "stats": {
       "attack": 2,
-      "armor": 2,
+      "defense": 2,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5033,7 +5033,7 @@
     "price": 250,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -5048,7 +5048,7 @@
     "price": 255,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -5057,13 +5057,13 @@
   {
     "name": "veteran iron silent treads",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/veteran iron silent treads.png",
     "kind": "boots",
     "price": 260,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5078,7 +5078,7 @@
     "price": 265,
     "stats": {
       "attack": 10,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -5093,7 +5093,7 @@
     "price": 270,
     "stats": {
       "attack": 12,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -5108,7 +5108,7 @@
     "price": 250,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -5123,7 +5123,7 @@
     "price": 260,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -5138,7 +5138,7 @@
     "price": 265,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5153,7 +5153,7 @@
     "price": 270,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5162,13 +5162,13 @@
   {
     "name": "veteran tempered infiltrator axe",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/veteran tempered infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 250,
     "stats": {
       "attack": 10,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -5183,7 +5183,7 @@
     "price": 255,
     "stats": {
       "attack": 12,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -5198,7 +5198,7 @@
     "price": 260,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -5207,13 +5207,13 @@
   {
     "name": "veteran iron silent visor mask",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/veteran iron silent visor mask.png",
     "kind": "helmet",
     "price": 270,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -5228,7 +5228,7 @@
     "price": 250,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -5243,7 +5243,7 @@
     "price": 255,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5258,7 +5258,7 @@
     "price": 260,
     "stats": {
       "attack": 10,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -5267,13 +5267,13 @@
   {
     "name": "veteran ironed assassin bow",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/veteran ironed assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 265,
     "stats": {
       "attack": 12,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -5288,7 +5288,7 @@
     "price": 270,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -5303,7 +5303,7 @@
     "price": 255,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -5312,13 +5312,13 @@
   {
     "name": "veteran iron infiltrator scale armor",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/veteran iron infiltrator scale armor.png",
     "kind": "armor",
     "price": 260,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -5333,7 +5333,7 @@
     "price": 265,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5348,7 +5348,7 @@
     "price": 270,
     "stats": {
       "attack": 10,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -5363,7 +5363,7 @@
     "price": 250,
     "stats": {
       "attack": 12,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -5372,13 +5372,13 @@
   {
     "name": "veteran iron silent shield",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/veteran iron silent shield.png",
     "kind": "offhand",
     "price": 255,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -5393,7 +5393,7 @@
     "price": 265,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5408,7 +5408,7 @@
     "price": 270,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -5423,7 +5423,7 @@
     "price": 165,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -5438,7 +5438,7 @@
     "price": 170,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -5447,13 +5447,13 @@
   {
     "name": "veteran pewter ring of deception",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/veteran pewter ring of deception.png",
     "kind": "accessory",
     "price": 175,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0
@@ -5468,7 +5468,7 @@
     "price": 180,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -5483,7 +5483,7 @@
     "price": 185,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -5498,7 +5498,7 @@
     "price": 165,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 4,
       "initiative": -2,
       "attack_speed": 0
@@ -5507,13 +5507,13 @@
   {
     "name": "veteran platinum ring of deception",
     "level": 8,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/veteran platinum ring of deception.png",
     "kind": "accessory",
     "price": 170,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -5528,7 +5528,7 @@
     "price": 175,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -5543,7 +5543,7 @@
     "price": 180,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 4,
       "initiative": 1,
       "attack_speed": 0
@@ -5558,7 +5558,7 @@
     "price": 185,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5573,7 +5573,7 @@
     "price": 280,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -5588,7 +5588,7 @@
     "price": 285,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -5597,13 +5597,13 @@
   {
     "name": "master iron silent treads",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/master iron silent treads.png",
     "kind": "boots",
     "price": 290,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5618,7 +5618,7 @@
     "price": 295,
     "stats": {
       "attack": 11,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -5633,7 +5633,7 @@
     "price": 300,
     "stats": {
       "attack": 13,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -5648,7 +5648,7 @@
     "price": 280,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -5663,7 +5663,7 @@
     "price": 290,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -5678,7 +5678,7 @@
     "price": 295,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5693,7 +5693,7 @@
     "price": 300,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5702,13 +5702,13 @@
   {
     "name": "master tempered infiltrator axe",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/master tempered infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 280,
     "stats": {
       "attack": 11,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -5723,7 +5723,7 @@
     "price": 285,
     "stats": {
       "attack": 13,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -5738,7 +5738,7 @@
     "price": 290,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -5747,13 +5747,13 @@
   {
     "name": "master golden silent bascinet",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/master golden silent bascinet.png",
     "kind": "helmet",
     "price": 300,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -5768,7 +5768,7 @@
     "price": 280,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -5783,7 +5783,7 @@
     "price": 285,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5798,7 +5798,7 @@
     "price": 290,
     "stats": {
       "attack": 11,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -5807,13 +5807,13 @@
   {
     "name": "master ironed assassin bow",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/master ironed assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 295,
     "stats": {
       "attack": 13,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -5828,7 +5828,7 @@
     "price": 300,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -5843,7 +5843,7 @@
     "price": 285,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -5852,13 +5852,13 @@
   {
     "name": "master iron infiltrator scale armor",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/master iron infiltrator scale armor.png",
     "kind": "armor",
     "price": 290,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -5873,7 +5873,7 @@
     "price": 295,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5888,7 +5888,7 @@
     "price": 300,
     "stats": {
       "attack": 11,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -5903,7 +5903,7 @@
     "price": 280,
     "stats": {
       "attack": 13,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -5912,13 +5912,13 @@
   {
     "name": "master iron silent shield",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/master iron silent shield.png",
     "kind": "offhand",
     "price": 285,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -5933,7 +5933,7 @@
     "price": 295,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -5948,7 +5948,7 @@
     "price": 300,
     "stats": {
       "attack": 0,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -5963,7 +5963,7 @@
     "price": 185,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -5978,7 +5978,7 @@
     "price": 190,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -5987,13 +5987,13 @@
   {
     "name": "master pewter bracelet of deception",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/master pewter bracelet of deception.png",
     "kind": "accessory",
     "price": 195,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0
@@ -6008,7 +6008,7 @@
     "price": 200,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -6023,7 +6023,7 @@
     "price": 205,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -6038,7 +6038,7 @@
     "price": 185,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 4,
       "initiative": -2,
       "attack_speed": 0
@@ -6047,13 +6047,13 @@
   {
     "name": "master platinum bracelet of deception",
     "level": 9,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/master platinum bracelet of deception.png",
     "kind": "accessory",
     "price": 190,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -6068,7 +6068,7 @@
     "price": 195,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -6083,7 +6083,7 @@
     "price": 200,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 4,
       "initiative": 1,
       "attack_speed": 0
@@ -6098,7 +6098,7 @@
     "price": 205,
     "stats": {
       "attack": 3,
-      "armor": 3,
+      "defense": 3,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6113,7 +6113,7 @@
     "price": 310,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -6128,7 +6128,7 @@
     "price": 315,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -6137,13 +6137,13 @@
   {
     "name": "grandmaster iron silent treads",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/grandmaster iron silent treads.png",
     "kind": "boots",
     "price": 320,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6158,7 +6158,7 @@
     "price": 325,
     "stats": {
       "attack": 12,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -6173,7 +6173,7 @@
     "price": 330,
     "stats": {
       "attack": 15,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -6188,7 +6188,7 @@
     "price": 310,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -6203,7 +6203,7 @@
     "price": 320,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -6218,7 +6218,7 @@
     "price": 325,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6233,7 +6233,7 @@
     "price": 330,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6242,13 +6242,13 @@
   {
     "name": "grandmaster tempered infiltrator axe",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/grandmaster tempered infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 310,
     "stats": {
       "attack": 12,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -6263,7 +6263,7 @@
     "price": 315,
     "stats": {
       "attack": 15,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -6278,7 +6278,7 @@
     "price": 320,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -6287,13 +6287,13 @@
   {
     "name": "grandmaster iron silent bascinet",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/grandmaster iron silent bascinet.png",
     "kind": "helmet",
     "price": 330,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -6308,7 +6308,7 @@
     "price": 310,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -6323,7 +6323,7 @@
     "price": 315,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6338,7 +6338,7 @@
     "price": 320,
     "stats": {
       "attack": 12,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -6347,13 +6347,13 @@
   {
     "name": "grandmaster ironed assassin bow",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/grandmaster ironed assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 325,
     "stats": {
       "attack": 15,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -6368,7 +6368,7 @@
     "price": 330,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -6383,7 +6383,7 @@
     "price": 315,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -6392,13 +6392,13 @@
   {
     "name": "grandmaster iron infiltrator scale armor",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/grandmaster iron infiltrator scale armor.png",
     "kind": "armor",
     "price": 320,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -6413,7 +6413,7 @@
     "price": 325,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6428,7 +6428,7 @@
     "price": 330,
     "stats": {
       "attack": 12,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -6443,7 +6443,7 @@
     "price": 310,
     "stats": {
       "attack": 15,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -6452,13 +6452,13 @@
   {
     "name": "grandmaster iron silent shield",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/grandmaster iron silent shield.png",
     "kind": "offhand",
     "price": 315,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -6473,7 +6473,7 @@
     "price": 325,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6488,7 +6488,7 @@
     "price": 330,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -6503,7 +6503,7 @@
     "price": 205,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -6518,7 +6518,7 @@
     "price": 210,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -6527,13 +6527,13 @@
   {
     "name": "grandmaster pewter necklace of deception",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/grandmaster pewter necklace of deception.png",
     "kind": "accessory",
     "price": 215,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0
@@ -6548,7 +6548,7 @@
     "price": 220,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -6563,7 +6563,7 @@
     "price": 225,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -6578,7 +6578,7 @@
     "price": 205,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 4,
       "initiative": -2,
       "attack_speed": 0
@@ -6587,13 +6587,13 @@
   {
     "name": "grandmaster platinum necklace of deception",
     "level": 10,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/grandmaster platinum necklace of deception.png",
     "kind": "accessory",
     "price": 210,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -6608,7 +6608,7 @@
     "price": 215,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -6623,7 +6623,7 @@
     "price": 220,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 4,
       "initiative": 1,
       "attack_speed": 0
@@ -6638,7 +6638,7 @@
     "price": 225,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6653,7 +6653,7 @@
     "price": 340,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -6668,7 +6668,7 @@
     "price": 345,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -6677,13 +6677,13 @@
   {
     "name": "sovereign iron silent treads",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/sovereign iron silent treads.png",
     "kind": "boots",
     "price": 350,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6698,7 +6698,7 @@
     "price": 355,
     "stats": {
       "attack": 13,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -6713,7 +6713,7 @@
     "price": 360,
     "stats": {
       "attack": 16,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -6728,7 +6728,7 @@
     "price": 340,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -6743,7 +6743,7 @@
     "price": 350,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -6758,7 +6758,7 @@
     "price": 355,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6773,7 +6773,7 @@
     "price": 360,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6782,13 +6782,13 @@
   {
     "name": "sovereign tempered infiltrator axe",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/sovereign tempered infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 340,
     "stats": {
       "attack": 13,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -6803,7 +6803,7 @@
     "price": 345,
     "stats": {
       "attack": 16,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -6818,7 +6818,7 @@
     "price": 350,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -6827,13 +6827,13 @@
   {
     "name": "sovereign iron silent bascinet",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/sovereign iron silent bascinet.png",
     "kind": "helmet",
     "price": 360,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -6848,7 +6848,7 @@
     "price": 340,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -6863,7 +6863,7 @@
     "price": 345,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6878,7 +6878,7 @@
     "price": 350,
     "stats": {
       "attack": 13,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -6887,13 +6887,13 @@
   {
     "name": "sovereign ironed assassin bow",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/sovereign ironed assassin bow.png",
     "kind": "two_hand_weapon",
     "price": 355,
     "stats": {
       "attack": 16,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -6908,7 +6908,7 @@
     "price": 360,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -6923,7 +6923,7 @@
     "price": 345,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -6932,13 +6932,13 @@
   {
     "name": "sovereign iron infiltrator scale armor",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/sovereign iron infiltrator scale armor.png",
     "kind": "armor",
     "price": 350,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -6953,7 +6953,7 @@
     "price": 355,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -6968,7 +6968,7 @@
     "price": 360,
     "stats": {
       "attack": 13,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -6983,7 +6983,7 @@
     "price": 340,
     "stats": {
       "attack": 16,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -6992,13 +6992,13 @@
   {
     "name": "sovereign iron silent shield",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/sovereign iron silent shield.png",
     "kind": "offhand",
     "price": 345,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -7013,7 +7013,7 @@
     "price": 355,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7028,7 +7028,7 @@
     "price": 360,
     "stats": {
       "attack": 0,
-      "armor": 6,
+      "defense": 6,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -7043,7 +7043,7 @@
     "price": 225,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -7058,7 +7058,7 @@
     "price": 230,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -7067,13 +7067,13 @@
   {
     "name": "sovereign pewter necklace of deception",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/sovereign pewter necklace of deception.png",
     "kind": "accessory",
     "price": 235,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0
@@ -7088,7 +7088,7 @@
     "price": 240,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -7103,7 +7103,7 @@
     "price": 245,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -7118,7 +7118,7 @@
     "price": 225,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 4,
       "initiative": -2,
       "attack_speed": 0
@@ -7127,13 +7127,13 @@
   {
     "name": "sovereign platinum necklace of deception",
     "level": 11,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/sovereign platinum necklace of deception.png",
     "kind": "accessory",
     "price": 230,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -7148,7 +7148,7 @@
     "price": 235,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -7163,7 +7163,7 @@
     "price": 240,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 4,
       "initiative": 1,
       "attack_speed": 0
@@ -7178,7 +7178,7 @@
     "price": 245,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7193,7 +7193,7 @@
     "price": 370,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -7208,7 +7208,7 @@
     "price": 375,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -7217,13 +7217,13 @@
   {
     "name": "exalted iron silent treads",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/exalted iron silent treads.png",
     "kind": "boots",
     "price": 380,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7238,7 +7238,7 @@
     "price": 385,
     "stats": {
       "attack": 14,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -7253,7 +7253,7 @@
     "price": 390,
     "stats": {
       "attack": 17,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -7268,7 +7268,7 @@
     "price": 370,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -7283,7 +7283,7 @@
     "price": 380,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -7298,7 +7298,7 @@
     "price": 385,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7313,7 +7313,7 @@
     "price": 390,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7322,13 +7322,13 @@
   {
     "name": "exalted tempered infiltrator axe",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/exalted tempered infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 370,
     "stats": {
       "attack": 14,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -7343,7 +7343,7 @@
     "price": 375,
     "stats": {
       "attack": 17,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -7358,7 +7358,7 @@
     "price": 380,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -7367,13 +7367,13 @@
   {
     "name": "exalted iron silent bascinet",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/exalted iron silent bascinet.png",
     "kind": "helmet",
     "price": 390,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -7388,7 +7388,7 @@
     "price": 370,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -7403,7 +7403,7 @@
     "price": 375,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7418,7 +7418,7 @@
     "price": 380,
     "stats": {
       "attack": 14,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -7427,13 +7427,13 @@
   {
     "name": "exalted ironed assassin crossbow",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/exalted ironed assassin crossbow.png",
     "kind": "two_hand_weapon",
     "price": 385,
     "stats": {
       "attack": 17,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -7448,7 +7448,7 @@
     "price": 390,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -7463,7 +7463,7 @@
     "price": 375,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -7472,13 +7472,13 @@
   {
     "name": "exalted iron infiltrator scale armor",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/exalted iron infiltrator scale armor.png",
     "kind": "armor",
     "price": 380,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -7493,7 +7493,7 @@
     "price": 385,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7508,7 +7508,7 @@
     "price": 390,
     "stats": {
       "attack": 14,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -7523,7 +7523,7 @@
     "price": 370,
     "stats": {
       "attack": 17,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -7532,13 +7532,13 @@
   {
     "name": "exalted iron silent shield",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/exalted iron silent shield.png",
     "kind": "offhand",
     "price": 375,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -7553,7 +7553,7 @@
     "price": 385,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7568,7 +7568,7 @@
     "price": 390,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -7583,7 +7583,7 @@
     "price": 245,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -7598,7 +7598,7 @@
     "price": 250,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -7607,13 +7607,13 @@
   {
     "name": "exalted emerald necklace of deception",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/exalted emerald necklace of deception.png",
     "kind": "accessory",
     "price": 255,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0
@@ -7628,7 +7628,7 @@
     "price": 260,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -7643,7 +7643,7 @@
     "price": 265,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 0
@@ -7658,7 +7658,7 @@
     "price": 245,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 4,
       "initiative": -2,
       "attack_speed": 0
@@ -7667,13 +7667,13 @@
   {
     "name": "exalted platinum necklace of deception",
     "level": 12,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/exalted platinum necklace of deception.png",
     "kind": "accessory",
     "price": 250,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -7688,7 +7688,7 @@
     "price": 255,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 2,
       "initiative": 0,
       "attack_speed": 0
@@ -7703,7 +7703,7 @@
     "price": 260,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 4,
       "initiative": 1,
       "attack_speed": 0
@@ -7718,7 +7718,7 @@
     "price": 265,
     "stats": {
       "attack": 4,
-      "armor": 4,
+      "defense": 4,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7733,7 +7733,7 @@
     "price": 400,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -7748,7 +7748,7 @@
     "price": 405,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -7757,13 +7757,13 @@
   {
     "name": "gladiator heavy steel silent treads",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/gladiator heavy steel silent treads.png",
     "kind": "boots",
     "price": 410,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7778,7 +7778,7 @@
     "price": 415,
     "stats": {
       "attack": 15,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -7793,7 +7793,7 @@
     "price": 420,
     "stats": {
       "attack": 18,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -7808,7 +7808,7 @@
     "price": 400,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -7823,7 +7823,7 @@
     "price": 410,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -7838,7 +7838,7 @@
     "price": 415,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7853,7 +7853,7 @@
     "price": 420,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7862,13 +7862,13 @@
   {
     "name": "gladiator mighty infiltrator axe",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/gladiator mighty infiltrator axe.png",
     "kind": "one_hand_weapon",
     "price": 400,
     "stats": {
       "attack": 15,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -7883,7 +7883,7 @@
     "price": 405,
     "stats": {
       "attack": 18,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -7898,7 +7898,7 @@
     "price": 410,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -7907,13 +7907,13 @@
   {
     "name": "gladiator regal silent crown",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/gladiator regal silent crown.png",
     "kind": "helmet",
     "price": 420,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -7928,7 +7928,7 @@
     "price": 400,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -7943,7 +7943,7 @@
     "price": 405,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -7958,7 +7958,7 @@
     "price": 410,
     "stats": {
       "attack": 15,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -7967,13 +7967,13 @@
   {
     "name": "gladiator masterwork assassin crossbow",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/gladiator masterwork assassin crossbow.png",
     "kind": "two_hand_weapon",
     "price": 415,
     "stats": {
       "attack": 18,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -7988,7 +7988,7 @@
     "price": 420,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -8003,7 +8003,7 @@
     "price": 405,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -8012,13 +8012,13 @@
   {
     "name": "gladiator plated infiltrator scale armor",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/gladiator plated infiltrator scale armor.png",
     "kind": "armor",
     "price": 410,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -8033,7 +8033,7 @@
     "price": 415,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8048,7 +8048,7 @@
     "price": 420,
     "stats": {
       "attack": 15,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -8063,7 +8063,7 @@
     "price": 400,
     "stats": {
       "attack": 18,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -8072,13 +8072,13 @@
   {
     "name": "gladiator heavily plated silent shield",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/gladiator heavily plated silent shield.png",
     "kind": "offhand",
     "price": 405,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -8093,7 +8093,7 @@
     "price": 415,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8108,7 +8108,7 @@
     "price": 420,
     "stats": {
       "attack": 0,
-      "armor": 7,
+      "defense": 7,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -8123,7 +8123,7 @@
     "price": 265,
     "stats": {
       "attack": 5,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": -2,
       "attack_speed": 0
@@ -8138,7 +8138,7 @@
     "price": 270,
     "stats": {
       "attack": 5,
-      "armor": 5,
+      "defense": 5,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0
@@ -8147,13 +8147,13 @@
   {
     "name": "gladiator amethyst necklace of deception",
     "level": 13,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/accessory/gladiator amethyst necklace of deception.png",
     "kind": "accessory",
     "price": 275,
     "stats": {
       "attack": 5,
-      "armor": 5,
+      "defense": 5,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0
@@ -8168,7 +8168,7 @@
     "price": 280,
     "stats": {
       "attack": 5,
-      "armor": 5,
+      "defense": 5,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -8183,7 +8183,7 @@
     "price": 430,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -8198,7 +8198,7 @@
     "price": 435,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -8207,13 +8207,13 @@
   {
     "name": "heroic heavy steel silent treads",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/heroic heavy steel silent treads.png",
     "kind": "boots",
     "price": 440,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8228,7 +8228,7 @@
     "price": 445,
     "stats": {
       "attack": 16,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -8243,7 +8243,7 @@
     "price": 450,
     "stats": {
       "attack": 19,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -8258,7 +8258,7 @@
     "price": 430,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -8273,7 +8273,7 @@
     "price": 440,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -8288,7 +8288,7 @@
     "price": 445,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8303,7 +8303,7 @@
     "price": 450,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8312,13 +8312,13 @@
   {
     "name": "heroic mighty infiltrator dagger",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/heroic mighty infiltrator dagger.png",
     "kind": "one_hand_weapon",
     "price": 430,
     "stats": {
       "attack": 16,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -8333,7 +8333,7 @@
     "price": 435,
     "stats": {
       "attack": 19,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -8348,7 +8348,7 @@
     "price": 440,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -8357,13 +8357,13 @@
   {
     "name": "heroic plated silent bascinet",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/heroic plated silent bascinet.png",
     "kind": "helmet",
     "price": 450,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -8378,7 +8378,7 @@
     "price": 430,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -8393,7 +8393,7 @@
     "price": 435,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8408,7 +8408,7 @@
     "price": 440,
     "stats": {
       "attack": 16,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -8417,13 +8417,13 @@
   {
     "name": "heroic masterwork assassin crossbow",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/heroic masterwork assassin crossbow.png",
     "kind": "two_hand_weapon",
     "price": 445,
     "stats": {
       "attack": 19,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -8438,7 +8438,7 @@
     "price": 450,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -8453,7 +8453,7 @@
     "price": 435,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -8462,13 +8462,13 @@
   {
     "name": "heroic plated infiltrator scale armor",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/heroic plated infiltrator scale armor.png",
     "kind": "armor",
     "price": 440,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -8483,7 +8483,7 @@
     "price": 445,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8498,7 +8498,7 @@
     "price": 450,
     "stats": {
       "attack": 16,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -8513,7 +8513,7 @@
     "price": 430,
     "stats": {
       "attack": 19,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -8522,13 +8522,13 @@
   {
     "name": "heroic heavily plated silent shield",
     "level": 14,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/heroic heavily plated silent shield.png",
     "kind": "offhand",
     "price": 435,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -8543,7 +8543,7 @@
     "price": 445,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8558,7 +8558,7 @@
     "price": 450,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -8573,7 +8573,7 @@
     "price": 460,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -8588,7 +8588,7 @@
     "price": 465,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -8597,13 +8597,13 @@
   {
     "name": "champion enchanted silent slippers",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/boots/champion enchanted silent slippers.png",
     "kind": "boots",
     "price": 470,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8618,7 +8618,7 @@
     "price": 475,
     "stats": {
       "attack": 17,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -8633,7 +8633,7 @@
     "price": 480,
     "stats": {
       "attack": 21,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -8648,7 +8648,7 @@
     "price": 460,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -8663,7 +8663,7 @@
     "price": 470,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -8678,7 +8678,7 @@
     "price": 475,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8687,13 +8687,13 @@
   {
     "name": "champion mighty infiltrator dagger",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/champion mighty infiltrator dagger.png",
     "kind": "one_hand_weapon",
     "price": 460,
     "stats": {
       "attack": 17,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -8708,7 +8708,7 @@
     "price": 465,
     "stats": {
       "attack": 21,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -8723,7 +8723,7 @@
     "price": 470,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -8732,13 +8732,13 @@
   {
     "name": "champion ritual silent bascinet",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/helmet/champion ritual silent bascinet.png",
     "kind": "helmet",
     "price": 480,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -8753,7 +8753,7 @@
     "price": 460,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -8768,7 +8768,7 @@
     "price": 470,
     "stats": {
       "attack": 17,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -8777,13 +8777,13 @@
   {
     "name": "champion masterwork assassin scythe",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/champion masterwork assassin scythe.png",
     "kind": "two_hand_weapon",
     "price": 475,
     "stats": {
       "attack": 21,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -8798,7 +8798,7 @@
     "price": 480,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -8813,7 +8813,7 @@
     "price": 465,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -8822,13 +8822,13 @@
   {
     "name": "champion plated infiltrator scale armor",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/champion plated infiltrator scale armor.png",
     "kind": "armor",
     "price": 470,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -8843,7 +8843,7 @@
     "price": 480,
     "stats": {
       "attack": 17,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -8858,7 +8858,7 @@
     "price": 460,
     "stats": {
       "attack": 21,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -8867,13 +8867,13 @@
   {
     "name": "champion heavily plated silent shield",
     "level": 15,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/champion heavily plated silent shield.png",
     "kind": "offhand",
     "price": 465,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -8888,7 +8888,7 @@
     "price": 480,
     "stats": {
       "attack": 0,
-      "armor": 8,
+      "defense": 8,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -8903,7 +8903,7 @@
     "price": 495,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -8918,7 +8918,7 @@
     "price": 505,
     "stats": {
       "attack": 18,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -8933,7 +8933,7 @@
     "price": 510,
     "stats": {
       "attack": 22,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -8948,7 +8948,7 @@
     "price": 490,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -8963,7 +8963,7 @@
     "price": 505,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -8972,13 +8972,13 @@
   {
     "name": "overlord mighty infiltrator dagger",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/overlord mighty infiltrator dagger.png",
     "kind": "one_hand_weapon",
     "price": 490,
     "stats": {
       "attack": 18,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -8993,7 +8993,7 @@
     "price": 495,
     "stats": {
       "attack": 22,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -9008,7 +9008,7 @@
     "price": 500,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -9023,7 +9023,7 @@
     "price": 490,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -9038,7 +9038,7 @@
     "price": 500,
     "stats": {
       "attack": 18,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -9047,13 +9047,13 @@
   {
     "name": "overlord masterwork assassin spear",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/overlord masterwork assassin spear.png",
     "kind": "two_hand_weapon",
     "price": 505,
     "stats": {
       "attack": 22,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -9068,7 +9068,7 @@
     "price": 510,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -9077,13 +9077,13 @@
   {
     "name": "overlord reinforced leather infiltrator tunic",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/overlord reinforced leather infiltrator tunic.png",
     "kind": "armor",
     "price": 500,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -9098,7 +9098,7 @@
     "price": 510,
     "stats": {
       "attack": 18,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -9113,7 +9113,7 @@
     "price": 490,
     "stats": {
       "attack": 22,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -9122,13 +9122,13 @@
   {
     "name": "overlord heavily plated silent shield",
     "level": 16,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/overlord heavily plated silent shield.png",
     "kind": "offhand",
     "price": 495,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -9143,7 +9143,7 @@
     "price": 510,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -9158,7 +9158,7 @@
     "price": 525,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -9173,7 +9173,7 @@
     "price": 535,
     "stats": {
       "attack": 19,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -9188,7 +9188,7 @@
     "price": 540,
     "stats": {
       "attack": 23,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -9203,7 +9203,7 @@
     "price": 520,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -9218,7 +9218,7 @@
     "price": 535,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 2,
       "attack_speed": 0
@@ -9227,13 +9227,13 @@
   {
     "name": "epic mighty infiltrator dagger",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/epic mighty infiltrator dagger.png",
     "kind": "one_hand_weapon",
     "price": 520,
     "stats": {
       "attack": 19,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -9248,7 +9248,7 @@
     "price": 525,
     "stats": {
       "attack": 23,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -9263,7 +9263,7 @@
     "price": 530,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -9278,7 +9278,7 @@
     "price": 520,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -9293,7 +9293,7 @@
     "price": 530,
     "stats": {
       "attack": 19,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -9302,13 +9302,13 @@
   {
     "name": "epic masterwork assassin spear",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/epic masterwork assassin spear.png",
     "kind": "two_hand_weapon",
     "price": 535,
     "stats": {
       "attack": 23,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -9323,7 +9323,7 @@
     "price": 540,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -9332,13 +9332,13 @@
   {
     "name": "epic verdant infiltrator scale armor",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/armor/epic verdant infiltrator scale armor.png",
     "kind": "armor",
     "price": 530,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -9353,7 +9353,7 @@
     "price": 540,
     "stats": {
       "attack": 19,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -9368,7 +9368,7 @@
     "price": 520,
     "stats": {
       "attack": 23,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -9377,13 +9377,13 @@
   {
     "name": "epic heavily plated silent shield",
     "level": 17,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/epic heavily plated silent shield.png",
     "kind": "offhand",
     "price": 525,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -9398,7 +9398,7 @@
     "price": 540,
     "stats": {
       "attack": 0,
-      "armor": 9,
+      "defense": 9,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -9413,7 +9413,7 @@
     "price": 555,
     "stats": {
       "attack": 0,
-      "armor": 10,
+      "defense": 10,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -9428,7 +9428,7 @@
     "price": 565,
     "stats": {
       "attack": 20,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -9443,7 +9443,7 @@
     "price": 570,
     "stats": {
       "attack": 24,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -9458,7 +9458,7 @@
     "price": 550,
     "stats": {
       "attack": 0,
-      "armor": 10,
+      "defense": 10,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -9467,13 +9467,13 @@
   {
     "name": "eldritch mighty infiltrator dagger",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/eldritch mighty infiltrator dagger.png",
     "kind": "one_hand_weapon",
     "price": 550,
     "stats": {
       "attack": 20,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -9488,7 +9488,7 @@
     "price": 555,
     "stats": {
       "attack": 24,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -9503,7 +9503,7 @@
     "price": 560,
     "stats": {
       "attack": 0,
-      "armor": 10,
+      "defense": 10,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -9518,7 +9518,7 @@
     "price": 560,
     "stats": {
       "attack": 20,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -9527,13 +9527,13 @@
   {
     "name": "eldritch masterwork assassin spear",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/eldritch masterwork assassin spear.png",
     "kind": "two_hand_weapon",
     "price": 565,
     "stats": {
       "attack": 24,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -9548,7 +9548,7 @@
     "price": 570,
     "stats": {
       "attack": 0,
-      "armor": 10,
+      "defense": 10,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -9563,7 +9563,7 @@
     "price": 570,
     "stats": {
       "attack": 20,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -9578,7 +9578,7 @@
     "price": 550,
     "stats": {
       "attack": 24,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -9587,13 +9587,13 @@
   {
     "name": "eldritch heavily plated silent shield",
     "level": 18,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/eldritch heavily plated silent shield.png",
     "kind": "offhand",
     "price": 555,
     "stats": {
       "attack": 0,
-      "armor": 10,
+      "defense": 10,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -9608,7 +9608,7 @@
     "price": 595,
     "stats": {
       "attack": 21,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -9623,7 +9623,7 @@
     "price": 600,
     "stats": {
       "attack": 25,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -9638,7 +9638,7 @@
     "price": 580,
     "stats": {
       "attack": 0,
-      "armor": 10,
+      "defense": 10,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -9647,13 +9647,13 @@
   {
     "name": "mythic mighty infiltrator dagger",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/mythic mighty infiltrator dagger.png",
     "kind": "one_hand_weapon",
     "price": 580,
     "stats": {
       "attack": 21,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -9668,7 +9668,7 @@
     "price": 585,
     "stats": {
       "attack": 25,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -9683,7 +9683,7 @@
     "price": 590,
     "stats": {
       "attack": 0,
-      "armor": 10,
+      "defense": 10,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -9698,7 +9698,7 @@
     "price": 590,
     "stats": {
       "attack": 21,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -9707,13 +9707,13 @@
   {
     "name": "mythic masterwork assassin spear",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/mythic masterwork assassin spear.png",
     "kind": "two_hand_weapon",
     "price": 595,
     "stats": {
       "attack": 25,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -9728,7 +9728,7 @@
     "price": 600,
     "stats": {
       "attack": 0,
-      "armor": 10,
+      "defense": 10,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -9743,7 +9743,7 @@
     "price": 600,
     "stats": {
       "attack": 21,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -9758,7 +9758,7 @@
     "price": 580,
     "stats": {
       "attack": 25,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -9767,13 +9767,13 @@
   {
     "name": "mythic heavily plated silent shield",
     "level": 19,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/mythic heavily plated silent shield.png",
     "kind": "offhand",
     "price": 585,
     "stats": {
       "attack": 0,
-      "armor": 10,
+      "defense": 10,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0
@@ -9788,7 +9788,7 @@
     "price": 625,
     "stats": {
       "attack": 22,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 2,
       "attack_speed": 1.2
@@ -9803,7 +9803,7 @@
     "price": 630,
     "stats": {
       "attack": 27,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 3,
       "attack_speed": 1.1
@@ -9818,7 +9818,7 @@
     "price": 610,
     "stats": {
       "attack": 0,
-      "armor": 11,
+      "defense": 11,
       "crit": 0,
       "initiative": -1,
       "attack_speed": 0
@@ -9827,13 +9827,13 @@
   {
     "name": "legendary mighty infiltrator dagger",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/legendary mighty infiltrator dagger.png",
     "kind": "one_hand_weapon",
     "price": 610,
     "stats": {
       "attack": 22,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": -1,
       "attack_speed": 0.9
@@ -9848,7 +9848,7 @@
     "price": 615,
     "stats": {
       "attack": 27,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 0,
       "attack_speed": 0.8
@@ -9863,7 +9863,7 @@
     "price": 620,
     "stats": {
       "attack": 0,
-      "armor": 11,
+      "defense": 11,
       "crit": 0,
       "initiative": 1,
       "attack_speed": 0
@@ -9878,7 +9878,7 @@
     "price": 620,
     "stats": {
       "attack": 22,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 1,
       "attack_speed": 1.1
@@ -9887,13 +9887,13 @@
   {
     "name": "legendary masterwork assassin spear",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/legendary masterwork assassin spear.png",
     "kind": "two_hand_weapon",
     "price": 625,
     "stats": {
       "attack": 27,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": 2,
       "attack_speed": 1
@@ -9908,7 +9908,7 @@
     "price": 630,
     "stats": {
       "attack": 0,
-      "armor": 11,
+      "defense": 11,
       "crit": 0,
       "initiative": 3,
       "attack_speed": 0
@@ -9923,7 +9923,7 @@
     "price": 630,
     "stats": {
       "attack": 22,
-      "armor": 0,
+      "defense": 0,
       "crit": 2,
       "initiative": 3,
       "attack_speed": 1.3
@@ -9938,7 +9938,7 @@
     "price": 610,
     "stats": {
       "attack": 27,
-      "armor": 0,
+      "defense": 0,
       "crit": 4,
       "initiative": -1,
       "attack_speed": 0.7
@@ -9947,13 +9947,13 @@
   {
     "name": "legendary enchanted silent tome",
     "level": 20,
-    "class_hint": "rogue",
+    "class_hint": "assassin",
     "icon_path": "images/equipment/weapon/legendary enchanted silent tome.png",
     "kind": "offhand",
     "price": 615,
     "stats": {
       "attack": 0,
-      "armor": 11,
+      "defense": 11,
       "crit": 0,
       "initiative": 0,
       "attack_speed": 0

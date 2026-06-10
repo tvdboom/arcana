@@ -139,7 +139,8 @@ pub fn check_keys_menu(
                             ajah.on_select(&mut player, &mut next_game_state);
                         },
                         Class::Druid => {
-                            let kind = player.pet.as_ref().map(|p| p.kind).unwrap_or(PetKind::default());
+                            let kind =
+                                player.pet.as_ref().map(|p| p.kind).unwrap_or(PetKind::default());
                             kind.on_select(&mut player, &mut next_game_state);
                         },
                         _ => {
