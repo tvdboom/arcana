@@ -104,7 +104,8 @@ pub fn check_keys_menu(
                 },
                 GameState::ChooseRace => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
-                    next_game_state.set(GameState::ChooseClass);
+                    let race = player.race;
+                    race.on_select(&mut player, &mut next_game_state);
                 },
                 GameState::ChooseClass => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));

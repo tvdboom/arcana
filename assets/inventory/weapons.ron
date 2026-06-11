@@ -1,6 +1,6 @@
 [
     (
-        name: "rusty training sword wood",
+        name: "training sword wood",
         image: "images/inventory/equipment/weapon/TrainingSwordWood.png",
         kind: Martial,
         category: Melee,
@@ -14,7 +14,7 @@
         effects: [],
     ),
     (
-        name: "rusty axe old",
+        name: "axe old",
         image: "images/inventory/equipment/weapon/AxeOld.png",
         kind: Martial,
         category: Melee,
@@ -28,7 +28,7 @@
         effects: [],
     ),
     (
-        name: "rusty broken shield",
+        name: "broken shield",
         image: "images/inventory/equipment/weapon/BrokenShield.png",
         kind: Bulwark,
         category: Shield,
@@ -42,7 +42,7 @@
         effects: [],
     ),
     (
-        name: "rusty broken sword",
+        name: "broken sword",
         image: "images/inventory/equipment/weapon/BrokenSword.png",
         kind: Martial,
         category: Melee,
@@ -56,7 +56,7 @@
         effects: [],
     ),
     (
-        name: "rusty old dagger",
+        name: "old dagger",
         image: "images/inventory/equipment/weapon/OldDagger.png",
         kind: Assassination,
         category: Melee,
@@ -70,7 +70,7 @@
         effects: [],
     ),
     (
-        name: "rusty old sword",
+        name: "old sword",
         image: "images/inventory/equipment/weapon/OldSword.png",
         kind: Martial,
         category: Melee,
@@ -84,7 +84,7 @@
         effects: [],
     ),
     (
-        name: "rusty stone hammer",
+        name: "stone hammer",
         image: "images/inventory/equipment/weapon/StoneHammer.png",
         kind: Martial,
         category: Melee,
@@ -98,7 +98,7 @@
         effects: [],
     ),
     (
-        name: "rusty wooden hammer",
+        name: "wooden hammer",
         image: "images/inventory/equipment/weapon/WoodenHammer.png",
         kind: Martial,
         category: Melee,
@@ -112,7 +112,7 @@
         effects: [],
     ),
     (
-        name: "rusty wood shield",
+        name: "wood shield",
         image: "images/inventory/equipment/weapon/WoodShield.png",
         kind: Bulwark,
         category: Shield,
@@ -126,7 +126,7 @@
         effects: [],
     ),
     (
-        name: "rusty wood shield black yellow",
+        name: "wood shield black yellow",
         image: "images/inventory/equipment/weapon/WoodShieldBlackYellow.png",
         kind: Bulwark,
         category: Shield,
@@ -140,7 +140,7 @@
         effects: [],
     ),
     (
-        name: "rusty wood shield blue white",
+        name: "wood shield blue white",
         image: "images/inventory/equipment/weapon/WoodShieldBlueWhite.png",
         kind: Bulwark,
         category: Shield,
@@ -154,7 +154,7 @@
         effects: [],
     ),
     (
-        name: "rusty wood shield blue yellow",
+        name: "wood shield blue yellow",
         image: "images/inventory/equipment/weapon/WoodShieldBlueYellow.png",
         kind: Bulwark,
         category: Shield,
@@ -168,7 +168,7 @@
         effects: [],
     ),
     (
-        name: "rusty wood shield green",
+        name: "wood shield green",
         image: "images/inventory/equipment/weapon/WoodShieldGreen.png",
         kind: Bulwark,
         category: Shield,
@@ -210,7 +210,7 @@
         effects: [],
     ),
     (
-        name: "rusty loot axeold",
+        name: "loot axeold",
         image: "images/inventory/equipment/weapon/Loot_14_axeold.png",
         kind: Martial,
         category: Melee,
@@ -224,7 +224,7 @@
         effects: [],
     ),
     (
-        name: "rusty elite dagger gold",
+        name: "elite dagger gold",
         image: "images/inventory/equipment/weapon/EliteDaggerGold.png",
         kind: Assassination,
         category: Melee,
@@ -238,7 +238,7 @@
         effects: [],
     ),
     (
-        name: "rusty assassins dagger",
+        name: "assassins dagger",
         image: "images/inventory/equipment/weapon/AssassinsDagger.png",
         kind: Assassination,
         category: Melee,
@@ -266,7 +266,7 @@
         effects: [],
     ),
     (
-        name: "rusty axe viking",
+        name: "axe viking",
         image: "images/inventory/equipment/weapon/AxeViking.png",
         kind: Martial,
         category: Melee,
@@ -294,7 +294,7 @@
         effects: [],
     ),
     (
-        name: "rusty black berber shield",
+        name: "black berber shield",
         image: "images/inventory/equipment/weapon/BlackBerberShield.png",
         kind: Bulwark,
         category: Shield,
@@ -308,7 +308,7 @@
         effects: [],
     ),
     (
-        name: "rusty black shield",
+        name: "black shield",
         image: "images/inventory/equipment/weapon/BlackShield.png",
         kind: Bulwark,
         category: Shield,
@@ -322,7 +322,7 @@
         effects: [],
     ),
     (
-        name: "rusty blue shield",
+        name: "blue shield",
         image: "images/inventory/equipment/weapon/BlueShield.png",
         kind: Bulwark,
         category: Shield,
@@ -378,7 +378,7 @@
         effects: [],
     ),
     (
-        name: "rusty elite dagger blue",
+        name: "elite dagger blue",
         image: "images/inventory/equipment/weapon/EliteDaggerBlue.png",
         kind: Assassination,
         category: Melee,
@@ -392,7 +392,7 @@
         effects: [],
     ),
     (
-        name: "rusty fat dagger",
+        name: "fat dagger",
         image: "images/inventory/equipment/weapon/FatDagger.png",
         kind: Assassination,
         category: Melee,
@@ -406,7 +406,7 @@
         effects: [],
     ),
     (
-        name: "rusty greece shield",
+        name: "greece shield",
         image: "images/inventory/equipment/weapon/GreeceShield.png",
         kind: Bulwark,
         category: Shield,
@@ -420,7 +420,7 @@
         effects: [],
     ),
     (
-        name: "rusty green metal shield",
+        name: "green metal shield",
         image: "images/inventory/equipment/weapon/GreenMetalShield.png",
         kind: Bulwark,
         category: Shield,
@@ -434,7 +434,7 @@
         effects: [],
     ),
     (
-        name: "rusty hook",
+        name: "hook",
         image: "images/inventory/equipment/weapon/Hook.png",
         kind: Martial,
         category: Melee,
@@ -448,7 +448,7 @@
         effects: [],
     ),
     (
-        name: "rusty knife dagger",
+        name: "knife dagger",
         image: "images/inventory/equipment/weapon/KnifeDagger.png",
         kind: Assassination,
         category: Melee,
@@ -462,7 +462,7 @@
         effects: [],
     ),
     (
-        name: "rusty knight shield",
+        name: "knight shield",
         image: "images/inventory/equipment/weapon/KnightShield.png",
         kind: Bulwark,
         category: Shield,
@@ -476,7 +476,7 @@
         effects: [],
     ),
     (
-        name: "rusty knight shield green",
+        name: "knight shield green",
         image: "images/inventory/equipment/weapon/KnightShieldGreen.png",
         kind: Bulwark,
         category: Shield,
@@ -490,7 +490,7 @@
         effects: [],
     ),
     (
-        name: "rusty lion shield",
+        name: "lion shield",
         image: "images/inventory/equipment/weapon/LionShield.png",
         kind: Bulwark,
         category: Shield,
@@ -518,7 +518,7 @@
         effects: [],
     ),
     (
-        name: "rusty paladin shield",
+        name: "paladin shield",
         image: "images/inventory/equipment/weapon/PaladinShield.png",
         kind: Bulwark,
         category: Shield,
@@ -532,7 +532,7 @@
         effects: [],
     ),
     (
-        name: "rusty red shield",
+        name: "red shield",
         image: "images/inventory/equipment/weapon/RedShield.png",
         kind: Bulwark,
         category: Shield,
@@ -546,7 +546,7 @@
         effects: [],
     ),
     (
-        name: "rusty rome dagger",
+        name: "rome dagger",
         image: "images/inventory/equipment/weapon/RomeDagger.png",
         kind: Assassination,
         category: Melee,
@@ -560,7 +560,7 @@
         effects: [],
     ),
     (
-        name: "rusty rome shield",
+        name: "rome shield",
         image: "images/inventory/equipment/weapon/RomeShield.png",
         kind: Bulwark,
         category: Shield,
@@ -574,7 +574,7 @@
         effects: [],
     ),
     (
-        name: "rusty rose shield",
+        name: "rose shield",
         image: "images/inventory/equipment/weapon/RoseShield.png",
         kind: Bulwark,
         category: Shield,
@@ -588,7 +588,7 @@
         effects: [],
     ),
     (
-        name: "rusty shield buckler",
+        name: "shield buckler",
         image: "images/inventory/equipment/weapon/ShieldBuckler.png",
         kind: Bulwark,
         category: Shield,
@@ -602,7 +602,7 @@
         effects: [],
     ),
     (
-        name: "rusty sickle",
+        name: "sickle",
         image: "images/inventory/equipment/weapon/Sickle.png",
         kind: Martial,
         category: Melee,
@@ -616,7 +616,7 @@
         effects: [],
     ),
     (
-        name: "rusty skull shield",
+        name: "skull shield",
         image: "images/inventory/equipment/weapon/SkullShield.png",
         kind: Bulwark,
         category: Shield,
@@ -630,7 +630,7 @@
         effects: [],
     ),
     (
-        name: "rusty spear scythe",
+        name: "spear scythe",
         image: "images/inventory/equipment/weapon/SpearScythe.png",
         kind: Martial,
         category: Melee,
@@ -644,7 +644,7 @@
         effects: [],
     ),
     (
-        name: "rusty spear tournament blue",
+        name: "spear tournament blue",
         image: "images/inventory/equipment/weapon/SpearTournamentBlue.png",
         kind: Martial,
         category: Melee,
@@ -658,7 +658,7 @@
         effects: [],
     ),
     (
-        name: "rusty spear tournament red",
+        name: "spear tournament red",
         image: "images/inventory/equipment/weapon/SpearTournamentRed.png",
         kind: Martial,
         category: Melee,
@@ -700,7 +700,7 @@
         effects: [],
     ),
     (
-        name: "worn sword decorated",
+        name: "sword decorated",
         image: "images/inventory/equipment/weapon/SwordDecorated.png",
         kind: Martial,
         category: Melee,
@@ -728,7 +728,7 @@
         effects: [],
     ),
     (
-        name: "worn sword rapier",
+        name: "sword rapier",
         image: "images/inventory/equipment/weapon/SwordRapier.png",
         kind: Martial,
         category: Melee,
@@ -756,7 +756,7 @@
         effects: [],
     ),
     (
-        name: "worn teutonic shield",
+        name: "teutonic shield",
         image: "images/inventory/equipment/weapon/TeutonicShield.png",
         kind: Bulwark,
         category: Shield,
@@ -770,7 +770,7 @@
         effects: [],
     ),
     (
-        name: "worn the whip",
+        name: "the whip",
         image: "images/inventory/equipment/weapon/TheWhip.png",
         kind: Martial,
         category: Melee,
@@ -812,7 +812,7 @@
         effects: [],
     ),
     (
-        name: "worn white shield",
+        name: "white shield",
         image: "images/inventory/equipment/weapon/WhiteShield.png",
         kind: Bulwark,
         category: Shield,
@@ -1008,7 +1008,7 @@
         effects: [],
     ),
     (
-        name: "worn metal shield",
+        name: "metal shield",
         image: "images/inventory/equipment/weapon/MetalShield1.png",
         kind: Bulwark,
         category: Shield,
@@ -2394,7 +2394,7 @@
         effects: [],
     ),
     (
-        name: "novice spearhalberd",
+        name: "spearhalberd",
         image: "images/inventory/equipment/weapon/Spear4Halberd.png",
         kind: Martial,
         category: Melee,
@@ -3738,7 +3738,7 @@
         effects: [],
     ),
     (
-        name: "sturdy loot dagger",
+        name: "loot dagger",
         image: "images/inventory/equipment/weapon/Loot_08_dagger.png",
         kind: Assassination,
         category: Melee,
@@ -4032,7 +4032,7 @@
         effects: [],
     ),
     (
-        name: "reliable loot axe",
+        name: "loot axe",
         image: "images/inventory/equipment/weapon/Loot_09_axe.png",
         kind: Martial,
         category: Melee,
@@ -4312,7 +4312,7 @@
         effects: [],
     ),
     (
-        name: "reliable loot knife",
+        name: "loot knife",
         image: "images/inventory/equipment/weapon/Loot_10_knife.png",
         kind: Martial,
         category: Melee,
@@ -4578,7 +4578,7 @@
         effects: [],
     ),
     (
-        name: "reliable loot hammer",
+        name: "loot hammer",
         image: "images/inventory/equipment/weapon/Loot_11_hammer.png",
         kind: Martial,
         category: Melee,
@@ -5068,7 +5068,7 @@
         effects: [Cleave(radius: 2.5, damage_pct: 0.40)],
     ),
     (
-        name: "skilled loot pick",
+        name: "loot pick",
         image: "images/inventory/equipment/weapon/Loot_13_pick.png",
         kind: Martial,
         category: Melee,
@@ -5208,7 +5208,7 @@
         effects: [ManaBurn(amount: 15)],
     ),
     (
-        name: "skilled golden shield",
+        name: "golden shield",
         image: "images/inventory/equipment/weapon/GoldenShield.png",
         kind: Bulwark,
         category: Shield,
@@ -5922,7 +5922,7 @@
         effects: [Clearcasting(duration: 4.0)],
     ),
     (
-        name: "refined axe pick",
+        name: "axe pick",
         image: "images/inventory/equipment/weapon/AxePick.png",
         kind: Martial,
         category: Melee,
@@ -6048,7 +6048,7 @@
         effects: [Cleave(radius: 2.5, damage_pct: 0.40)],
     ),
     (
-        name: "veteran loot ogrehammer",
+        name: "loot ogrehammer",
         image: "images/inventory/equipment/weapon/Loot_17_ogrehammer.png",
         kind: Martial,
         category: Melee,
@@ -7392,7 +7392,7 @@
         effects: [Cleave(radius: 2.5, damage_pct: 0.40)],
     ),
     (
-        name: "heavy loot bone",
+        name: "loot bone",
         image: "images/inventory/equipment/weapon/Loot_23_bone.png",
         kind: Martial,
         category: Melee,

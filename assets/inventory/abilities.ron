@@ -2051,7 +2051,7 @@
         cooldown: 8.9,
         is_aoe: false,
         modifiers: [],
-        effects: [Purge],
+        effects: [HealMaxHealthPct(percentage: 0.22)],
     ),
     (
         name: "hit of the flame",
@@ -2142,7 +2142,7 @@
         cooldown: 9.3,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 10, duration: 5.0)],
+        effects: [Purge],
     ),
     (
         name: "meditation",
@@ -2454,7 +2454,7 @@
         cooldown: 8.8,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 12, duration: 5.0)],
+        effects: [Purge],
     ),
     (
         name: "thirdeye",
@@ -2636,7 +2636,7 @@
         cooldown: 8.6,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 14, duration: 5.0)],
+        effects: [HealMaxHealthPct(percentage: 0.23)],
     ),
     (
         name: "bloodlust",
@@ -2831,7 +2831,7 @@
         cooldown: 8.6,
         is_aoe: false,
         modifiers: [],
-        effects: [Purge],
+        effects: [HealMaxHealthPct(percentage: 0.23)],
     ),
     (
         name: "holywater",
@@ -2844,7 +2844,7 @@
         cooldown: 8.8,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 14, duration: 5.0)],
+        effects: [Purge],
     ),
     (
         name: "holy power",
@@ -2857,7 +2857,7 @@
         cooldown: 9.0,
         is_aoe: false,
         modifiers: [],
-        effects: [Purge],
+        effects: [Regen(heal_per_sec: 15, duration: 5.0)],
     ),
     (
         name: "holy rain",
@@ -2870,7 +2870,7 @@
         cooldown: 8.2,
         is_aoe: true,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 12, duration: 5.0)],
+        effects: [HealMaxHealthPct(percentage: 0.23)],
     ),
     (
         name: "ice nova",
@@ -2935,7 +2935,7 @@
         cooldown: 7.9,
         is_aoe: false,
         modifiers: [],
-        effects: [Purge],
+        effects: [Regen(heal_per_sec: 15, duration: 5.0)],
     ),
     (
         name: "light arrow",
@@ -2948,7 +2948,7 @@
         cooldown: 8.1,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 16, duration: 5.0)],
+        effects: [HealMaxHealthPct(percentage: 0.24)],
     ),
     (
         name: "light blow",
@@ -3260,7 +3260,7 @@
         cooldown: 7.9,
         is_aoe: false,
         modifiers: [],
-        effects: [TimeWarp(initiative_reduction: 0.13, duration: 4.0)],
+        effects: [HealMaxManaPct(percentage: 0.24)],
     ),
     (
         name: "summon army of death",
@@ -3702,7 +3702,7 @@
         cooldown: 8.4,
         is_aoe: true,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 16, duration: 5.0)],
+        effects: [Purge],
     ),
     (
         name: "unholy energy",
@@ -3715,7 +3715,7 @@
         cooldown: 7.6,
         is_aoe: true,
         modifiers: [],
-        effects: [Purge],
+        effects: [Regen(heal_per_sec: 17, duration: 5.0)],
     ),
     (
         name: "doublesword",
@@ -4729,7 +4729,7 @@
         cooldown: 7.6,
         is_aoe: false,
         modifiers: [],
-        effects: [Purge],
+        effects: [Regen(heal_per_sec: 23, duration: 5.0)],
     ),
     (
         name: "thistle armor of the desert",
@@ -4781,7 +4781,7 @@
         cooldown: 7.4,
         is_aoe: false,
         modifiers: [],
-        effects: [Silence(duration: 3.0)],
+        effects: [HealMaxManaPct(percentage: 0.27)],
     ),
     (
         name: "arcane blast",
@@ -4898,7 +4898,7 @@
         cooldown: 6.9,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 22, duration: 5.0)],
+        effects: [HealMaxHealthPct(percentage: 0.28)],
     ),
     (
         name: "wild growth of the sun",
@@ -5041,7 +5041,7 @@
         cooldown: 7.1,
         is_aoe: false,
         modifiers: [],
-        effects: [Purge],
+        effects: [Regen(heal_per_sec: 25, duration: 5.0)],
     ),
     (
         name: "root of the deep",
@@ -5106,7 +5106,7 @@
         cooldown: 7.1,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 22, duration: 5.0)],
+        effects: [Purge],
     ),
     (
         name: "eagle screech of the vale",
@@ -5262,7 +5262,7 @@
         cooldown: 7.5,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 22, duration: 5.0)],
+        effects: [Purge],
     ),
     (
         name: "oakskin guard of the sea",
@@ -5509,7 +5509,7 @@
         cooldown: 7.0,
         is_aoe: true,
         modifiers: [],
-        effects: [Purge],
+        effects: [Regen(heal_per_sec: 27, duration: 5.0)],
     ),
     (
         name: "rage",
@@ -5639,7 +5639,7 @@
         cooldown: 7.0,
         is_aoe: true,
         modifiers: [],
-        effects: [Purge],
+        effects: [HealMaxHealthPct(percentage: 0.29)],
     ),
     (
         name: "update",
@@ -5665,7 +5665,7 @@
         cooldown: 6.4,
         is_aoe: true,
         modifiers: [],
-        effects: [Purge],
+        effects: [Regen(heal_per_sec: 27, duration: 5.0)],
     ),
     (
         name: "floral gale of the peak",
@@ -6614,7 +6614,7 @@
         cooldown: 6.4,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 28, duration: 5.0)],
+        effects: [HealMaxHealthPct(percentage: 0.31)],
     ),
     (
         name: "vine snare of the deep",
@@ -6744,7 +6744,7 @@
         cooldown: 6.1,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 32, duration: 5.0)],
+        effects: [Purge],
     ),
     (
         name: "iceelement",
@@ -6900,7 +6900,7 @@
         cooldown: 5.5,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 32, duration: 5.0)],
+        effects: [Purge],
     ),
     (
         name: "hurricane gust of the peak",
@@ -7082,7 +7082,7 @@
         cooldown: 6.3,
         is_aoe: false,
         modifiers: [],
-        effects: [Regen(heal_per_sec: 30, duration: 5.0)],
+        effects: [HealMaxHealthPct(percentage: 0.32)],
     ),
     (
         name: "primal roar of the dawn",
@@ -7355,7 +7355,7 @@
         cooldown: 5.2,
         is_aoe: true,
         modifiers: [],
-        effects: [Purge],
+        effects: [HealMaxHealthPct(percentage: 0.33)],
     ),
     (
         name: "wolf pack call of the vale",
@@ -7628,7 +7628,7 @@
         cooldown: 5.4,
         is_aoe: true,
         modifiers: [],
-        effects: [TimeWarp(initiative_reduction: 0.22, duration: 4.0)],
+        effects: [HealMaxManaPct(percentage: 0.33)],
     ),
     (
         name: "leaf blade of the tundra",

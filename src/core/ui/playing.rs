@@ -12,6 +12,7 @@ use crate::core::classes::Class;
 use crate::core::constants::*;
 use crate::core::inventory::armor::EquipmentSlot;
 use crate::core::inventory::equipment::{Equipment, Kind};
+use crate::core::inventory::modifiers::Modifier;
 use crate::core::inventory::weapons::Hand;
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::buttons::DisabledButton;
@@ -228,6 +229,7 @@ fn combat_breakdown(
                 player.strength() as i32 - 10,
             ));
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| weapon.attack()));
+            lines.extend(perk_bonus_lines(player, localization, lang, stat));
             lines
         },
         PlayingStat::Defense => {
@@ -236,6 +238,7 @@ fn combat_breakdown(
                 player.constitution() as i32 / 4,
             )];
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| weapon.defense()));
+            lines.extend(perk_bonus_lines(player, localization, lang, stat));
             lines
         },
         PlayingStat::Initiative => {
@@ -249,10 +252,63 @@ fn combat_breakdown(
             if matches!(player.class, Class::Assassin) {
                 lines.push(signed_line(localization.get("class.assassin", lang), 2));
             }
+            lines.extend(perk_bonus_lines(player, localization, lang, stat));
             lines
         },
         _ => vec![],
     }
+}
+
+fn perk_bonus_lines(
+    player: &Player,
+    localization: &Localization,
+    lang: Language,
+    stat: PlayingStat,
+) -> Vec<String> {
+    let mut lines = Vec::new();
+    for perk_key in &player.perks {
+        if let Some(perk) = get_perk(perk_key) {
+            for modifier in &perk.modifiers {
+                match (stat, modifier) {
+                    (PlayingStat::Attack, Modifier::BonusAttack(val)) => {
+                        let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
+                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
+                        lines.push(signed_line(localized_name, *val));
+                    }
+                    (PlayingStat::Attack, Modifier::AttackMultiplier(val)) => {
+                        let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
+                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
+                        let pct = ((val - 1.0) * 100.0).round() as i32;
+                        lines.push(format!("{}: {:+}%", localized_name, pct));
+                    }
+                    (PlayingStat::Defense, Modifier::BonusDefense(val)) => {
+                        let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
+                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
+                        lines.push(signed_line(localized_name, *val));
+                    }
+                    (PlayingStat::Defense, Modifier::DefenseMultiplier(val)) => {
+                        let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
+                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
+                        let pct = ((val - 1.0) * 100.0).round() as i32;
+                        lines.push(format!("{}: {:+}%", localized_name, pct));
+                    }
+                    (PlayingStat::Initiative, Modifier::BonusInitiative(val)) => {
+                        let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
+                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
+                        lines.push(signed_line(localized_name, *val));
+                    }
+                    (PlayingStat::Initiative, Modifier::InitiativeMultiplier(val)) => {
+                        let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
+                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
+                        let pct = ((val - 1.0) * 100.0).round() as i32;
+                        lines.push(format!("{}: {:+}%", localized_name, pct));
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+    lines
 }
 
 /// A bordered placeholder box (used wherever an item/ability image will go later).

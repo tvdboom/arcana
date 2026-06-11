@@ -857,10 +857,15 @@ fn main() {
                     }
                 },
                 "Holy" => {
-                    if idx % 2 == 0 {
+                    if idx % 3 == 0 {
                         effects.push(format!(
                             "Regen(heal_per_sec: {}, duration: 5.0)",
                             level * 2 + (idx % 4) as u32
+                        ));
+                    } else if idx % 3 == 1 {
+                        effects.push(format!(
+                            "HealMaxHealthPct(percentage: {:.2})",
+                            0.15 + (level as f32 * 0.01) + (idx % 3) as f32 * 0.02
                         ));
                     } else {
                         effects.push("Purge".to_string());
@@ -927,10 +932,15 @@ fn main() {
                     }
                 },
                 _ => {
-                    if idx % 2 == 0 {
+                    if idx % 3 == 0 {
                         effects.push(format!(
                             "TimeWarp(initiative_reduction: {:.2}, duration: 4.0)",
                             0.05 + level as f32 * 0.01 + (idx % 3) as f32 * 0.01
+                        ));
+                    } else if idx % 3 == 1 {
+                        effects.push(format!(
+                            "HealMaxManaPct(percentage: {:.2})",
+                            0.15 + (level as f32 * 0.01) + (idx % 3) as f32 * 0.02
                         ));
                     } else {
                         effects.push(format!("Silence(duration: {:.1})", 2.0 + (idx % 3) as f32));
@@ -1506,6 +1516,10 @@ fn main() {
                     "Regen(heal_per_sec: {}, duration: 999999.0)",
                     level + (idx % 3) as u32
                 ));
+                templates.push(format!(
+                    "HealFlat(amount: {})",
+                    level * 15 + (idx % 5) as u32 * 5
+                ));
             },
             "Shadow" => {
                 templates
@@ -1527,6 +1541,10 @@ fn main() {
                 ));
                 templates
                     .push(format!("MonarchShield(duration: {:.1})", 2.0 + (level as f32 * 0.2)));
+                templates.push(format!(
+                    "HealManaFlat(amount: {})",
+                    level * 15 + (idx % 5) as u32 * 5
+                ));
             },
             "Martial" => {
                 templates.push(format!(
@@ -1674,6 +1692,15 @@ fn main() {
     }
     weapons_files.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
+    let mut weapon_cleaned_counts = std::collections::HashMap::new();
+    for (filename, _) in &weapons_files {
+        let mut cleaned = clean_name(filename);
+        if cleaned.is_empty() {
+            cleaned = "Steel Weapon".to_string();
+        }
+        *weapon_cleaned_counts.entry(cleaned).or_insert(0) += 1;
+    }
+
     let total_wps = weapons_files.len();
     let chunk_size_wps = total_wps as f64 / 20.0;
     let mut weapons_ron = String::from("[\n");
@@ -1716,12 +1743,23 @@ fn main() {
             cleaned = "Steel Weapon".to_string();
         }
 
-        let adj = LEVEL_ADJECTIVES[level as usize - 1];
-        let mut name = format!("{} {}", adj, cleaned).to_lowercase();
+        let is_unique = *weapon_cleaned_counts.get(&cleaned).unwrap_or(&0) == 1;
+        let mut name = if is_unique {
+            cleaned.to_lowercase()
+        } else {
+            let adj = LEVEL_ADJECTIVES[level as usize - 1];
+            format!("{} {}", adj, cleaned).to_lowercase()
+        };
+
         let mut ctr = 1;
         while seen_weapons.contains(&name) {
             let mod_idx = (idx + ctr as usize) % UNIQUE_MODIFIERS.len();
-            name = format!("{} {} {}", adj, cleaned, UNIQUE_MODIFIERS[mod_idx]).to_lowercase();
+            if is_unique {
+                name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx]).to_lowercase();
+            } else {
+                let adj = LEVEL_ADJECTIVES[level as usize - 1];
+                name = format!("{} {} {}", adj, cleaned, UNIQUE_MODIFIERS[mod_idx]).to_lowercase();
+            }
             ctr += 1;
         }
         seen_weapons.push(name.clone());
@@ -1891,6 +1929,15 @@ fn main() {
     }
     armor_files.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
+    let mut armor_cleaned_counts = std::collections::HashMap::new();
+    for (filename, _, _, _) in &armor_files {
+        let mut cleaned = clean_name(filename);
+        if cleaned.is_empty() {
+            cleaned = "Armor".to_string();
+        }
+        *armor_cleaned_counts.entry(cleaned).or_insert(0) += 1;
+    }
+
     let total_arm = armor_files.len();
     let chunk_size_arm = total_arm as f64 / 20.0;
     let mut armor_ron = String::from("[\n");
@@ -1918,12 +1965,23 @@ fn main() {
             cleaned = "Armor".to_string();
         }
 
-        let adj = LEVEL_ADJECTIVES[level as usize - 1];
-        let mut name = format!("{} {}", adj, cleaned).to_lowercase();
+        let is_unique = *armor_cleaned_counts.get(&cleaned).unwrap_or(&0) == 1;
+        let mut name = if is_unique {
+            cleaned.to_lowercase()
+        } else {
+            let adj = LEVEL_ADJECTIVES[level as usize - 1];
+            format!("{} {}", adj, cleaned).to_lowercase()
+        };
+
         let mut ctr = 1;
         while seen_armor.contains(&name) {
             let mod_idx = (idx + ctr as usize) % UNIQUE_MODIFIERS.len();
-            name = format!("{} {} {}", adj, cleaned, UNIQUE_MODIFIERS[mod_idx]).to_lowercase();
+            if is_unique {
+                name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx]).to_lowercase();
+            } else {
+                let adj = LEVEL_ADJECTIVES[level as usize - 1];
+                name = format!("{} {} {}", adj, cleaned, UNIQUE_MODIFIERS[mod_idx]).to_lowercase();
+            }
             ctr += 1;
         }
         seen_armor.push(name.clone());

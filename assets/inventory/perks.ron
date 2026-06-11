@@ -45,7 +45,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusCritChance(0.015)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.120)],
     ),
     (
         name: "stone nature hit",
@@ -141,7 +141,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), DefenseMultiplier(1.040)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.140)],
     ),
     (
         name: "aura acid",
@@ -149,7 +149,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusInitiative(1)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 1, duration: 999999.0)],
     ),
     (
         name: "aura acid rain",
@@ -157,7 +157,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), InitiativeMultiplier(1.021)],
-        effects: [HolyResistance(percentage: 0.160)],
+        effects: [HealFlat(amount: 35)],
     ),
     (
         name: "aura ancient",
@@ -165,7 +165,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusCritChance(0.015)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura ancient knowledge",
@@ -173,7 +173,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), CritChanceMultiplier(1.017)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.130)],
     ),
     (
         name: "aura anger",
@@ -181,7 +181,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusAttackSpeed(0.019)],
-        effects: [HolyResistance(percentage: 0.140)],
+        effects: [Regen(heal_per_sec: 2, duration: 999999.0)],
     ),
     (
         name: "aura beetles",
@@ -189,7 +189,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), AttackSpeedMultiplier(1.021)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [HealFlat(amount: 30)],
     ),
     (
         name: "aura betrayal",
@@ -221,7 +221,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusPetInitiative(2)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 25)],
     ),
     (
         name: "aura dirt monster",
@@ -229,7 +229,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), HealingReceivedMultiplier(1.045)],
-        effects: [HolyResistance(percentage: 0.150)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura druid",
@@ -237,7 +237,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusAttack(4)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.160)],
     ),
     (
         name: "aura exile",
@@ -245,7 +245,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), AttackMultiplier(1.030)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 1, duration: 999999.0)],
     ),
     (
         name: "aura fast travel",
@@ -253,7 +253,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusDefense(3)],
-        effects: [HolyResistance(percentage: 0.130)],
+        effects: [HealFlat(amount: 20)],
     ),
     (
         name: "aura feed",
@@ -261,7 +261,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), DefenseMultiplier(1.040)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura filth",
@@ -269,7 +269,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusInitiative(2)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.150)],
     ),
     (
         name: "aura flex",
@@ -277,7 +277,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), InitiativeMultiplier(1.019)],
-        effects: [HolyResistance(percentage: 0.160)],
+        effects: [Regen(heal_per_sec: 2, duration: 999999.0)],
     ),
     (
         name: "aura frost",
@@ -317,7 +317,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusPetDamage(2)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 35)],
     ),
     (
         name: "aura invisibility",
@@ -325,7 +325,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), PetDamageMultiplier(1.030)],
-        effects: [HolyResistance(percentage: 0.120)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura jump",
@@ -333,7 +333,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusDefenseDamage(4)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.130)],
     ),
     (
         name: "aura kiss love",
@@ -341,7 +341,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusPetInitiative(1)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 1, duration: 999999.0)],
     ),
     (
         name: "aura lamp",
@@ -349,7 +349,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), HealingReceivedMultiplier(1.045)],
-        effects: [HolyResistance(percentage: 0.150)],
+        effects: [HealFlat(amount: 30)],
     ),
     (
         name: "aura lock destroyer",
@@ -357,7 +357,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusAttack(4)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura mage",
@@ -365,7 +365,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), AttackMultiplier(1.030)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.120)],
     ),
     (
         name: "aura mega explosion",
@@ -373,7 +373,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusDefense(3)],
-        effects: [HolyResistance(percentage: 0.130)],
+        effects: [Regen(heal_per_sec: 2, duration: 999999.0)],
     ),
     (
         name: "aura money",
@@ -381,7 +381,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), DefenseMultiplier(1.040)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [HealFlat(amount: 25)],
     ),
     (
         name: "aura nature",
@@ -413,7 +413,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), CritChanceMultiplier(1.021)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 20)],
     ),
     (
         name: "aura pipe music",
@@ -421,7 +421,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusAttackSpeed(0.015)],
-        effects: [HolyResistance(percentage: 0.140)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura plague",
@@ -429,7 +429,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), AttackSpeedMultiplier(1.017)],
-        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.150)],
     ),
     (
         name: "aura plate armor",
@@ -437,7 +437,7 @@
         kind: Holy,
         level: 1,
         modifiers: [BonusCharisma(1), BonusPetDamage(2)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 1, duration: 999999.0)],
     ),
     (
         name: "aura red shield",
@@ -453,7 +453,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), BonusPetInitiative(1)],
-        effects: [Regen(heal_per_sec: 4, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura rogue",
@@ -461,7 +461,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), HealingReceivedMultiplier(1.050)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.160)],
     ),
     (
         name: "aura run",
@@ -469,7 +469,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), BonusAttack(5)],
-        effects: [HolyResistance(percentage: 0.170)],
+        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
     ),
     (
         name: "aura shake",
@@ -477,7 +477,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), AttackMultiplier(1.060)],
-        effects: [Regen(heal_per_sec: 4, duration: 999999.0)],
+        effects: [HealFlat(amount: 50)],
     ),
     (
         name: "aura spark",
@@ -509,7 +509,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), InitiativeMultiplier(1.026)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 45)],
     ),
     (
         name: "aura tentacle",
@@ -517,7 +517,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), BonusCritChance(0.028)],
-        effects: [HolyResistance(percentage: 0.180)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura thick skin",
@@ -525,7 +525,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), CritChanceMultiplier(1.022)],
-        effects: [Regen(heal_per_sec: 4, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.140)],
     ),
     (
         name: "aura vampiric",
@@ -533,7 +533,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), BonusAttackSpeed(0.024)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 2, duration: 999999.0)],
     ),
     (
         name: "aura warlock",
@@ -541,7 +541,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), AttackSpeedMultiplier(1.026)],
-        effects: [HolyResistance(percentage: 0.160)],
+        effects: [HealFlat(amount: 40)],
     ),
     (
         name: "aura warrior",
@@ -549,7 +549,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), BonusPetDamage(6)],
-        effects: [Regen(heal_per_sec: 4, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura water",
@@ -557,7 +557,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), PetDamageMultiplier(1.060)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.180)],
     ),
     (
         name: "aura wild growth",
@@ -565,7 +565,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), BonusDefenseDamage(5)],
-        effects: [HolyResistance(percentage: 0.140)],
+        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
     ),
     (
         name: "aura wizard",
@@ -573,7 +573,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), BonusPetInitiative(2)],
-        effects: [Regen(heal_per_sec: 4, duration: 999999.0)],
+        effects: [HealFlat(amount: 35)],
     ),
     (
         name: "aura wizards",
@@ -821,7 +821,7 @@
         kind: Holy,
         level: 2,
         modifiers: [BonusCharisma(2), HealingReceivedMultiplier(1.050)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 2, duration: 999999.0)],
     ),
     (
         name: "blind",
@@ -1301,7 +1301,7 @@
         kind: Holy,
         level: 3,
         modifiers: [BonusCharisma(3), BonusAttack(6)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 3, duration: 999999.0)],
     ),
     (
         name: "fighting",
@@ -1581,7 +1581,7 @@
         kind: Holy,
         level: 4,
         modifiers: [BonusCharisma(4), BonusCritChance(0.034)],
-        effects: [Regen(heal_per_sec: 6, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.200)],
     ),
     (
         name: "healing aura",
@@ -1589,7 +1589,7 @@
         kind: Holy,
         level: 4,
         modifiers: [BonusCharisma(4), CritChanceMultiplier(1.034)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 4, duration: 999999.0)],
     ),
     (
         name: "healing chain",
@@ -1597,7 +1597,7 @@
         kind: Holy,
         level: 4,
         modifiers: [BonusCharisma(4), BonusAttackSpeed(0.036)],
-        effects: [HolyResistance(percentage: 0.220)],
+        effects: [HealFlat(amount: 80)],
     ),
     (
         name: "healing lamp",
@@ -1605,7 +1605,7 @@
         kind: Holy,
         level: 4,
         modifiers: [BonusCharisma(4), AttackSpeedMultiplier(1.030)],
-        effects: [Regen(heal_per_sec: 6, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0)],
     ),
     (
         name: "healing rain",
@@ -1613,7 +1613,7 @@
         kind: Holy,
         level: 4,
         modifiers: [BonusCharisma(4), BonusPetDamage(8)],
-        effects: [Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.190)],
     ),
     (
         name: "healing shield",
@@ -1621,7 +1621,7 @@
         kind: Holy,
         level: 4,
         modifiers: [BonusCharisma(4), PetDamageMultiplier(1.070)],
-        effects: [HolyResistance(percentage: 0.200)],
+        effects: [Regen(heal_per_sec: 5, duration: 999999.0)],
     ),
     (
         name: "healing touch",
@@ -1629,7 +1629,7 @@
         kind: Holy,
         level: 4,
         modifiers: [BonusCharisma(4), BonusDefenseDamage(10)],
-        effects: [Regen(heal_per_sec: 6, duration: 999999.0)],
+        effects: [HealFlat(amount: 75)],
     ),
     (
         name: "healing wave",
@@ -2013,7 +2013,7 @@
         kind: Holy,
         level: 5,
         modifiers: [BonusCharisma(5), AttackMultiplier(1.075)],
-        effects: [Regen(heal_per_sec: 7, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 80), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "nature healing",
@@ -2189,7 +2189,7 @@
         kind: Holy,
         level: 6,
         modifiers: [BonusCharisma(6), AttackSpeedMultiplier(1.042)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.250)],
+        effects: [HolyResistance(percentage: 0.250), Regen(heal_per_sec: 6, duration: 999999.0)],
     ),
     (
         name: "press button",
@@ -2349,7 +2349,7 @@
         kind: Holy,
         level: 6,
         modifiers: [BonusCharisma(6), HealingReceivedMultiplier(1.095)],
-        effects: [Regen(heal_per_sec: 8, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.250), Regen(heal_per_sec: 8, duration: 999999.0)],
     ),
     (
         name: "resurrection",
@@ -2389,7 +2389,7 @@
         kind: Holy,
         level: 6,
         modifiers: [BonusCharisma(6), BonusInitiative(3)],
-        effects: [HolyResistance(percentage: 0.250), Regen(heal_per_sec: 7, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 7, duration: 999999.0), HealFlat(amount: 105)],
     ),
     (
         name: "runic weapon",
@@ -2437,7 +2437,7 @@
         kind: Holy,
         level: 6,
         modifiers: [BonusCharisma(6), BonusPetDamage(13)],
-        effects: [HolyResistance(percentage: 0.260), Regen(heal_per_sec: 7, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.260)],
     ),
     (
         name: "shield drop",
@@ -2445,7 +2445,7 @@
         kind: Holy,
         level: 6,
         modifiers: [BonusCharisma(6), PetDamageMultiplier(1.080)],
-        effects: [Regen(heal_per_sec: 8, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.220), Regen(heal_per_sec: 8, duration: 999999.0)],
     ),
     (
         name: "shield hit",
@@ -2453,7 +2453,7 @@
         kind: Holy,
         level: 6,
         modifiers: [BonusCharisma(6), BonusDefenseDamage(12)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.230)],
+        effects: [Regen(heal_per_sec: 6, duration: 999999.0), HealFlat(amount: 95)],
     ),
     (
         name: "shield up",
@@ -2461,7 +2461,7 @@
         kind: Holy,
         level: 6,
         modifiers: [BonusCharisma(6), BonusPetInitiative(4)],
-        effects: [HolyResistance(percentage: 0.240), Regen(heal_per_sec: 7, duration: 999999.0)],
+        effects: [HealFlat(amount: 100), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shield wall",
@@ -2469,7 +2469,7 @@
         kind: Holy,
         level: 6,
         modifiers: [BonusCharisma(6), HealingReceivedMultiplier(1.095)],
-        effects: [Regen(heal_per_sec: 8, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.250)],
     ),
     (
         name: "shock",
@@ -2797,7 +2797,7 @@
         kind: Cosmic,
         level: 7,
         modifiers: [BonusIntelligence(7), PetDamageMultiplier(1.110)],
-        effects: [MonarchShield(duration: 3.4), TimeWarp(initiative_reduction: 0.085, duration: 6.0)],
+        effects: [MonarchShield(duration: 3.4), HealManaFlat(amount: 125)],
     ),
     (
         name: "toxic",
@@ -3349,7 +3349,7 @@
         kind: Holy,
         level: 8,
         modifiers: [BonusCharisma(8), BonusCritChance(0.056)],
-        effects: [HolyResistance(percentage: 0.290), Regen(heal_per_sec: 9, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 9, duration: 999999.0), HealFlat(amount: 135)],
     ),
     (
         name: "tech skin armor",
@@ -3485,7 +3485,7 @@
         kind: Holy,
         level: 8,
         modifiers: [BonusCharisma(8), BonusAttackSpeed(0.056)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.260)],
+        effects: [HealFlat(amount: 120), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "engineerskill work",
@@ -3517,7 +3517,7 @@
         kind: Holy,
         level: 9,
         modifiers: [BonusCharisma(9), BonusPetInitiative(5)],
-        effects: [HolyResistance(percentage: 0.320), Regen(heal_per_sec: 10, duration: 999999.0)],
+        effects: [HealFlat(amount: 155), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shamanskill runehammer",
@@ -3637,7 +3637,7 @@
         kind: Holy,
         level: 9,
         modifiers: [BonusCharisma(9), BonusPetInitiative(4)],
-        effects: [HolyResistance(percentage: 0.320), Regen(heal_per_sec: 10, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 10, duration: 999999.0), HealFlat(amount: 155)],
     ),
     (
         name: "engineerskill shieldmetal",
@@ -3645,7 +3645,7 @@
         kind: Holy,
         level: 9,
         modifiers: [BonusCharisma(9), HealingReceivedMultiplier(1.110)],
-        effects: [Regen(heal_per_sec: 11, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 135), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "paladinskill protect",
@@ -3701,7 +3701,7 @@
         kind: Holy,
         level: 9,
         modifiers: [BonusCharisma(9), BonusCritChance(0.059)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.300)],
+        effects: [Regen(heal_per_sec: 9, duration: 999999.0), HealFlat(amount: 145)],
     ),
     (
         name: "mageskill staffs",
@@ -3717,7 +3717,7 @@
         kind: Holy,
         level: 9,
         modifiers: [BonusCharisma(9), BonusAttackSpeed(0.055)],
-        effects: [Regen(heal_per_sec: 11, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.320)],
     ),
     (
         name: "shamanskill totem",
@@ -3781,7 +3781,7 @@
         kind: Holy,
         level: 9,
         modifiers: [BonusCharisma(9), AttackMultiplier(1.120)],
-        effects: [HolyResistance(percentage: 0.300), Regen(heal_per_sec: 10, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.300)],
     ),
     (
         name: "shamanskill",
@@ -3917,7 +3917,7 @@
         kind: Holy,
         level: 9,
         modifiers: [BonusCharisma(9), DefenseMultiplier(1.130)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.320)],
+        effects: [HolyResistance(percentage: 0.320), Regen(heal_per_sec: 9, duration: 999999.0)],
     ),
     (
         name: "shamanskill of the desert",
@@ -3981,7 +3981,7 @@
         kind: Holy,
         level: 10,
         modifiers: [BonusCharisma(10), BonusDefenseDamage(22)],
-        effects: [Regen(heal_per_sec: 12, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.320), Regen(heal_per_sec: 12, duration: 999999.0)],
     ),
     (
         name: "priestskill",
@@ -3989,7 +3989,7 @@
         kind: Holy,
         level: 10,
         modifiers: [BonusCharisma(10), BonusPetInitiative(4)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.330)],
+        effects: [Regen(heal_per_sec: 10, duration: 999999.0), HealFlat(amount: 165)],
     ),
     (
         name: "shamanskill of the dawn",
@@ -4029,7 +4029,7 @@
         kind: Holy,
         level: 10,
         modifiers: [BonusCharisma(10), DefenseMultiplier(1.135)],
-        effects: [Regen(heal_per_sec: 12, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 165), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "engineerskill sniper",
@@ -4061,7 +4061,7 @@
         kind: Holy,
         level: 10,
         modifiers: [BonusCharisma(10), CritChanceMultiplier(1.066)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.320)],
+        effects: [HealFlat(amount: 160), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shamanskill of the flame",
@@ -4125,7 +4125,7 @@
         kind: Holy,
         level: 10,
         modifiers: [BonusCharisma(10), BonusAttack(22)],
-        effects: [Regen(heal_per_sec: 12, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 150), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shamanskill of the tundra",
@@ -4181,7 +4181,7 @@
         kind: Holy,
         level: 10,
         modifiers: [BonusCharisma(10), CritChanceMultiplier(1.064)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.320)],
+        effects: [Regen(heal_per_sec: 10, duration: 999999.0), HealFlat(amount: 160)],
     ),
     (
         name: "warlock clone",
@@ -4221,7 +4221,7 @@
         kind: Holy,
         level: 10,
         modifiers: [BonusCharisma(10), BonusDefenseDamage(22)],
-        effects: [Regen(heal_per_sec: 12, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 160), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shamanskill of the moon",
@@ -4277,7 +4277,7 @@
         kind: Holy,
         level: 10,
         modifiers: [BonusCharisma(10), BonusInitiative(4)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.340)],
+        effects: [Regen(heal_per_sec: 10, duration: 999999.0), HealFlat(amount: 170)],
     ),
     (
         name: "paladinskill of the shadow",
@@ -4293,7 +4293,7 @@
         kind: Holy,
         level: 10,
         modifiers: [BonusCharisma(10), BonusCritChance(0.062)],
-        effects: [Regen(heal_per_sec: 12, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.310)],
     ),
     (
         name: "shamanskill of the peak",
@@ -4397,7 +4397,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), InitiativeMultiplier(1.067)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.360)],
+        effects: [HolyResistance(percentage: 0.360), Regen(heal_per_sec: 11, duration: 999999.0)],
     ),
     (
         name: "engineerskill of the night",
@@ -4493,7 +4493,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), BonusDefense(22)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.330)],
+        effects: [HolyResistance(percentage: 0.330), Regen(heal_per_sec: 11, duration: 999999.0)],
     ),
     (
         name: "shamanskill water",
@@ -4549,7 +4549,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), AttackSpeedMultiplier(1.065)],
-        effects: [HolyResistance(percentage: 0.350), Regen(heal_per_sec: 12, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.350)],
     ),
     (
         name: "aura dark agent",
@@ -4557,7 +4557,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), BonusPetDamage(24)],
-        effects: [Regen(heal_per_sec: 13, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.360), Regen(heal_per_sec: 13, duration: 999999.0)],
     ),
     (
         name: "aura death knight",
@@ -4565,7 +4565,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), PetDamageMultiplier(1.130)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.320)],
+        effects: [Regen(heal_per_sec: 11, duration: 999999.0), HealFlat(amount: 165)],
     ),
     (
         name: "aura demon mark",
@@ -4573,7 +4573,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), BonusDefenseDamage(23)],
-        effects: [HolyResistance(percentage: 0.330), Regen(heal_per_sec: 12, duration: 999999.0)],
+        effects: [HealFlat(amount: 170), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura dragon power",
@@ -4581,7 +4581,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), BonusPetInitiative(4)],
-        effects: [Regen(heal_per_sec: 13, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.340)],
     ),
     (
         name: "aura fire",
@@ -4637,7 +4637,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), InitiativeMultiplier(1.071)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.360)],
+        effects: [HealFlat(amount: 185), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "aura shadow treads",
@@ -4645,7 +4645,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), BonusCritChance(0.065)],
-        effects: [HolyResistance(percentage: 0.320), Regen(heal_per_sec: 12, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.320)],
     ),
     (
         name: "aura weapon on fire",
@@ -4685,7 +4685,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), PetDamageMultiplier(1.130)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.320)],
+        effects: [HolyResistance(percentage: 0.320), Regen(heal_per_sec: 11, duration: 999999.0)],
     ),
     (
         name: "rune holy rune",
@@ -4693,7 +4693,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), BonusDefenseDamage(23)],
-        effects: [HolyResistance(percentage: 0.330), Regen(heal_per_sec: 12, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 12, duration: 999999.0), HealFlat(amount: 170)],
     ),
     (
         name: "rune holy scroll",
@@ -4701,7 +4701,7 @@
         kind: Holy,
         level: 11,
         modifiers: [BonusCharisma(11), BonusPetInitiative(5)],
-        effects: [Regen(heal_per_sec: 13, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 175), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "rune little fire",
@@ -4925,7 +4925,7 @@
         kind: Holy,
         level: 12,
         modifiers: [BonusCharisma(12), BonusDefenseDamage(24)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.340)],
+        effects: [HealFlat(amount: 180), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "fake death",
@@ -5101,7 +5101,7 @@
         kind: Cosmic,
         level: 12,
         modifiers: [BonusIntelligence(12), BonusInitiative(6)],
-        effects: [MonarchShield(duration: 4.4), TimeWarp(initiative_reduction: 0.110, duration: 6.0)],
+        effects: [MonarchShield(duration: 4.4), HealManaFlat(amount: 190)],
     ),
     (
         name: "hacking with magic",
@@ -5125,7 +5125,7 @@
         kind: Holy,
         level: 12,
         modifiers: [BonusCharisma(12), CritChanceMultiplier(1.070)],
-        effects: [HolyResistance(percentage: 0.340), Regen(heal_per_sec: 13, duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.340)],
     ),
     (
         name: "holy regeneration",
@@ -5133,7 +5133,7 @@
         kind: Holy,
         level: 12,
         modifiers: [BonusCharisma(12), BonusAttackSpeed(0.072)],
-        effects: [Regen(heal_per_sec: 14, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.350), Regen(heal_per_sec: 14, duration: 999999.0)],
     ),
     (
         name: "hot blood",
@@ -5229,7 +5229,7 @@
         kind: Holy,
         level: 13,
         modifiers: [BonusCharisma(13), BonusCritChance(0.081)],
-        effects: [Regen(heal_per_sec: 15, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.390)],
+        effects: [HolyResistance(percentage: 0.390), Regen(heal_per_sec: 15, duration: 999999.0), HealFlat(amount: 210)],
     ),
     (
         name: "light power",
@@ -5237,7 +5237,7 @@
         kind: Holy,
         level: 13,
         modifiers: [BonusCharisma(13), CritChanceMultiplier(1.079)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.400), Regen(heal_per_sec: 13, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 13, duration: 999999.0), HealFlat(amount: 215), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "light sphere",
@@ -5245,7 +5245,7 @@
         kind: Holy,
         level: 13,
         modifiers: [BonusCharisma(13), BonusAttackSpeed(0.081)],
-        effects: [HolyResistance(percentage: 0.360), Regen(heal_per_sec: 14, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 195), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.360)],
     ),
     (
         name: "magic armor burn",
@@ -5293,7 +5293,7 @@
         kind: Holy,
         level: 13,
         modifiers: [BonusCharisma(13), HealingReceivedMultiplier(1.155)],
-        effects: [HolyResistance(percentage: 0.370), Regen(heal_per_sec: 14, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.370), Regen(heal_per_sec: 14, duration: 999999.0), HealFlat(amount: 200)],
     ),
     (
         name: "magic shoot",
@@ -5341,7 +5341,7 @@
         kind: Cosmic,
         level: 13,
         modifiers: [BonusIntelligence(13), InitiativeMultiplier(1.081)],
-        effects: [MonarchShield(duration: 4.6), TimeWarp(initiative_reduction: 0.115, duration: 6.0), MonarchShield(duration: 4.6)],
+        effects: [MonarchShield(duration: 4.6), HealManaFlat(amount: 205), TimeWarp(initiative_reduction: 0.115, duration: 6.0)],
     ),
     (
         name: "outof darkness",
@@ -5445,7 +5445,7 @@
         kind: Cosmic,
         level: 13,
         modifiers: [BonusIntelligence(13), DefenseMultiplier(1.150)],
-        effects: [TimeWarp(initiative_reduction: 0.115, duration: 7.0), MonarchShield(duration: 4.6), TimeWarp(initiative_reduction: 0.115, duration: 7.0)],
+        effects: [HealManaFlat(amount: 195), TimeWarp(initiative_reduction: 0.115, duration: 7.0), MonarchShield(duration: 4.6)],
     ),
     (
         name: "stealing magic",
@@ -5525,7 +5525,7 @@
         kind: Holy,
         level: 13,
         modifiers: [BonusCharisma(13), BonusPetInitiative(5)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.360), Regen(heal_per_sec: 13, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 13, duration: 999999.0), HealFlat(amount: 195), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "assassinskill hardattack",
@@ -5565,7 +5565,7 @@
         kind: Holy,
         level: 13,
         modifiers: [BonusCharisma(13), DefenseMultiplier(1.150)],
-        effects: [Regen(heal_per_sec: 15, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.360)],
+        effects: [HealFlat(amount: 195), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.360)],
     ),
     (
         name: "shamanskill nobg",
@@ -5661,7 +5661,7 @@
         kind: Holy,
         level: 13,
         modifiers: [BonusCharisma(13), BonusAttack(28)],
-        effects: [Regen(heal_per_sec: 15, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.380)],
+        effects: [HealFlat(amount: 205), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.380)],
     ),
     (
         name: "shamanskill of the frost",
@@ -5709,7 +5709,7 @@
         kind: Holy,
         level: 14,
         modifiers: [BonusCharisma(14), CritChanceMultiplier(1.082)],
-        effects: [Regen(heal_per_sec: 16, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.410)],
+        effects: [HolyResistance(percentage: 0.410), Regen(heal_per_sec: 16, duration: 999999.0), HealFlat(amount: 225)],
     ),
     (
         name: "secret magic of the wild",
@@ -5773,7 +5773,7 @@
         kind: Holy,
         level: 14,
         modifiers: [BonusCharisma(14), BonusAttack(29)],
-        effects: [HolyResistance(percentage: 0.390), Regen(heal_per_sec: 15, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.390), Regen(heal_per_sec: 15, duration: 999999.0), HealFlat(amount: 215)],
     ),
     (
         name: "warriorskill daggers",
@@ -5813,7 +5813,7 @@
         kind: Holy,
         level: 14,
         modifiers: [BonusCharisma(14), InitiativeMultiplier(1.084)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.390), Regen(heal_per_sec: 14, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 14, duration: 999999.0), HealFlat(amount: 215), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "engineerskill tech",
@@ -5925,7 +5925,7 @@
         kind: Holy,
         level: 14,
         modifiers: [BonusCharisma(14), BonusInitiative(5)],
-        effects: [Regen(heal_per_sec: 16, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.380)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.380), Regen(heal_per_sec: 16, duration: 999999.0)],
     ),
     (
         name: "warlock of the tundra",
@@ -5949,7 +5949,7 @@
         kind: Holy,
         level: 14,
         modifiers: [BonusCharisma(14), CritChanceMultiplier(1.086)],
-        effects: [Regen(heal_per_sec: 16, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.410)],
+        effects: [HealFlat(amount: 225), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.410)],
     ),
     (
         name: "warlock demonicshield",
@@ -5989,7 +5989,7 @@
         kind: Holy,
         level: 14,
         modifiers: [BonusCharisma(14), BonusDefenseDamage(29)],
-        effects: [HolyResistance(percentage: 0.410), Regen(heal_per_sec: 15, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.410), Regen(heal_per_sec: 15, duration: 999999.0)],
     ),
     (
         name: "priestskill of the dawn",
@@ -5997,7 +5997,7 @@
         kind: Holy,
         level: 14,
         modifiers: [BonusCharisma(14), BonusPetInitiative(6)],
-        effects: [Regen(heal_per_sec: 16, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.420)],
+        effects: [HolyResistance(percentage: 0.420), Regen(heal_per_sec: 16, duration: 999999.0), HealFlat(amount: 230)],
     ),
     (
         name: "warlock let loose",
@@ -6061,7 +6061,7 @@
         kind: Holy,
         level: 14,
         modifiers: [BonusCharisma(14), BonusCritChance(0.084)],
-        effects: [HolyResistance(percentage: 0.400), Regen(heal_per_sec: 15, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.400), Regen(heal_per_sec: 15, duration: 999999.0), HealFlat(amount: 220)],
     ),
     (
         name: "warlock army",
@@ -6173,7 +6173,7 @@
         kind: Holy,
         level: 15,
         modifiers: [BonusCharisma(15), BonusCritChance(0.087)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.410), Regen(heal_per_sec: 15, duration: 999999.0)],
+        effects: [HealFlat(amount: 230), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.410)],
     ),
     (
         name: "warriorskill shieldwall",
@@ -6181,7 +6181,7 @@
         kind: Holy,
         level: 15,
         modifiers: [BonusCharisma(15), CritChanceMultiplier(1.085)],
-        effects: [HolyResistance(percentage: 0.420), Regen(heal_per_sec: 16, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.420), Regen(heal_per_sec: 16, duration: 999999.0)],
     ),
     (
         name: "archerskill trap",
@@ -6229,7 +6229,7 @@
         kind: Holy,
         level: 15,
         modifiers: [BonusCharisma(15), BonusPetInitiative(6)],
-        effects: [HolyResistance(percentage: 0.430), Regen(heal_per_sec: 16, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 16, duration: 999999.0), HealFlat(amount: 240), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "warlock armor",
@@ -6301,7 +6301,7 @@
         kind: Holy,
         level: 15,
         modifiers: [BonusCharisma(15), CritChanceMultiplier(1.091)],
-        effects: [HolyResistance(percentage: 0.420), Regen(heal_per_sec: 16, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 235), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.420)],
     ),
     (
         name: "priestskill of the deep",
@@ -6309,7 +6309,7 @@
         kind: Holy,
         level: 15,
         modifiers: [BonusCharisma(15), BonusAttackSpeed(0.085)],
-        effects: [Regen(heal_per_sec: 17, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.430)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.430), Regen(heal_per_sec: 17, duration: 999999.0)],
     ),
     (
         name: "warlock battle",
@@ -6341,7 +6341,7 @@
         kind: Cosmic,
         level: 15,
         modifiers: [BonusIntelligence(15), BonusDefenseDamage(30)],
-        effects: [TimeWarp(initiative_reduction: 0.125, duration: 5.0), MonarchShield(duration: 5.0), TimeWarp(initiative_reduction: 0.125, duration: 5.0)],
+        effects: [TimeWarp(initiative_reduction: 0.125, duration: 5.0), MonarchShield(duration: 5.0), HealManaFlat(amount: 235)],
     ),
     (
         name: "shamanskill blood",
@@ -6397,7 +6397,7 @@
         kind: Holy,
         level: 15,
         modifiers: [BonusCharisma(15), BonusInitiative(7)],
-        effects: [HolyResistance(percentage: 0.440), Regen(heal_per_sec: 16, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 245), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.440)],
     ),
     (
         name: "warlock evil",
@@ -6429,7 +6429,7 @@
         kind: Cosmic,
         level: 15,
         modifiers: [BonusIntelligence(15), BonusAttackSpeed(0.091)],
-        effects: [MonarchShield(duration: 5.0), TimeWarp(initiative_reduction: 0.125, duration: 7.0), MonarchShield(duration: 5.0)],
+        effects: [HealManaFlat(amount: 240), TimeWarp(initiative_reduction: 0.125, duration: 7.0), MonarchShield(duration: 5.0)],
     ),
     (
         name: "mageskill purefire",
@@ -6485,7 +6485,7 @@
         kind: Holy,
         level: 15,
         modifiers: [BonusCharisma(15), BonusAttack(30)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.400), Regen(heal_per_sec: 15, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 15, duration: 999999.0), HealFlat(amount: 225), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shamanskill auras",
@@ -6493,7 +6493,7 @@
         kind: Holy,
         level: 15,
         modifiers: [BonusCharisma(15), AttackMultiplier(1.175)],
-        effects: [HolyResistance(percentage: 0.410), Regen(heal_per_sec: 16, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 230), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.410)],
     ),
     (
         name: "warlock rituals",
@@ -6565,7 +6565,7 @@
         kind: Holy,
         level: 16,
         modifiers: [BonusCharisma(16), PetDamageMultiplier(1.180)],
-        effects: [HolyResistance(percentage: 0.420), Regen(heal_per_sec: 17, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.420), Regen(heal_per_sec: 17, duration: 999999.0)],
     ),
     (
         name: "warlock summon",
@@ -6653,7 +6653,7 @@
         kind: Holy,
         level: 16,
         modifiers: [BonusCharisma(16), CritChanceMultiplier(1.096)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.430), Regen(heal_per_sec: 16, duration: 999999.0)],
+        effects: [HealFlat(amount: 245), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.430)],
     ),
     (
         name: "shamanskill elementals",
@@ -6733,7 +6733,7 @@
         kind: Holy,
         level: 16,
         modifiers: [BonusCharisma(16), BonusDefense(33)],
-        effects: [HolyResistance(percentage: 0.430), Regen(heal_per_sec: 17, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.430), Regen(heal_per_sec: 17, duration: 999999.0), HealFlat(amount: 245)],
     ),
     (
         name: "shamanskill earhtmeteor",
@@ -6853,7 +6853,7 @@
         kind: Holy,
         level: 16,
         modifiers: [BonusCharisma(16), BonusDefense(33)],
-        effects: [HolyResistance(percentage: 0.430), Regen(heal_per_sec: 17, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.430), Regen(heal_per_sec: 17, duration: 999999.0)],
     ),
     (
         name: "aura dark magic",
@@ -6861,7 +6861,7 @@
         kind: Holy,
         level: 16,
         modifiers: [BonusCharisma(16), DefenseMultiplier(1.190)],
-        effects: [Regen(heal_per_sec: 18, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.440)],
+        effects: [HolyResistance(percentage: 0.440), Regen(heal_per_sec: 18, duration: 999999.0), HealFlat(amount: 250)],
     ),
     (
         name: "aura demonic fire",
@@ -6893,7 +6893,7 @@
         kind: Holy,
         level: 16,
         modifiers: [BonusCharisma(16), CritChanceMultiplier(1.092)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.430), Regen(heal_per_sec: 16, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.430), Regen(heal_per_sec: 16, duration: 999999.0), HealFlat(amount: 245)],
     ),
     (
         name: "rune unholy rune",
@@ -6901,7 +6901,7 @@
         kind: Holy,
         level: 16,
         modifiers: [BonusCharisma(16), BonusAttackSpeed(0.094)],
-        effects: [HolyResistance(percentage: 0.440), Regen(heal_per_sec: 17, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 17, duration: 999999.0), HealFlat(amount: 250), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "rune unholy scroll",
@@ -6909,7 +6909,7 @@
         kind: Holy,
         level: 16,
         modifiers: [BonusCharisma(16), AttackSpeedMultiplier(1.096)],
-        effects: [Regen(heal_per_sec: 18, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.450)],
+        effects: [HealFlat(amount: 255), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.450)],
     ),
     (
         name: "dark magic",
@@ -6941,7 +6941,7 @@
         kind: Holy,
         level: 16,
         modifiers: [BonusCharisma(16), BonusPetInitiative(7)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.440), Regen(heal_per_sec: 16, duration: 999999.0)],
+        effects: [HealFlat(amount: 250), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.440)],
     ),
     (
         name: "lightning charge",
@@ -6989,7 +6989,7 @@
         kind: Holy,
         level: 17,
         modifiers: [BonusCharisma(17), InitiativeMultiplier(1.097)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.470), Regen(heal_per_sec: 17, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.470), Regen(heal_per_sec: 17, duration: 999999.0), HealFlat(amount: 270)],
     ),
     (
         name: "unholy power",
@@ -6997,7 +6997,7 @@
         kind: Holy,
         level: 17,
         modifiers: [BonusCharisma(17), BonusCritChance(0.103)],
-        effects: [HolyResistance(percentage: 0.480), Regen(heal_per_sec: 18, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 18, duration: 999999.0), HealFlat(amount: 275), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "unholy strength",
@@ -7005,7 +7005,7 @@
         kind: Holy,
         level: 17,
         modifiers: [BonusCharisma(17), CritChanceMultiplier(1.101)],
-        effects: [Regen(heal_per_sec: 19, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.440)],
+        effects: [HealFlat(amount: 255), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.440)],
     ),
     (
         name: "unholy weapon",
@@ -7061,7 +7061,7 @@
         kind: Holy,
         level: 17,
         modifiers: [BonusCharisma(17), HealingReceivedMultiplier(1.200)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.460), Regen(heal_per_sec: 17, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 17, duration: 999999.0), HealFlat(amount: 265), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shamanskill heal",
@@ -7069,7 +7069,7 @@
         kind: Holy,
         level: 17,
         modifiers: [BonusCharisma(17), BonusAttack(35)],
-        effects: [HolyResistance(percentage: 0.470), Regen(heal_per_sec: 18, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 270), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.470)],
     ),
     (
         name: "warlock of the shadow",
@@ -7213,7 +7213,7 @@
         kind: Holy,
         level: 17,
         modifiers: [BonusCharisma(17), DefenseMultiplier(1.195)],
-        effects: [HolyResistance(percentage: 0.450), Regen(heal_per_sec: 18, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.450), Regen(heal_per_sec: 18, duration: 999999.0), HealFlat(amount: 260)],
     ),
     (
         name: "shamanskill of the sun",
@@ -7253,7 +7253,7 @@
         kind: Holy,
         level: 17,
         modifiers: [BonusCharisma(17), BonusAttackSpeed(0.099)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.450), Regen(heal_per_sec: 17, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 17, duration: 999999.0), HealFlat(amount: 260), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "garrote passive",
@@ -7293,7 +7293,7 @@
         kind: Holy,
         level: 17,
         modifiers: [BonusCharisma(17), BonusPetInitiative(7)],
-        effects: [Regen(heal_per_sec: 19, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.450)],
+        effects: [HealFlat(amount: 260), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.450)],
     ),
     (
         name: "shamanskill of the deep",
@@ -7381,7 +7381,7 @@
         kind: Holy,
         level: 17,
         modifiers: [BonusCharisma(17), AttackSpeedMultiplier(1.099)],
-        effects: [HolyResistance(percentage: 0.460), Regen(heal_per_sec: 18, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 18, duration: 999999.0), HealFlat(amount: 265), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shamanskill of the skies",
@@ -7429,7 +7429,7 @@
         kind: Holy,
         level: 18,
         modifiers: [BonusCharisma(18), AttackMultiplier(1.215)],
-        effects: [HolyResistance(percentage: 0.490), Regen(heal_per_sec: 19, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.490), Regen(heal_per_sec: 19, duration: 999999.0)],
     ),
     (
         name: "assassinskill of the stars",
@@ -7477,7 +7477,7 @@
         kind: Holy,
         level: 18,
         modifiers: [BonusCharisma(18), CritChanceMultiplier(1.104)],
-        effects: [HolyResistance(percentage: 0.500), Regen(heal_per_sec: 19, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 19, duration: 999999.0), HealFlat(amount: 290), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shamanskill of the shadow",
@@ -7525,7 +7525,7 @@
         kind: Holy,
         level: 18,
         modifiers: [BonusCharisma(18), BonusPetInitiative(7)],
-        effects: [HolyResistance(percentage: 0.460), Regen(heal_per_sec: 19, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.460), Regen(heal_per_sec: 19, duration: 999999.0)],
     ),
     (
         name: "assassinskill of the tundra",
@@ -7565,7 +7565,7 @@
         kind: Holy,
         level: 18,
         modifiers: [BonusCharisma(18), DefenseMultiplier(1.200)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.460), Regen(heal_per_sec: 18, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.460), Regen(heal_per_sec: 18, duration: 999999.0), HealFlat(amount: 270)],
     ),
     (
         name: "shamanskill of the forest",
@@ -7605,7 +7605,7 @@
         kind: Holy,
         level: 18,
         modifiers: [BonusCharisma(18), BonusAttackSpeed(0.104)],
-        effects: [Regen(heal_per_sec: 20, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.460)],
+        effects: [Regen(heal_per_sec: 20, duration: 999999.0), HealFlat(amount: 270), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "warlock shadowbook",
@@ -7661,7 +7661,7 @@
         kind: Holy,
         level: 18,
         modifiers: [BonusCharisma(18), BonusAttack(36)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.480), Regen(heal_per_sec: 18, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.480), Regen(heal_per_sec: 18, duration: 999999.0), HealFlat(amount: 280)],
     ),
     (
         name: "shamanskill wind",
@@ -7725,7 +7725,7 @@
         kind: Holy,
         level: 18,
         modifiers: [BonusCharisma(18), BonusAttackSpeed(0.102)],
-        effects: [Regen(heal_per_sec: 20, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.460)],
+        effects: [HolyResistance(percentage: 0.460), Regen(heal_per_sec: 20, duration: 999999.0), HealFlat(amount: 270)],
     ),
     (
         name: "shamanskill wind of the tundra",
@@ -7789,7 +7789,7 @@
         kind: Holy,
         level: 18,
         modifiers: [BonusCharisma(18), AttackMultiplier(1.215)],
-        effects: [HolyResistance(percentage: 0.490), Regen(heal_per_sec: 19, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.490), Regen(heal_per_sec: 19, duration: 999999.0), HealFlat(amount: 285)],
     ),
     (
         name: "mageskill arcane of the dawn",
@@ -7813,7 +7813,7 @@
         kind: Holy,
         level: 18,
         modifiers: [BonusCharisma(18), BonusInitiative(7)],
-        effects: [HolyResistance(percentage: 0.470), Regen(heal_per_sec: 19, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.470), Regen(heal_per_sec: 19, duration: 999999.0)],
     ),
     (
         name: "shamanskill wind of the sun",
@@ -7893,7 +7893,7 @@
         kind: Holy,
         level: 19,
         modifiers: [BonusCharisma(19), BonusAttack(40)],
-        effects: [Regen(heal_per_sec: 21, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.490)],
+        effects: [Regen(heal_per_sec: 21, duration: 999999.0), HealFlat(amount: 290), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "shamanskill wind totem",
@@ -7909,7 +7909,7 @@
         kind: Holy,
         level: 19,
         modifiers: [BonusCharisma(19), BonusDefense(39)],
-        effects: [HolyResistance(percentage: 0.510), Regen(heal_per_sec: 20, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.510), Regen(heal_per_sec: 20, duration: 999999.0)],
     ),
     (
         name: "warriorskill of the tundra",
@@ -7965,7 +7965,7 @@
         kind: Holy,
         level: 19,
         modifiers: [BonusCharisma(19), AttackSpeedMultiplier(1.111)],
-        effects: [Regen(heal_per_sec: 21, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.480)],
+        effects: [HealFlat(amount: 285), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.480)],
     ),
     (
         name: "shamanskill wind of the forest",
@@ -8029,7 +8029,7 @@
         kind: Holy,
         level: 19,
         modifiers: [BonusCharisma(19), BonusDefense(39)],
-        effects: [HolyResistance(percentage: 0.510), Regen(heal_per_sec: 20, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 300), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.510)],
     ),
     (
         name: "shamanskill wind of the stars",
@@ -8093,7 +8093,7 @@
         kind: Holy,
         level: 19,
         modifiers: [BonusCharisma(19), BonusPetDamage(38)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.490), Regen(heal_per_sec: 19, duration: 999999.0)],
+        effects: [HealFlat(amount: 290), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.490)],
     ),
     (
         name: "shamanskill wind of the peak",
@@ -8157,7 +8157,7 @@
         kind: Holy,
         level: 19,
         modifiers: [BonusCharisma(19), DefenseMultiplier(1.230)],
-        effects: [Regen(heal_per_sec: 21, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.520)],
+        effects: [HealFlat(amount: 305), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.520)],
     ),
     (
         name: "shamanskill pierce",
@@ -8237,7 +8237,7 @@
         kind: Holy,
         level: 19,
         modifiers: [BonusCharisma(19), BonusPetInitiative(8)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.520), Regen(heal_per_sec: 19, duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.520), Regen(heal_per_sec: 19, duration: 999999.0), HealFlat(amount: 305)],
     ),
     (
         name: "shamanskill windhit",
@@ -8301,7 +8301,7 @@
         kind: Cosmic,
         level: 20,
         modifiers: [BonusIntelligence(20), CritChanceMultiplier(1.112)],
-        effects: [MonarchShield(duration: 6.0), TimeWarp(initiative_reduction: 0.150, duration: 7.0), MonarchShield(duration: 6.0)],
+        effects: [HealManaFlat(amount: 310), TimeWarp(initiative_reduction: 0.150, duration: 7.0), MonarchShield(duration: 6.0)],
     ),
     (
         name: "paladinskill wave",
@@ -8317,7 +8317,7 @@
         kind: Holy,
         level: 20,
         modifiers: [BonusCharisma(20), AttackSpeedMultiplier(1.116)],
-        effects: [HolyResistance(percentage: 0.540), Regen(heal_per_sec: 21, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 320), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.540)],
     ),
     (
         name: "shamanskill wind of the desert",
@@ -8365,7 +8365,7 @@
         kind: Holy,
         level: 20,
         modifiers: [BonusCharisma(20), BonusAttack(41)],
-        effects: [HolyResistance(percentage: 0.500), Regen(heal_per_sec: 21, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HolyResistance(percentage: 0.500), Regen(heal_per_sec: 21, duration: 999999.0), HealFlat(amount: 300)],
     ),
     (
         name: "archerskill label",
@@ -8685,7 +8685,7 @@
         kind: Holy,
         level: 20,
         modifiers: [BonusCharisma(20), BonusPetDamage(42)],
-        effects: [Regen(heal_per_sec: 22, duration: 999999.0), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.500)],
+        effects: [HolyResistance(percentage: 0.500), Regen(heal_per_sec: 22, duration: 999999.0), HealFlat(amount: 300)],
     ),
     (
         name: "warlock unholy of the grove",
@@ -8693,7 +8693,7 @@
         kind: Holy,
         level: 20,
         modifiers: [BonusCharisma(20), PetDamageMultiplier(1.225)],
-        effects: [Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.510), Regen(heal_per_sec: 20, duration: 999999.0)],
+        effects: [Regen(heal_per_sec: 20, duration: 999999.0), HealFlat(amount: 305), Clearcasting(duration: 999999.0)],
     ),
     (
         name: "warlock unholysword",
@@ -8701,6 +8701,6 @@
         kind: Holy,
         level: 20,
         modifiers: [BonusCharisma(20), BonusDefenseDamage(41)],
-        effects: [HolyResistance(percentage: 0.520), Regen(heal_per_sec: 21, duration: 999999.0), Clearcasting(duration: 999999.0)],
+        effects: [HealFlat(amount: 310), Clearcasting(duration: 999999.0), HolyResistance(percentage: 0.520)],
     ),
 ]

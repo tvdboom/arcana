@@ -1,7 +1,8 @@
-use crate::core::catalog::get_equipment;
+use crate::core::catalog::{get_equipment, get_perk};
 use crate::core::classes::Class;
 use crate::core::constants::{NAMES, START_CHARACTERISTIC};
 use crate::core::inventory::equipment::Equipment;
+use crate::core::inventory::modifiers::Modifier;
 use crate::core::pets::Pet;
 use crate::core::races::Race;
 use bevy::prelude::*;
@@ -264,7 +265,22 @@ impl Player {
     /// Total physical attack damage (base from strength plus weapon bonuses).
     pub fn attack_damage(&self) -> u32 {
         let equip_mod = self.equipped_equipment().iter().map(|w| w.attack()).sum::<i32>();
-        (5 + self.strength_mod() as i32 + equip_mod) as u32
+        let mut flat_bonus = 0;
+        let mut mult = 1.0;
+        for perk_key in &self.perks {
+            if let Some(perk) = get_perk(perk_key) {
+                for modifier in &perk.modifiers {
+                    match modifier {
+                        Modifier::BonusAttack(val) => flat_bonus += val,
+                        Modifier::AttackMultiplier(val) => mult *= val,
+                        _ => {}
+                    }
+                }
+            }
+        }
+        let base_atk = 5 + self.strength_mod() as i32 + equip_mod;
+        let total = ((base_atk + flat_bonus) as f32 * mult) as i32;
+        total.max(0) as u32
     }
 
     pub fn weapon_attack_speed(&self, weapon_key: &str) -> f32 {
@@ -278,18 +294,45 @@ impl Player {
     }
 
     pub fn defense_value(&self) -> i32 {
-        self.constitution() as i32 / 4
-            + self.equipped_equipment().iter().map(|w| w.defense()).sum::<i32>()
+        let base_def = self.constitution() as i32 / 4
+            + self.equipped_equipment().iter().map(|w| w.defense()).sum::<i32>();
+        let mut flat_bonus = 0;
+        let mut mult = 1.0;
+        for perk_key in &self.perks {
+            if let Some(perk) = get_perk(perk_key) {
+                for modifier in &perk.modifiers {
+                    match modifier {
+                        Modifier::BonusDefense(val) => flat_bonus += val,
+                        Modifier::DefenseMultiplier(val) => mult *= val,
+                        _ => {}
+                    }
+                }
+            }
+        }
+        let total = ((base_def + flat_bonus) as f32 * mult) as i32;
+        total
     }
 
     pub fn initiative(&self) -> i32 {
         let base_init = self.dexterity() as i32 / 2
             + self.equipped_equipment().iter().map(|w| w.initiative()).sum::<i32>();
-        if matches!(self.class, Class::Assassin) {
-            base_init + 2
-        } else {
-            base_init
+        let class_bonus = if matches!(self.class, Class::Assassin) { 2 } else { 0 };
+
+        let mut flat_bonus = 0;
+        let mut mult = 1.0;
+        for perk_key in &self.perks {
+            if let Some(perk) = get_perk(perk_key) {
+                for modifier in &perk.modifiers {
+                    match modifier {
+                        Modifier::BonusInitiative(val) => flat_bonus += val,
+                        Modifier::InitiativeMultiplier(val) => mult *= val,
+                        _ => {}
+                    }
+                }
+            }
         }
+        let total = ((base_init + class_bonus + flat_bonus) as f32 * mult) as i32;
+        total
     }
 
     /// (height_cm, weight_kg). Height and weight are derived deterministically from name and race.

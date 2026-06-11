@@ -1,6 +1,6 @@
 [
     (
-        name: "rusty basic helm",
+        name: "basic helm",
         image: "images/inventory/equipment/helmet/BasicHelm.png",
         kind: Bulwark,
         level: 1,
@@ -33,7 +33,7 @@
         effects: [],
     ),
     (
-        name: "rusty helm broken",
+        name: "helm broken",
         image: "images/inventory/equipment/helmet/Helm_12_broken.png",
         kind: Bulwark,
         level: 1,
@@ -44,7 +44,7 @@
         effects: [],
     ),
     (
-        name: "rusty metal helmet gold",
+        name: "metal helmet gold",
         image: "images/inventory/equipment/helmet/MetalHelmetGold.png",
         kind: Bulwark,
         level: 1,
@@ -66,7 +66,7 @@
         effects: [],
     ),
     (
-        name: "rusty metal bracers",
+        name: "metal bracers",
         image: "images/inventory/equipment/accessory/MetalBracers.png",
         kind: Bulwark,
         level: 1,
@@ -77,7 +77,7 @@
         effects: [],
     ),
     (
-        name: "rusty ring s",
+        name: "ring s",
         image: "images/inventory/equipment/accessory/RingS.png",
         kind: Bulwark,
         level: 1,
@@ -88,7 +88,7 @@
         effects: [],
     ),
     (
-        name: "rusty barbarian chest",
+        name: "barbarian chest",
         image: "images/inventory/equipment/armor/BarbarianChest.png",
         kind: Bulwark,
         level: 1,
@@ -121,7 +121,7 @@
         effects: [],
     ),
     (
-        name: "rusty brown shirt",
+        name: "brown shirt",
         image: "images/inventory/equipment/armor/BrownShirt.png",
         kind: Bulwark,
         level: 1,
@@ -143,7 +143,7 @@
         effects: [],
     ),
     (
-        name: "rusty cloth armor",
+        name: "cloth armor",
         image: "images/inventory/equipment/armor/ClothArmor.png",
         kind: Tactic,
         level: 1,
@@ -154,7 +154,7 @@
         effects: [],
     ),
     (
-        name: "rusty cuirass",
+        name: "cuirass",
         image: "images/inventory/equipment/armor/Cuirass.png",
         kind: Bulwark,
         level: 1,
@@ -165,7 +165,7 @@
         effects: [],
     ),
     (
-        name: "rusty cuirass red",
+        name: "cuirass red",
         image: "images/inventory/equipment/armor/CuirassRed.png",
         kind: Bulwark,
         level: 1,
@@ -176,7 +176,7 @@
         effects: [],
     ),
     (
-        name: "rusty cuirass yellow",
+        name: "cuirass yellow",
         image: "images/inventory/equipment/armor/CuirassYellow.png",
         kind: Bulwark,
         level: 1,
@@ -187,7 +187,7 @@
         effects: [],
     ),
     (
-        name: "rusty fur chest",
+        name: "fur chest",
         image: "images/inventory/equipment/armor/FurChest.png",
         kind: Bulwark,
         level: 1,
@@ -198,7 +198,7 @@
         effects: [],
     ),
     (
-        name: "rusty gambesons",
+        name: "gambesons",
         image: "images/inventory/equipment/armor/Gambesons.png",
         kind: Bulwark,
         level: 1,
@@ -209,7 +209,7 @@
         effects: [],
     ),
     (
-        name: "rusty green shirt",
+        name: "green shirt",
         image: "images/inventory/equipment/armor/GreenShirt.png",
         kind: Bulwark,
         level: 1,
@@ -220,7 +220,7 @@
         effects: [],
     ),
     (
-        name: "rusty kings armor",
+        name: "kings armor",
         image: "images/inventory/equipment/armor/KingsArmor.png",
         kind: Bulwark,
         level: 1,
@@ -253,7 +253,7 @@
         effects: [],
     ),
     (
-        name: "rusty leather vest",
+        name: "leather vest",
         image: "images/inventory/equipment/armor/LeatherVest.png",
         kind: Assassination,
         level: 1,
@@ -264,7 +264,7 @@
         effects: [],
     ),
     (
-        name: "rusty legionary armor",
+        name: "legionary armor",
         image: "images/inventory/equipment/armor/LegionaryArmor.png",
         kind: Bulwark,
         level: 1,
@@ -286,7 +286,7 @@
         effects: [],
     ),
     (
-        name: "rusty mail chest red",
+        name: "mail chest red",
         image: "images/inventory/equipment/armor/MailChestRed.png",
         kind: Bulwark,
         level: 1,
@@ -297,7 +297,7 @@
         effects: [],
     ),
     (
-        name: "rusty monastic robe",
+        name: "monastic robe",
         image: "images/inventory/equipment/armor/MonasticRobe.png",
         kind: Tactic,
         level: 1,
@@ -319,7 +319,7 @@
         effects: [],
     ),
     (
-        name: "rusty padded gambeson",
+        name: "padded gambeson",
         image: "images/inventory/equipment/armor/PaddedGambeson.png",
         kind: Bulwark,
         level: 1,
@@ -341,7 +341,7 @@
         effects: [],
     ),
     (
-        name: "rusty plate mail chest blue",
+        name: "plate mail chest blue",
         image: "images/inventory/equipment/armor/PlateMailChestBlue.png",
         kind: Bulwark,
         level: 1,
@@ -352,7 +352,7 @@
         effects: [],
     ),
     (
-        name: "rusty plate mail chest purple",
+        name: "plate mail chest purple",
         image: "images/inventory/equipment/armor/PlateMailChestPurple.png",
         kind: Bulwark,
         level: 1,
@@ -363,7 +363,7 @@
         effects: [],
     ),
     (
-        name: "rusty plate mail chest red",
+        name: "plate mail chest red",
         image: "images/inventory/equipment/armor/PlateMailChestRed.png",
         kind: Bulwark,
         level: 1,
@@ -374,7 +374,7 @@
         effects: [],
     ),
     (
-        name: "rusty plate mail chest yellow",
+        name: "plate mail chest yellow",
         image: "images/inventory/equipment/armor/PlateMailChestYellow.png",
         kind: Bulwark,
         level: 1,
@@ -385,7 +385,7 @@
         effects: [],
     ),
     (
-        name: "rusty red gambeson",
+        name: "red gambeson",
         image: "images/inventory/equipment/armor/RedGambeson.png",
         kind: Bulwark,
         level: 1,
@@ -396,7 +396,7 @@
         effects: [],
     ),
     (
-        name: "rusty red shirt",
+        name: "red shirt",
         image: "images/inventory/equipment/armor/RedShirt.png",
         kind: Bulwark,
         level: 1,
@@ -407,7 +407,7 @@
         effects: [],
     ),
     (
-        name: "rusty ripped white shirt",
+        name: "ripped white shirt",
         image: "images/inventory/equipment/armor/RippedWhiteShirt.png",
         kind: Bulwark,
         level: 1,
@@ -418,7 +418,7 @@
         effects: [],
     ),
     (
-        name: "rusty rome armor",
+        name: "rome armor",
         image: "images/inventory/equipment/armor/RomeArmor.png",
         kind: Bulwark,
         level: 1,
@@ -429,7 +429,7 @@
         effects: [],
     ),
     (
-        name: "rusty scholar robe",
+        name: "scholar robe",
         image: "images/inventory/equipment/armor/ScholarRobe.png",
         kind: Tactic,
         level: 1,
@@ -440,7 +440,7 @@
         effects: [],
     ),
     (
-        name: "rusty thick broun gambleson",
+        name: "thick broun gambleson",
         image: "images/inventory/equipment/armor/ThickBrounGambleson.png",
         kind: Bulwark,
         level: 1,
@@ -451,7 +451,7 @@
         effects: [],
     ),
     (
-        name: "rusty vest",
+        name: "vest",
         image: "images/inventory/equipment/armor/Vest.png",
         kind: Bulwark,
         level: 1,
@@ -462,7 +462,7 @@
         effects: [],
     ),
     (
-        name: "rusty white shirt",
+        name: "white shirt",
         image: "images/inventory/equipment/armor/WhiteShirt.png",
         kind: Bulwark,
         level: 1,
@@ -473,7 +473,7 @@
         effects: [],
     ),
     (
-        name: "rusty yellow shirt",
+        name: "yellow shirt",
         image: "images/inventory/equipment/armor/YellowShirt.png",
         kind: Bulwark,
         level: 1,
@@ -484,7 +484,7 @@
         effects: [],
     ),
     (
-        name: "worn boots s",
+        name: "boots s",
         image: "images/inventory/equipment/boots/BootsS.png",
         kind: Bulwark,
         level: 2,
@@ -495,7 +495,7 @@
         effects: [],
     ),
     (
-        name: "worn elite shoes",
+        name: "elite shoes",
         image: "images/inventory/equipment/boots/EliteShoes.png",
         kind: Bulwark,
         level: 2,
@@ -517,7 +517,7 @@
         effects: [],
     ),
     (
-        name: "worn leather shoes",
+        name: "leather shoes",
         image: "images/inventory/equipment/boots/LeatherShoes.png",
         kind: Assassination,
         level: 2,
@@ -539,7 +539,7 @@
         effects: [],
     ),
     (
-        name: "worn trash boots",
+        name: "trash boots",
         image: "images/inventory/equipment/boots/TrashBoots.png",
         kind: Bulwark,
         level: 2,
@@ -550,7 +550,7 @@
         effects: [],
     ),
     (
-        name: "worn work shoes",
+        name: "work shoes",
         image: "images/inventory/equipment/boots/WorkShoes.png",
         kind: Bulwark,
         level: 2,
@@ -561,7 +561,7 @@
         effects: [],
     ),
     (
-        name: "worn potion energy",
+        name: "potion energy",
         image: "images/inventory/equipment/consumable/Potion_energy.png",
         kind: Bulwark,
         level: 2,
@@ -572,7 +572,7 @@
         effects: [],
     ),
     (
-        name: "worn potion green",
+        name: "potion green",
         image: "images/inventory/equipment/consumable/Potion_Green.png",
         kind: Bulwark,
         level: 2,
@@ -583,7 +583,7 @@
         effects: [],
     ),
     (
-        name: "worn potion king",
+        name: "potion king",
         image: "images/inventory/equipment/consumable/Potion_King.png",
         kind: Bulwark,
         level: 2,
@@ -594,7 +594,7 @@
         effects: [],
     ),
     (
-        name: "worn potion spider",
+        name: "potion spider",
         image: "images/inventory/equipment/consumable/Potion_Spider.png",
         kind: Bulwark,
         level: 2,
@@ -605,7 +605,7 @@
         effects: [],
     ),
     (
-        name: "worn quest bottle",
+        name: "quest bottle",
         image: "images/inventory/equipment/consumable/QuestBottle.png",
         kind: Bulwark,
         level: 2,
@@ -616,7 +616,7 @@
         effects: [],
     ),
     (
-        name: "worn bandage",
+        name: "bandage",
         image: "images/inventory/equipment/helmet/Bandage.png",
         kind: Bulwark,
         level: 2,
@@ -638,7 +638,7 @@
         effects: [],
     ),
     (
-        name: "worn frog helmet stechzeug",
+        name: "frog helmet stechzeug",
         image: "images/inventory/equipment/helmet/FrogHelmetStechzeug.png",
         kind: Bulwark,
         level: 2,
@@ -649,7 +649,7 @@
         effects: [],
     ),
     (
-        name: "worn gladiators helm",
+        name: "gladiators helm",
         image: "images/inventory/equipment/helmet/GladiatorsHelm.png",
         kind: Bulwark,
         level: 2,
@@ -671,7 +671,7 @@
         effects: [],
     ),
     (
-        name: "worn head mail",
+        name: "head mail",
         image: "images/inventory/equipment/helmet/HeadMail.png",
         kind: Bulwark,
         level: 2,
@@ -704,7 +704,7 @@
         effects: [],
     ),
     (
-        name: "worn leather helmet",
+        name: "leather helmet",
         image: "images/inventory/equipment/helmet/LeatherHelmet.png",
         kind: Assassination,
         level: 2,
@@ -715,7 +715,7 @@
         effects: [],
     ),
     (
-        name: "worn mage hat",
+        name: "mage hat",
         image: "images/inventory/equipment/helmet/mage_hat.png",
         kind: Tactic,
         level: 2,
@@ -737,7 +737,7 @@
         effects: [],
     ),
     (
-        name: "worn quest mask",
+        name: "quest mask",
         image: "images/inventory/equipment/helmet/QuestMask.png",
         kind: Bulwark,
         level: 2,
@@ -748,7 +748,7 @@
         effects: [],
     ),
     (
-        name: "worn red hat",
+        name: "red hat",
         image: "images/inventory/equipment/helmet/RedHat.png",
         kind: Bulwark,
         level: 2,
@@ -759,7 +759,7 @@
         effects: [],
     ),
     (
-        name: "worn roman helmet",
+        name: "roman helmet",
         image: "images/inventory/equipment/helmet/RomanHelmet.png",
         kind: Bulwark,
         level: 2,
@@ -781,7 +781,7 @@
         effects: [],
     ),
     (
-        name: "worn straw hat",
+        name: "straw hat",
         image: "images/inventory/equipment/helmet/StrawHat.png",
         kind: Bulwark,
         level: 2,
@@ -869,7 +869,7 @@
         effects: [],
     ),
     (
-        name: "worn necklace cross",
+        name: "necklace cross",
         image: "images/inventory/equipment/accessory/necklace_01_cross.png",
         kind: Bulwark,
         level: 2,
@@ -990,7 +990,7 @@
         effects: [],
     ),
     (
-        name: "apprentice boots common",
+        name: "boots common",
         image: "images/inventory/equipment/boots/Boots_01_common.png",
         kind: Bulwark,
         level: 3,
@@ -1034,7 +1034,7 @@
         effects: [],
     ),
     (
-        name: "apprentice alchemy tea",
+        name: "alchemy tea",
         image: "images/inventory/equipment/consumable/Alchemy_01_tea.png",
         kind: Bulwark,
         level: 3,
@@ -1287,7 +1287,7 @@
         effects: [],
     ),
     (
-        name: "apprentice chest merchant",
+        name: "chest merchant",
         image: "images/inventory/equipment/armor/Chest_02_merchant.png",
         kind: Bulwark,
         level: 3,
@@ -1463,7 +1463,7 @@
         effects: [],
     ),
     (
-        name: "novice alchemy middle flask",
+        name: "alchemy middle flask",
         image: "images/inventory/equipment/consumable/Alchemy_45_middle_flask2.png",
         kind: Bulwark,
         level: 4,
@@ -1749,7 +1749,7 @@
         effects: [],
     ),
     (
-        name: "novice ring double",
+        name: "ring double",
         image: "images/inventory/equipment/accessory/Ring_03_double.png",
         kind: Bulwark,
         level: 4,
@@ -2090,7 +2090,7 @@
         effects: [],
     ),
     (
-        name: "simple necklace love",
+        name: "necklace love",
         image: "images/inventory/equipment/accessory/necklace_04_love.png",
         kind: Bulwark,
         level: 5,
@@ -2233,7 +2233,7 @@
         effects: [],
     ),
     (
-        name: "simple alchemy water",
+        name: "alchemy water",
         image: "images/inventory/equipment/consumable/Alchemy_04_water.png",
         kind: Bulwark,
         level: 5,
@@ -2629,7 +2629,7 @@
         effects: [],
     ),
     (
-        name: "sturdy helm crusader",
+        name: "helm crusader",
         image: "images/inventory/equipment/helmet/Helm_05_Crusader.png",
         kind: Bulwark,
         level: 6,
@@ -2739,7 +2739,7 @@
         effects: [],
     ),
     (
-        name: "sturdy ring silvergreen",
+        name: "ring silvergreen",
         image: "images/inventory/equipment/accessory/Ring_06_silvergreen.png",
         kind: Bulwark,
         level: 6,
@@ -3091,7 +3091,7 @@
         effects: [],
     ),
     (
-        name: "reliable mailchest",
+        name: "mailchest",
         image: "images/inventory/equipment/armor/Mail7Chest.png",
         kind: Bulwark,
         level: 7,
@@ -3443,7 +3443,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "skilled alchemy reactive mixture",
+        name: "alchemy reactive mixture",
         image: "images/inventory/equipment/consumable/Alchemy_08_reactive_mixture.png",
         kind: Bulwark,
         level: 8,
@@ -3542,7 +3542,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "skilled necklace goldeye",
+        name: "necklace goldeye",
         image: "images/inventory/equipment/accessory/necklace_12goldeye.png",
         kind: Bulwark,
         level: 8,
@@ -4004,7 +4004,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "refined alchemy blue mixture",
+        name: "alchemy blue mixture",
         image: "images/inventory/equipment/consumable/Alchemy_10_blue_mixture.png",
         kind: Bulwark,
         level: 9,
@@ -4147,7 +4147,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "refined necklace fourcolors",
+        name: "necklace fourcolors",
         image: "images/inventory/equipment/accessory/necklace_11_fourcolors.png",
         kind: Bulwark,
         level: 9,
@@ -4730,7 +4730,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "veteran alchemy heal potion",
+        name: "alchemy heal potion",
         image: "images/inventory/equipment/consumable/Alchemy_13_heal_potion.png",
         kind: Bulwark,
         level: 10,
@@ -4752,7 +4752,7 @@
         effects: [Clearcasting(duration: 3.0)],
     ),
     (
-        name: "veteran gloves witch",
+        name: "gloves witch",
         image: "images/inventory/equipment/gloves/Gloves_13_witch.png",
         kind: Bulwark,
         level: 10,
@@ -4884,7 +4884,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "gilded chest milita",
+        name: "chest milita",
         image: "images/inventory/equipment/armor/Chest_14_milita.png",
         kind: Bulwark,
         level: 11,
@@ -5115,7 +5115,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "gilded ring necromantic",
+        name: "ring necromantic",
         image: "images/inventory/equipment/accessory/Ring_15_necromantic.png",
         kind: Bulwark,
         level: 11,
@@ -5225,7 +5225,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "gilded alchemy reactive potion",
+        name: "alchemy reactive potion",
         image: "images/inventory/equipment/consumable/Alchemy_15_reactive_potion.png",
         kind: Bulwark,
         level: 11,
@@ -5280,7 +5280,7 @@
         effects: [Clearcasting(duration: 3.0)],
     ),
     (
-        name: "gilded helm ogre",
+        name: "helm ogre",
         image: "images/inventory/equipment/helmet/Helm_15_ogre.png",
         kind: Bulwark,
         level: 11,
@@ -5357,7 +5357,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "heavy ring lion",
+        name: "ring lion",
         image: "images/inventory/equipment/accessory/Ring_16_lion.png",
         kind: Bulwark,
         level: 12,
@@ -5555,7 +5555,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "heavy ring darkcross",
+        name: "ring darkcross",
         image: "images/inventory/equipment/accessory/Ring_darkcross.png",
         kind: Bulwark,
         level: 12,
@@ -5566,7 +5566,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "heavy dark shirt",
+        name: "dark shirt",
         image: "images/inventory/equipment/armor/DarkShirt.png",
         kind: Bulwark,
         level: 12,
@@ -5577,7 +5577,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "heavy holy water",
+        name: "holy water",
         image: "images/inventory/equipment/consumable/HolyWater.png",
         kind: Bulwark,
         level: 12,
@@ -5588,7 +5588,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "heavy potion shadow",
+        name: "potion shadow",
         image: "images/inventory/equipment/consumable/Potion_Shadow.png",
         kind: Bulwark,
         level: 12,
@@ -5643,7 +5643,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "heavy ring silver red eye",
+        name: "ring silver red eye",
         image: "images/inventory/equipment/accessory/Ring_17Silver_redEye.png",
         kind: Bulwark,
         level: 12,
@@ -5753,7 +5753,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "heavy alchemy blue potion",
+        name: "alchemy blue potion",
         image: "images/inventory/equipment/consumable/Alchemy_17_blue_potion.png",
         kind: Bulwark,
         level: 12,
@@ -5852,7 +5852,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "elite ring redgold",
+        name: "ring redgold",
         image: "images/inventory/equipment/accessory/Ring_21_redgold.png",
         kind: Bulwark,
         level: 13,
@@ -5874,7 +5874,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "elite ring silver purple",
+        name: "ring silver purple",
         image: "images/inventory/equipment/accessory/Ring_18_silverPurple.png",
         kind: Bulwark,
         level: 13,
@@ -5951,7 +5951,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "elite ring water",
+        name: "ring water",
         image: "images/inventory/equipment/accessory/Ring_19_water.png",
         kind: Bulwark,
         level: 13,
@@ -6072,7 +6072,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "elite alchemy littlemana flask",
+        name: "alchemy littlemana flask",
         image: "images/inventory/equipment/consumable/Alchemy_20_littlemana_flask.png",
         kind: Bulwark,
         level: 13,
@@ -6105,7 +6105,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "elite jewelry silver ring",
+        name: "jewelry silver ring",
         image: "images/inventory/equipment/accessory/Jewelry_21_silver_ring.png",
         kind: Bulwark,
         level: 13,
@@ -6116,7 +6116,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "elite necklace doll",
+        name: "necklace doll",
         image: "images/inventory/equipment/accessory/necklace_21_doll.png",
         kind: Bulwark,
         level: 13,
@@ -6160,7 +6160,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "elite alchemy littleheal flask",
+        name: "alchemy littleheal flask",
         image: "images/inventory/equipment/consumable/Alchemy_21_littleheal_flask.png",
         kind: Bulwark,
         level: 13,
@@ -6204,7 +6204,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "elite gloves archer",
+        name: "gloves archer",
         image: "images/inventory/equipment/gloves/Gloves_05_archer.png",
         kind: Bulwark,
         level: 13,
@@ -6215,7 +6215,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "elite jewelry bronze ring",
+        name: "jewelry bronze ring",
         image: "images/inventory/equipment/accessory/Jewelry_22_bronze_ring.png",
         kind: Bulwark,
         level: 13,
@@ -6226,7 +6226,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "elite necklace shaman",
+        name: "necklace shaman",
         image: "images/inventory/equipment/accessory/necklace_22_shaman.png",
         kind: Bulwark,
         level: 13,
@@ -6270,7 +6270,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "master boots paladin",
+        name: "boots paladin",
         image: "images/inventory/equipment/boots/Boots_22_paladin.png",
         kind: Bulwark,
         level: 14,
@@ -6281,7 +6281,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "master alchemy deadly poison",
+        name: "alchemy deadly poison",
         image: "images/inventory/equipment/consumable/Alchemy_22_deadly_poison.png",
         kind: Bulwark,
         level: 14,
@@ -6314,7 +6314,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "master alchemy blood",
+        name: "alchemy blood",
         image: "images/inventory/equipment/consumable/Alchemy_06_blood.png",
         kind: Bulwark,
         level: 14,
@@ -6336,7 +6336,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "master necklace princess",
+        name: "necklace princess",
         image: "images/inventory/equipment/accessory/necklace_23_princess.png",
         kind: Bulwark,
         level: 14,
@@ -6380,7 +6380,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "master alchemy black poison",
+        name: "alchemy black poison",
         image: "images/inventory/equipment/consumable/Alchemy_23_black_poison.png",
         kind: Bulwark,
         level: 14,
@@ -6413,7 +6413,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "master jewelry whitegold ring",
+        name: "jewelry whitegold ring",
         image: "images/inventory/equipment/accessory/Jewelry_27_whitegold_ring.png",
         kind: Bulwark,
         level: 14,
@@ -6424,7 +6424,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "master ring gold green",
+        name: "ring gold green",
         image: "images/inventory/equipment/accessory/Ring_27_goldGreen.png",
         kind: Bulwark,
         level: 14,
@@ -6435,7 +6435,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "master alchemy shadow",
+        name: "alchemy shadow",
         image: "images/inventory/equipment/consumable/Alchemy_07_shadow.png",
         kind: Bulwark,
         level: 14,
@@ -6457,7 +6457,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "master ring warlock",
+        name: "ring warlock",
         image: "images/inventory/equipment/accessory/Ring_24_warlock.png",
         kind: Bulwark,
         level: 14,
@@ -6501,7 +6501,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "master alchemy energy potion",
+        name: "alchemy energy potion",
         image: "images/inventory/equipment/consumable/Alchemy_24_energy_potion.png",
         kind: Bulwark,
         level: 14,
@@ -6545,7 +6545,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "master jewelry little ring",
+        name: "jewelry little ring",
         image: "images/inventory/equipment/accessory/Jewelry_25_little_ring.png",
         kind: Bulwark,
         level: 14,
@@ -6600,7 +6600,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "master alchemy stamina potion",
+        name: "alchemy stamina potion",
         image: "images/inventory/equipment/consumable/Alchemy_25_stamina_potion.png",
         kind: Bulwark,
         level: 14,
@@ -6622,7 +6622,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "master helm gladiator",
+        name: "helm gladiator",
         image: "images/inventory/equipment/helmet/Helm_25_gladiator.png",
         kind: Bulwark,
         level: 14,
@@ -6644,7 +6644,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "master gloves dragon",
+        name: "gloves dragon",
         image: "images/inventory/equipment/gloves/Gloves_09_dragon.png",
         kind: Bulwark,
         level: 14,
@@ -6655,7 +6655,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "master jewelry mage ring",
+        name: "jewelry mage ring",
         image: "images/inventory/equipment/accessory/Jewelry_26_mage_ring.png",
         kind: Tactic,
         level: 14,
@@ -6699,7 +6699,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "master boots ogre",
+        name: "boots ogre",
         image: "images/inventory/equipment/boots/Boots_26_ogre.png",
         kind: Bulwark,
         level: 14,
@@ -6710,7 +6710,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "master alchemy immortal potion",
+        name: "alchemy immortal potion",
         image: "images/inventory/equipment/consumable/Alchemy_26_immortal_potion.png",
         kind: Bulwark,
         level: 14,
@@ -6754,7 +6754,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "championship necklace ship",
+        name: "necklace ship",
         image: "images/inventory/equipment/accessory/necklace_27_ship.png",
         kind: Bulwark,
         level: 15,
@@ -6787,7 +6787,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "championship boots gragon",
+        name: "boots gragon",
         image: "images/inventory/equipment/boots/Boots_27_gragon.png",
         kind: Bulwark,
         level: 15,
@@ -6842,7 +6842,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "championship jewelry aztec ring",
+        name: "jewelry aztec ring",
         image: "images/inventory/equipment/accessory/Jewelry_28_aztec_ring.png",
         kind: Bulwark,
         level: 15,
@@ -6853,7 +6853,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "championship necklace special",
+        name: "necklace special",
         image: "images/inventory/equipment/accessory/necklace_28_Special.png",
         kind: Bulwark,
         level: 15,
@@ -6930,7 +6930,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "championship alchemy magic potion",
+        name: "alchemy magic potion",
         image: "images/inventory/equipment/consumable/Alchemy_12_magic_potion.png",
         kind: Bulwark,
         level: 15,
@@ -6941,7 +6941,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "championship jewelry threeknowledge ring",
+        name: "jewelry threeknowledge ring",
         image: "images/inventory/equipment/accessory/Jewelry_29_threeknowledge_ring.png",
         kind: Bulwark,
         level: 15,
@@ -7007,7 +7007,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "championship helm samurai",
+        name: "helm samurai",
         image: "images/inventory/equipment/helmet/Helm_29_samurai.png",
         kind: Bulwark,
         level: 15,
@@ -7018,7 +7018,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "championship jewelry green ring",
+        name: "jewelry green ring",
         image: "images/inventory/equipment/accessory/Jewelry_30_green_ring.png",
         kind: Bulwark,
         level: 15,
@@ -7029,7 +7029,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "championship necklace scull",
+        name: "necklace scull",
         image: "images/inventory/equipment/accessory/necklace_30_scull.png",
         kind: Bulwark,
         level: 15,
@@ -7051,7 +7051,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "championship chest trader",
+        name: "chest trader",
         image: "images/inventory/equipment/armor/Chest_30_trader.png",
         kind: Bulwark,
         level: 15,
@@ -7084,7 +7084,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "championship alchemy bigmana flask",
+        name: "alchemy bigmana flask",
         image: "images/inventory/equipment/consumable/Alchemy_30_bigmana_flask.png",
         kind: Bulwark,
         level: 15,
@@ -7106,7 +7106,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "championship jewelry bigsilver ring",
+        name: "jewelry bigsilver ring",
         image: "images/inventory/equipment/accessory/Jewelry_31_bigsilver_ring.png",
         kind: Bulwark,
         level: 15,
@@ -7172,7 +7172,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "championship alchemy bigheal flask",
+        name: "alchemy bigheal flask",
         image: "images/inventory/equipment/consumable/Alchemy_31_bigheal_flask.png",
         kind: Bulwark,
         level: 15,
@@ -7183,7 +7183,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "championship gloves death",
+        name: "gloves death",
         image: "images/inventory/equipment/gloves/Gloves_15_death.png",
         kind: Bulwark,
         level: 15,
@@ -7194,7 +7194,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "championship jewelry blackiron ring",
+        name: "jewelry blackiron ring",
         image: "images/inventory/equipment/accessory/Jewelry_32_blackiron_ring.png",
         kind: Bulwark,
         level: 15,
@@ -7227,7 +7227,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "vanguard chest mage",
+        name: "chest mage",
         image: "images/inventory/equipment/armor/Chest_32_mage.png",
         kind: Tactic,
         level: 16,
@@ -7260,7 +7260,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard alchemy big poison",
+        name: "alchemy big poison",
         image: "images/inventory/equipment/consumable/Alchemy_32_big_poison.png",
         kind: Bulwark,
         level: 16,
@@ -7282,7 +7282,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard necklace gold",
+        name: "necklace gold",
         image: "images/inventory/equipment/accessory/necklace_36_gold.png",
         kind: Bulwark,
         level: 16,
@@ -7293,7 +7293,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "vanguard alchemy shadow potion",
+        name: "alchemy shadow potion",
         image: "images/inventory/equipment/consumable/Alchemy_16_shadow_potion.png",
         kind: Bulwark,
         level: 16,
@@ -7370,7 +7370,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard alchemy mercury",
+        name: "alchemy mercury",
         image: "images/inventory/equipment/consumable/Alchemy_33_mercury.png",
         kind: Bulwark,
         level: 16,
@@ -7392,7 +7392,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard necklace blackdrop",
+        name: "necklace blackdrop",
         image: "images/inventory/equipment/accessory/necklace_34Blackdrop.png",
         kind: Bulwark,
         level: 16,
@@ -7436,7 +7436,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard alchemy bigenergy flask",
+        name: "alchemy bigenergy flask",
         image: "images/inventory/equipment/consumable/Alchemy_34_bigenergy_flask.png",
         kind: Bulwark,
         level: 16,
@@ -7458,7 +7458,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard jewelry goldred ring",
+        name: "jewelry goldred ring",
         image: "images/inventory/equipment/accessory/Jewelry_38_goldred_ring.png",
         kind: Bulwark,
         level: 16,
@@ -7480,7 +7480,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard jewelry rune ring",
+        name: "jewelry rune ring",
         image: "images/inventory/equipment/accessory/Jewelry_35_rune_ring.png",
         kind: Bulwark,
         level: 16,
@@ -7491,7 +7491,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "vanguard necklace purple",
+        name: "necklace purple",
         image: "images/inventory/equipment/accessory/necklace_35_purple.png",
         kind: Bulwark,
         level: 16,
@@ -7502,7 +7502,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard ring earth",
+        name: "ring earth",
         image: "images/inventory/equipment/accessory/Ring_35_earth.png",
         kind: Bulwark,
         level: 16,
@@ -7535,7 +7535,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "vanguard boots knight",
+        name: "boots knight",
         image: "images/inventory/equipment/boots/Boots_35_knight.png",
         kind: Bulwark,
         level: 16,
@@ -7546,7 +7546,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard alchemy invisibility flask",
+        name: "alchemy invisibility flask",
         image: "images/inventory/equipment/consumable/Alchemy_35_invisibility_flask.png",
         kind: Bulwark,
         level: 16,
@@ -7568,7 +7568,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard jewelry hardstoune ring",
+        name: "jewelry hardstoune ring",
         image: "images/inventory/equipment/accessory/Jewelry_36_hardstoune_ring.png",
         kind: Bulwark,
         level: 16,
@@ -7579,7 +7579,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "vanguard ring speed",
+        name: "ring speed",
         image: "images/inventory/equipment/accessory/Ring_36_speed.png",
         kind: Bulwark,
         level: 16,
@@ -7623,7 +7623,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "vanguard alchemy spiritual flask",
+        name: "alchemy spiritual flask",
         image: "images/inventory/equipment/consumable/Alchemy_36_spiritual_flask.png",
         kind: Bulwark,
         level: 16,
@@ -7645,7 +7645,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "vanguard jewelry golden ring",
+        name: "jewelry golden ring",
         image: "images/inventory/equipment/accessory/Jewelry_23_golden_ring.png",
         kind: Bulwark,
         level: 16,
@@ -7656,7 +7656,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard boots golden",
+        name: "boots golden",
         image: "images/inventory/equipment/boots/Boots_23_golden.png",
         kind: Bulwark,
         level: 16,
@@ -7678,7 +7678,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "vanguard ring white",
+        name: "ring white",
         image: "images/inventory/equipment/accessory/Ring_37_white.png",
         kind: Bulwark,
         level: 16,
@@ -7689,7 +7689,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "vanguard chest priest",
+        name: "chest priest",
         image: "images/inventory/equipment/armor/Chest_37_priest.png",
         kind: Tactic,
         level: 16,
@@ -7744,7 +7744,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "mythic ring priest",
+        name: "ring priest",
         image: "images/inventory/equipment/accessory/Ring_38_priest.png",
         kind: Tactic,
         level: 17,
@@ -7788,7 +7788,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "mythic helm wanderer",
+        name: "helm wanderer",
         image: "images/inventory/equipment/helmet/Helm_38_wanderer.png",
         kind: Bulwark,
         level: 17,
@@ -7799,7 +7799,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "mythic jewelry devil ring",
+        name: "jewelry devil ring",
         image: "images/inventory/equipment/accessory/Jewelry_39_devil_ring.png",
         kind: Bulwark,
         level: 17,
@@ -7854,7 +7854,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "mythic helm inhabitant",
+        name: "helm inhabitant",
         image: "images/inventory/equipment/helmet/Helm_39_inhabitant.png",
         kind: Bulwark,
         level: 17,
@@ -7865,7 +7865,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "mythic jewelry megastrength ring",
+        name: "jewelry megastrength ring",
         image: "images/inventory/equipment/accessory/Jewelry_40_megastrength_ring.png",
         kind: Bulwark,
         level: 17,
@@ -7876,7 +7876,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "mythic chest wizard",
+        name: "chest wizard",
         image: "images/inventory/equipment/armor/Chest_40_wizard.png",
         kind: Tactic,
         level: 17,
@@ -7909,7 +7909,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "mythic alchemy poisonousherbs",
+        name: "alchemy poisonousherbs",
         image: "images/inventory/equipment/consumable/Alchemy_40_poisonousherbs.png",
         kind: Bulwark,
         level: 17,
@@ -7931,7 +7931,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "mythic jewelry magic ring",
+        name: "jewelry magic ring",
         image: "images/inventory/equipment/accessory/Jewelry_24_magic_ring.png",
         kind: Bulwark,
         level: 17,
@@ -7942,7 +7942,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "mythic necklace crystal blue",
+        name: "necklace crystal blue",
         image: "images/inventory/equipment/accessory/necklace_24_crystalBlue.png",
         kind: Bulwark,
         level: 17,
@@ -7953,7 +7953,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "mythic jewelry orangeneck",
+        name: "jewelry orangeneck",
         image: "images/inventory/equipment/accessory/Jewelry_41_orangeneck.png",
         kind: Bulwark,
         level: 17,
@@ -7997,7 +7997,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "mythic necklace crystal green",
+        name: "necklace crystal green",
         image: "images/inventory/equipment/accessory/necklace_25_crystalGreen.png",
         kind: Bulwark,
         level: 17,
@@ -8008,7 +8008,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "mythic ring gold",
+        name: "ring gold",
         image: "images/inventory/equipment/accessory/Ring_45_Gold.png",
         kind: Bulwark,
         level: 17,
@@ -8030,7 +8030,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "mythic ring tree",
+        name: "ring tree",
         image: "images/inventory/equipment/accessory/Ring_42_tree.png",
         kind: Bulwark,
         level: 17,
@@ -8085,7 +8085,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "mythic necklace crystal purple",
+        name: "necklace crystal purple",
         image: "images/inventory/equipment/accessory/necklace_26_crystalPurple.png",
         kind: Bulwark,
         level: 17,
@@ -8096,7 +8096,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "mythic jewelry red neck",
+        name: "jewelry red neck",
         image: "images/inventory/equipment/accessory/Jewelry_43_red_neck.png",
         kind: Bulwark,
         level: 17,
@@ -8107,7 +8107,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "mythic ring mage",
+        name: "ring mage",
         image: "images/inventory/equipment/accessory/Ring_43_mage.png",
         kind: Tactic,
         level: 17,
@@ -8162,7 +8162,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "mythic jewelry aztec neck",
+        name: "jewelry aztec neck",
         image: "images/inventory/equipment/accessory/Jewelry_44_aztec_neck.png",
         kind: Bulwark,
         level: 17,
@@ -8217,7 +8217,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "legendary alchemy minipotions",
+        name: "alchemy minipotions",
         image: "images/inventory/equipment/consumable/Alchemy_44_minipotions.png",
         kind: Bulwark,
         level: 18,
@@ -8239,7 +8239,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "legendary jewelry neck",
+        name: "jewelry neck",
         image: "images/inventory/equipment/accessory/Jewelry_45_neck.png",
         kind: Bulwark,
         level: 18,
@@ -8294,7 +8294,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "legendary jewelry black neck",
+        name: "jewelry black neck",
         image: "images/inventory/equipment/accessory/Jewelry_46_black_neck.png",
         kind: Bulwark,
         level: 18,
@@ -8316,7 +8316,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "legendary boots speed",
+        name: "boots speed",
         image: "images/inventory/equipment/boots/Boots_46_speed.png",
         kind: Bulwark,
         level: 18,
@@ -8327,7 +8327,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "legendary alchemy middleheal flask",
+        name: "alchemy middleheal flask",
         image: "images/inventory/equipment/consumable/Alchemy_46_middleheal_flask.png",
         kind: Bulwark,
         level: 18,
@@ -8338,7 +8338,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "legendary helm camel",
+        name: "helm camel",
         image: "images/inventory/equipment/helmet/Helm_46_camel.png",
         kind: Bulwark,
         level: 18,
@@ -8360,7 +8360,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "legendary jewelry whiteneck",
+        name: "jewelry whiteneck",
         image: "images/inventory/equipment/accessory/Jewelry_47_whiteneck.png",
         kind: Bulwark,
         level: 18,
@@ -8426,7 +8426,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "legendary jewelry purpleneck",
+        name: "jewelry purpleneck",
         image: "images/inventory/equipment/accessory/Jewelry_48_purpleneck.png",
         kind: Bulwark,
         level: 18,
@@ -8503,7 +8503,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "legendary jewelry blackironneck",
+        name: "jewelry blackironneck",
         image: "images/inventory/equipment/accessory/Jewelry_49_blackironneck.png",
         kind: Bulwark,
         level: 18,
@@ -8547,7 +8547,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "legendary alchemy middleenergy flask",
+        name: "alchemy middleenergy flask",
         image: "images/inventory/equipment/consumable/Alchemy_49_middleenergy_flask.png",
         kind: Bulwark,
         level: 18,
@@ -8569,7 +8569,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "legendary jewelry skullneck",
+        name: "jewelry skullneck",
         image: "images/inventory/equipment/accessory/Jewelry_50_skullneck.png",
         kind: Bulwark,
         level: 18,
@@ -8602,7 +8602,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "legendary alchemy plague flask",
+        name: "alchemy plague flask",
         image: "images/inventory/equipment/consumable/Alchemy_50_plague_flask.png",
         kind: Bulwark,
         level: 18,
@@ -8613,7 +8613,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "legendary jewelry fire ring",
+        name: "jewelry fire ring",
         image: "images/inventory/equipment/accessory/Jewelry_34_fire_ring.png",
         kind: Bulwark,
         level: 18,
@@ -8624,7 +8624,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "legendary chest archimage",
+        name: "chest archimage",
         image: "images/inventory/equipment/armor/Chest_34_archimage.png",
         kind: Tactic,
         level: 18,
@@ -8635,7 +8635,7 @@
         effects: [Regen(heal_per_sec: 4, duration: 6.0)],
     ),
     (
-        name: "legendary jewelry flowerneck",
+        name: "jewelry flowerneck",
         image: "images/inventory/equipment/accessory/Jewelry_51_flowerneck.png",
         kind: Bulwark,
         level: 18,
@@ -8679,7 +8679,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient alchemy fastpoison",
+        name: "alchemy fastpoison",
         image: "images/inventory/equipment/consumable/Alchemy_51_fastpoison.png",
         kind: Bulwark,
         level: 19,
@@ -8745,7 +8745,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient alchemy middlemana flask",
+        name: "alchemy middlemana flask",
         image: "images/inventory/equipment/consumable/Alchemy_52_middlemana_flask.png",
         kind: Bulwark,
         level: 19,
@@ -8756,7 +8756,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient jewelry gold medallion",
+        name: "jewelry gold medallion",
         image: "images/inventory/equipment/accessory/Jewelry_56_gold_medallion.png",
         kind: Bulwark,
         level: 19,
@@ -8767,7 +8767,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient jewelry deadly collar",
+        name: "jewelry deadly collar",
         image: "images/inventory/equipment/accessory/Jewelry_53_deadly_collar.png",
         kind: Bulwark,
         level: 19,
@@ -8800,7 +8800,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient helm horns",
+        name: "helm horns",
         image: "images/inventory/equipment/helmet/Helm_53_horns.png",
         kind: Bulwark,
         level: 19,
@@ -8811,7 +8811,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient jewelry green neck",
+        name: "jewelry green neck",
         image: "images/inventory/equipment/accessory/Jewelry_54_green_neck.png",
         kind: Bulwark,
         level: 19,
@@ -8822,7 +8822,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient ring flower",
+        name: "ring flower",
         image: "images/inventory/equipment/accessory/Ring_54_flower.png",
         kind: Bulwark,
         level: 19,
@@ -8855,7 +8855,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient alchemy hugeheal flask",
+        name: "alchemy hugeheal flask",
         image: "images/inventory/equipment/consumable/Alchemy_54_hugeheal_flask.png",
         kind: Bulwark,
         level: 19,
@@ -8877,7 +8877,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient jewelry medallion",
+        name: "jewelry medallion",
         image: "images/inventory/equipment/accessory/Jewelry_55_medallion.png",
         kind: Bulwark,
         level: 19,
@@ -8888,7 +8888,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient ring black",
+        name: "ring black",
         image: "images/inventory/equipment/accessory/Ring_55_black.png",
         kind: Bulwark,
         level: 19,
@@ -8921,7 +8921,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient alchemy hugegreen flask",
+        name: "alchemy hugegreen flask",
         image: "images/inventory/equipment/consumable/Alchemy_55_hugegreen_flask.png",
         kind: Bulwark,
         level: 19,
@@ -8932,7 +8932,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient helm farmer",
+        name: "helm farmer",
         image: "images/inventory/equipment/helmet/Helm_55_farmer.png",
         kind: Bulwark,
         level: 19,
@@ -8965,7 +8965,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient ring fire",
+        name: "ring fire",
         image: "images/inventory/equipment/accessory/Ring_40_fire.png",
         kind: Bulwark,
         level: 19,
@@ -8976,7 +8976,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient jewelry mystic neck",
+        name: "jewelry mystic neck",
         image: "images/inventory/equipment/accessory/Jewelry_57_mystic_neck.png",
         kind: Bulwark,
         level: 19,
@@ -8998,7 +8998,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient alchemy hugepoison flask",
+        name: "alchemy hugepoison flask",
         image: "images/inventory/equipment/consumable/Alchemy_57_hugepoison_flask.png",
         kind: Bulwark,
         level: 19,
@@ -9009,7 +9009,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient helm priest",
+        name: "helm priest",
         image: "images/inventory/equipment/helmet/Helm_57_priest.png",
         kind: Tactic,
         level: 19,
@@ -9020,7 +9020,7 @@
         effects: [Clearcasting(duration: 3.0)],
     ),
     (
-        name: "ancient ring magic",
+        name: "ring magic",
         image: "images/inventory/equipment/accessory/Ring_41_magic.png",
         kind: Bulwark,
         level: 19,
@@ -9031,7 +9031,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient alchemy magical substance",
+        name: "alchemy magical substance",
         image: "images/inventory/equipment/consumable/Alchemy_41_magical_substance.png",
         kind: Bulwark,
         level: 19,
@@ -9042,7 +9042,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient jewelry tribe neck",
+        name: "jewelry tribe neck",
         image: "images/inventory/equipment/accessory/Jewelry_58_tribe_neck.png",
         kind: Bulwark,
         level: 19,
@@ -9053,7 +9053,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient chest leather plus",
+        name: "chest leather plus",
         image: "images/inventory/equipment/armor/Chest_58_leatherPlus.png",
         kind: Assassination,
         level: 19,
@@ -9064,7 +9064,7 @@
         effects: [Lifesteal(percentage: 0.05)],
     ),
     (
-        name: "ancient jewelry clay neck",
+        name: "jewelry clay neck",
         image: "images/inventory/equipment/accessory/Jewelry_59_clay_neck.png",
         kind: Bulwark,
         level: 19,
@@ -9086,7 +9086,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient alchemy hugemana flask",
+        name: "alchemy hugemana flask",
         image: "images/inventory/equipment/consumable/Alchemy_59_hugemana_flask.png",
         kind: Bulwark,
         level: 19,
@@ -9097,7 +9097,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "ancient jewelry immortal neck",
+        name: "jewelry immortal neck",
         image: "images/inventory/equipment/accessory/Jewelry_60_immortal_neck.png",
         kind: Bulwark,
         level: 19,
@@ -9130,7 +9130,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "ancient helm crown",
+        name: "helm crown",
         image: "images/inventory/equipment/helmet/Helm_61_crown.png",
         kind: Bulwark,
         level: 19,
@@ -9174,7 +9174,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine chest warchief",
+        name: "chest warchief",
         image: "images/inventory/equipment/armor/Chest_46_warchief.png",
         kind: Bulwark,
         level: 20,
@@ -9196,7 +9196,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine helm queen",
+        name: "helm queen",
         image: "images/inventory/equipment/helmet/Helm_63_queen.png",
         kind: Bulwark,
         level: 20,
@@ -9207,7 +9207,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "divine alchemy middlemagical flask",
+        name: "alchemy middlemagical flask",
         image: "images/inventory/equipment/consumable/Alchemy_47_middlemagical_flask.png",
         kind: Bulwark,
         level: 20,
@@ -9240,7 +9240,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine alchemy middleshadow flask",
+        name: "alchemy middleshadow flask",
         image: "images/inventory/equipment/consumable/Alchemy_48_middleshadow_flask.png",
         kind: Bulwark,
         level: 20,
@@ -9262,7 +9262,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine helm king",
+        name: "helm king",
         image: "images/inventory/equipment/helmet/Helm_65_king.png",
         kind: Bulwark,
         level: 20,
@@ -9372,7 +9372,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine ring demonic",
+        name: "ring demonic",
         image: "images/inventory/equipment/accessory/Ring_53_demonic.png",
         kind: Bulwark,
         level: 20,
@@ -9394,7 +9394,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine helm mage",
+        name: "helm mage",
         image: "images/inventory/equipment/helmet/Helm_70_mage.png",
         kind: Tactic,
         level: 20,
@@ -9405,7 +9405,7 @@
         effects: [Regen(heal_per_sec: 4, duration: 6.0)],
     ),
     (
-        name: "divine chest knight",
+        name: "chest knight",
         image: "images/inventory/equipment/armor/Chest_71_knight.png",
         kind: Bulwark,
         level: 20,
@@ -9416,7 +9416,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine helm green",
+        name: "helm green",
         image: "images/inventory/equipment/helmet/Helm_71_green.png",
         kind: Bulwark,
         level: 20,
@@ -9449,7 +9449,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "divine ring dark water",
+        name: "ring dark water",
         image: "images/inventory/equipment/accessory/Ring_56_darkWater.png",
         kind: Bulwark,
         level: 20,
@@ -9460,7 +9460,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine boots magic",
+        name: "boots magic",
         image: "images/inventory/equipment/boots/Boots_56_magic.png",
         kind: Bulwark,
         level: 20,
@@ -9471,7 +9471,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "divine alchemy hugeshadow flask",
+        name: "alchemy hugeshadow flask",
         image: "images/inventory/equipment/consumable/Alchemy_56_hugeshadow_flask.png",
         kind: Bulwark,
         level: 20,
@@ -9504,7 +9504,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine alchemy hugedark flask",
+        name: "alchemy hugedark flask",
         image: "images/inventory/equipment/consumable/Alchemy_58_hugedark_flask.png",
         kind: Bulwark,
         level: 20,
@@ -9537,7 +9537,7 @@
         effects: [Thorns(damage_reflected: 6, duration: 4.0)],
     ),
     (
-        name: "divine alchemy hugemagic flask",
+        name: "alchemy hugemagic flask",
         image: "images/inventory/equipment/consumable/Alchemy_60_hugemagic_flask.png",
         kind: Bulwark,
         level: 20,
@@ -9548,7 +9548,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine chest scout",
+        name: "chest scout",
         image: "images/inventory/equipment/armor/Chest_77_scout.png",
         kind: Assassination,
         level: 20,
@@ -9570,7 +9570,7 @@
         effects: [Fortify(armor_bonus_pct: 0.10, duration: 5.0)],
     ),
     (
-        name: "divine chest adventure",
+        name: "chest adventure",
         image: "images/inventory/equipment/armor/Chest_79_adventure.png",
         kind: Bulwark,
         level: 20,

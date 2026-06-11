@@ -227,6 +227,26 @@ pub enum Effect {
     BleedResistance {
         percentage: f32,
     },
+
+    /// Instantly heals a percentage of maximum health.
+    HealMaxHealthPct {
+        percentage: f32,
+    },
+
+    /// Instantly heals a percentage of maximum mana.
+    HealMaxManaPct {
+        percentage: f32,
+    },
+
+    /// Instantly heals a fixed amount of health.
+    HealFlat {
+        amount: u32,
+    },
+
+    /// Instantly heals a fixed amount of mana.
+    HealManaFlat {
+        amount: u32,
+    },
 }
 
 impl Effect {
@@ -273,6 +293,10 @@ impl Effect {
             Effect::ShadowResistance { percentage } => format!("Shadow Res: {:.0}%", percentage * 100.0),
             Effect::HolyResistance { percentage } => format!("Holy Res: {:.0}%", percentage * 100.0),
             Effect::BleedResistance { percentage } => format!("Bleed Res: {:.0}%", percentage * 100.0),
+            Effect::HealMaxHealthPct { percentage } => format!("Instantly heal {:.0}% Max HP", percentage * 100.0),
+            Effect::HealMaxManaPct { percentage } => format!("Instantly restore {:.0}% Max MP", percentage * 100.0),
+            Effect::HealFlat { amount } => format!("Instantly heal {} HP", amount),
+            Effect::HealManaFlat { amount } => format!("Instantly restore {} MP", amount),
         }
     }
 }
