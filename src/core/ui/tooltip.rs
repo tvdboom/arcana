@@ -1,4 +1,3 @@
-use bevy::prelude::*;
 use crate::core::assets::WorldAssets;
 use crate::core::constants::{BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, PLACEHOLDER_COLOR};
 use crate::core::localization::Localization;
@@ -6,6 +5,7 @@ use crate::core::menu::utils::add_text;
 use crate::core::player::Player;
 use crate::core::settings::Language;
 use crate::utils::{capitalize_words, NameFromEnum};
+use bevy::prelude::*;
 
 const ICON_BADGE: Val = Val::Vw(1.9); // equipped badge overlay
 
@@ -55,9 +55,8 @@ pub fn spawn_tooltip(
 
     // Total padding + safety margins = 48.0 px
     let padding_width = 48.0_f32;
-    let max_chars_per_line = ((max_allowed_width - padding_width) / char_width_desc)
-        .floor()
-        .max(30.0) as usize;
+    let max_chars_per_line =
+        ((max_allowed_width - padding_width) / char_width_desc).floor().max(30.0) as usize;
 
     // Wrap the description lines
     let mut wrapped_lines = Vec::new();
@@ -68,7 +67,8 @@ pub fn spawn_tooltip(
     }
 
     // Estimate width of content
-    let desc_max_chars = wrapped_lines.iter().map(|line| line.chars().count()).max().unwrap_or(0) as f32;
+    let desc_max_chars =
+        wrapped_lines.iter().map(|line| line.chars().count()).max().unwrap_or(0) as f32;
     let desc_width = desc_max_chars * char_width_desc;
 
     let title_chars_width = content.title.chars().count() as f32 * char_width_desc * 1.1;
@@ -79,10 +79,12 @@ pub fn spawn_tooltip(
     };
 
     let content_width = desc_width.max(title_row_width) * 1.10;
-    let tooltip_width = (content_width + padding_width).clamp(320.0_f32.min(max_allowed_width), max_allowed_width);
+    let tooltip_width =
+        (content_width + padding_width).clamp(320.0_f32.min(max_allowed_width), max_allowed_width);
 
     // Calculate height
-    let mut tooltip_height = line_height_title + (wrapped_lines.len() as f32) * line_height_desc + 36.0;
+    let mut tooltip_height =
+        line_height_title + (wrapped_lines.len() as f32) * line_height_desc + 36.0;
     if content.pet_stats.is_some() {
         let stat_box_height = tooltip_width * 0.32;
         tooltip_height += stat_box_height + 12.0;
@@ -142,7 +144,8 @@ pub fn spawn_tooltip(
                                         height: ICON_BADGE,
                                         ..default()
                                     },
-                                    ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                                    ImageNode::new(assets.image("gold"))
+                                        .with_mode(NodeImageMode::Stretch),
                                 ));
 
                                 // Price number
@@ -150,7 +153,7 @@ pub fn spawn_tooltip(
                                     add_text(format!("{}", price_value), "bold", 1.9, assets),
                                     TextColor(BUTTON_TEXT_COLOR),
                                 ));
-                            }
+                            },
                             TooltipBadge::ActionPoints(ap_cost) => {
                                 // AP icon (larger!)
                                 parent.spawn((
@@ -159,7 +162,8 @@ pub fn spawn_tooltip(
                                         height: Val::Px(24.),
                                         ..default()
                                     },
-                                    ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
+                                    ImageNode::new(assets.image("ap"))
+                                        .with_mode(NodeImageMode::Stretch),
                                 ));
 
                                 // AP cost number
@@ -167,13 +171,16 @@ pub fn spawn_tooltip(
                                     add_text(format!("{}", ap_cost), "bold", 1.9, assets),
                                     TextColor(BUTTON_TEXT_COLOR),
                                 ));
-                            }
+                            },
                         }
                     });
             }
 
             // Title
-            parent.spawn((add_text(content.title, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
+            parent.spawn((
+                add_text(content.title, "bold", 1.9, assets),
+                TextColor(BUTTON_TEXT_COLOR),
+            ));
 
             // Description
             if !wrapped_lines.is_empty() {
@@ -402,10 +409,7 @@ fn spawn_pet_stat_box(
                     ..default()
                 },
             ));
-            parent.spawn((
-                add_text(label, "medium", 1.6, assets),
-                TextColor(BUTTON_TEXT_COLOR),
-            ));
+            parent.spawn((add_text(label, "medium", 1.6, assets), TextColor(BUTTON_TEXT_COLOR)));
             parent
                 .spawn((add_text(value.to_string(), "bold", 3.0, assets), TextColor(Color::WHITE)));
         });

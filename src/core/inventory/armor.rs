@@ -1,5 +1,4 @@
 use crate::core::inventory::effects::Effect;
-use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
 use crate::core::player::Player;
 use serde::Deserialize;
@@ -23,9 +22,6 @@ pub struct Armor {
     /// Name of the image the armor corresponds to
     pub image: String,
 
-    /// Kind of armor
-    pub kind: Kind,
-
     /// Level or upgrade tier of the armor piece
     pub level: u32,
 
@@ -34,9 +30,6 @@ pub struct Armor {
 
     /// Determines which slot this protective piece occupies on the character sheet
     pub slot: EquipmentSlot,
-
-    /// Flat raw mitigation rating added to defensive calculations
-    pub base_defense: u32,
 
     /// Static attribute modifiers applied directly to the player while equipped
     pub modifiers: Vec<Modifier>,
@@ -48,9 +41,6 @@ pub struct Armor {
 impl Armor {
     pub fn description(&self, _player: &Player) -> String {
         let mut parts = Vec::new();
-        if self.base_defense > 0 {
-            parts.push(format!("+{} Def", self.base_defense));
-        }
         for m in &self.modifiers {
             parts.push(m.to_short_string());
         }

@@ -1442,10 +1442,7 @@ fn main() {
                     "BurnDamageTakenMultiplier({:.3})",
                     (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
-                templates.push(format!(
-                    "BonusMaxMana({})",
-                    level * 5
-                ));
+                templates.push(format!("BonusMaxMana({})", level * 5));
             },
             "Frost" => {
                 templates.push(format!(
@@ -1456,20 +1453,14 @@ fn main() {
                     "BurnDamageTakenMultiplier({:.3})",
                     (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
-                templates.push(format!(
-                    "BonusMaxHealth({})",
-                    level * 10
-                ));
+                templates.push(format!("BonusMaxHealth({})", level * 10));
             },
             "Lightning" => {
                 templates.push(format!(
                     "AbilityDamageMultiplier(Lightning, {:.3})",
                     1.05 + (level as f32 * 0.02)
                 ));
-                templates.push(format!(
-                    "MaxManaMultiplier({:.3})",
-                    1.02 + (level as f32 * 0.01)
-                ));
+                templates.push(format!("MaxManaMultiplier({:.3})", 1.02 + (level as f32 * 0.01)));
                 templates.push(format!(
                     "BleedDamageTakenMultiplier({:.3})",
                     (0.95 - (level as f32 * 0.01)).max(0.5)
@@ -1484,34 +1475,22 @@ fn main() {
                     "PoisonDamageTakenMultiplier({:.3})",
                     (0.90 - (level as f32 * 0.01)).max(0.4)
                 ));
-                templates.push(format!(
-                    "MaxHealthMultiplier({:.3})",
-                    1.03 + (level as f32 * 0.01)
-                ));
+                templates.push(format!("MaxHealthMultiplier({:.3})", 1.03 + (level as f32 * 0.01)));
             },
             "Holy" => {
                 templates.push(format!(
                     "AbilityHealingMultiplier(Holy, {:.3})",
                     1.05 + (level as f32 * 0.02)
                 ));
-                templates.push(format!(
-                    "BonusMaxHealth({})",
-                    level * 12
-                ));
-                templates.push(format!(
-                    "MaxManaMultiplier({:.3})",
-                    1.02 + (level as f32 * 0.01)
-                ));
+                templates.push(format!("BonusMaxHealth({})", level * 12));
+                templates.push(format!("MaxManaMultiplier({:.3})", 1.02 + (level as f32 * 0.01)));
             },
             "Shadow" => {
                 templates.push(format!(
                     "AbilityDamageMultiplier(Shadow, {:.3})",
                     1.05 + (level as f32 * 0.02)
                 ));
-                templates.push(format!(
-                    "BonusMaxMana({})",
-                    level * 6
-                ));
+                templates.push(format!("BonusMaxMana({})", level * 6));
                 templates.push(format!(
                     "PoisonDamageTakenMultiplier({:.3})",
                     (0.95 - (level as f32 * 0.01)).max(0.5)
@@ -1522,38 +1501,20 @@ fn main() {
                     "AbilityDamageMultiplier(Cosmic, {:.3})",
                     1.05 + (level as f32 * 0.02)
                 ));
-                templates.push(format!(
-                    "BonusMaxMana({})",
-                    level * 8
-                ));
-                templates.push(format!(
-                    "MaxManaMultiplier({:.3})",
-                    1.03 + (level as f32 * 0.01)
-                ));
+                templates.push(format!("BonusMaxMana({})", level * 8));
+                templates.push(format!("MaxManaMultiplier({:.3})", 1.03 + (level as f32 * 0.01)));
             },
             "Martial" => {
-                templates.push(format!(
-                    "MaxHealthMultiplier({:.3})",
-                    1.04 + (level as f32 * 0.01)
-                ));
+                templates.push(format!("MaxHealthMultiplier({:.3})", 1.04 + (level as f32 * 0.01)));
                 templates.push(format!(
                     "BleedDamageTakenMultiplier({:.3})",
                     (0.90 - (level as f32 * 0.01)).max(0.4)
                 ));
-                templates.push(format!(
-                    "BonusMaxHealth({})",
-                    level * 10
-                ));
+                templates.push(format!("BonusMaxHealth({})", level * 10));
             },
             "Bulwark" => {
-                templates.push(format!(
-                    "BonusMaxHealth({})",
-                    level * 15
-                ));
-                templates.push(format!(
-                    "MaxHealthMultiplier({:.3})",
-                    1.05 + (level as f32 * 0.01)
-                ));
+                templates.push(format!("BonusMaxHealth({})", level * 15));
+                templates.push(format!("MaxHealthMultiplier({:.3})", 1.05 + (level as f32 * 0.01)));
                 templates.push(format!(
                     "EnemyPetDamageTakenMultiplier({:.3})",
                     (0.90 - (level as f32 * 0.01)).max(0.4)
@@ -1568,10 +1529,7 @@ fn main() {
                     "PoisonDamageTakenMultiplier({:.3})",
                     (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
-                templates.push(format!(
-                    "BonusMaxHealth({})",
-                    level * 6
-                ));
+                templates.push(format!("BonusMaxHealth({})", level * 6));
             },
             "Skirmish" => {
                 templates.push(format!(
@@ -1582,20 +1540,14 @@ fn main() {
                     "BurnDamageTakenMultiplier({:.3})",
                     (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
-                templates.push(format!(
-                    "BonusMaxMana({})",
-                    level * 4
-                ));
+                templates.push(format!("BonusMaxMana({})", level * 4));
             },
             "Tactic" => {
                 templates.push(format!(
                     "AbilityDamageMultiplier(Tactic, {:.3})",
                     1.05 + (level as f32 * 0.02)
                 ));
-                templates.push(format!(
-                    "BonusMaxMana({})",
-                    level * 5
-                ));
+                templates.push(format!("BonusMaxMana({})", level * 5));
                 templates.push(format!(
                     "EnemyPetDamageTakenMultiplier({:.3})",
                     (0.95 - (level as f32 * 0.01)).max(0.5)
@@ -1610,16 +1562,10 @@ fn main() {
                     "EnemyPetDamageTakenMultiplier({:.3})",
                     (0.90 - (level as f32 * 0.01)).max(0.4)
                 ));
-                templates.push(format!(
-                    "BonusMaxHealth({})",
-                    level * 8
-                ));
+                templates.push(format!("BonusMaxHealth({})", level * 8));
             },
             _ => {
-                templates.push(format!(
-                    "MaxHealthMultiplier({:.3})",
-                    1.02 + (level as f32 * 0.01)
-                ));
+                templates.push(format!("MaxHealthMultiplier({:.3})", 1.02 + (level as f32 * 0.01)));
             },
         }
 
@@ -1646,8 +1592,8 @@ fn main() {
             "    (
         name: \"{}\",
         image: \"images/inventory/perks/{}\",
-        kind: {},
         level: {},
+        kind: {},
         modifiers: [{}],
     ),
 ",
@@ -1751,7 +1697,8 @@ fn main() {
         while seen_weapons.contains(&name) {
             let mod_idx = (idx + ctr as usize) % UNIQUE_MODIFIERS.len();
             if is_unique {
-                name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx]).to_lowercase();
+                name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx])
+                    .to_lowercase();
             } else {
                 let adj = LEVEL_ADJECTIVES[level as usize - 1];
                 name = format!("{} {} {}", adj, cleaned, UNIQUE_MODIFIERS[mod_idx]).to_lowercase();
@@ -1973,7 +1920,8 @@ fn main() {
         while seen_armor.contains(&name) {
             let mod_idx = (idx + ctr as usize) % UNIQUE_MODIFIERS.len();
             if is_unique {
-                name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx]).to_lowercase();
+                name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx])
+                    .to_lowercase();
             } else {
                 let adj = LEVEL_ADJECTIVES[level as usize - 1];
                 name = format!("{} {} {}", adj, cleaned, UNIQUE_MODIFIERS[mod_idx]).to_lowercase();

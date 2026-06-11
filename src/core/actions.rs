@@ -29,6 +29,7 @@ pub enum Action {
     Shop,
     Hunt,
     Quest,
+    Duel,
 }
 
 impl Action {
@@ -42,7 +43,7 @@ impl Action {
 
     pub fn ap_cost(&self) -> u32 {
         match self {
-            Action::Shop => 0,
+            Action::Shop | Action::Duel => 0,
             Action::Rest | Action::Study | Action::Work => 1,
             Action::Craft | Action::Train | Action::Hunt => 2,
             Action::Quest => 3,
@@ -381,34 +382,29 @@ pub fn handle_playing_action_clicks(
                     reward_equipment(&mut player, item.name().to_string());
                 }
             },
+            Action::Duel => {},
         };
 
         // Deduct action points
         if player.ap <= action.ap_cost() {
-            let old_max_health = player.max_health();
-            let old_max_mana = player.max_mana();
-
             player.level += 1;
             player.ap = 10;
-            // No automatic attribute increases - player chooses 2 points
-            // Bonus health/mana increase
+            player.health += 10;
+            player.mana += 10;
             player.bonus_max_health += 10;
             player.bonus_max_mana += 10;
 
-            let health_diff = player.max_health() - old_max_health;
-            let mana_diff = player.max_mana() - old_max_mana;
-
-            player.health = (player.health + health_diff).min(player.max_health());
-            player.mana = (player.mana + mana_diff).min(player.max_mana());
-
-            // Generate ability and perk choices for the new level
-            let new_level = player.level;
+            if let Some(pet) = &mut player.pet {
+                pet.health += 10;
+                pet.max_health += 10;
+            }
 
             let mut ability_choices = Vec::new();
             let mut ability_pool: Vec<_> = all_abilities()
                 .iter()
                 .filter(|ab| {
-                    ab.level == new_level as u32 && !player.abilities.contains(&ab.name.to_string())
+                    ab.level == player.level as u32
+                        && !player.abilities.contains(&ab.name.to_string())
                 })
                 .collect();
             for _ in 0..3 {
@@ -424,7 +420,7 @@ pub fn handle_playing_action_clicks(
             let mut perk_pool: Vec<_> = all_perks()
                 .iter()
                 .filter(|pk| {
-                    pk.level == new_level as u32 && !player.perks.contains(&pk.name.to_string())
+                    pk.level == player.level as u32 && !player.perks.contains(&pk.name.to_string())
                 })
                 .collect();
             for _ in 0..3 {
@@ -449,7 +445,7 @@ pub fn handle_playing_action_clicks(
 
             *level_up = LevelUpPending {
                 active: true,
-                new_level,
+                new_level: player.level,
                 points_remaining: 2,
                 attr_gains: [0; 6],
                 ability_choices,

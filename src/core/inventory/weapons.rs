@@ -1,21 +1,21 @@
 use crate::core::inventory::effects::Effect;
-use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
 use crate::core::player::Player;
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-pub enum Hand {
-    OneHand,
-    TwoHand,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-pub enum Category {
-    Magic,
+pub enum WeaponKind {
+    Finesse,
+    Magical,
     Melee,
     Range,
     Shield,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+pub enum Hand {
+    OneHand,
+    TwoHand,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -27,23 +27,20 @@ pub struct Weapon {
     /// Name of the image the weapon corresponds to
     pub image: String,
 
-    /// Kind of weapon
-    pub kind: Kind,
+    /// Level or upgrade tier of the weapon
+    pub level: u32,
 
-    /// Weapon category
-    pub category: Category,
+    /// Weapon kind
+    pub kind: WeaponKind,
 
     /// Whether the weapon is carried in one or two hands
     pub hand: Hand,
-
-    /// Level or upgrade tier of the weapon
-    pub level: u32,
 
     /// Gold value for buying and selling
     pub price: u32,
 
     /// Flat raw attack rating added to offensive calculations
-    pub base_attack: u32,
+    pub attack: u32,
 
     /// Attack interval pacing (e.g., 1.5 base weapon swings per second)
     pub attack_speed: f32,
@@ -60,10 +57,8 @@ pub struct Weapon {
 
 impl Weapon {
     pub fn description(&self, player: &Player) -> String {
-        let mut parts = vec![
-            format!("+{} Atk", self.base_attack),
-            format!("{:.1} AS", player.weapon_attack_speed(&self.name)),
-        ];
+        let mut parts =
+            vec![format!("+{} Atk", self.attack), format!("{:.1} AS", self.attack_speed)];
         if self.crit_chance > 0.0 {
             parts.push(format!("{:.0}% Crit", self.crit_chance * 100.0));
         }

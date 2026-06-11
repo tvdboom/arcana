@@ -3,17 +3,15 @@ use bevy::prelude::*;
 use strum::IntoEnumIterator;
 
 pub use crate::core::actions::{handle_playing_action_clicks, Action, ActionButton};
-pub use crate::core::ui::toast::ToastContainer;
-pub use crate::core::ui::tooltip::*;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::{get_ability, get_equipment, get_perk};
 use crate::core::classes::Class;
 use crate::core::constants::*;
 use crate::core::inventory::armor::EquipmentSlot;
-use crate::core::inventory::equipment::{Equipment, Kind};
+use crate::core::inventory::equipment::Equipment;
 use crate::core::inventory::modifiers::Modifier;
-use crate::core::inventory::weapons::Hand;
+use crate::core::inventory::weapons::{Hand, WeaponKind};
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::buttons::DisabledButton;
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
@@ -21,6 +19,8 @@ use crate::core::player::{Attribute, Player};
 use crate::core::settings::{Language, Settings};
 use crate::core::ui::creation::SelectionItem;
 pub use crate::core::ui::level_up::{manage_level_up_overlay, LevelUpPending};
+pub use crate::core::ui::toast::ToastContainer;
+pub use crate::core::ui::tooltip::*;
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
 use bevy::window::{CursorIcon, SystemCursorIcon};
@@ -270,40 +270,28 @@ fn perk_bonus_lines(
         if let Some(perk) = get_perk(perk_key) {
             for modifier in &perk.modifiers {
                 match (stat, modifier) {
-                    (PlayingStat::Attack, Modifier::BonusAttack(val)) => {
+                    (PlayingStat::Attack, Modifier::AttackModifier(val)) => {
                         let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
-                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
+                        let localized_name = localization
+                            .get_opt(&key, lang)
+                            .unwrap_or_else(|| capitalize_words(&perk.name));
                         lines.push(signed_line(localized_name, *val));
-                    }
-                    (PlayingStat::Attack, Modifier::AttackMultiplier(val)) => {
+                    },
+                    (PlayingStat::Defense, Modifier::DefenseModifier(val)) => {
                         let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
-                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
-                        let pct = ((val - 1.0) * 100.0).round() as i32;
-                        lines.push(format!("{}: {:+}%", localized_name, pct));
-                    }
-                    (PlayingStat::Defense, Modifier::BonusDefense(val)) => {
-                        let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
-                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
+                        let localized_name = localization
+                            .get_opt(&key, lang)
+                            .unwrap_or_else(|| capitalize_words(&perk.name));
                         lines.push(signed_line(localized_name, *val));
-                    }
-                    (PlayingStat::Defense, Modifier::DefenseMultiplier(val)) => {
+                    },
+                    (PlayingStat::Initiative, Modifier::InitiativeModifier(val)) => {
                         let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
-                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
-                        let pct = ((val - 1.0) * 100.0).round() as i32;
-                        lines.push(format!("{}: {:+}%", localized_name, pct));
-                    }
-                    (PlayingStat::Initiative, Modifier::BonusInitiative(val)) => {
-                        let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
-                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
+                        let localized_name = localization
+                            .get_opt(&key, lang)
+                            .unwrap_or_else(|| capitalize_words(&perk.name));
                         lines.push(signed_line(localized_name, *val));
-                    }
-                    (PlayingStat::Initiative, Modifier::InitiativeMultiplier(val)) => {
-                        let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
-                        let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(&perk.name));
-                        let pct = ((val - 1.0) * 100.0).round() as i32;
-                        lines.push(format!("{}: {:+}%", localized_name, pct));
-                    }
-                    _ => {}
+                    },
+                    _ => {},
                 }
             }
         }
@@ -1905,7 +1893,7 @@ pub fn rebuild_playing_lists(
         });
     }
 
-            // Abilities list.
+    // Abilities list.
     if let Ok(entity) = queries.abil_q.single() {
         clear(&mut commands, entity, &queries.children_q);
         commands.entity(entity).with_children(|parent| {
@@ -2113,8 +2101,8 @@ pub fn update_playing_screen(
                 localization.get("general.mana", lang)
             ),
             PlayingStat::Money => format!("{}", player.gold),
-            PlayingStat::Attack => format!("{}", player.attack_damage()),
-            PlayingStat::Defense => format!("{}", player.defense_value()),
+            PlayingStat::Attack => format!("{}", player.attack()),
+            PlayingStat::Defense => format!("{}", player.defense()),
             PlayingStat::Initiative => format!("{}", player.initiative()),
             PlayingStat::ActionPoints => format!("{}", player.ap),
             PlayingStat::PetHealth => {
@@ -2331,8 +2319,8 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                         player.inventory.push(old_rh);
                     }
                     player.weapon_lh = Some(key.to_string());
-                } else if w.kind == Kind::Bulwark {
-                    // Bulwark (shield/offhand): unequip two-handed weapon from LH if present, then place in weapon_rh
+                } else if w.kind == WeaponKind::Shield {
+                    // Shield: unequip two-handed weapon from LH if present, then place in weapon_rh
                     if is_lh_two_hand {
                         if let Some(old_lh) = player.weapon_lh.take() {
                             player.inventory.push(old_lh);
@@ -2442,7 +2430,7 @@ pub fn reward_equipment(player: &mut Player, key: String) {
 
                 if w.hand == Hand::TwoHand {
                     player.weapon_lh.is_none() && player.weapon_rh.is_none()
-                } else if w.kind == Kind::Bulwark {
+                } else if w.kind == WeaponKind::Shield {
                     player.weapon_rh.is_none() && !is_lh_two_hand
                 } else {
                     !is_lh_two_hand && (player.weapon_lh.is_none() || player.weapon_rh.is_none())
@@ -2517,21 +2505,6 @@ pub fn handle_equipment_card_click(
         }
     }
 }
-
-/*
-pub fn tick_gold_toasts(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut q: Query<(Entity, &mut GoldToast)>,
-) {
-    for (entity, mut toast) in &mut q {
-        toast.timer -= time.delta_secs();
-        if toast.timer <= 0.0 {
-            commands.entity(entity).try_despawn();
-        }
-    }
-}
-*/
 
 pub fn handle_equipment_slot_click(
     event: On<Pointer<Click>>,

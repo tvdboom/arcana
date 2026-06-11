@@ -4,11 +4,11 @@ use strum::IntoEnumIterator;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
-use crate::core::catalog::{all_abilities, all_perks, all_weapons};
+use crate::core::catalog::{all_abilities, all_weapons};
 use crate::core::classes::{Ajah, Class};
 use crate::core::constants::*;
-use crate::core::inventory::equipment::Kind;
-use crate::core::inventory::weapons::Category;
+use crate::core::inventory::abilities::AbilityKind;
+use crate::core::inventory::weapons::WeaponKind;
 use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
@@ -1349,28 +1349,15 @@ impl SelectionItem for Class {
 
         player.abilities = vec![ability.name.clone()];
 
-        let perk = all_perks()
-            .iter()
-            .filter(|a| {
-                a.level == 1
-                    && match *self {
-                        Class::Assassin | Class::Warrior => !a.kind.is_magic(),
-                        _ => a.kind.is_magic(),
-                    }
-            })
-            .choose(&mut rng())
-            .unwrap();
-
-        player.perks = vec![perk.name.clone()];
-
         let weapon = all_weapons()
             .iter()
             .filter(|a| {
                 a.level == 1
-                    && a.category == Category::Melee
                     && match *self {
-                        Class::Assassin => a.kind == Kind::Assassination,
-                        _ => a.kind == Kind::Martial,
+                        Class::Assassin => a.kind == WeaponKind::Finesse,
+                        Class::Druid => a.kind == WeaponKind::Range,
+                        Class::Mage(_) => a.kind == WeaponKind::Magical,
+                        Class::Warrior => a.kind == WeaponKind::Melee,
                     }
             })
             .choose(&mut rng())
@@ -1418,10 +1405,10 @@ impl SelectionItem for Ajah {
             .filter(|a| {
                 a.level == 1
                     && match *self {
-                        Ajah::Black => a.kind == Kind::Shadow,
-                        Ajah::Green => a.kind == Kind::Nature,
-                        Ajah::Red => a.kind == Kind::Fire,
-                        Ajah::White => a.kind == Kind::Frost,
+                        Ajah::Black => a.kind == AbilityKind::Shadow,
+                        Ajah::Green => a.kind == AbilityKind::Nature,
+                        Ajah::Red => a.kind == AbilityKind::Fire,
+                        Ajah::White => a.kind == AbilityKind::Ice,
                     }
             })
             .choose(&mut rng())

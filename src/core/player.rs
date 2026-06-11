@@ -94,7 +94,7 @@ impl AgeStage {
     }
 }
 
-#[derive(EnumIter, Clone, Copy, Debug, EnumString, Serialize, Deserialize)]
+#[derive(EnumIter, EnumString, Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum Attribute {
     Strength,
     Dexterity,
@@ -193,6 +193,10 @@ impl Player {
         (self.dexterity as i32 + race_mod).max(0) as u32
     }
 
+    pub fn dexterity_mod(&self) -> u32 {
+        self.dexterity().checked_sub(START_CHARACTERISTIC).unwrap_or_default()
+    }
+
     pub fn constitution(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Constitution);
         let age_mod = self.stage.characteristic_mod(Attribute::Constitution);
@@ -262,77 +266,61 @@ impl Player {
         base + class_mod + self.bonus_max_mana
     }
 
-    /// Total physical attack damage (base from strength plus weapon bonuses).
-    pub fn attack_damage(&self) -> u32 {
-        let equip_mod = self.equipped_equipment().iter().map(|w| w.attack()).sum::<i32>();
-        let mut flat_bonus = 0;
-        let mut mult = 1.0;
-        for perk_key in &self.perks {
-            if let Some(perk) = get_perk(perk_key) {
-                for modifier in &perk.modifiers {
-                    match modifier {
-                        Modifier::BonusAttack(val) => flat_bonus += val,
-                        Modifier::AttackMultiplier(val) => mult *= val,
-                        _ => {}
+    pub fn attack(&self) -> u32 {
+        (5 + self.strength_mod() as i32
+            + self.equipped_equipment().iter().map(|w| w.attack()).sum::<i32>()
+            + self
+                .perks
+                .iter()
+                .filter_map(|key| get_perk(key))
+                .flat_map(|perk| perk.modifiers)
+                .filter_map(|m| {
+                    if let Modifier::AttackModifier(v) = m {
+                        Some(v)
+                    } else {
+                        None
                     }
-                }
-            }
-        }
-        let base_atk = 5 + self.strength_mod() as i32 + equip_mod;
-        let total = ((base_atk + flat_bonus) as f32 * mult) as i32;
-        total.max(0) as u32
+                })
+                .sum::<i32>()
+                .max(0)) as u32
     }
 
-    pub fn weapon_attack_speed(&self, weapon_key: &str) -> f32 {
-        let weapon_speed = get_equipment(weapon_key).map(|w| w.attack_speed()).unwrap_or(1.0);
-        self.adjust_attack_speed(weapon_speed)
-    }
-
-    fn adjust_attack_speed(&self, weapon_speed: f32) -> f32 {
-        let dex_bonus = (self.dexterity() as f32 - 10.) * 0.05;
-        (weapon_speed + dex_bonus).max(0.3)
-    }
-
-    pub fn defense_value(&self) -> i32 {
-        let base_def = self.constitution() as i32 / 4
-            + self.equipped_equipment().iter().map(|w| w.defense()).sum::<i32>();
-        let mut flat_bonus = 0;
-        let mut mult = 1.0;
-        for perk_key in &self.perks {
-            if let Some(perk) = get_perk(perk_key) {
-                for modifier in &perk.modifiers {
-                    match modifier {
-                        Modifier::BonusDefense(val) => flat_bonus += val,
-                        Modifier::DefenseMultiplier(val) => mult *= val,
-                        _ => {}
+    pub fn defense(&self) -> u32 {
+        (5 + self.constitution_mod() as i32
+            + self.equipped_equipment().iter().map(|w| w.defense()).sum::<i32>()
+            + self
+                .perks
+                .iter()
+                .filter_map(|key| get_perk(key))
+                .flat_map(|perk| perk.modifiers)
+                .filter_map(|m| {
+                    if let Modifier::DefenseModifier(v) = m {
+                        Some(v)
+                    } else {
+                        None
                     }
-                }
-            }
-        }
-        let total = ((base_def + flat_bonus) as f32 * mult) as i32;
-        total
+                })
+                .sum::<i32>()
+                .max(0)) as u32
     }
 
-    pub fn initiative(&self) -> i32 {
-        let base_init = self.dexterity() as i32 / 2
-            + self.equipped_equipment().iter().map(|w| w.initiative()).sum::<i32>();
-        let class_bonus = if matches!(self.class, Class::Assassin) { 2 } else { 0 };
-
-        let mut flat_bonus = 0;
-        let mut mult = 1.0;
-        for perk_key in &self.perks {
-            if let Some(perk) = get_perk(perk_key) {
-                for modifier in &perk.modifiers {
-                    match modifier {
-                        Modifier::BonusInitiative(val) => flat_bonus += val,
-                        Modifier::InitiativeMultiplier(val) => mult *= val,
-                        _ => {}
+    pub fn initiative(&self) -> u32 {
+        (5 + self.dexterity_mod() as i32
+            + self.equipped_equipment().iter().map(|w| w.initiative()).sum::<i32>()
+            + self
+                .perks
+                .iter()
+                .filter_map(|key| get_perk(key))
+                .flat_map(|perk| perk.modifiers)
+                .filter_map(|m| {
+                    if let Modifier::InitiativeModifier(v) = m {
+                        Some(v)
+                    } else {
+                        None
                     }
-                }
-            }
-        }
-        let total = ((base_init + class_bonus + flat_bonus) as f32 * mult) as i32;
-        total
+                })
+                .sum::<i32>()
+                .max(0)) as u32
     }
 
     /// (height_cm, weight_kg). Height and weight are derived deterministically from name and race.

@@ -1,4 +1,3 @@
-use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
 use crate::core::player::Player;
 use serde::Deserialize;
@@ -11,9 +10,6 @@ pub struct Perk {
 
     /// Name of the image the perk corresponds to
     pub image: String,
-
-    /// Kind of perk (determines the theme or unlock requirements, if applicable)
-    pub kind: Kind,
 
     /// Level of the perk
     pub level: u32,

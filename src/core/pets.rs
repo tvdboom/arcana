@@ -34,6 +34,7 @@ pub struct Pet {
     pub attack: u32,
     pub defense: u32,
     pub initiative: u32,
+    pub attack_speed: f32,
 }
 
 impl Pet {
@@ -68,6 +69,7 @@ impl Pet {
             attack,
             defense,
             initiative,
+            attack_speed: 1.,
         }
     }
 }
