@@ -45,11 +45,11 @@ pub fn spawn_tooltip(
         (1600., 900., None)
     };
 
-    let max_allowed_width = window_width * 0.30;
+    let max_allowed_width = window_width * 0.35;
 
     let font_size_title = window_height * 0.019;
     let font_size_desc = window_height * 0.016;
-    let char_width_desc = font_size_desc * 0.55;
+    let char_width_desc = font_size_desc * 0.62;
     let line_height_title = font_size_title * 1.35;
     let line_height_desc = font_size_desc * 1.35;
 
@@ -62,7 +62,9 @@ pub fn spawn_tooltip(
     // Wrap the description lines
     let mut wrapped_lines = Vec::new();
     for line in &content.lines {
-        wrapped_lines.extend(wrap_tooltip_line(line, max_chars_per_line));
+        for sub_line in line.split('\n') {
+            wrapped_lines.extend(wrap_tooltip_line(sub_line, max_chars_per_line));
+        }
     }
 
     // Estimate width of content
@@ -76,7 +78,7 @@ pub fn spawn_tooltip(
         title_chars_width
     };
 
-    let content_width = desc_width.max(title_row_width);
+    let content_width = desc_width.max(title_row_width) * 1.10;
     let tooltip_width = (content_width + padding_width).clamp(320.0_f32.min(max_allowed_width), max_allowed_width);
 
     // Calculate height

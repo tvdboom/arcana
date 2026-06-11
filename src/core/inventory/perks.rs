@@ -1,6 +1,7 @@
 use crate::core::inventory::effects::Effect;
 use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
+use crate::core::player::Player;
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -26,7 +27,18 @@ pub struct Perk {
 }
 
 impl Perk {
-    pub fn description(&self) -> String {
-        format!("This is a test description for {}", self.name)
+    pub fn description(&self, _player: &Player) -> String {
+        let mut parts = Vec::new();
+        for m in &self.modifiers {
+            parts.push(m.to_short_string());
+        }
+        for e in &self.effects {
+            parts.push(e.to_short_string());
+        }
+        if parts.is_empty() {
+            "Passive boost".to_string()
+        } else {
+            parts.join(" | ")
+        }
     }
 }

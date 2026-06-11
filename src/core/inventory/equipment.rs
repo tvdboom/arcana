@@ -2,6 +2,7 @@ use crate::core::inventory::armor::Armor;
 use crate::core::inventory::effects::Effect;
 use crate::core::inventory::modifiers::Modifier;
 use crate::core::inventory::weapons::Weapon;
+use crate::core::player::Player;
 use serde::Deserialize;
 use strum_macros::Display;
 
@@ -46,6 +47,13 @@ pub enum Equipment {
 }
 
 impl Equipment {
+    pub fn description(&self, player: &Player) -> String {
+        match self {
+            Equipment::Armor(a) => a.description(player),
+            Equipment::Weapon(w) => w.description(player),
+        }
+    }
+
     pub fn name(&self) -> &str {
         match self {
             Equipment::Armor(a) => &a.name,

@@ -10,7 +10,6 @@ use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::{get_ability, get_equipment, get_perk};
 use crate::core::classes::Class;
 use crate::core::constants::*;
-use crate::core::inventory::abilities::Ability;
 use crate::core::inventory::armor::EquipmentSlot;
 use crate::core::inventory::equipment::{Equipment, Kind};
 use crate::core::inventory::weapons::Hand;
@@ -173,52 +172,14 @@ fn name_with_level(
     format!("{localized_name} ({lv}. {level})")
 }
 
-fn ability_detail_line(stats: &Ability, localization: &Localization, lang: Language) -> String {
-    let mut parts = vec![format!(
-        "{}: {} | {}: {}",
-        localization.get("general.ability_type", lang),
-        localization.get(&format!("general.{}", stats.kind.to_string().to_lowercase()), lang),
-        localization.get("general.mana", lang),
-        stats.mana_cost
-    )];
-
-    if stats.cooldown > 0.0 {
-        parts.push(format!("{}: {}s", localization.get("general.cooldown", lang), stats.cooldown));
-    }
-
-    parts.join(" | ")
-}
-
 /// Format the bonus characteristics of a weapon, e.g. "+6 attack | +10 crit | 1.2 as".
 fn weapon_stat_lines(
     weapon: &Equipment,
     player: &Player,
-    localization: &Localization,
-    lang: Language,
+    _localization: &Localization,
+    _lang: Language,
 ) -> Vec<String> {
-    let mut parts = Vec::new();
-    let mut push = |val: i32, key: &str| {
-        if val != 0 {
-            let sign = if val > 0 {
-                "+"
-            } else {
-                ""
-            };
-            parts.push(format!("{}{} {}", sign, val, localization.get(key, lang)));
-        }
-    };
-    push(weapon.attack(), "general.attack");
-    push(weapon.defense(), "general.defense");
-    push(weapon.crit(), "general.crit");
-    push(weapon.initiative(), "general.initiative");
-    if weapon.attack_speed() > 0.0 {
-        parts.push(format!("{:.1} as", player.weapon_attack_speed(weapon.name())));
-    }
-    if parts.is_empty() {
-        vec![]
-    } else {
-        vec![parts.join(" | ")]
-    }
+    vec![weapon.description(player)]
 }
 
 fn signed_line(label: impl Into<String>, value: i32) -> String {
@@ -1888,7 +1849,7 @@ pub fn rebuild_playing_lists(
         });
     }
 
-    // Abilities list.
+            // Abilities list.
     if let Ok(entity) = queries.abil_q.single() {
         clear(&mut commands, entity, &queries.children_q);
         commands.entity(entity).with_children(|parent| {
@@ -1914,7 +1875,7 @@ pub fn rebuild_playing_lists(
                         lang,
                     ),
                     None,
-                    vec![ability_detail_line(&ability, &localization, lang)],
+                    vec![ability.description(&player)],
                 );
             }
         });
@@ -1940,7 +1901,7 @@ pub fn rebuild_playing_lists(
                     &perk.name,
                     name_with_level(&perk.name, "perk", perk.level as u8, &localization, lang),
                     None,
-                    vec![],
+                    vec![perk.description(&player)],
                 );
             }
         });

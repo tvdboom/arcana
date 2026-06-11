@@ -1,6 +1,7 @@
 use crate::core::inventory::effects::Effect;
 use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
+use crate::core::player::Player;
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
@@ -58,7 +59,20 @@ pub struct Weapon {
 }
 
 impl Weapon {
-    pub fn description(&self) -> String {
-        format!("This is a test description for {}", self.name)
+    pub fn description(&self, player: &Player) -> String {
+        let mut parts = vec![
+            format!("+{} Atk", self.base_attack),
+            format!("{:.1} AS", player.weapon_attack_speed(&self.name)),
+        ];
+        if self.crit_chance > 0.0 {
+            parts.push(format!("{:.0}% Crit", self.crit_chance * 100.0));
+        }
+        for m in &self.modifiers {
+            parts.push(m.to_short_string());
+        }
+        for e in &self.effects {
+            parts.push(e.to_short_string());
+        }
+        parts.join(" | ")
     }
 }

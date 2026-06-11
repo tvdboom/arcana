@@ -3,6 +3,7 @@ use bevy::window::SystemCursorIcon;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
+use crate::core::catalog::{get_ability, get_perk};
 use crate::core::constants::*;
 use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;
@@ -784,6 +785,7 @@ fn spawn_level_up_overlay(
                                                                 is_selected,
                                                                 true, // is_ability
                                                                 i,
+                                                                &player,
                                                             );
                                                         }
                                                     });
@@ -828,6 +830,7 @@ fn spawn_level_up_overlay(
                                                                 is_selected,
                                                                 false, // is_perk
                                                                 i,
+                                                                &player,
                                                             );
                                                         }
                                                     });
@@ -911,6 +914,7 @@ fn spawn_choice_card(
     is_selected: bool,
     is_ability: bool,
     index: usize,
+    player: &Player,
 ) {
     const SELECTED_BORDER: Color = Color::srgb(1.0, 0.85, 0.2);
     const UNSELECTED_BORDER: Color = BUTTON_BORDER_COLOR;
@@ -998,7 +1002,16 @@ fn spawn_choice_card(
                     ));
 
                     // Description
-                    parent.spawn((add_text("", "medium", 1.6, assets), TextColor(Color::WHITE)));
+                    let desc_text = if is_ability {
+                        get_ability(name).map(|ab| ab.description(player)).unwrap_or_default()
+                    } else {
+                        get_perk(name).map(|pk| pk.description(player)).unwrap_or_default()
+                    };
+
+                    parent.spawn((
+                        add_text(&desc_text, "medium", 1.6, assets),
+                        TextColor(Color::WHITE),
+                    ));
                 });
         });
 }

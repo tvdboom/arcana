@@ -1,6 +1,7 @@
 use crate::core::inventory::effects::Effect;
 use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
+use crate::core::player::Player;
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -42,7 +43,50 @@ pub struct Ability {
 }
 
 impl Ability {
-    pub fn description(&self) -> String {
-        format!("This is a test description for {}", self.name)
+    pub fn actual_value(&self, player: &Player) -> u32 {
+        let scaling_stat = if self.kind.is_magic() {
+            if self.kind == Kind::Holy || self.kind == Kind::Nature {
+                player.wisdom() as f32
+            } else {
+                player.intelligence() as f32
+            }
+        } else {
+            if self.kind == Kind::Assassination || self.kind == Kind::Skirmish {
+                player.dexterity() as f32
+            } else {
+                player.strength() as f32
+            }
+        };
+        (self.base as f32 + scaling_stat * self.scaling_factor).round() as u32
+    }
+
+    pub fn description(&self, player: &Player) -> String {
+        let value_label = if self.kind == Kind::Holy || self.kind == Kind::Nature {
+            "Heal"
+        } else {
+            "Dmg"
+        };
+        let mut line = format!(
+            "Type: {} | {}: {} | Cost: {} MP",
+            self.kind,
+            value_label,
+            self.actual_value(player),
+            self.mana_cost,
+        );
+        if self.cooldown > 0.0 {
+            line.push_str(&format!(" | CD: {}s", self.cooldown));
+        }
+        
+        let mut sub_parts = Vec::new();
+        for m in &self.modifiers {
+            sub_parts.push(m.to_short_string());
+        }
+        for e in &self.effects {
+            sub_parts.push(e.to_short_string());
+        }
+        if !sub_parts.is_empty() {
+            line.push_str(&format!("\n{}", sub_parts.join(" | ")));
+        }
+        line
     }
 }
