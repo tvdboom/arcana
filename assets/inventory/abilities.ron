@@ -9,7 +9,6 @@
         scaling_factor: 0.6,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -22,7 +21,6 @@
         scaling_factor: 0.7,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -35,7 +33,6 @@
         scaling_factor: 0.7,
         cooldown: 10.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -48,7 +45,6 @@
         scaling_factor: 0.8,
         cooldown: 10.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -61,7 +57,6 @@
         scaling_factor: 0.6,
         cooldown: 10.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -74,7 +69,6 @@
         scaling_factor: 0.7,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -87,7 +81,6 @@
         scaling_factor: 0.7,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -100,7 +93,6 @@
         scaling_factor: 0.8,
         cooldown: 10.1,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -113,7 +105,6 @@
         scaling_factor: 0.6,
         cooldown: 10.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -126,7 +117,6 @@
         scaling_factor: 0.7,
         cooldown: 10.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -139,7 +129,6 @@
         scaling_factor: 0.7,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -152,7 +141,6 @@
         scaling_factor: 0.8,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -165,7 +153,6 @@
         scaling_factor: 0.6,
         cooldown: 10.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -178,7 +165,6 @@
         scaling_factor: 0.7,
         cooldown: 10.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -191,7 +177,6 @@
         scaling_factor: 0.7,
         cooldown: 10.5,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -204,7 +189,6 @@
         scaling_factor: 0.8,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -217,7 +201,6 @@
         scaling_factor: 0.6,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -230,7 +213,6 @@
         scaling_factor: 0.7,
         cooldown: 10.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -243,7 +225,6 @@
         scaling_factor: 0.7,
         cooldown: 10.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -256,7 +237,6 @@
         scaling_factor: 0.8,
         cooldown: 10.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -269,7 +249,6 @@
         scaling_factor: 0.6,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -282,7 +261,6 @@
         scaling_factor: 0.7,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -295,7 +273,6 @@
         scaling_factor: 0.7,
         cooldown: 10.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -308,7 +285,6 @@
         scaling_factor: 0.8,
         cooldown: 10.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -321,7 +297,6 @@
         scaling_factor: 0.6,
         cooldown: 10.5,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -334,7 +309,6 @@
         scaling_factor: 0.7,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -347,7 +321,6 @@
         scaling_factor: 0.7,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -360,7 +333,6 @@
         scaling_factor: 0.8,
         cooldown: 10.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -373,7 +345,6 @@
         scaling_factor: 0.6,
         cooldown: 10.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -386,7 +357,6 @@
         scaling_factor: 0.7,
         cooldown: 10.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -399,7 +369,6 @@
         scaling_factor: 0.7,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -412,7 +381,6 @@
         scaling_factor: 0.8,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -425,7 +393,6 @@
         scaling_factor: 0.6,
         cooldown: 10.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -438,7 +405,6 @@
         scaling_factor: 0.7,
         cooldown: 10.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -451,7 +417,6 @@
         scaling_factor: 0.7,
         cooldown: 10.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -464,7 +429,6 @@
         scaling_factor: 0.8,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -477,7 +441,6 @@
         scaling_factor: 0.6,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -490,7 +453,6 @@
         scaling_factor: 0.8,
         cooldown: 9.8,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -503,7 +465,6 @@
         scaling_factor: 0.8,
         cooldown: 10.0,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -516,7 +477,6 @@
         scaling_factor: 0.9,
         cooldown: 10.2,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -529,7 +489,6 @@
         scaling_factor: 0.7,
         cooldown: 9.4,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -542,7 +501,6 @@
         scaling_factor: 0.8,
         cooldown: 9.6,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -555,7 +513,6 @@
         scaling_factor: 0.8,
         cooldown: 9.8,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -568,7 +525,6 @@
         scaling_factor: 0.9,
         cooldown: 10.0,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -581,7 +537,6 @@
         scaling_factor: 0.7,
         cooldown: 10.2,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -594,7 +549,6 @@
         scaling_factor: 0.8,
         cooldown: 9.4,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -607,7 +561,6 @@
         scaling_factor: 0.8,
         cooldown: 9.6,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -620,7 +573,6 @@
         scaling_factor: 0.9,
         cooldown: 9.8,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -633,7 +585,6 @@
         scaling_factor: 0.7,
         cooldown: 10.0,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -646,7 +597,6 @@
         scaling_factor: 0.8,
         cooldown: 10.2,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -659,7 +609,6 @@
         scaling_factor: 0.8,
         cooldown: 9.4,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -672,7 +621,6 @@
         scaling_factor: 0.9,
         cooldown: 9.6,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -685,7 +633,6 @@
         scaling_factor: 0.7,
         cooldown: 9.8,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -698,7 +645,6 @@
         scaling_factor: 0.8,
         cooldown: 10.0,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -711,7 +657,6 @@
         scaling_factor: 0.8,
         cooldown: 10.2,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -724,7 +669,6 @@
         scaling_factor: 0.9,
         cooldown: 9.4,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -737,7 +681,6 @@
         scaling_factor: 0.7,
         cooldown: 9.6,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -750,7 +693,6 @@
         scaling_factor: 0.8,
         cooldown: 9.8,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -763,7 +705,6 @@
         scaling_factor: 0.8,
         cooldown: 10.0,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -776,7 +717,6 @@
         scaling_factor: 0.9,
         cooldown: 10.2,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -789,7 +729,6 @@
         scaling_factor: 0.7,
         cooldown: 9.4,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -802,7 +741,6 @@
         scaling_factor: 0.8,
         cooldown: 9.6,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -815,7 +753,6 @@
         scaling_factor: 0.8,
         cooldown: 9.8,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -828,7 +765,6 @@
         scaling_factor: 0.9,
         cooldown: 10.0,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -841,7 +777,6 @@
         scaling_factor: 0.7,
         cooldown: 10.2,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -854,7 +789,6 @@
         scaling_factor: 0.8,
         cooldown: 9.4,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -867,7 +801,6 @@
         scaling_factor: 0.8,
         cooldown: 9.6,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -880,7 +813,6 @@
         scaling_factor: 0.9,
         cooldown: 9.8,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -893,7 +825,6 @@
         scaling_factor: 0.7,
         cooldown: 10.0,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -906,7 +837,6 @@
         scaling_factor: 0.8,
         cooldown: 10.2,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -919,7 +849,6 @@
         scaling_factor: 0.8,
         cooldown: 9.4,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -932,7 +861,6 @@
         scaling_factor: 0.9,
         cooldown: 9.6,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -945,7 +873,6 @@
         scaling_factor: 0.7,
         cooldown: 9.8,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -958,7 +885,6 @@
         scaling_factor: 0.8,
         cooldown: 10.0,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -971,7 +897,6 @@
         scaling_factor: 0.9,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -984,7 +909,6 @@
         scaling_factor: 1.0,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -997,7 +921,6 @@
         scaling_factor: 0.8,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1010,7 +933,6 @@
         scaling_factor: 0.9,
         cooldown: 9.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1023,7 +945,6 @@
         scaling_factor: 0.9,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1036,7 +957,6 @@
         scaling_factor: 1.0,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1049,7 +969,6 @@
         scaling_factor: 0.8,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1062,7 +981,6 @@
         scaling_factor: 0.9,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1075,7 +993,6 @@
         scaling_factor: 0.9,
         cooldown: 9.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1088,7 +1005,6 @@
         scaling_factor: 1.0,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1101,7 +1017,6 @@
         scaling_factor: 0.8,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1114,7 +1029,6 @@
         scaling_factor: 0.9,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1127,7 +1041,6 @@
         scaling_factor: 0.9,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1140,7 +1053,6 @@
         scaling_factor: 1.0,
         cooldown: 9.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1153,7 +1065,6 @@
         scaling_factor: 0.8,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1166,7 +1077,6 @@
         scaling_factor: 0.9,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1179,7 +1089,6 @@
         scaling_factor: 0.9,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1192,7 +1101,6 @@
         scaling_factor: 1.0,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1205,7 +1113,6 @@
         scaling_factor: 0.8,
         cooldown: 9.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1218,7 +1125,6 @@
         scaling_factor: 0.9,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1231,7 +1137,6 @@
         scaling_factor: 0.9,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1244,7 +1149,6 @@
         scaling_factor: 1.0,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1257,7 +1161,6 @@
         scaling_factor: 0.8,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1270,7 +1173,6 @@
         scaling_factor: 0.9,
         cooldown: 9.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1283,7 +1185,6 @@
         scaling_factor: 0.9,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1296,7 +1197,6 @@
         scaling_factor: 1.0,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1309,7 +1209,6 @@
         scaling_factor: 0.8,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1322,7 +1221,6 @@
         scaling_factor: 0.9,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1335,7 +1233,6 @@
         scaling_factor: 0.9,
         cooldown: 9.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1348,7 +1245,6 @@
         scaling_factor: 1.0,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1361,7 +1257,6 @@
         scaling_factor: 0.8,
         cooldown: 9.9,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1374,7 +1269,6 @@
         scaling_factor: 0.9,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1387,7 +1281,6 @@
         scaling_factor: 0.9,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1400,7 +1293,6 @@
         scaling_factor: 1.0,
         cooldown: 9.5,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1413,7 +1305,6 @@
         scaling_factor: 0.8,
         cooldown: 9.7,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1426,7 +1317,6 @@
         scaling_factor: 0.9,
         cooldown: 9.9,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1439,7 +1329,6 @@
         scaling_factor: 0.9,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1452,7 +1341,6 @@
         scaling_factor: 1.0,
         cooldown: 9.0,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1465,7 +1353,6 @@
         scaling_factor: 0.9,
         cooldown: 9.2,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1478,7 +1365,6 @@
         scaling_factor: 0.9,
         cooldown: 9.4,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1491,7 +1377,6 @@
         scaling_factor: 1.0,
         cooldown: 9.6,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1504,7 +1389,6 @@
         scaling_factor: 1.0,
         cooldown: 8.8,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1517,7 +1401,6 @@
         scaling_factor: 0.9,
         cooldown: 9.0,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1530,7 +1413,6 @@
         scaling_factor: 0.9,
         cooldown: 9.2,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1543,7 +1425,6 @@
         scaling_factor: 1.0,
         cooldown: 9.4,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1556,7 +1437,6 @@
         scaling_factor: 1.0,
         cooldown: 9.6,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1569,7 +1449,6 @@
         scaling_factor: 0.9,
         cooldown: 8.8,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1582,7 +1461,6 @@
         scaling_factor: 0.9,
         cooldown: 9.0,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1595,7 +1473,6 @@
         scaling_factor: 1.0,
         cooldown: 9.2,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1608,7 +1485,6 @@
         scaling_factor: 1.0,
         cooldown: 9.4,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1621,7 +1497,6 @@
         scaling_factor: 0.9,
         cooldown: 9.6,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1634,7 +1509,6 @@
         scaling_factor: 0.9,
         cooldown: 8.8,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1647,7 +1521,6 @@
         scaling_factor: 1.0,
         cooldown: 9.0,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1660,7 +1533,6 @@
         scaling_factor: 1.0,
         cooldown: 9.2,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1673,7 +1545,6 @@
         scaling_factor: 0.9,
         cooldown: 9.4,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1686,7 +1557,6 @@
         scaling_factor: 0.9,
         cooldown: 9.6,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1699,7 +1569,6 @@
         scaling_factor: 1.0,
         cooldown: 8.8,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1712,7 +1581,6 @@
         scaling_factor: 1.0,
         cooldown: 9.0,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1725,7 +1593,6 @@
         scaling_factor: 0.9,
         cooldown: 9.2,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1738,7 +1605,6 @@
         scaling_factor: 0.9,
         cooldown: 9.4,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1751,7 +1617,6 @@
         scaling_factor: 1.0,
         cooldown: 9.6,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1764,7 +1629,6 @@
         scaling_factor: 1.0,
         cooldown: 8.8,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1777,7 +1641,6 @@
         scaling_factor: 0.9,
         cooldown: 9.0,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1790,7 +1653,6 @@
         scaling_factor: 0.9,
         cooldown: 9.2,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1803,7 +1665,6 @@
         scaling_factor: 1.0,
         cooldown: 9.4,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1816,7 +1677,6 @@
         scaling_factor: 1.0,
         cooldown: 9.6,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1829,7 +1689,6 @@
         scaling_factor: 0.9,
         cooldown: 8.8,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1842,7 +1701,6 @@
         scaling_factor: 0.9,
         cooldown: 9.0,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1855,7 +1713,6 @@
         scaling_factor: 1.0,
         cooldown: 9.2,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1868,7 +1725,6 @@
         scaling_factor: 1.0,
         cooldown: 9.4,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1881,7 +1737,6 @@
         scaling_factor: 0.9,
         cooldown: 9.6,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1894,7 +1749,6 @@
         scaling_factor: 0.9,
         cooldown: 8.8,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1907,7 +1761,6 @@
         scaling_factor: 1.0,
         cooldown: 9.0,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1920,7 +1773,6 @@
         scaling_factor: 1.0,
         cooldown: 9.2,
         is_aoe: true,
-        modifiers: [],
         effects: [],
     ),
     (
@@ -1933,7 +1785,6 @@
         scaling_factor: 1.0,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 6, duration: 5.0)],
     ),
     (
@@ -1946,7 +1797,6 @@
         scaling_factor: 1.0,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Blind(miss_chance: 0.25, duration: 3.0)],
     ),
     (
@@ -1959,7 +1809,6 @@
         scaling_factor: 1.1,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Stun(duration: 1.0)],
     ),
     (
@@ -1972,7 +1821,6 @@
         scaling_factor: 1.1,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -1985,7 +1833,6 @@
         scaling_factor: 1.0,
         cooldown: 8.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Stun(duration: 2.0)],
     ),
     (
@@ -1998,7 +1845,6 @@
         scaling_factor: 1.0,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -2011,7 +1857,6 @@
         scaling_factor: 1.1,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 6, duration: 5.0)],
     ),
     (
@@ -2024,7 +1869,6 @@
         scaling_factor: 1.1,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Focus(crit_chance_bonus: 0.10, duration: 4.0)],
     ),
     (
@@ -2037,7 +1881,6 @@
         scaling_factor: 1.0,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Bleed(damage_per_sec: 10, duration: 4.0)],
     ),
     (
@@ -2050,7 +1893,6 @@
         scaling_factor: 1.0,
         cooldown: 8.9,
         is_aoe: false,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.22)],
     ),
     (
@@ -2063,7 +1905,6 @@
         scaling_factor: 1.1,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 7, duration: 5.0)],
     ),
     (
@@ -2076,7 +1917,6 @@
         scaling_factor: 1.1,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Focus(crit_chance_bonus: 0.10, duration: 4.0)],
     ),
     (
@@ -2089,7 +1929,6 @@
         scaling_factor: 1.0,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 6, duration: 5.0)],
     ),
     (
@@ -2102,7 +1941,6 @@
         scaling_factor: 1.0,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Focus(crit_chance_bonus: 0.10, duration: 4.0)],
     ),
     (
@@ -2115,7 +1953,6 @@
         scaling_factor: 1.1,
         cooldown: 8.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Bleed(damage_per_sec: 10, duration: 4.0)],
     ),
     (
@@ -2128,7 +1965,6 @@
         scaling_factor: 1.1,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Weaken(attack_power_reduction: 6, duration: 4.0)],
     ),
     (
@@ -2141,7 +1977,6 @@
         scaling_factor: 1.0,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -2154,7 +1989,6 @@
         scaling_factor: 1.0,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -2167,7 +2001,6 @@
         scaling_factor: 1.1,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Stun(duration: 1.5)],
     ),
     (
@@ -2180,7 +2013,6 @@
         scaling_factor: 1.1,
         cooldown: 8.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Blind(miss_chance: 0.25, duration: 3.0)],
     ),
     (
@@ -2193,7 +2025,6 @@
         scaling_factor: 1.0,
         cooldown: 9.1,
         is_aoe: true,
-        modifiers: [],
         effects: [ChainArc(jumps: 2, damage_decay_pct: 0.2)],
     ),
     (
@@ -2206,7 +2037,6 @@
         scaling_factor: 1.0,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -2219,7 +2049,6 @@
         scaling_factor: 1.1,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Lifesteal(percentage: 0.10)],
     ),
     (
@@ -2232,7 +2061,6 @@
         scaling_factor: 1.1,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Blind(miss_chance: 0.25, duration: 3.0)],
     ),
     (
@@ -2245,7 +2073,6 @@
         scaling_factor: 1.0,
         cooldown: 8.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 6, duration: 5.0)],
     ),
     (
@@ -2258,7 +2085,6 @@
         scaling_factor: 1.0,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Thorns(damage_reflected: 12, duration: 5.0)],
     ),
     (
@@ -2271,7 +2097,6 @@
         scaling_factor: 1.1,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Stun(duration: 1.0)],
     ),
     (
@@ -2284,7 +2109,6 @@
         scaling_factor: 1.1,
         cooldown: 8.5,
         is_aoe: true,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 50)],
     ),
     (
@@ -2297,7 +2121,6 @@
         scaling_factor: 1.0,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 7, duration: 5.0)],
     ),
     (
@@ -2310,7 +2133,6 @@
         scaling_factor: 1.0,
         cooldown: 8.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Focus(crit_chance_bonus: 0.10, duration: 4.0)],
     ),
     (
@@ -2323,7 +2145,6 @@
         scaling_factor: 1.1,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Bleed(damage_per_sec: 11, duration: 4.0)],
     ),
     (
@@ -2336,7 +2157,6 @@
         scaling_factor: 1.1,
         cooldown: 9.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Weaken(attack_power_reduction: 7, duration: 4.0)],
     ),
     (
@@ -2349,7 +2169,6 @@
         scaling_factor: 1.0,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -2362,7 +2181,6 @@
         scaling_factor: 1.0,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -2375,7 +2193,6 @@
         scaling_factor: 1.1,
         cooldown: 8.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Stun(duration: 2.0)],
     ),
     (
@@ -2388,7 +2205,6 @@
         scaling_factor: 1.1,
         cooldown: 9.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Focus(crit_chance_bonus: 0.10, duration: 4.0)],
     ),
     (
@@ -2401,7 +2217,6 @@
         scaling_factor: 1.1,
         cooldown: 9.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.13, duration: 5.0)],
     ),
     (
@@ -2414,7 +2229,6 @@
         scaling_factor: 1.1,
         cooldown: 8.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -2427,7 +2241,6 @@
         scaling_factor: 1.2,
         cooldown: 8.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Stun(duration: 1.0)],
     ),
     (
@@ -2440,7 +2253,6 @@
         scaling_factor: 1.2,
         cooldown: 8.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Weaken(attack_power_reduction: 7, duration: 4.0)],
     ),
     (
@@ -2453,7 +2265,6 @@
         scaling_factor: 1.1,
         cooldown: 8.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -2466,7 +2277,6 @@
         scaling_factor: 1.1,
         cooldown: 9.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -2479,7 +2289,6 @@
         scaling_factor: 1.2,
         cooldown: 8.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Stun(duration: 1.5)],
     ),
     (
@@ -2492,7 +2301,6 @@
         scaling_factor: 1.2,
         cooldown: 8.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.09, duration: 5.0)],
     ),
     (
@@ -2505,7 +2313,6 @@
         scaling_factor: 1.1,
         cooldown: 8.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 6, duration: 5.0)],
     ),
     (
@@ -2518,7 +2325,6 @@
         scaling_factor: 1.1,
         cooldown: 8.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -2531,7 +2337,6 @@
         scaling_factor: 1.2,
         cooldown: 9.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 8, duration: 5.0)],
     ),
     (
@@ -2544,7 +2349,6 @@
         scaling_factor: 1.2,
         cooldown: 8.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Weaken(attack_power_reduction: 6, duration: 4.0)],
     ),
     (
@@ -2557,7 +2361,6 @@
         scaling_factor: 1.1,
         cooldown: 8.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 7, duration: 5.0)],
     ),
     (
@@ -2570,7 +2373,6 @@
         scaling_factor: 1.1,
         cooldown: 8.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -2583,7 +2385,6 @@
         scaling_factor: 1.2,
         cooldown: 8.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 6, duration: 5.0)],
     ),
     (
@@ -2596,7 +2397,6 @@
         scaling_factor: 1.2,
         cooldown: 9.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -2609,7 +2409,6 @@
         scaling_factor: 1.1,
         cooldown: 8.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 8, duration: 5.0)],
     ),
     (
@@ -2622,7 +2421,6 @@
         scaling_factor: 1.1,
         cooldown: 8.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.05, duration: 5.0)],
     ),
     (
@@ -2635,7 +2433,6 @@
         scaling_factor: 1.2,
         cooldown: 8.6,
         is_aoe: false,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.23)],
     ),
     (
@@ -2648,7 +2445,6 @@
         scaling_factor: 1.2,
         cooldown: 8.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -2661,7 +2457,6 @@
         scaling_factor: 1.1,
         cooldown: 9.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.11, duration: 5.0)],
     ),
     (
@@ -2674,7 +2469,6 @@
         scaling_factor: 1.1,
         cooldown: 8.2,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 60)],
     ),
     (
@@ -2687,7 +2481,6 @@
         scaling_factor: 1.2,
         cooldown: 8.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.15, duration: 5.0)],
     ),
     (
@@ -2700,7 +2493,6 @@
         scaling_factor: 1.2,
         cooldown: 8.6,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 62)],
     ),
     (
@@ -2713,7 +2505,6 @@
         scaling_factor: 1.1,
         cooldown: 8.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.13, duration: 5.0)],
     ),
     (
@@ -2726,7 +2517,6 @@
         scaling_factor: 1.1,
         cooldown: 9.0,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 64)],
     ),
     (
@@ -2739,7 +2529,6 @@
         scaling_factor: 1.2,
         cooldown: 8.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 12, duration: 4.0)],
     ),
     (
@@ -2752,7 +2541,6 @@
         scaling_factor: 1.2,
         cooldown: 8.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.07, duration: 5.0)],
     ),
     (
@@ -2765,7 +2553,6 @@
         scaling_factor: 1.1,
         cooldown: 8.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 14, duration: 4.0)],
     ),
     (
@@ -2778,7 +2565,6 @@
         scaling_factor: 1.1,
         cooldown: 8.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.05, duration: 5.0)],
     ),
     (
@@ -2791,7 +2577,6 @@
         scaling_factor: 1.2,
         cooldown: 9.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 13, duration: 4.0)],
     ),
     (
@@ -2804,7 +2589,6 @@
         scaling_factor: 1.2,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.09, duration: 5.0)],
     ),
     (
@@ -2817,7 +2601,6 @@
         scaling_factor: 1.1,
         cooldown: 8.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Freeze(attack_speed_reduction: 0.16, duration: 3.0)],
     ),
     (
@@ -2830,7 +2613,6 @@
         scaling_factor: 1.1,
         cooldown: 8.6,
         is_aoe: false,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.23)],
     ),
     (
@@ -2843,7 +2625,6 @@
         scaling_factor: 1.2,
         cooldown: 8.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -2856,7 +2637,6 @@
         scaling_factor: 1.2,
         cooldown: 9.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -2869,7 +2649,6 @@
         scaling_factor: 1.1,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.23)],
     ),
     (
@@ -2882,7 +2661,6 @@
         scaling_factor: 1.2,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [ChillBlast(radius: 3.0, frost_damage: 22)],
     ),
     (
@@ -2895,7 +2673,6 @@
         scaling_factor: 1.3,
         cooldown: 8.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Freeze(attack_speed_reduction: 0.17, duration: 3.0)],
     ),
     (
@@ -2908,7 +2685,6 @@
         scaling_factor: 1.4,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [ChillBlast(radius: 3.0, frost_damage: 24)],
     ),
     (
@@ -2921,7 +2697,6 @@
         scaling_factor: 1.2,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Freeze(attack_speed_reduction: 0.21, duration: 3.0)],
     ),
     (
@@ -2934,7 +2709,6 @@
         scaling_factor: 1.2,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -2947,7 +2721,6 @@
         scaling_factor: 1.3,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.24)],
     ),
     (
@@ -2960,7 +2733,6 @@
         scaling_factor: 1.4,
         cooldown: 8.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -2973,7 +2745,6 @@
         scaling_factor: 1.2,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -2986,7 +2757,6 @@
         scaling_factor: 1.2,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Haste(initiative_bonus: 0.15, duration: 4.0)],
     ),
     (
@@ -2999,7 +2769,6 @@
         scaling_factor: 1.3,
         cooldown: 7.9,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 9, duration: 5.0)],
     ),
     (
@@ -3012,7 +2781,6 @@
         scaling_factor: 1.4,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -3025,7 +2793,6 @@
         scaling_factor: 1.2,
         cooldown: 8.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 8, duration: 5.0)],
     ),
     (
@@ -3038,7 +2805,6 @@
         scaling_factor: 1.2,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Silence(duration: 4.0)],
     ),
     (
@@ -3051,7 +2817,6 @@
         scaling_factor: 1.3,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.12, duration: 5.0)],
     ),
     (
@@ -3064,7 +2829,6 @@
         scaling_factor: 1.4,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Haste(initiative_bonus: 0.15, duration: 4.0)],
     ),
     (
@@ -3077,7 +2841,6 @@
         scaling_factor: 1.2,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.16, duration: 5.0)],
     ),
     (
@@ -3090,7 +2853,6 @@
         scaling_factor: 1.2,
         cooldown: 8.3,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 72)],
     ),
     (
@@ -3103,7 +2865,6 @@
         scaling_factor: 1.3,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.14, duration: 5.0)],
     ),
     (
@@ -3116,7 +2877,6 @@
         scaling_factor: 1.4,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 74)],
     ),
     (
@@ -3129,7 +2889,6 @@
         scaling_factor: 1.2,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.12, duration: 5.0)],
     ),
     (
@@ -3142,7 +2901,6 @@
         scaling_factor: 1.2,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 71)],
     ),
     (
@@ -3155,7 +2913,6 @@
         scaling_factor: 1.3,
         cooldown: 8.3,
         is_aoe: false,
-        modifiers: [],
         effects: [ChainArc(jumps: 2, damage_decay_pct: 0.2)],
     ),
     (
@@ -3168,7 +2925,6 @@
         scaling_factor: 1.4,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 73)],
     ),
     (
@@ -3181,7 +2937,6 @@
         scaling_factor: 1.2,
         cooldown: 8.7,
         is_aoe: true,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.14, duration: 5.0)],
     ),
     (
@@ -3194,7 +2949,6 @@
         scaling_factor: 1.2,
         cooldown: 7.9,
         is_aoe: true,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 70)],
     ),
     (
@@ -3207,7 +2961,6 @@
         scaling_factor: 1.3,
         cooldown: 8.1,
         is_aoe: true,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.12, duration: 5.0)],
     ),
     (
@@ -3220,7 +2973,6 @@
         scaling_factor: 1.4,
         cooldown: 8.3,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 72)],
     ),
     (
@@ -3233,7 +2985,6 @@
         scaling_factor: 1.2,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.16, duration: 5.0)],
     ),
     (
@@ -3246,7 +2997,6 @@
         scaling_factor: 1.2,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -3259,7 +3009,6 @@
         scaling_factor: 1.3,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [HealMaxManaPct(percentage: 0.24)],
     ),
     (
@@ -3272,7 +3021,6 @@
         scaling_factor: 1.4,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 71)],
     ),
     (
@@ -3285,7 +3033,6 @@
         scaling_factor: 1.2,
         cooldown: 8.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.12, duration: 5.0)],
     ),
     (
@@ -3298,7 +3045,6 @@
         scaling_factor: 1.2,
         cooldown: 8.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -3311,7 +3057,6 @@
         scaling_factor: 1.3,
         cooldown: 8.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.16, duration: 5.0)],
     ),
     (
@@ -3324,7 +3069,6 @@
         scaling_factor: 1.4,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.05, duration: 5.0)],
     ),
     (
@@ -3337,7 +3081,6 @@
         scaling_factor: 1.2,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 15, duration: 4.0)],
     ),
     (
@@ -3350,7 +3093,6 @@
         scaling_factor: 1.2,
         cooldown: 8.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -3363,7 +3105,6 @@
         scaling_factor: 1.4,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 8, duration: 5.0)],
     ),
     (
@@ -3376,7 +3117,6 @@
         scaling_factor: 1.4,
         cooldown: 8.4,
         is_aoe: true,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 84)],
     ),
     (
@@ -3389,7 +3129,6 @@
         scaling_factor: 1.3,
         cooldown: 7.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.17, duration: 5.0)],
     ),
     (
@@ -3402,7 +3141,6 @@
         scaling_factor: 1.3,
         cooldown: 7.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -3415,7 +3153,6 @@
         scaling_factor: 1.4,
         cooldown: 8.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.15, duration: 5.0)],
     ),
     (
@@ -3428,7 +3165,6 @@
         scaling_factor: 1.4,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Haste(initiative_bonus: 0.20, duration: 4.0)],
     ),
     (
@@ -3441,7 +3177,6 @@
         scaling_factor: 1.3,
         cooldown: 8.4,
         is_aoe: true,
-        modifiers: [],
         effects: [ChainArc(jumps: 2, damage_decay_pct: 0.2)],
     ),
     (
@@ -3454,7 +3189,6 @@
         scaling_factor: 1.3,
         cooldown: 7.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -3467,7 +3201,6 @@
         scaling_factor: 1.4,
         cooldown: 7.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.17, duration: 5.0)],
     ),
     (
@@ -3480,7 +3213,6 @@
         scaling_factor: 1.4,
         cooldown: 8.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Haste(initiative_bonus: 0.10, duration: 4.0)],
     ),
     (
@@ -3493,7 +3225,6 @@
         scaling_factor: 1.3,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 9, duration: 5.0)],
     ),
     (
@@ -3506,7 +3237,6 @@
         scaling_factor: 1.3,
         cooldown: 8.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Haste(initiative_bonus: 0.20, duration: 4.0)],
     ),
     (
@@ -3519,7 +3249,6 @@
         scaling_factor: 1.4,
         cooldown: 7.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 16, duration: 4.0)],
     ),
     (
@@ -3532,7 +3261,6 @@
         scaling_factor: 1.4,
         cooldown: 7.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Weaken(attack_power_reduction: 9, duration: 4.0)],
     ),
     (
@@ -3545,7 +3273,6 @@
         scaling_factor: 1.3,
         cooldown: 8.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -3558,7 +3285,6 @@
         scaling_factor: 1.3,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -3571,7 +3297,6 @@
         scaling_factor: 1.4,
         cooldown: 8.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.15, duration: 5.0)],
     ),
     (
@@ -3584,7 +3309,6 @@
         scaling_factor: 1.4,
         cooldown: 7.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.09, duration: 5.0)],
     ),
     (
@@ -3597,7 +3321,6 @@
         scaling_factor: 1.3,
         cooldown: 7.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 8, duration: 5.0)],
     ),
     (
@@ -3610,7 +3333,6 @@
         scaling_factor: 1.3,
         cooldown: 8.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -3623,7 +3345,6 @@
         scaling_factor: 1.4,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -3636,7 +3357,6 @@
         scaling_factor: 1.4,
         cooldown: 8.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -3649,7 +3369,6 @@
         scaling_factor: 1.3,
         cooldown: 7.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 9, duration: 5.0)],
     ),
     (
@@ -3662,7 +3381,6 @@
         scaling_factor: 1.3,
         cooldown: 7.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Haste(initiative_bonus: 0.20, duration: 4.0)],
     ),
     (
@@ -3675,7 +3393,6 @@
         scaling_factor: 1.4,
         cooldown: 8.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 16, duration: 4.0)],
     ),
     (
@@ -3688,7 +3405,6 @@
         scaling_factor: 1.4,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Haste(initiative_bonus: 0.15, duration: 4.0)],
     ),
     (
@@ -3701,7 +3417,6 @@
         scaling_factor: 1.3,
         cooldown: 8.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -3714,7 +3429,6 @@
         scaling_factor: 1.3,
         cooldown: 7.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -3727,7 +3441,6 @@
         scaling_factor: 1.4,
         cooldown: 7.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Bleed(damage_per_sec: 17, duration: 4.0)],
     ),
     (
@@ -3740,7 +3453,6 @@
         scaling_factor: 1.4,
         cooldown: 8.0,
         is_aoe: true,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 82)],
     ),
     (
@@ -3753,7 +3465,6 @@
         scaling_factor: 1.3,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 8, duration: 5.0)],
     ),
     (
@@ -3766,7 +3477,6 @@
         scaling_factor: 1.3,
         cooldown: 8.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Thorns(damage_reflected: 17, duration: 5.0)],
     ),
     (
@@ -3779,7 +3489,6 @@
         scaling_factor: 1.4,
         cooldown: 7.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -3792,7 +3501,6 @@
         scaling_factor: 1.4,
         cooldown: 7.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.05, duration: 5.0)],
     ),
     (
@@ -3805,7 +3513,6 @@
         scaling_factor: 1.3,
         cooldown: 8.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Bleed(damage_per_sec: 17, duration: 4.0)],
     ),
     (
@@ -3818,7 +3525,6 @@
         scaling_factor: 1.3,
         cooldown: 8.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -3831,7 +3537,6 @@
         scaling_factor: 1.4,
         cooldown: 8.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 8, duration: 5.0)],
     ),
     (
@@ -3844,7 +3549,6 @@
         scaling_factor: 1.6,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -3857,7 +3561,6 @@
         scaling_factor: 1.4,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -3870,7 +3573,6 @@
         scaling_factor: 1.5,
         cooldown: 7.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -3883,7 +3585,6 @@
         scaling_factor: 1.5,
         cooldown: 7.9,
         is_aoe: true,
-        modifiers: [],
         effects: [Freeze(attack_speed_reduction: 0.21, duration: 3.0)],
     ),
     (
@@ -3896,7 +3597,6 @@
         scaling_factor: 1.6,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -3909,7 +3609,6 @@
         scaling_factor: 1.4,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 9, duration: 5.0)],
     ),
     (
@@ -3922,7 +3621,6 @@
         scaling_factor: 1.5,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.07, duration: 5.0)],
     ),
     (
@@ -3935,7 +3633,6 @@
         scaling_factor: 1.5,
         cooldown: 7.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -3948,7 +3645,6 @@
         scaling_factor: 1.6,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 93)],
     ),
     (
@@ -3961,7 +3657,6 @@
         scaling_factor: 1.4,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Bleed(damage_per_sec: 19, duration: 4.0)],
     ),
     (
@@ -3974,7 +3669,6 @@
         scaling_factor: 1.5,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Thorns(damage_reflected: 20, duration: 5.0)],
     ),
     (
@@ -3987,7 +3681,6 @@
         scaling_factor: 1.5,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.14, duration: 5.0)],
     ),
     (
@@ -4000,7 +3693,6 @@
         scaling_factor: 1.6,
         cooldown: 7.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4013,7 +3705,6 @@
         scaling_factor: 1.4,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4026,7 +3717,6 @@
         scaling_factor: 1.5,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4039,7 +3729,6 @@
         scaling_factor: 1.5,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -4052,7 +3741,6 @@
         scaling_factor: 1.6,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [ChillBlast(radius: 3.0, frost_damage: 28)],
     ),
     (
@@ -4065,7 +3753,6 @@
         scaling_factor: 1.4,
         cooldown: 7.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 9, duration: 5.0)],
     ),
     (
@@ -4078,7 +3765,6 @@
         scaling_factor: 1.5,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4091,7 +3777,6 @@
         scaling_factor: 1.5,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4104,7 +3789,6 @@
         scaling_factor: 1.6,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4117,7 +3801,6 @@
         scaling_factor: 1.4,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Freeze(attack_speed_reduction: 0.21, duration: 3.0)],
     ),
     (
@@ -4130,7 +3813,6 @@
         scaling_factor: 1.5,
         cooldown: 7.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4143,7 +3825,6 @@
         scaling_factor: 1.5,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 9, duration: 5.0)],
     ),
     (
@@ -4156,7 +3837,6 @@
         scaling_factor: 1.6,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [ChillBlast(radius: 3.0, frost_damage: 31)],
     ),
     (
@@ -4169,7 +3849,6 @@
         scaling_factor: 1.4,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4182,7 +3861,6 @@
         scaling_factor: 1.5,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4195,7 +3873,6 @@
         scaling_factor: 1.5,
         cooldown: 7.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -4208,7 +3885,6 @@
         scaling_factor: 1.6,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4221,7 +3897,6 @@
         scaling_factor: 1.4,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 9, duration: 5.0)],
     ),
     (
@@ -4234,7 +3909,6 @@
         scaling_factor: 1.5,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4247,7 +3921,6 @@
         scaling_factor: 1.5,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4260,7 +3933,6 @@
         scaling_factor: 1.6,
         cooldown: 7.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4273,7 +3945,6 @@
         scaling_factor: 1.4,
         cooldown: 7.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -4286,7 +3957,6 @@
         scaling_factor: 1.5,
         cooldown: 8.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4299,7 +3969,6 @@
         scaling_factor: 1.5,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 9, duration: 5.0)],
     ),
     (
@@ -4312,7 +3981,6 @@
         scaling_factor: 1.6,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4325,7 +3993,6 @@
         scaling_factor: 1.5,
         cooldown: 7.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -4338,7 +4005,6 @@
         scaling_factor: 1.5,
         cooldown: 7.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4351,7 +4017,6 @@
         scaling_factor: 1.6,
         cooldown: 7.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4364,7 +4029,6 @@
         scaling_factor: 1.6,
         cooldown: 7.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4377,7 +4041,6 @@
         scaling_factor: 1.5,
         cooldown: 7.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -4390,7 +4053,6 @@
         scaling_factor: 1.5,
         cooldown: 7.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4403,7 +4065,6 @@
         scaling_factor: 1.6,
         cooldown: 7.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -4416,7 +4077,6 @@
         scaling_factor: 1.6,
         cooldown: 7.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4429,7 +4089,6 @@
         scaling_factor: 1.5,
         cooldown: 7.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Fortify(armor_bonus_pct: 0.20, duration: 5.0)],
     ),
     (
@@ -4442,7 +4101,6 @@
         scaling_factor: 1.5,
         cooldown: 7.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4455,7 +4113,6 @@
         scaling_factor: 1.6,
         cooldown: 7.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -4468,7 +4125,6 @@
         scaling_factor: 1.6,
         cooldown: 7.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4481,7 +4137,6 @@
         scaling_factor: 1.5,
         cooldown: 7.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -4494,7 +4149,6 @@
         scaling_factor: 1.5,
         cooldown: 7.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4507,7 +4161,6 @@
         scaling_factor: 1.6,
         cooldown: 7.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4520,7 +4173,6 @@
         scaling_factor: 1.6,
         cooldown: 7.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4533,7 +4185,6 @@
         scaling_factor: 1.5,
         cooldown: 7.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -4546,7 +4197,6 @@
         scaling_factor: 1.5,
         cooldown: 7.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4559,7 +4209,6 @@
         scaling_factor: 1.6,
         cooldown: 7.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -4572,7 +4221,6 @@
         scaling_factor: 1.6,
         cooldown: 7.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4585,7 +4233,6 @@
         scaling_factor: 1.5,
         cooldown: 7.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4598,7 +4245,6 @@
         scaling_factor: 1.5,
         cooldown: 7.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4611,7 +4257,6 @@
         scaling_factor: 1.6,
         cooldown: 7.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -4624,7 +4269,6 @@
         scaling_factor: 1.6,
         cooldown: 7.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4637,7 +4281,6 @@
         scaling_factor: 1.5,
         cooldown: 7.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -4650,7 +4293,6 @@
         scaling_factor: 1.5,
         cooldown: 7.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4663,7 +4305,6 @@
         scaling_factor: 1.6,
         cooldown: 7.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4676,7 +4317,6 @@
         scaling_factor: 1.6,
         cooldown: 7.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4689,7 +4329,6 @@
         scaling_factor: 1.5,
         cooldown: 7.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -4702,7 +4341,6 @@
         scaling_factor: 1.5,
         cooldown: 7.2,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 101)],
     ),
     (
@@ -4715,7 +4353,6 @@
         scaling_factor: 1.6,
         cooldown: 7.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -4728,7 +4365,6 @@
         scaling_factor: 1.6,
         cooldown: 7.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 23, duration: 5.0)],
     ),
     (
@@ -4741,7 +4377,6 @@
         scaling_factor: 1.5,
         cooldown: 7.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4754,7 +4389,6 @@
         scaling_factor: 1.5,
         cooldown: 7.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4767,7 +4401,6 @@
         scaling_factor: 1.6,
         cooldown: 7.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 10, duration: 5.0)],
     ),
     (
@@ -4780,7 +4413,6 @@
         scaling_factor: 1.6,
         cooldown: 7.4,
         is_aoe: false,
-        modifiers: [],
         effects: [HealMaxManaPct(percentage: 0.27)],
     ),
     (
@@ -4793,7 +4425,6 @@
         scaling_factor: 1.6,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 24, duration: 4.0)],
     ),
     (
@@ -4806,7 +4437,6 @@
         scaling_factor: 1.6,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4819,7 +4449,6 @@
         scaling_factor: 1.7,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -4832,7 +4461,6 @@
         scaling_factor: 1.8,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4845,7 +4473,6 @@
         scaling_factor: 1.6,
         cooldown: 7.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4858,7 +4485,6 @@
         scaling_factor: 1.6,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4871,7 +4497,6 @@
         scaling_factor: 1.7,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -4884,7 +4509,6 @@
         scaling_factor: 1.8,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4897,7 +4521,6 @@
         scaling_factor: 1.6,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.28)],
     ),
     (
@@ -4910,7 +4533,6 @@
         scaling_factor: 1.6,
         cooldown: 7.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -4923,7 +4545,6 @@
         scaling_factor: 1.7,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -4936,7 +4557,6 @@
         scaling_factor: 1.8,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -4949,7 +4569,6 @@
         scaling_factor: 1.6,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 24, duration: 4.0)],
     ),
     (
@@ -4962,7 +4581,6 @@
         scaling_factor: 1.6,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -4975,7 +4593,6 @@
         scaling_factor: 1.7,
         cooldown: 7.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -4988,7 +4605,6 @@
         scaling_factor: 1.8,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -5001,7 +4617,6 @@
         scaling_factor: 1.6,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -5014,7 +4629,6 @@
         scaling_factor: 1.6,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5027,7 +4641,6 @@
         scaling_factor: 1.7,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5040,7 +4653,6 @@
         scaling_factor: 1.8,
         cooldown: 7.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 25, duration: 5.0)],
     ),
     (
@@ -5053,7 +4665,6 @@
         scaling_factor: 1.6,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -5066,7 +4677,6 @@
         scaling_factor: 1.6,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -5079,7 +4689,6 @@
         scaling_factor: 1.7,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -5092,7 +4701,6 @@
         scaling_factor: 1.8,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5105,7 +4713,6 @@
         scaling_factor: 1.6,
         cooldown: 7.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -5118,7 +4725,6 @@
         scaling_factor: 1.6,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -5131,7 +4737,6 @@
         scaling_factor: 1.7,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -5144,7 +4749,6 @@
         scaling_factor: 1.8,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -5157,7 +4761,6 @@
         scaling_factor: 1.6,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -5170,7 +4773,6 @@
         scaling_factor: 1.6,
         cooldown: 7.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5183,7 +4785,6 @@
         scaling_factor: 1.7,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5196,7 +4797,6 @@
         scaling_factor: 1.8,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -5209,7 +4809,6 @@
         scaling_factor: 1.6,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.18, duration: 5.0)],
     ),
     (
@@ -5222,7 +4821,6 @@
         scaling_factor: 1.6,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -5235,7 +4833,6 @@
         scaling_factor: 1.7,
         cooldown: 7.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 11, duration: 5.0)],
     ),
     (
@@ -5248,7 +4845,6 @@
         scaling_factor: 1.8,
         cooldown: 7.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5261,7 +4857,6 @@
         scaling_factor: 1.6,
         cooldown: 7.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -5274,7 +4869,6 @@
         scaling_factor: 1.8,
         cooldown: 6.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -5287,7 +4881,6 @@
         scaling_factor: 1.8,
         cooldown: 6.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5300,7 +4893,6 @@
         scaling_factor: 1.9,
         cooldown: 6.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -5313,7 +4905,6 @@
         scaling_factor: 1.7,
         cooldown: 7.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -5326,7 +4917,6 @@
         scaling_factor: 1.8,
         cooldown: 7.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5339,7 +4929,6 @@
         scaling_factor: 1.8,
         cooldown: 6.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -5352,7 +4941,6 @@
         scaling_factor: 1.9,
         cooldown: 6.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -5365,7 +4953,6 @@
         scaling_factor: 1.7,
         cooldown: 6.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5378,7 +4965,6 @@
         scaling_factor: 1.8,
         cooldown: 7.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -5391,7 +4977,6 @@
         scaling_factor: 1.8,
         cooldown: 7.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -5404,7 +4989,6 @@
         scaling_factor: 1.9,
         cooldown: 6.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5417,7 +5001,6 @@
         scaling_factor: 1.7,
         cooldown: 6.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -5430,7 +5013,6 @@
         scaling_factor: 1.8,
         cooldown: 6.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -5443,7 +5025,6 @@
         scaling_factor: 1.8,
         cooldown: 7.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5456,7 +5037,6 @@
         scaling_factor: 1.9,
         cooldown: 7.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -5469,7 +5049,6 @@
         scaling_factor: 1.7,
         cooldown: 6.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -5482,7 +5061,6 @@
         scaling_factor: 1.8,
         cooldown: 6.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5495,7 +5073,6 @@
         scaling_factor: 1.8,
         cooldown: 6.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 26, duration: 4.0)],
     ),
     (
@@ -5508,7 +5085,6 @@
         scaling_factor: 1.9,
         cooldown: 7.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 27, duration: 5.0)],
     ),
     (
@@ -5521,7 +5097,6 @@
         scaling_factor: 1.7,
         cooldown: 7.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5534,7 +5109,6 @@
         scaling_factor: 1.8,
         cooldown: 6.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -5547,7 +5121,6 @@
         scaling_factor: 1.8,
         cooldown: 6.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 26, duration: 5.0)],
     ),
     (
@@ -5560,7 +5133,6 @@
         scaling_factor: 1.9,
         cooldown: 6.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5573,7 +5145,6 @@
         scaling_factor: 1.7,
         cooldown: 7.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -5586,7 +5157,6 @@
         scaling_factor: 1.8,
         cooldown: 7.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.05, duration: 5.0)],
     ),
     (
@@ -5599,7 +5169,6 @@
         scaling_factor: 1.8,
         cooldown: 6.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5612,7 +5181,6 @@
         scaling_factor: 1.9,
         cooldown: 6.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -5625,7 +5193,6 @@
         scaling_factor: 1.7,
         cooldown: 6.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -5638,7 +5205,6 @@
         scaling_factor: 1.8,
         cooldown: 7.0,
         is_aoe: true,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.29)],
     ),
     (
@@ -5651,7 +5217,6 @@
         scaling_factor: 1.8,
         cooldown: 7.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -5664,7 +5229,6 @@
         scaling_factor: 1.9,
         cooldown: 6.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Regen(heal_per_sec: 27, duration: 5.0)],
     ),
     (
@@ -5677,7 +5241,6 @@
         scaling_factor: 1.7,
         cooldown: 6.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5690,7 +5253,6 @@
         scaling_factor: 1.8,
         cooldown: 6.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.09, duration: 5.0)],
     ),
     (
@@ -5703,7 +5265,6 @@
         scaling_factor: 1.8,
         cooldown: 7.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 12, duration: 5.0)],
     ),
     (
@@ -5716,7 +5277,6 @@
         scaling_factor: 1.9,
         cooldown: 7.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5729,7 +5289,6 @@
         scaling_factor: 1.7,
         cooldown: 6.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -5742,7 +5301,6 @@
         scaling_factor: 1.8,
         cooldown: 6.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -5755,7 +5313,6 @@
         scaling_factor: 1.9,
         cooldown: 6.5,
         is_aoe: false,
-        modifiers: [],
         effects: [ChainArc(jumps: 3, damage_decay_pct: 0.2)],
     ),
     (
@@ -5768,7 +5325,6 @@
         scaling_factor: 2.0,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -5781,7 +5337,6 @@
         scaling_factor: 1.8,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 26, duration: 4.0)],
     ),
     (
@@ -5794,7 +5349,6 @@
         scaling_factor: 1.9,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5807,7 +5361,6 @@
         scaling_factor: 1.9,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 28, duration: 4.0)],
     ),
     (
@@ -5820,7 +5373,6 @@
         scaling_factor: 2.0,
         cooldown: 6.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -5833,7 +5385,6 @@
         scaling_factor: 1.8,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -5846,7 +5397,6 @@
         scaling_factor: 1.9,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Empower(damage_bonus_pct: 0.09, duration: 5.0)],
     ),
     (
@@ -5859,7 +5409,6 @@
         scaling_factor: 1.9,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5872,7 +5421,6 @@
         scaling_factor: 2.0,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5885,7 +5433,6 @@
         scaling_factor: 1.8,
         cooldown: 6.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 28, duration: 4.0)],
     ),
     (
@@ -5898,7 +5445,6 @@
         scaling_factor: 1.9,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -5911,7 +5457,6 @@
         scaling_factor: 1.9,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 27, duration: 4.0)],
     ),
     (
@@ -5924,7 +5469,6 @@
         scaling_factor: 2.0,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -5937,7 +5481,6 @@
         scaling_factor: 1.8,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -5950,7 +5493,6 @@
         scaling_factor: 1.9,
         cooldown: 6.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -5963,7 +5505,6 @@
         scaling_factor: 1.9,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -5976,7 +5517,6 @@
         scaling_factor: 2.0,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -5989,7 +5529,6 @@
         scaling_factor: 1.8,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -6002,7 +5541,6 @@
         scaling_factor: 1.9,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6015,7 +5553,6 @@
         scaling_factor: 1.9,
         cooldown: 6.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -6028,7 +5565,6 @@
         scaling_factor: 2.0,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6041,7 +5577,6 @@
         scaling_factor: 1.8,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.22, duration: 5.0)],
     ),
     (
@@ -6054,7 +5589,6 @@
         scaling_factor: 1.9,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6067,7 +5601,6 @@
         scaling_factor: 1.9,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.20, duration: 5.0)],
     ),
     (
@@ -6080,7 +5613,6 @@
         scaling_factor: 2.0,
         cooldown: 6.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6093,7 +5625,6 @@
         scaling_factor: 1.8,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -6106,7 +5637,6 @@
         scaling_factor: 1.9,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6119,7 +5649,6 @@
         scaling_factor: 1.9,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -6132,7 +5661,6 @@
         scaling_factor: 2.0,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6145,7 +5673,6 @@
         scaling_factor: 1.8,
         cooldown: 6.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -6158,7 +5685,6 @@
         scaling_factor: 1.9,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6171,7 +5697,6 @@
         scaling_factor: 1.9,
         cooldown: 6.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 13, duration: 5.0)],
     ),
     (
@@ -6184,7 +5709,6 @@
         scaling_factor: 2.0,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6197,7 +5721,6 @@
         scaling_factor: 1.8,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.22, duration: 5.0)],
     ),
     (
@@ -6210,7 +5733,6 @@
         scaling_factor: 1.9,
         cooldown: 6.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6223,7 +5745,6 @@
         scaling_factor: 1.9,
         cooldown: 6.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -6236,7 +5757,6 @@
         scaling_factor: 2.0,
         cooldown: 6.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Thorns(damage_reflected: 30, duration: 5.0)],
     ),
     (
@@ -6249,7 +5769,6 @@
         scaling_factor: 1.9,
         cooldown: 5.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -6262,7 +5781,6 @@
         scaling_factor: 1.9,
         cooldown: 6.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6275,7 +5793,6 @@
         scaling_factor: 2.0,
         cooldown: 6.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -6288,7 +5805,6 @@
         scaling_factor: 2.0,
         cooldown: 6.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6301,7 +5817,6 @@
         scaling_factor: 1.9,
         cooldown: 6.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -6314,7 +5829,6 @@
         scaling_factor: 1.9,
         cooldown: 5.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6327,7 +5841,6 @@
         scaling_factor: 2.0,
         cooldown: 6.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -6340,7 +5853,6 @@
         scaling_factor: 2.0,
         cooldown: 6.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6353,7 +5865,6 @@
         scaling_factor: 1.9,
         cooldown: 6.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -6366,7 +5877,6 @@
         scaling_factor: 1.9,
         cooldown: 6.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6379,7 +5889,6 @@
         scaling_factor: 2.0,
         cooldown: 5.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -6392,7 +5901,6 @@
         scaling_factor: 2.0,
         cooldown: 6.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6405,7 +5913,6 @@
         scaling_factor: 1.9,
         cooldown: 6.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -6418,7 +5925,6 @@
         scaling_factor: 1.9,
         cooldown: 6.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6431,7 +5937,6 @@
         scaling_factor: 2.0,
         cooldown: 6.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -6444,7 +5949,6 @@
         scaling_factor: 2.0,
         cooldown: 5.8,
         is_aoe: false,
-        modifiers: [],
         effects: [ChillBlast(radius: 3.0, frost_damage: 42)],
     ),
     (
@@ -6457,7 +5961,6 @@
         scaling_factor: 1.9,
         cooldown: 6.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -6470,7 +5973,6 @@
         scaling_factor: 1.9,
         cooldown: 6.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -6483,7 +5985,6 @@
         scaling_factor: 2.0,
         cooldown: 6.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -6496,7 +5997,6 @@
         scaling_factor: 2.0,
         cooldown: 6.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6509,7 +6009,6 @@
         scaling_factor: 1.9,
         cooldown: 5.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -6522,7 +6021,6 @@
         scaling_factor: 1.9,
         cooldown: 6.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6535,7 +6033,6 @@
         scaling_factor: 2.0,
         cooldown: 6.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -6548,7 +6045,6 @@
         scaling_factor: 2.0,
         cooldown: 6.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6561,7 +6057,6 @@
         scaling_factor: 1.9,
         cooldown: 6.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -6574,7 +6069,6 @@
         scaling_factor: 1.9,
         cooldown: 5.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6587,7 +6081,6 @@
         scaling_factor: 2.0,
         cooldown: 6.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -6600,7 +6093,6 @@
         scaling_factor: 2.0,
         cooldown: 6.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6613,7 +6105,6 @@
         scaling_factor: 1.9,
         cooldown: 6.4,
         is_aoe: false,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.31)],
     ),
     (
@@ -6626,7 +6117,6 @@
         scaling_factor: 1.9,
         cooldown: 6.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6639,7 +6129,6 @@
         scaling_factor: 2.0,
         cooldown: 5.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 14, duration: 5.0)],
     ),
     (
@@ -6652,7 +6141,6 @@
         scaling_factor: 2.0,
         cooldown: 6.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6665,7 +6153,6 @@
         scaling_factor: 1.9,
         cooldown: 6.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -6678,7 +6165,6 @@
         scaling_factor: 1.9,
         cooldown: 6.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6691,7 +6177,6 @@
         scaling_factor: 2.0,
         cooldown: 6.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -6704,7 +6189,6 @@
         scaling_factor: 2.0,
         cooldown: 5.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6717,7 +6201,6 @@
         scaling_factor: 2.0,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -6730,7 +6213,6 @@
         scaling_factor: 2.0,
         cooldown: 5.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6743,7 +6225,6 @@
         scaling_factor: 2.1,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -6756,7 +6237,6 @@
         scaling_factor: 2.2,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [ChillBlast(radius: 3.0, frost_damage: 49)],
     ),
     (
@@ -6769,7 +6249,6 @@
         scaling_factor: 2.0,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.22, duration: 5.0)],
     ),
     (
@@ -6782,7 +6261,6 @@
         scaling_factor: 2.0,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6795,7 +6273,6 @@
         scaling_factor: 2.1,
         cooldown: 5.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Freeze(attack_speed_reduction: 0.25, duration: 3.0)],
     ),
     (
@@ -6808,7 +6285,6 @@
         scaling_factor: 2.2,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6821,7 +6297,6 @@
         scaling_factor: 2.0,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -6834,7 +6309,6 @@
         scaling_factor: 2.0,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6847,7 +6321,6 @@
         scaling_factor: 2.1,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -6860,7 +6333,6 @@
         scaling_factor: 2.2,
         cooldown: 5.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6873,7 +6345,6 @@
         scaling_factor: 2.0,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -6886,7 +6357,6 @@
         scaling_factor: 2.0,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6899,7 +6369,6 @@
         scaling_factor: 2.1,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -6912,7 +6381,6 @@
         scaling_factor: 2.2,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -6925,7 +6393,6 @@
         scaling_factor: 2.0,
         cooldown: 5.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -6938,7 +6405,6 @@
         scaling_factor: 2.0,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -6951,7 +6417,6 @@
         scaling_factor: 2.1,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -6964,7 +6429,6 @@
         scaling_factor: 2.2,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -6977,7 +6441,6 @@
         scaling_factor: 2.0,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.24, duration: 5.0)],
     ),
     (
@@ -6990,7 +6453,6 @@
         scaling_factor: 2.0,
         cooldown: 5.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7003,7 +6465,6 @@
         scaling_factor: 2.1,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -7016,7 +6477,6 @@
         scaling_factor: 2.2,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7029,7 +6489,6 @@
         scaling_factor: 2.0,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -7042,7 +6501,6 @@
         scaling_factor: 2.0,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -7055,7 +6513,6 @@
         scaling_factor: 2.1,
         cooldown: 5.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7068,7 +6525,6 @@
         scaling_factor: 2.2,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7081,7 +6537,6 @@
         scaling_factor: 2.0,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.32)],
     ),
     (
@@ -7094,7 +6549,6 @@
         scaling_factor: 2.0,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7107,7 +6561,6 @@
         scaling_factor: 2.1,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 15, duration: 5.0)],
     ),
     (
@@ -7120,7 +6573,6 @@
         scaling_factor: 2.2,
         cooldown: 5.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -7133,7 +6585,6 @@
         scaling_factor: 2.0,
         cooldown: 6.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7146,7 +6597,6 @@
         scaling_factor: 2.0,
         cooldown: 6.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7159,7 +6609,6 @@
         scaling_factor: 2.1,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -7172,7 +6621,6 @@
         scaling_factor: 2.2,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7185,7 +6633,6 @@
         scaling_factor: 2.1,
         cooldown: 5.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -7198,7 +6645,6 @@
         scaling_factor: 2.1,
         cooldown: 5.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Blind(miss_chance: 0.25, duration: 3.0)],
     ),
     (
@@ -7211,7 +6657,6 @@
         scaling_factor: 2.2,
         cooldown: 6.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7224,7 +6669,6 @@
         scaling_factor: 2.2,
         cooldown: 5.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7237,7 +6681,6 @@
         scaling_factor: 2.1,
         cooldown: 5.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7250,7 +6693,6 @@
         scaling_factor: 2.1,
         cooldown: 5.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7263,7 +6705,6 @@
         scaling_factor: 2.2,
         cooldown: 5.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -7276,7 +6717,6 @@
         scaling_factor: 2.2,
         cooldown: 6.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -7289,7 +6729,6 @@
         scaling_factor: 2.1,
         cooldown: 5.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7302,7 +6741,6 @@
         scaling_factor: 2.1,
         cooldown: 5.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7315,7 +6753,6 @@
         scaling_factor: 2.2,
         cooldown: 5.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7328,7 +6765,6 @@
         scaling_factor: 2.2,
         cooldown: 5.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7341,7 +6777,6 @@
         scaling_factor: 2.1,
         cooldown: 6.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -7354,7 +6789,6 @@
         scaling_factor: 2.1,
         cooldown: 5.2,
         is_aoe: true,
-        modifiers: [],
         effects: [HealMaxHealthPct(percentage: 0.33)],
     ),
     (
@@ -7367,7 +6801,6 @@
         scaling_factor: 2.2,
         cooldown: 5.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7380,7 +6813,6 @@
         scaling_factor: 2.2,
         cooldown: 5.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7393,7 +6825,6 @@
         scaling_factor: 2.1,
         cooldown: 5.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7406,7 +6837,6 @@
         scaling_factor: 2.1,
         cooldown: 6.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7419,7 +6849,6 @@
         scaling_factor: 2.2,
         cooldown: 5.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -7432,7 +6861,6 @@
         scaling_factor: 2.2,
         cooldown: 5.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -7445,7 +6873,6 @@
         scaling_factor: 2.1,
         cooldown: 5.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7458,7 +6885,6 @@
         scaling_factor: 2.1,
         cooldown: 5.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7471,7 +6897,6 @@
         scaling_factor: 2.2,
         cooldown: 6.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7484,7 +6909,6 @@
         scaling_factor: 2.2,
         cooldown: 5.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7497,7 +6921,6 @@
         scaling_factor: 2.1,
         cooldown: 5.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -7510,7 +6933,6 @@
         scaling_factor: 2.1,
         cooldown: 5.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Haste(initiative_bonus: 0.15, duration: 4.0)],
     ),
     (
@@ -7523,7 +6945,6 @@
         scaling_factor: 2.2,
         cooldown: 5.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7536,7 +6957,6 @@
         scaling_factor: 2.2,
         cooldown: 6.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7549,7 +6969,6 @@
         scaling_factor: 2.1,
         cooldown: 5.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7562,7 +6981,6 @@
         scaling_factor: 2.1,
         cooldown: 5.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7575,7 +6993,6 @@
         scaling_factor: 2.2,
         cooldown: 5.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 16, duration: 5.0)],
     ),
     (
@@ -7588,7 +7005,6 @@
         scaling_factor: 2.2,
         cooldown: 5.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Focus(crit_chance_bonus: 0.21, duration: 4.0)],
     ),
     (
@@ -7601,7 +7017,6 @@
         scaling_factor: 2.1,
         cooldown: 6.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7614,7 +7029,6 @@
         scaling_factor: 2.1,
         cooldown: 5.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7627,7 +7041,6 @@
         scaling_factor: 2.2,
         cooldown: 5.4,
         is_aoe: true,
-        modifiers: [],
         effects: [HealMaxManaPct(percentage: 0.33)],
     ),
     (
@@ -7640,7 +7053,6 @@
         scaling_factor: 2.2,
         cooldown: 5.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7653,7 +7065,6 @@
         scaling_factor: 2.1,
         cooldown: 5.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Stun(duration: 1.0)],
     ),
     (
@@ -7666,7 +7077,6 @@
         scaling_factor: 2.2,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -7679,7 +7089,6 @@
         scaling_factor: 2.3,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -7692,7 +7101,6 @@
         scaling_factor: 2.4,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [ChillBlast(radius: 3.0, frost_damage: 52)],
     ),
     (
@@ -7705,7 +7113,6 @@
         scaling_factor: 2.2,
         cooldown: 5.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7718,7 +7125,6 @@
         scaling_factor: 2.2,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7731,7 +7137,6 @@
         scaling_factor: 2.3,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7744,7 +7149,6 @@
         scaling_factor: 2.4,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -7757,7 +7161,6 @@
         scaling_factor: 2.2,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -7770,7 +7173,6 @@
         scaling_factor: 2.2,
         cooldown: 5.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7783,7 +7185,6 @@
         scaling_factor: 2.3,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7796,7 +7197,6 @@
         scaling_factor: 2.4,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7809,7 +7209,6 @@
         scaling_factor: 2.2,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7822,7 +7221,6 @@
         scaling_factor: 2.2,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -7835,7 +7233,6 @@
         scaling_factor: 2.3,
         cooldown: 5.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -7848,7 +7245,6 @@
         scaling_factor: 2.4,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7861,7 +7257,6 @@
         scaling_factor: 2.2,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7874,7 +7269,6 @@
         scaling_factor: 2.2,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7887,7 +7281,6 @@
         scaling_factor: 2.3,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7900,7 +7293,6 @@
         scaling_factor: 2.4,
         cooldown: 5.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -7913,7 +7305,6 @@
         scaling_factor: 2.2,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -7926,7 +7317,6 @@
         scaling_factor: 2.2,
         cooldown: 5.7,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -7939,7 +7329,6 @@
         scaling_factor: 2.3,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -7952,7 +7341,6 @@
         scaling_factor: 2.4,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -7965,7 +7353,6 @@
         scaling_factor: 2.2,
         cooldown: 5.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -7978,7 +7365,6 @@
         scaling_factor: 2.2,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -7991,7 +7377,6 @@
         scaling_factor: 2.3,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8004,7 +7389,6 @@
         scaling_factor: 2.4,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8017,7 +7401,6 @@
         scaling_factor: 2.2,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.24, duration: 5.0)],
     ),
     (
@@ -8030,7 +7413,6 @@
         scaling_factor: 2.2,
         cooldown: 5.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8043,7 +7425,6 @@
         scaling_factor: 2.3,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -8056,7 +7437,6 @@
         scaling_factor: 2.4,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8069,7 +7449,6 @@
         scaling_factor: 2.2,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8082,7 +7461,6 @@
         scaling_factor: 2.2,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8095,7 +7473,6 @@
         scaling_factor: 2.3,
         cooldown: 5.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -8108,7 +7485,6 @@
         scaling_factor: 2.4,
         cooldown: 5.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8121,7 +7497,6 @@
         scaling_factor: 2.2,
         cooldown: 5.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 17, duration: 5.0)],
     ),
     (
@@ -8134,7 +7509,6 @@
         scaling_factor: 2.2,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8147,7 +7521,6 @@
         scaling_factor: 2.4,
         cooldown: 4.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8160,7 +7533,6 @@
         scaling_factor: 2.5,
         cooldown: 5.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8173,7 +7545,6 @@
         scaling_factor: 2.3,
         cooldown: 5.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8186,7 +7557,6 @@
         scaling_factor: 2.4,
         cooldown: 5.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8199,7 +7569,6 @@
         scaling_factor: 2.4,
         cooldown: 4.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -8212,7 +7581,6 @@
         scaling_factor: 2.5,
         cooldown: 4.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8225,7 +7593,6 @@
         scaling_factor: 2.3,
         cooldown: 5.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.27, duration: 5.0)],
     ),
     (
@@ -8238,7 +7605,6 @@
         scaling_factor: 2.4,
         cooldown: 5.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8251,7 +7617,6 @@
         scaling_factor: 2.4,
         cooldown: 5.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8264,7 +7629,6 @@
         scaling_factor: 2.5,
         cooldown: 4.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8277,7 +7641,6 @@
         scaling_factor: 2.3,
         cooldown: 4.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -8290,7 +7653,6 @@
         scaling_factor: 2.4,
         cooldown: 5.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8303,7 +7665,6 @@
         scaling_factor: 2.4,
         cooldown: 5.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8316,7 +7677,6 @@
         scaling_factor: 2.5,
         cooldown: 5.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Haste(initiative_bonus: 0.10, duration: 4.0)],
     ),
     (
@@ -8329,7 +7689,6 @@
         scaling_factor: 2.3,
         cooldown: 4.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8342,7 +7701,6 @@
         scaling_factor: 2.4,
         cooldown: 4.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8355,7 +7713,6 @@
         scaling_factor: 2.4,
         cooldown: 5.0,
         is_aoe: false,
-        modifiers: [],
         effects: [TimeWarp(initiative_reduction: 0.23, duration: 4.0)],
     ),
     (
@@ -8368,7 +7725,6 @@
         scaling_factor: 2.5,
         cooldown: 5.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8381,7 +7737,6 @@
         scaling_factor: 2.3,
         cooldown: 5.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8394,7 +7749,6 @@
         scaling_factor: 2.4,
         cooldown: 4.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8407,7 +7761,6 @@
         scaling_factor: 2.4,
         cooldown: 4.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8420,7 +7773,6 @@
         scaling_factor: 2.5,
         cooldown: 5.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8433,7 +7785,6 @@
         scaling_factor: 2.3,
         cooldown: 5.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -8446,7 +7797,6 @@
         scaling_factor: 2.4,
         cooldown: 5.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8459,7 +7809,6 @@
         scaling_factor: 2.4,
         cooldown: 4.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8472,7 +7821,6 @@
         scaling_factor: 2.5,
         cooldown: 4.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Blind(miss_chance: 0.25, duration: 3.0)],
     ),
     (
@@ -8485,7 +7833,6 @@
         scaling_factor: 2.3,
         cooldown: 5.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8498,7 +7845,6 @@
         scaling_factor: 2.4,
         cooldown: 5.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8511,7 +7857,6 @@
         scaling_factor: 2.4,
         cooldown: 5.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -8524,7 +7869,6 @@
         scaling_factor: 2.5,
         cooldown: 4.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8537,7 +7881,6 @@
         scaling_factor: 2.3,
         cooldown: 4.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8550,7 +7893,6 @@
         scaling_factor: 2.4,
         cooldown: 5.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8563,7 +7905,6 @@
         scaling_factor: 2.4,
         cooldown: 5.2,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8576,7 +7917,6 @@
         scaling_factor: 2.5,
         cooldown: 5.4,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8589,7 +7929,6 @@
         scaling_factor: 2.3,
         cooldown: 4.6,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 18, duration: 5.0)],
     ),
     (
@@ -8602,7 +7941,6 @@
         scaling_factor: 2.4,
         cooldown: 4.8,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8615,7 +7953,6 @@
         scaling_factor: 2.4,
         cooldown: 5.0,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8628,7 +7965,6 @@
         scaling_factor: 2.6,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8641,7 +7977,6 @@
         scaling_factor: 2.4,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8654,7 +7989,6 @@
         scaling_factor: 2.5,
         cooldown: 4.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8667,7 +8001,6 @@
         scaling_factor: 2.5,
         cooldown: 4.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Lifesteal(percentage: 0.24)],
     ),
     (
@@ -8680,7 +8013,6 @@
         scaling_factor: 2.6,
         cooldown: 4.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8693,7 +8025,6 @@
         scaling_factor: 2.4,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -8706,7 +8037,6 @@
         scaling_factor: 2.5,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8719,7 +8049,6 @@
         scaling_factor: 2.5,
         cooldown: 4.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8732,7 +8061,6 @@
         scaling_factor: 2.6,
         cooldown: 4.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8745,7 +8073,6 @@
         scaling_factor: 2.4,
         cooldown: 4.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8758,7 +8085,6 @@
         scaling_factor: 2.5,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 193)],
     ),
     (
@@ -8771,7 +8097,6 @@
         scaling_factor: 2.5,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -8784,7 +8109,6 @@
         scaling_factor: 2.6,
         cooldown: 4.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8797,7 +8121,6 @@
         scaling_factor: 2.4,
         cooldown: 4.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8810,7 +8133,6 @@
         scaling_factor: 2.5,
         cooldown: 4.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8823,7 +8145,6 @@
         scaling_factor: 2.5,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8836,7 +8157,6 @@
         scaling_factor: 2.6,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8849,7 +8169,6 @@
         scaling_factor: 2.4,
         cooldown: 4.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -8862,7 +8181,6 @@
         scaling_factor: 2.5,
         cooldown: 4.5,
         is_aoe: false,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 191)],
     ),
     (
@@ -8875,7 +8193,6 @@
         scaling_factor: 2.5,
         cooldown: 4.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8888,7 +8205,6 @@
         scaling_factor: 2.6,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8901,7 +8217,6 @@
         scaling_factor: 2.4,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8914,7 +8229,6 @@
         scaling_factor: 2.5,
         cooldown: 4.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -8927,7 +8241,6 @@
         scaling_factor: 2.5,
         cooldown: 4.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -8940,7 +8253,6 @@
         scaling_factor: 2.6,
         cooldown: 4.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -8953,7 +8265,6 @@
         scaling_factor: 2.4,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -8966,7 +8277,6 @@
         scaling_factor: 2.5,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -8979,7 +8289,6 @@
         scaling_factor: 2.5,
         cooldown: 4.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -8992,7 +8301,6 @@
         scaling_factor: 2.6,
         cooldown: 4.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -9005,7 +8313,6 @@
         scaling_factor: 2.4,
         cooldown: 4.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -9018,7 +8325,6 @@
         scaling_factor: 2.5,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -9031,7 +8337,6 @@
         scaling_factor: 2.5,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.26, duration: 5.0)],
     ),
     (
@@ -9044,7 +8349,6 @@
         scaling_factor: 2.6,
         cooldown: 4.3,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -9057,7 +8361,6 @@
         scaling_factor: 2.4,
         cooldown: 4.5,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 19, duration: 5.0)],
     ),
     (
@@ -9070,7 +8373,6 @@
         scaling_factor: 2.5,
         cooldown: 4.7,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -9083,7 +8385,6 @@
         scaling_factor: 2.5,
         cooldown: 4.9,
         is_aoe: false,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -9096,7 +8397,6 @@
         scaling_factor: 2.6,
         cooldown: 5.1,
         is_aoe: false,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -9109,7 +8409,6 @@
         scaling_factor: 2.5,
         cooldown: 4.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Burn(damage_per_sec: 41, duration: 4.0)],
     ),
     (
@@ -9122,7 +8421,6 @@
         scaling_factor: 2.5,
         cooldown: 4.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Purge],
     ),
     (
@@ -9135,7 +8433,6 @@
         scaling_factor: 2.6,
         cooldown: 4.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -9148,7 +8445,6 @@
         scaling_factor: 2.7,
         cooldown: 4.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -9161,7 +8457,6 @@
         scaling_factor: 2.5,
         cooldown: 4.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Vulnerability(damage_taken_multiplier: 1.29, duration: 5.0)],
     ),
     (
@@ -9174,7 +8469,6 @@
         scaling_factor: 2.5,
         cooldown: 4.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -9187,7 +8481,6 @@
         scaling_factor: 2.6,
         cooldown: 4.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -9200,7 +8493,6 @@
         scaling_factor: 2.7,
         cooldown: 4.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -9213,7 +8505,6 @@
         scaling_factor: 2.5,
         cooldown: 4.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -9226,7 +8517,6 @@
         scaling_factor: 2.5,
         cooldown: 4.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -9239,7 +8529,6 @@
         scaling_factor: 2.6,
         cooldown: 4.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 22, duration: 5.0)],
     ),
     (
@@ -9252,7 +8541,6 @@
         scaling_factor: 2.7,
         cooldown: 4.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -9265,7 +8553,6 @@
         scaling_factor: 2.5,
         cooldown: 4.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -9278,7 +8565,6 @@
         scaling_factor: 2.5,
         cooldown: 4.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -9291,7 +8577,6 @@
         scaling_factor: 2.6,
         cooldown: 4.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -9304,7 +8589,6 @@
         scaling_factor: 2.7,
         cooldown: 4.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -9317,7 +8601,6 @@
         scaling_factor: 2.5,
         cooldown: 4.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 22, duration: 5.0)],
     ),
     (
@@ -9330,7 +8613,6 @@
         scaling_factor: 2.5,
         cooldown: 4.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -9343,7 +8625,6 @@
         scaling_factor: 2.6,
         cooldown: 4.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -9356,7 +8637,6 @@
         scaling_factor: 2.7,
         cooldown: 4.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -9369,7 +8649,6 @@
         scaling_factor: 2.5,
         cooldown: 4.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -9382,7 +8661,6 @@
         scaling_factor: 2.5,
         cooldown: 4.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -9395,7 +8673,6 @@
         scaling_factor: 2.6,
         cooldown: 4.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 22, duration: 5.0)],
     ),
     (
@@ -9408,7 +8685,6 @@
         scaling_factor: 2.7,
         cooldown: 4.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -9421,7 +8697,6 @@
         scaling_factor: 2.5,
         cooldown: 4.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -9434,7 +8709,6 @@
         scaling_factor: 2.5,
         cooldown: 4.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 3.0)],
     ),
     (
@@ -9447,7 +8721,6 @@
         scaling_factor: 2.6,
         cooldown: 4.2,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -9460,7 +8733,6 @@
         scaling_factor: 2.7,
         cooldown: 4.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.5)],
     ),
     (
@@ -9473,7 +8745,6 @@
         scaling_factor: 2.5,
         cooldown: 4.6,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 22, duration: 5.0)],
     ),
     (
@@ -9486,7 +8757,6 @@
         scaling_factor: 2.5,
         cooldown: 4.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Immobilize(duration: 2.0)],
     ),
     (
@@ -9499,7 +8769,6 @@
         scaling_factor: 2.6,
         cooldown: 4.0,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 21, duration: 5.0)],
     ),
     (
@@ -9512,7 +8781,6 @@
         scaling_factor: 2.7,
         cooldown: 4.2,
         is_aoe: true,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 201)],
     ),
     (
@@ -9525,7 +8793,6 @@
         scaling_factor: 2.5,
         cooldown: 4.4,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 20, duration: 5.0)],
     ),
     (
@@ -9538,7 +8805,6 @@
         scaling_factor: 2.5,
         cooldown: 4.6,
         is_aoe: true,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 203)],
     ),
     (
@@ -9551,7 +8817,6 @@
         scaling_factor: 2.6,
         cooldown: 4.8,
         is_aoe: true,
-        modifiers: [],
         effects: [Poison(damage_per_sec: 22, duration: 5.0)],
     ),
     (
@@ -9564,7 +8829,6 @@
         scaling_factor: 2.7,
         cooldown: 4.0,
         is_aoe: true,
-        modifiers: [],
         effects: [DoomCurse(stacks_required: 3, explosion_damage: 200)],
     ),
 ]

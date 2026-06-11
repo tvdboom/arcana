@@ -1,6 +1,5 @@
 use crate::core::inventory::effects::Effect;
 use crate::core::inventory::equipment::Kind;
-use crate::core::inventory::modifiers::Modifier;
 use crate::core::player::Player;
 use serde::Deserialize;
 
@@ -34,9 +33,6 @@ pub struct Ability {
 
     /// Whether this ability applies to only the player or also his pet
     pub is_aoe: bool,
-
-    /// Modifiers applied when activated
-    pub modifiers: Vec<Modifier>,
 
     /// Effects applied when hitting
     pub effects: Vec<Effect>,
@@ -78,9 +74,6 @@ impl Ability {
         }
         
         let mut sub_parts = Vec::new();
-        for m in &self.modifiers {
-            sub_parts.push(m.to_short_string());
-        }
         for e in &self.effects {
             sub_parts.push(e.to_short_string());
         }

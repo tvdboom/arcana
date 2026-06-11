@@ -961,7 +961,6 @@ fn main() {
         scaling_factor: {:.1},
         cooldown: {:.1},
         is_aoe: {},
-        modifiers: [],
         effects: [{}],
     ),
 ",
@@ -1432,202 +1431,200 @@ fn main() {
             },
         }
 
-        let mods_str = modifiers.join(", ");
-
-        let mut effects = Vec::new();
         let mut templates = Vec::new();
         match kind {
             "Fire" => {
                 templates.push(format!(
-                    "Burn(damage_per_sec: {}, duration: {:.1})",
-                    level * 2 + (idx % 3) as u32,
-                    5.0 + (idx % 4) as f32
+                    "AbilityDamageMultiplier(Fire, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
                 templates.push(format!(
-                    "FireResistance(percentage: {:.3})",
-                    0.10 + (level as f32 * 0.02) + (idx % 5) as f32 * 0.01
+                    "BurnDamageTakenMultiplier({:.3})",
+                    (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
                 templates.push(format!(
-                    "Empower(damage_bonus_pct: {:.3}, duration: 999999.0)",
-                    0.05 + (level as f32 * 0.01)
+                    "BonusMaxMana({})",
+                    level * 5
                 ));
             },
             "Frost" => {
                 templates.push(format!(
-                    "ChillBlast(radius: {:.1}, frost_damage: {})",
-                    3.0 + (idx % 3) as f32,
-                    level * 3 + (idx % 5) as u32
+                    "AbilityDamageMultiplier(Frost, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
                 templates.push(format!(
-                    "FrostResistance(percentage: {:.3})",
-                    0.10 + (level as f32 * 0.02) + (idx % 5) as f32 * 0.01
+                    "BurnDamageTakenMultiplier({:.3})",
+                    (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
                 templates.push(format!(
-                    "Freeze(attack_speed_reduction: {:.3}, duration: {:.1})",
-                    0.10 + (level as f32 * 0.01),
-                    3.0 + (idx % 3) as f32
-                ));
-                templates.push(format!(
-                    "Fortify(armor_bonus_pct: {:.3}, duration: 999999.0)",
-                    0.05 + (level as f32 * 0.01)
+                    "BonusMaxHealth({})",
+                    level * 10
                 ));
             },
             "Lightning" => {
                 templates.push(format!(
-                    "ChainArc(jumps: {}, damage_decay_pct: {:.2})",
-                    2 + (idx % 3) as u32,
-                    0.10 + (idx % 4) as f32 * 0.05
+                    "AbilityDamageMultiplier(Lightning, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
                 templates.push(format!(
-                    "LightningResistance(percentage: {:.3})",
-                    0.10 + (level as f32 * 0.02) + (idx % 5) as f32 * 0.01
+                    "MaxManaMultiplier({:.3})",
+                    1.02 + (level as f32 * 0.01)
                 ));
                 templates.push(format!(
-                    "Haste(initiative_bonus: {:.3}, duration: 999999.0)",
-                    0.05 + (level as f32 * 0.01)
+                    "BleedDamageTakenMultiplier({:.3})",
+                    (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
             },
             "Nature" => {
                 templates.push(format!(
-                    "Regen(heal_per_sec: {}, duration: 999999.0)",
-                    level * 2 + (idx % 4) as u32
+                    "AbilityHealingMultiplier(Nature, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
                 templates.push(format!(
-                    "Poison(damage_per_sec: {}, duration: {:.1})",
-                    level * 2 + (idx % 3) as u32,
-                    6.0 + (idx % 3) as f32
+                    "PoisonDamageTakenMultiplier({:.3})",
+                    (0.90 - (level as f32 * 0.01)).max(0.4)
                 ));
                 templates.push(format!(
-                    "PoisonResistance(percentage: {:.3})",
-                    0.10 + (level as f32 * 0.02) + (idx % 5) as f32 * 0.01
-                ));
-                templates.push(format!(
-                    "Thorns(damage_reflected: {}, duration: 999999.0)",
-                    level * 3 + (idx % 5) as u32
+                    "MaxHealthMultiplier({:.3})",
+                    1.03 + (level as f32 * 0.01)
                 ));
             },
             "Holy" => {
-                templates.push(format!("Clearcasting(duration: 999999.0)"));
                 templates.push(format!(
-                    "HolyResistance(percentage: {:.3})",
-                    0.10 + (level as f32 * 0.02) + (idx % 5) as f32 * 0.01
+                    "AbilityHealingMultiplier(Holy, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
                 templates.push(format!(
-                    "Regen(heal_per_sec: {}, duration: 999999.0)",
-                    level + (idx % 3) as u32
+                    "BonusMaxHealth({})",
+                    level * 12
                 ));
                 templates.push(format!(
-                    "HealFlat(amount: {})",
-                    level * 15 + (idx % 5) as u32 * 5
+                    "MaxManaMultiplier({:.3})",
+                    1.02 + (level as f32 * 0.01)
                 ));
             },
             "Shadow" => {
-                templates
-                    .push(format!("Lifesteal(percentage: {:.3})", 0.05 + (level as f32 * 0.01)));
                 templates.push(format!(
-                    "ShadowResistance(percentage: {:.3})",
-                    0.10 + (level as f32 * 0.02) + (idx % 5) as f32 * 0.01
+                    "AbilityDamageMultiplier(Shadow, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
                 templates.push(format!(
-                    "DoomCurse(stacks_required: 3, explosion_damage: {})",
-                    level * 10 + (idx % 20) as u32
+                    "BonusMaxMana({})",
+                    level * 6
+                ));
+                templates.push(format!(
+                    "PoisonDamageTakenMultiplier({:.3})",
+                    (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
             },
             "Cosmic" => {
                 templates.push(format!(
-                    "TimeWarp(initiative_reduction: {:.3}, duration: {:.1})",
-                    0.05 + (level as f32 * 0.005),
-                    5.0 + (idx % 3) as f32
+                    "AbilityDamageMultiplier(Cosmic, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
-                templates
-                    .push(format!("MonarchShield(duration: {:.1})", 2.0 + (level as f32 * 0.2)));
                 templates.push(format!(
-                    "HealManaFlat(amount: {})",
-                    level * 15 + (idx % 5) as u32 * 5
+                    "BonusMaxMana({})",
+                    level * 8
+                ));
+                templates.push(format!(
+                    "MaxManaMultiplier({:.3})",
+                    1.03 + (level as f32 * 0.01)
                 ));
             },
             "Martial" => {
                 templates.push(format!(
-                    "Bleed(damage_per_sec: {}, duration: {:.1})",
-                    level * 2 + (idx % 3) as u32,
-                    5.0 + (idx % 4) as f32
+                    "MaxHealthMultiplier({:.3})",
+                    1.04 + (level as f32 * 0.01)
                 ));
                 templates.push(format!(
-                    "BleedResistance(percentage: {:.3})",
-                    0.10 + (level as f32 * 0.02) + (idx % 5) as f32 * 0.01
+                    "BleedDamageTakenMultiplier({:.3})",
+                    (0.90 - (level as f32 * 0.01)).max(0.4)
                 ));
                 templates.push(format!(
-                    "Weaken(attack_power_reduction: {}, duration: {:.1})",
-                    level * 2 + (idx % 5) as u32,
-                    5.0 + (idx % 3) as f32
+                    "BonusMaxHealth({})",
+                    level * 10
                 ));
             },
             "Bulwark" => {
                 templates.push(format!(
-                    "Fortify(armor_bonus_pct: {:.3}, duration: 999999.0)",
-                    0.05 + (level as f32 * 0.01)
+                    "BonusMaxHealth({})",
+                    level * 15
                 ));
                 templates.push(format!(
-                    "Thorns(damage_reflected: {}, duration: 999999.0)",
-                    level * 2 + (idx % 4) as u32
+                    "MaxHealthMultiplier({:.3})",
+                    1.05 + (level as f32 * 0.01)
                 ));
                 templates.push(format!(
-                    "ArmorShred(reduction: {}, duration: {:.1})",
-                    level * 2 + (idx % 5) as u32,
-                    6.0 + (idx % 3) as f32
+                    "EnemyPetDamageTakenMultiplier({:.3})",
+                    (0.90 - (level as f32 * 0.01)).max(0.4)
                 ));
             },
             "Assassination" => {
                 templates.push(format!(
-                    "Poison(damage_per_sec: {}, duration: {:.1})",
-                    level * 2 + (idx % 4) as u32,
-                    5.0 + (idx % 3) as f32
+                    "AbilityDamageMultiplier(Assassination, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
                 templates.push(format!(
-                    "Bleed(damage_per_sec: {}, duration: {:.1})",
-                    level * 2 + (idx % 3) as u32,
-                    5.0 + (idx % 4) as f32
+                    "PoisonDamageTakenMultiplier({:.3})",
+                    (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
-                templates
-                    .push(format!("Lifesteal(percentage: {:.3})", 0.02 + (level as f32 * 0.005)));
+                templates.push(format!(
+                    "BonusMaxHealth({})",
+                    level * 6
+                ));
             },
             "Skirmish" => {
                 templates.push(format!(
-                    "Haste(initiative_bonus: {:.3}, duration: 999999.0)",
-                    0.05 + (level as f32 * 0.01)
+                    "AbilityDamageMultiplier(Skirmish, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
                 templates.push(format!(
-                    "Blind(miss_chance: {:.2}, duration: {:.1})",
-                    0.10 + (level as f32 * 0.01),
-                    4.0 + (idx % 3) as f32
+                    "BurnDamageTakenMultiplier({:.3})",
+                    (0.95 - (level as f32 * 0.01)).max(0.5)
+                ));
+                templates.push(format!(
+                    "BonusMaxMana({})",
+                    level * 4
                 ));
             },
             "Tactic" => {
                 templates.push(format!(
-                    "Vulnerability(damage_taken_multiplier: {:.3}, duration: {:.1})",
-                    1.05 + (level as f32 * 0.01),
-                    6.0 + (idx % 3) as f32
+                    "AbilityDamageMultiplier(Tactic, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
                 templates.push(format!(
-                    "Focus(crit_chance_bonus: {:.3}, duration: 999999.0)",
-                    0.05 + (level as f32 * 0.01)
+                    "BonusMaxMana({})",
+                    level * 5
+                ));
+                templates.push(format!(
+                    "EnemyPetDamageTakenMultiplier({:.3})",
+                    (0.95 - (level as f32 * 0.01)).max(0.5)
                 ));
             },
             "Command" => {
                 templates.push(format!(
-                    "BeastFrenzy(attack_speed_bonus: {:.3}, duration: {:.1})",
-                    0.10 + (level as f32 * 0.01),
-                    8.0 + (idx % 5) as f32
+                    "AbilityDamageMultiplier(Command, {:.3})",
+                    1.05 + (level as f32 * 0.02)
                 ));
-                templates.push(format!("Taunt(duration: {:.1})", 5.0 + (idx % 4) as f32));
+                templates.push(format!(
+                    "EnemyPetDamageTakenMultiplier({:.3})",
+                    (0.90 - (level as f32 * 0.01)).max(0.4)
+                ));
+                templates.push(format!(
+                    "BonusMaxHealth({})",
+                    level * 8
+                ));
             },
             _ => {
-                templates.push(format!("Clearcasting(duration: 999999.0)"));
+                templates.push(format!(
+                    "MaxHealthMultiplier({:.3})",
+                    1.02 + (level as f32 * 0.01)
+                ));
             },
         }
 
-        // Determine number of effects based on level
-        let num_effects = if level <= 4 {
+        // Determine number of modifiers based on level
+        let num_mods = if level <= 4 {
             1
         } else if level <= 12 {
             2
@@ -1635,15 +1632,15 @@ fn main() {
             3
         };
 
-        for i in 0..num_effects {
+        for i in 0..num_mods {
             if templates.is_empty() {
                 break;
             }
             let template_idx = (idx + i as usize) % templates.len();
-            effects.push(templates[template_idx].clone());
+            modifiers.push(templates[template_idx].clone());
         }
 
-        let effects_str = effects.join(", ");
+        let mods_str = modifiers.join(", ");
 
         perks_ron.push_str(&format!(
             "    (
@@ -1652,10 +1649,9 @@ fn main() {
         kind: {},
         level: {},
         modifiers: [{}],
-        effects: [{}],
     ),
 ",
-            name, filename, kind, level, mods_str, effects_str
+            name, filename, kind, level, mods_str
         ));
     }
     perks_ron.push_str("]\n");

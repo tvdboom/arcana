@@ -1,4 +1,3 @@
-use crate::core::inventory::effects::Effect;
 use crate::core::inventory::equipment::Kind;
 use crate::core::inventory::modifiers::Modifier;
 use crate::core::player::Player;
@@ -21,9 +20,6 @@ pub struct Perk {
 
     /// Passive modifiers that are always applied
     pub modifiers: Vec<Modifier>,
-
-    /// Passive effects that are always applied
-    pub effects: Vec<Effect>,
 }
 
 impl Perk {
@@ -31,9 +27,6 @@ impl Perk {
         let mut parts = Vec::new();
         for m in &self.modifiers {
             parts.push(m.to_short_string());
-        }
-        for e in &self.effects {
-            parts.push(e.to_short_string());
         }
         if parts.is_empty() {
             "Passive boost".to_string()

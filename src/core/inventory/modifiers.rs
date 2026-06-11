@@ -1,3 +1,4 @@
+use crate::core::inventory::equipment::Kind;
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -32,6 +33,22 @@ pub enum Modifier {
 
     /// Others
     HealingReceivedMultiplier(f32),
+
+    /// Health & Mana
+    BonusMaxHealth(i32),
+    MaxHealthMultiplier(f32),
+    BonusMaxMana(i32),
+    MaxManaMultiplier(f32),
+
+    /// Ability damage & healing improvements
+    AbilityDamageMultiplier(Kind, f32),
+    AbilityHealingMultiplier(Kind, f32),
+
+    /// Damage reduction from effects and pets
+    PoisonDamageTakenMultiplier(f32),
+    BurnDamageTakenMultiplier(f32),
+    BleedDamageTakenMultiplier(f32),
+    EnemyPetDamageTakenMultiplier(f32),
 }
 
 impl Modifier {
@@ -60,6 +77,17 @@ impl Modifier {
             Modifier::BonusPetInitiative(val) => format!("{:+} Pet Init", val),
             Modifier::PetInitiativeMultiplier(val) => format!("{:+}% Pet Init", (val * 100.0) as i32),
             Modifier::HealingReceivedMultiplier(val) => format!("{:+}% Heal Recv", (val * 100.0) as i32),
+
+            Modifier::BonusMaxHealth(val) => format!("{:+} Max HP", val),
+            Modifier::MaxHealthMultiplier(val) => format!("{:+.0}% Max HP", (val - 1.0) * 100.0),
+            Modifier::BonusMaxMana(val) => format!("{:+} Max MP", val),
+            Modifier::MaxManaMultiplier(val) => format!("{:+.0}% Max MP", (val - 1.0) * 100.0),
+            Modifier::AbilityDamageMultiplier(kind, val) => format!("{:+.0}% {} Ability Dmg", (val - 1.0) * 100.0, kind),
+            Modifier::AbilityHealingMultiplier(kind, val) => format!("{:+.0}% {} Ability Heal", (val - 1.0) * 100.0, kind),
+            Modifier::PoisonDamageTakenMultiplier(val) => format!("{:+.0}% Poison Dmg Taken", (val - 1.0) * 100.0),
+            Modifier::BurnDamageTakenMultiplier(val) => format!("{:+.0}% Burn Dmg Taken", (val - 1.0) * 100.0),
+            Modifier::BleedDamageTakenMultiplier(val) => format!("{:+.0}% Bleed Dmg Taken", (val - 1.0) * 100.0),
+            Modifier::EnemyPetDamageTakenMultiplier(val) => format!("{:+.0}% Enemy Pet Dmg Taken", (val - 1.0) * 100.0),
         }
     }
 }
