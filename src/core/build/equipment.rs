@@ -1,5 +1,4 @@
 use crate::core::build::wearable::Wearable;
-use crate::core::build::effects::Effect;
 use crate::core::build::modifiers::Modifier;
 use crate::core::build::weapons::Weapon;
 use crate::core::localization::Localization;
@@ -34,6 +33,13 @@ impl Equipment {
         match self {
             Equipment::Wearable(a) => a.description(language, localization),
             Equipment::Weapon(w) => w.description(language, localization),
+        }
+    }
+
+    pub fn full_description(&self, language: Language, localization: &Localization) -> Vec<String> {
+        match self {
+            Equipment::Wearable(a) => a.full_description(language, localization),
+            Equipment::Weapon(w) => w.full_description(language, localization),
         }
     }
 
@@ -102,13 +108,6 @@ impl Equipment {
         match self {
             Equipment::Wearable(a) => &a.modifiers,
             Equipment::Weapon(w) => &w.modifiers,
-        }
-    }
-
-    pub fn effects(&self) -> &[Effect] {
-        match self {
-            Equipment::Wearable(a) => &a.effects,
-            Equipment::Weapon(w) => &w.effects,
         }
     }
 }

@@ -7,11 +7,12 @@ use crate::core::catalog::{get_ability, get_perk};
 use crate::core::constants::*;
 use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;
-use crate::core::menu::utils::add_text;
+use crate::core::menu::utils::{add_text, spawn_rich_text_row};
+use crate::core::ui::playing::RightColumnTooltip;
 use crate::core::player::{Attribute, Player};
 use crate::core::settings::Language;
 use crate::core::utils::cursor;
-use crate::utils::NameFromEnum;
+use crate::utils::{capitalize_words, NameFromEnum};
 
 #[derive(Resource, Default)]
 pub struct LevelUpPending {
@@ -292,7 +293,7 @@ pub fn manage_level_up_overlay(
     if overlay_exists {
         for (mut z_index, mut pickable) in overlay_q.iter_mut() {
             if is_game_menu {
-                *z_index = GlobalZIndex(100); // Below game menu (which is likely 500+)
+                *z_index = GlobalZIndex(100); // Below game menu
                 pickable.should_block_lower = false;
                 pickable.is_hoverable = false;
             } else {
@@ -934,7 +935,8 @@ fn spawn_choice_card(
     } else {
         format!("perk.{}", name.replace(" ", "_").to_lowercase())
     };
-    let title = localization.get_opt(&key_name, lang).unwrap_or_else(|| name.to_string());
+    let raw_title = localization.get_opt(&key_name, lang).unwrap_or_else(|| name.to_string());
+    let title = capitalize_words(&raw_title);
 
     let mut entity_cmd = parent.spawn((
         Node {
@@ -962,9 +964,11 @@ fn spawn_choice_card(
     if is_ability {
         entity_cmd.insert(LevelUpAbilityChoiceBtn(index));
         entity_cmd.observe(handle_ability_choice_click);
+        entity_cmd.insert(RightColumnTooltip::Ability(name.to_string()));
     } else {
         entity_cmd.insert(LevelUpPerkChoiceBtn(index));
         entity_cmd.observe(handle_perk_choice_click);
+        entity_cmd.insert(RightColumnTooltip::Perk(name.to_string()));
     }
 
     entity_cmd
@@ -982,7 +986,7 @@ fn spawn_choice_card(
                 },
                 BackgroundColor(PLACEHOLDER_COLOR),
                 BorderColor::all(BUTTON_BORDER_COLOR),
-                ImageNode::new(assets.image(&img_name)).with_mode(NodeImageMode::Stretch),
+                ImageNode::new(assets.image(format!("build_{}", img_name))).with_mode(NodeImageMode::Stretch),
             ));
 
             // Text content
@@ -994,7 +998,7 @@ fn spawn_choice_card(
                 .with_children(|parent| {
                     // Name (same as playing tab)
                     parent.spawn((
-                        add_text(&title, "bold", 1.9, assets),
+                        add_text(&title, "bold", 2.3, assets),
                         TextColor(BUTTON_TEXT_COLOR),
                     ));
 
@@ -1005,10 +1009,7 @@ fn spawn_choice_card(
                         get_perk(name).map(|pk| pk.description(lang, &localization)).unwrap_or_default()
                     };
 
-                    parent.spawn((
-                        add_text(&desc_text, "medium", 1.6, assets),
-                        TextColor(Color::WHITE),
-                    ));
+                    spawn_rich_text_row(parent, assets, desc_text, 2.0, "medium", Color::WHITE);
                 });
         });
 }

@@ -2,6 +2,7 @@ use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
 use std::collections::HashMap;
+use crate::core::catalog::{all_abilities, all_perks, all_weapons, all_wearables};
 
 #[derive(Resource)]
 pub struct WorldAssets {
@@ -66,9 +67,9 @@ impl FromWorld for WorldAssets {
             ("mute", assets.load("images/icons/mute.png")),
             ("sound", assets.load("images/icons/sound.png")),
             ("music", assets.load("images/icons/music.png")),
-            ("defense_icon", assets.load("images/icons/defense.png")),
-            ("attack_icon", assets.load("images/icons/attack.png")),
-            ("initiative_icon", assets.load("images/icons/initiative.png")),
+            ("defense", assets.load("images/icons/defense.png")),
+            ("attack", assets.load("images/icons/attack.png")),
+            ("initiative", assets.load("images/icons/initiative.png")),
             ("gold", assets.load("images/icons/gold.png")),
             ("action_hunt", assets.load("images/icons/action_hunt.png")),
             ("action_shop", assets.load("images/icons/action_shop.png")),
@@ -78,12 +79,46 @@ impl FromWorld for WorldAssets {
             ("action_work", assets.load("images/icons/action_work.png")),
             ("action_rest", assets.load("images/icons/action_rest.png")),
             ("action_study", assets.load("images/icons/action_study.png")),
+            ("action_duel", assets.load("images/icons/action_duel.png")),
             ("ap", assets.load("images/icons/ap.png")),
             ("equipped", assets.load("images/icons/equipped.png")),
+            ("base", assets.load("images/icons/base.png")),
+            ("ability", assets.load("images/icons/ability.png")),
+            ("perk", assets.load("images/icons/perk.png")),
+            ("modifier", assets.load("images/icons/modifier.png")),
+            ("effect", assets.load("images/icons/effect.png")),
+            ("level", assets.load("images/icons/level.png")),
+            ("mana", assets.load("images/icons/mana.png")),
+            ("cooldown", assets.load("images/icons/cooldown.png")),
+            ("fire", assets.load("images/icons/fire.png")),
+            ("ice", assets.load("images/icons/ice.png")),
+            ("nature", assets.load("images/icons/nature.png")),
+            ("holy", assets.load("images/icons/holy.png")),
+            ("shadow", assets.load("images/icons/shadow.png")),
+            ("physical", assets.load("images/icons/physical.png")),
+            ("melee", assets.load("images/icons/melee.png")),
+            ("range", assets.load("images/icons/range.png")),
+            ("magical", assets.load("images/icons/magical.png")),
+            ("finesse", assets.load("images/icons/finesse.png")),
+            ("shield", assets.load("images/icons/shield.png")),
+            ("book", assets.load("images/icons/book.png")),
+            ("aoe", assets.load("images/icons/aoe.png")),
+            ("target", assets.load("images/icons/target.png")),
+            ("attack_speed", assets.load("images/icons/attack_speed.png")),
+            ("crit_chance", assets.load("images/icons/crit_chance.png")),
+            ("health", assets.load("images/icons/health.png")),
+            ("equipment", assets.load("images/icons/equipment.png")),
+            ("strength", assets.load("images/icons/strength.png")),
+            ("dexterity", assets.load("images/icons/dexterity.png")),
+            ("constitution", assets.load("images/icons/constitution.png")),
+            ("intelligence", assets.load("images/icons/intelligence.png")),
+            ("wisdom", assets.load("images/icons/wisdom.png")),
+            ("charisma", assets.load("images/icons/charisma.png")),
+            ("assassin", assets.load("images/icons/assassin.png")),
             // Background
             ("bg", assets.load("images/bg/bg.png")),
             ("bg2", assets.load("images/bg/bg2.png")),
-            ("base", assets.load("images/bg/base.png")),
+            ("basebg", assets.load("images/bg/base.png")),
             ("shop", assets.load("images/bg/shop.png")),
             ("victory", assets.load("images/bg/victory.png")),
             ("defeat", assets.load("images/bg/defeat.png")),
@@ -193,21 +228,21 @@ impl FromWorld for WorldAssets {
             ("vulture", assets.load("images/pets/vulture.png")),
         ]);
 
-        for ability in crate::core::catalog::all_abilities() {
-            let key: &'static str = Box::leak(ability.name.clone().into_boxed_str());
+        for ability in all_abilities() {
+            let key: &'static str = Box::leak(format!("build_{}", ability.name).into_boxed_str());
             images.insert(key, assets.load(ability.image.clone()));
         }
-        for perk in crate::core::catalog::all_perks() {
-            let key: &'static str = Box::leak(perk.name.clone().into_boxed_str());
+        for perk in all_perks() {
+            let key: &'static str = Box::leak(format!("build_{}", perk.name).into_boxed_str());
             images.insert(key, assets.load(perk.image.clone()));
         }
-        for weapon in crate::core::catalog::all_weapons() {
-            let key: &'static str = Box::leak(weapon.name.clone().into_boxed_str());
+        for weapon in all_weapons() {
+            let key: &'static str = Box::leak(format!("build_{}", weapon.name).into_boxed_str());
             images.insert(key, assets.load(weapon.image.clone()));
         }
-        for armor in crate::core::catalog::all_armor() {
-            let key: &'static str = Box::leak(armor.name.clone().into_boxed_str());
-            images.insert(key, assets.load(armor.image.clone()));
+        for wearable in all_wearables() {
+            let key: &'static str = Box::leak(format!("build_{}", wearable.name).into_boxed_str());
+            images.insert(key, assets.load(wearable.image.clone()));
         }
 
         Self {

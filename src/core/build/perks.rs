@@ -20,15 +20,20 @@ pub struct Perk {
 }
 
 impl Perk {
-    pub fn description(&self, language: Language, localization: &Localization) -> String {
-        let mut parts = Vec::new();
+    pub fn description(&self, _language: Language, _localization: &Localization) -> String {
+        format!("[level]{} [modifier]{}", self.level, self.modifiers.len())
+    }
+
+    pub fn full_description(&self, language: Language, localization: &Localization) -> Vec<String> {
+        let mut lines = Vec::new();
+        let level_label = localization.get("general.level", language);
+        let modifiers_label = localization.get("general.modifiers", language);
+
+        lines.push(format!("[level] {}: {}", level_label, self.level));
+        lines.push(format!("[modifier] {}:", modifiers_label));
         for m in &self.modifiers {
-            parts.push(m.description(language, localization));
+            lines.push(format!("• {}", m.description(language, localization)));
         }
-        if parts.is_empty() {
-            "Passive boost".to_string()
-        } else {
-            parts.join(" | ")
-        }
+        lines
     }
 }

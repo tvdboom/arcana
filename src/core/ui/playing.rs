@@ -14,7 +14,7 @@ use crate::core::classes::Class;
 use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::buttons::DisabledButton;
-use crate::core::menu::utils::{add_root_node, add_text, recolor};
+use crate::core::menu::utils::{add_root_node, add_text, recolor, spawn_rich_text_row};
 use crate::core::player::{Attribute, Player};
 use crate::core::settings::{Language, Settings};
 use crate::core::ui::creation::SelectionItem;
@@ -37,7 +37,7 @@ const ICON_STAT: Val = Val::Vw(2.4); // gold / AP stat icons
 pub struct PlayingCmp;
 
 /// Simple text stats that are refreshed every frame.
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PlayingStat {
     ClassLine,
     CharRace,
@@ -163,23 +163,13 @@ fn localized_class_name(player: &Player, localization: &Localization, lang: Lang
 fn name_with_level(
     name: &str,
     prefix: &str,
-    level: u8,
+    _level: u8,
     localization: &Localization,
     lang: Language,
 ) -> String {
-    let lv = localization.get("general.lv", lang);
     let key = format!("{}.{}", prefix, name.replace(" ", "_").to_lowercase());
-    let localized_name = localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(name));
-    format!("{localized_name} ({lv}. {level})")
-}
-
-/// Format the bonus characteristics of a weapon, e.g. "+6 attack | +10 crit | 1.2 as".
-fn weapon_stat_lines(
-    weapon: &Equipment,
-    localization: &Localization,
-    lang: Language,
-) -> Vec<String> {
-    vec![weapon.description(lang, localization)]
+    let raw_name = localization.get_opt(&key, lang).unwrap_or_else(|| name.to_string());
+    capitalize_words(&raw_name)
 }
 
 fn signed_line(label: impl Into<String>, value: i32) -> String {
@@ -207,9 +197,10 @@ fn weapon_bonus_lines(
                 Equipment::Wearable(_) => "wearable",
             };
             let key = format!("{}.{}", prefix, weapon.name().replace(" ", "_").to_lowercase());
-            let localized_name =
-                localization.get_opt(&key, lang).unwrap_or_else(|| capitalize_words(weapon.name()));
-            (value != 0).then(|| signed_line(localized_name, value))
+            let raw_name =
+                localization.get_opt(&key, lang).unwrap_or_else(|| weapon.name().to_string());
+            let localized_name = capitalize_words(&raw_name);
+            (value != 0).then(|| format!("[equipment] {}", signed_line(localized_name, value)))
         })
         .collect()
 }
@@ -222,34 +213,34 @@ fn combat_breakdown(
 ) -> Vec<String> {
     match stat {
         PlayingStat::Attack => {
-            let mut lines = vec![signed_line(localization.get("general.base", lang), 5)];
-            lines.push(signed_line(
+            let mut lines = vec![format!("[base] {}", signed_line(localization.get("general.base", lang), 5))];
+            lines.push(format!("[strength] {}", signed_line(
                 localization.get("attribute.strength", lang),
                 player.strength() as i32 - 10,
-            ));
+            )));
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| weapon.attack()));
             lines.extend(perk_bonus_lines(player, localization, lang, stat));
             lines
         },
         PlayingStat::Defense => {
-            let mut lines = vec![signed_line(
+            let mut lines = vec![format!("[constitution] {}", signed_line(
                 localization.get("attribute.constitution", lang),
                 player.constitution() as i32 / 4,
-            )];
+            ))];
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| weapon.defense()));
             lines.extend(perk_bonus_lines(player, localization, lang, stat));
             lines
         },
         PlayingStat::Initiative => {
-            let mut lines = vec![signed_line(
+            let mut lines = vec![format!("[dexterity] {}", signed_line(
                 localization.get("attribute.dexterity", lang),
                 player.dexterity() as i32 / 2,
-            )];
+            ))];
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
                 weapon.initiative()
             }));
             if matches!(player.class, Class::Assassin) {
-                lines.push(signed_line(localization.get("class.assassin", lang), 2));
+                lines.push(format!("[assassin] {}", signed_line(localization.get("class.assassin", lang), 2)));
             }
             lines.extend(perk_bonus_lines(player, localization, lang, stat));
             lines
@@ -271,24 +262,27 @@ fn perk_bonus_lines(
                 match (stat, modifier) {
                     (PlayingStat::Attack, Modifier::AttackModifier(val)) => {
                         let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
-                        let localized_name = localization
+                        let raw_name = localization
                             .get_opt(&key, lang)
-                            .unwrap_or_else(|| capitalize_words(&perk.name));
-                        lines.push(signed_line(localized_name, *val));
+                            .unwrap_or_else(|| perk.name.to_string());
+                        let localized_name = capitalize_words(&raw_name);
+                        lines.push(format!("[perk] {}", signed_line(localized_name, *val)));
                     },
                     (PlayingStat::Defense, Modifier::DefenseModifier(val)) => {
                         let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
-                        let localized_name = localization
+                        let raw_name = localization
                             .get_opt(&key, lang)
-                            .unwrap_or_else(|| capitalize_words(&perk.name));
-                        lines.push(signed_line(localized_name, *val));
+                            .unwrap_or_else(|| perk.name.to_string());
+                        let localized_name = capitalize_words(&raw_name);
+                        lines.push(format!("[perk] {}", signed_line(localized_name, *val)));
                     },
                     (PlayingStat::Initiative, Modifier::InitiativeModifier(val)) => {
                         let key = format!("perk.{}", perk.name.replace(" ", "_").to_lowercase());
-                        let localized_name = localization
+                        let raw_name = localization
                             .get_opt(&key, lang)
-                            .unwrap_or_else(|| capitalize_words(&perk.name));
-                        lines.push(signed_line(localized_name, *val));
+                            .unwrap_or_else(|| perk.name.to_string());
+                        let localized_name = capitalize_words(&raw_name);
+                        lines.push(format!("[perk] {}", signed_line(localized_name, *val)));
                     },
                     _ => {},
                 }
@@ -315,7 +309,7 @@ fn spawn_placeholder(
         },
         BackgroundColor(PLACEHOLDER_COLOR),
         BorderColor::all(BUTTON_BORDER_COLOR),
-        ImageNode::new(assets.image(image_key)).with_mode(NodeImageMode::Stretch),
+        ImageNode::new(assets.image(format!("build_{}", image_key))).with_mode(NodeImageMode::Stretch),
     ));
 }
 
@@ -327,46 +321,55 @@ fn spawn_card(
     name: String,
     name_key: Option<String>,
     lines: Vec<String>,
+    tooltip: Option<RightColumnTooltip>,
 ) {
-    parent
-        .spawn((
-            Node {
-                width: percent(100.),
-                flex_direction: FlexDirection::Row,
-                align_items: AlignItems::FlexStart,
-                flex_shrink: 0.,
-                column_gap: Val::Px(8.),
-                padding: UiRect::all(Val::Px(6.)),
-                margin: UiRect::bottom(Val::Px(6.)),
-                border: UiRect::all(Val::Px(1.)),
+    let mut cmd = parent.spawn((
+        Node {
+            width: percent(100.),
+            flex_direction: FlexDirection::Row,
+            align_items: AlignItems::FlexStart,
+            flex_shrink: 0.,
+            column_gap: Val::Px(8.),
+            padding: UiRect::all(Val::Px(6.)),
+            margin: UiRect::bottom(Val::Px(6.)),
+            border: UiRect::all(Val::Px(1.)),
+            ..default()
+        },
+        BackgroundColor(BAR_BG_COLOR),
+        BorderColor::all(BUTTON_BORDER_COLOR),
+    ));
+
+    if let Some(t) = tooltip {
+        cmd.insert((
+            Button,
+            Interaction::default(),
+            Pickable::default(),
+            t,
+        ));
+        cmd.observe(recolor::<Over>(HOVERED_BUTTON_COLOR));
+        cmd.observe(recolor::<Out>(BAR_BG_COLOR));
+    }
+
+    cmd.with_children(|parent| {
+        spawn_placeholder(parent, assets, image_key, ICON_ITEM);
+
+        parent
+            .spawn(Node {
+                flex_direction: FlexDirection::Column,
                 ..default()
-            },
-            BackgroundColor(BAR_BG_COLOR),
-            BorderColor::all(BUTTON_BORDER_COLOR),
-        ))
-        .with_children(|parent| {
-            spawn_placeholder(parent, assets, image_key, ICON_ITEM);
+            })
+            .with_children(|parent| {
+                let mut name_cmd = parent
+                    .spawn((add_text(name, "bold", 2.3, assets), TextColor(BUTTON_TEXT_COLOR)));
+                if let Some(key) = name_key {
+                    name_cmd.insert(LocalizedText(key));
+                }
 
-            parent
-                .spawn(Node {
-                    flex_direction: FlexDirection::Column,
-                    ..default()
-                })
-                .with_children(|parent| {
-                    let mut name_cmd = parent
-                        .spawn((add_text(name, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
-                    if let Some(key) = name_key {
-                        name_cmd.insert(LocalizedText(key));
-                    }
-
-                    for line in lines {
-                        parent.spawn((
-                            add_text(line, "medium", 1.6, assets),
-                            TextColor(Color::WHITE),
-                        ));
-                    }
-                });
-        });
+                for line in lines {
+                    spawn_rich_text_row(parent, assets, line, 2.0, "medium", Color::WHITE);
+                }
+            });
+    });
 }
 
 /// One of the three combat-stat boxes (attack / defense / initiative).
@@ -375,8 +378,6 @@ fn spawn_combat_stat(
     assets: &WorldAssets,
     localization: &Localization,
     lang: Language,
-    label_key: &str,
-    image_key: &str,
     stat: PlayingStat,
 ) {
     parent
@@ -410,16 +411,18 @@ fn spawn_combat_stat(
                     ..default()
                 },
                 ImageNode {
-                    image: assets.image(image_key),
+                    image: assets.image(stat.to_lowername()),
                     image_mode: NodeImageMode::Stretch,
                     color: Color::srgba(1., 1., 1., 0.3),
                     ..default()
                 },
             ));
+            
+            let label_key = format!("general.{}", stat.to_lowername());
             parent.spawn((
-                add_text(localization.get(label_key, lang), "medium", 2.2, assets),
+                add_text(localization.get(&label_key, lang), "medium", 2.2, assets),
                 TextColor(BUTTON_TEXT_COLOR),
-                LocalizedText(label_key.to_string()),
+                LocalizedText(label_key),
             ));
             parent.spawn((
                 add_text("", "bold", 4.5, assets),
@@ -451,7 +454,7 @@ pub fn setup_playing_screen(
             root_node,
             pickable,
             ImageNode {
-                image: assets.image("base"),
+                image: assets.image("basebg"),
                 image_mode: NodeImageMode::Stretch,
                 color: Color::srgba(0.40, 0.40, 0.40, 1.0),
                 ..default()
@@ -620,6 +623,13 @@ pub fn setup_playing_screen(
                             spawn_playing_action_button(
                                 parent,
                                 Action::Quest,
+                                &assets,
+                                &localization,
+                                lang,
+                            );
+                            spawn_playing_action_button(
+                                parent,
+                                Action::Duel,
                                 &assets,
                                 &localization,
                                 lang,
@@ -1060,8 +1070,6 @@ fn spawn_stats_column(
                         assets,
                         localization,
                         lang,
-                        "general.attack",
-                        "attack_icon",
                         PlayingStat::Attack,
                     );
                     spawn_combat_stat(
@@ -1069,8 +1077,6 @@ fn spawn_stats_column(
                         assets,
                         localization,
                         lang,
-                        "general.defense",
-                        "defense_icon",
                         PlayingStat::Defense,
                     );
                     spawn_combat_stat(
@@ -1078,8 +1084,6 @@ fn spawn_stats_column(
                         assets,
                         localization,
                         lang,
-                        "general.initiative",
-                        "initiative_icon",
                         PlayingStat::Initiative,
                     );
                 });
@@ -1257,62 +1261,165 @@ pub fn equip_slot_tooltip_system(
     settings: Res<Settings>,
     player: Res<Player>,
     level_up: Res<LevelUpPending>,
-    slot_q: Query<(&Interaction, &EquipSlot), Changed<Interaction>>,
+    slot_q: Query<(&Interaction, &EquipSlot)>,
+    changed_slot_q: Query<(), (With<EquipSlot>, Changed<Interaction>)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
     windows: Query<&Window>,
 ) {
     if level_up.active {
-        for entity in tooltip_q.iter() {
-            commands.entity(entity).try_despawn();
-        }
         return;
     }
 
-    let lang = settings.language;
+    if changed_slot_q.is_empty() {
+        return;
+    }
 
+    let mut hovered_slot = None;
     for (interaction, slot) in &slot_q {
-        // Despawn any existing tooltip on any change
-        for entity in tooltip_q.iter() {
-            commands.entity(entity).try_despawn();
-        }
-
         if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
-            let equipped_key = match slot {
-                EquipSlot::Helmet => player.helmet.as_deref(),
-                EquipSlot::Accessory => player.accessory.as_deref(),
-                EquipSlot::Accessory2 => player.accessory2.as_deref(),
-                EquipSlot::WeaponLH => player.weapon_lh.as_deref(),
-                EquipSlot::WeaponRH => player.weapon_rh.as_deref(),
-                EquipSlot::Chestplate => player.armor.as_deref(),
-                EquipSlot::Boots => player.boots.as_deref(),
-                EquipSlot::Gloves => player.gloves.as_deref(),
-            };
+            hovered_slot = Some(slot);
+            break;
+        }
+    }
 
-            if let Some(key) = equipped_key {
-                if let Some(weapon) = get_equipment(key) {
-                    let prefix = match weapon {
-                        Equipment::Weapon(_) => "weapon",
-                        Equipment::Wearable(_) => "wearable",
-                    };
-                    let name = name_with_level(
-                        weapon.name(),
-                        prefix,
-                        weapon.level() as u8,
+    for entity in tooltip_q.iter() {
+        commands.entity(entity).try_despawn();
+    }
+
+    if let Some(slot) = hovered_slot {
+        let lang = settings.language;
+        let equipped_key = match slot {
+            EquipSlot::Helmet => player.helmet.as_deref(),
+            EquipSlot::Accessory => player.accessory.as_deref(),
+            EquipSlot::Accessory2 => player.accessory2.as_deref(),
+            EquipSlot::WeaponLH => player.weapon_lh.as_deref(),
+            EquipSlot::WeaponRH => player.weapon_rh.as_deref(),
+            EquipSlot::Chestplate => player.armor.as_deref(),
+            EquipSlot::Boots => player.boots.as_deref(),
+            EquipSlot::Gloves => player.gloves.as_deref(),
+        };
+
+        if let Some(key) = equipped_key {
+            if let Some(weapon) = get_equipment(key) {
+                let prefix = match weapon {
+                    Equipment::Weapon(_) => "weapon",
+                    Equipment::Wearable(_) => "wearable",
+                };
+                let name = name_with_level(
+                    weapon.name(),
+                    prefix,
+                    weapon.level() as u8,
+                    &localization,
+                    lang,
+                );
+                let stat_lines = weapon.full_description(lang, &localization);
+
+                spawn_item_tooltip(
+                    &mut commands,
+                    &assets,
+                    name,
+                    stat_lines,
+                    &windows,
+                    Some(weapon.price()),
+                    Some(weapon.name().to_string()),
+                );
+            }
+        }
+    }
+}
+
+#[derive(Component, Clone)]
+pub enum RightColumnTooltip {
+    Ability(String),
+    Perk(String),
+    Equipment(String),
+}
+
+pub fn right_column_tooltip_system(
+    mut commands: Commands,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    level_up: Res<LevelUpPending>,
+    right_tab: Res<RightTab>,
+    card_q: Query<(&Interaction, &RightColumnTooltip)>,
+    changed_card_q: Query<(), (With<RightColumnTooltip>, Changed<Interaction>)>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
+    windows: Query<&Window>,
+) {
+    if changed_card_q.is_empty() {
+        return;
+    }
+
+    let mut hovered_card = None;
+    for (interaction, card) in &card_q {
+        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
+            let is_active_tab = if level_up.active {
+                true
+            } else {
+                match card {
+                    RightColumnTooltip::Ability(_) => *right_tab == RightTab::Abilities,
+                    RightColumnTooltip::Perk(_) => *right_tab == RightTab::Perks,
+                    RightColumnTooltip::Equipment(_) => *right_tab == RightTab::Equipment,
+                }
+            };
+            if is_active_tab {
+                hovered_card = Some(card);
+                break;
+            }
+        }
+    }
+
+    for entity in tooltip_q.iter() {
+        commands.entity(entity).try_despawn();
+    }
+
+    if let Some(card) = hovered_card {
+        let lang = settings.language;
+        match card {
+            RightColumnTooltip::Ability(name) => {
+                if let Some(ability) = get_ability(name) {
+                    let title = name_with_level(
+                        &ability.name,
+                        "ability",
+                        ability.level as u8,
                         &localization,
                         lang,
                     );
-                    let stat_lines = weapon_stat_lines(&weapon, &localization, lang);
-
-                    spawn_item_tooltip(
-                        &mut commands,
-                        &assets,
-                        name,
-                        stat_lines,
-                        &windows,
-                        Some(weapon.price()),
-                    );
+                    let lines = ability.full_description(lang, &localization);
+                    spawn_item_tooltip(&mut commands, &assets, title, lines, &windows, None, Some(ability.name.clone()));
                 }
-            }
+            },
+            RightColumnTooltip::Perk(name) => {
+                if let Some(perk) = get_perk(name) {
+                    let title = name_with_level(
+                        &perk.name,
+                        "perk",
+                        perk.level as u8,
+                        &localization,
+                        lang,
+                    );
+                    let lines = perk.full_description(lang, &localization);
+                    spawn_item_tooltip(&mut commands, &assets, title, lines, &windows, None, Some(perk.name.clone()));
+                }
+            },
+            RightColumnTooltip::Equipment(name) => {
+                if let Some(equipment) = get_equipment(name) {
+                    let prefix = match equipment {
+                        Equipment::Weapon(_) => "weapon",
+                        Equipment::Wearable(_) => "wearable",
+                    };
+                    let title = name_with_level(
+                        equipment.name(),
+                        prefix,
+                        equipment.level() as u8,
+                        &localization,
+                        lang,
+                    );
+                    let lines = equipment.full_description(lang, &localization);
+                    spawn_item_tooltip(&mut commands, &assets, title, lines, &windows, Some(equipment.price()), Some(equipment.name().to_string()));
+                }
+            },
         }
     }
 }
@@ -1324,31 +1431,37 @@ pub fn info_tooltip_system(
     settings: Res<Settings>,
     player: Res<Player>,
     level_up: Res<LevelUpPending>,
-    info_q: Query<(&Interaction, &InfoTooltip), Changed<Interaction>>,
+    info_q: Query<(&Interaction, &InfoTooltip)>,
+    changed_info_q: Query<(), (With<InfoTooltip>, Changed<Interaction>)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
     windows: Query<&Window>,
 ) {
     if level_up.active {
-        for entity in tooltip_q.iter() {
-            commands.entity(entity).try_despawn();
-        }
         return;
     }
 
-    let lang = settings.language;
+    if changed_info_q.is_empty() {
+        return;
+    }
 
+    let mut hovered_tooltip = None;
     for (interaction, tooltip) in &info_q {
-        for entity in tooltip_q.iter() {
-            commands.entity(entity).try_despawn();
+        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
+            hovered_tooltip = Some(tooltip);
+            break;
         }
+    }
 
-        if *interaction != Interaction::Hovered && *interaction != Interaction::Pressed {
-            continue;
-        }
+    for entity in tooltip_q.iter() {
+        commands.entity(entity).try_despawn();
+    }
+
+    if let Some(tooltip) = hovered_tooltip {
+        let lang = settings.language;
 
         if matches!(tooltip, InfoTooltip::Pet) {
             spawn_pet_tooltip(&mut commands, &assets, &localization, lang, &player, &windows);
-            continue;
+            return;
         }
 
         if let InfoTooltip::Action(action) = tooltip {
@@ -1363,7 +1476,7 @@ pub fn info_tooltip_system(
                 desc,
                 &windows,
             );
-            continue;
+            return;
         }
 
         let (title, lines) = match tooltip {
@@ -1390,7 +1503,7 @@ pub fn info_tooltip_system(
             InfoTooltip::Action(_) | InfoTooltip::Pet => unreachable!(),
         };
 
-        spawn_item_tooltip(&mut commands, &assets, title, lines, &windows, None);
+        spawn_item_tooltip(&mut commands, &assets, title, lines, &windows, None, None);
     }
 }
 
@@ -1772,7 +1885,7 @@ pub fn rebuild_playing_lists(
             EquipSlot::Gloves => player.gloves.as_deref(),
         };
         image.image = match equipped_key {
-            Some(key) => assets.image(key),
+            Some(key) => assets.image(format!("build_{}", key)),
             None => assets.image("stone"),
         };
     }
@@ -1845,7 +1958,7 @@ pub fn rebuild_playing_lists(
                         &localization,
                         lang,
                     ),
-                    weapon_stat_lines(weapon, &localization, lang),
+                    vec![weapon.description(lang, &localization)],
                     EquipmentCard {
                         key: weapon.name().to_string(),
                         is_equipped: true,
@@ -1875,7 +1988,7 @@ pub fn rebuild_playing_lists(
                         &localization,
                         lang,
                     ),
-                    weapon_stat_lines(weapon, &localization, lang),
+                    vec![weapon.description(lang, &localization)],
                     EquipmentCard {
                         key: weapon.name().to_string(),
                         is_equipped: false,
@@ -1919,6 +2032,7 @@ pub fn rebuild_playing_lists(
                     ),
                     None,
                     vec![ability.description(lang, &localization)],
+                    Some(RightColumnTooltip::Ability(ability.name.clone())),
                 );
             }
         });
@@ -1945,6 +2059,7 @@ pub fn rebuild_playing_lists(
                     name_with_level(&perk.name, "perk", perk.level as u8, &localization, lang),
                     None,
                     vec![perk.description(lang, &localization)],
+                    Some(RightColumnTooltip::Perk(perk.name.clone())),
                 );
             }
         });
@@ -2451,8 +2566,12 @@ pub fn handle_equipment_card_click(
     window_e: Single<Entity, With<Window>>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    right_tab: Res<RightTab>,
     card_q: Query<&EquipmentCard>,
 ) {
+    if *right_tab != RightTab::Equipment {
+        return;
+    }
     if let Ok(card) = card_q.get(event.entity) {
         // Right-click: sell item for full price
         if event.button == PointerButton::Secondary {
@@ -2570,6 +2689,7 @@ fn spawn_equipment_card(
 ) {
     let is_equipped = card.is_equipped;
     let price = card.price;
+    let tooltip = RightColumnTooltip::Equipment(card.key.clone());
     parent
         .spawn((
             Node {
@@ -2590,6 +2710,7 @@ fn spawn_equipment_card(
             Interaction::default(),
             Pickable::default(),
             card,
+            tooltip,
         ))
         .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
         .observe(recolor::<Out>(BAR_BG_COLOR))
@@ -2634,7 +2755,7 @@ fn spawn_equipment_card(
 
                     // Price number (same color as weapon name)
                     parent.spawn((
-                        add_text(format!("{}", price), "bold", 1.9, assets),
+                        add_text(format!("{}", price), "bold", 2.3, assets),
                         TextColor(BUTTON_TEXT_COLOR),
                     ));
                 });
@@ -2649,13 +2770,10 @@ fn spawn_equipment_card(
                 })
                 .with_children(|parent| {
                     parent
-                        .spawn((add_text(name, "bold", 1.9, assets), TextColor(BUTTON_TEXT_COLOR)));
+                        .spawn((add_text(name, "bold", 2.3, assets), TextColor(BUTTON_TEXT_COLOR)));
 
                     for line in lines {
-                        parent.spawn((
-                            add_text(line, "medium", 1.6, assets),
-                            TextColor(Color::WHITE),
-                        ));
+                        spawn_rich_text_row(parent, assets, line, 2.0, "medium", Color::WHITE);
                     }
                 });
         });

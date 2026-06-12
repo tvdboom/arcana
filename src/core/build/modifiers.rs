@@ -112,12 +112,12 @@ impl Modifier {
                 format!("{percentage:+.0}% {kind_str} {resist_str}")
             },
             Self::CategoryPowerMultiplier(category, percentage) => {
-                let category_str = localization.get(format!("general.{}", category.to_string().to_lowercase()), language).to_lowercase();
+                let category_str = localization.get(format!("general.{}", category.to_lowername()), language).to_lowercase();
                 let damage_str = localization.get("general.damage", language).to_lowercase();
                 format!("{percentage:+.0}% {category_str} {damage_str}")
             },
             Self::CategoryResistanceMultiplier(category, percentage) => {
-                let category_str = localization.get(format!("general.{}", category.to_string().to_lowercase()), language).to_lowercase();
+                let category_str = localization.get(format!("general.{}", category.to_lowername()), language).to_lowercase();
                 let resist_str = localization.get("general.resistance", language).to_lowercase();
                 format!("{percentage:+.0}% {category_str} {resist_str}")
             },

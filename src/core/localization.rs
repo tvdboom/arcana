@@ -107,7 +107,13 @@ fn map_localization_key(key: &str) -> String {
     format!("general.{}", normalized)
 }
 
-fn get_custom_localization(key: &str, language: Language) -> Option<String> {
+#[allow(dead_code)]
+fn get_custom_localization(_key: &str, _language: Language) -> Option<String> {
+    None
+}
+
+/*
+fn get_custom_localization_unused(key: &str, language: Language) -> Option<String> {
     let val = match (key, language) {
         // Level
         ("general.level", Language::English) => "Level",
@@ -268,6 +274,7 @@ fn get_custom_localization(key: &str, language: Language) -> Option<String> {
     };
     Some(val.to_string())
 }
+*/
 
 impl Localization {
     pub fn get(&self, key: impl Into<String>, language: Language) -> String {
@@ -281,9 +288,6 @@ impl Localization {
         if let Some(val) = map.get(&mapped_key) {
             return val.clone();
         }
-        if let Some(val) = get_custom_localization(&mapped_key, language) {
-            return val;
-        }
         panic!("Missing localization key: '{}' (mapped from '{}')", mapped_key, key)
     }
 
@@ -294,10 +298,7 @@ impl Localization {
             Language::Spanish => &self.es,
             Language::Dutch => &self.nl,
         };
-        if let Some(val) = map.get(&mapped_key) {
-            return Some(val.clone());
-        }
-        get_custom_localization(&mapped_key, language)
+        map.get(&mapped_key).cloned()
     }
 }
 
@@ -333,22 +334,16 @@ pub fn format_race_description(
     for attr in Attribute::iter() {
         let val = race.characteristic_mod(attr);
         if val != 0 {
-            let sign = if val > 0 {
-                "+"
-            } else {
-                ""
-            };
             let attr_name =
                 localization.get(&format!("attribute.{}", attr.to_lowername()), language);
-            modifier_strs.push(format!("{} {}{}", attr_name, sign, val));
+            modifier_strs.push(format!("  {val:+} {attr_name}"));
         }
     }
 
     if modifier_strs.is_empty() {
         desc
     } else {
-        let modifiers_label = localization.get("general.modifiers", language);
-        format!("{}\n\n{}: {}", desc, modifiers_label, modifier_strs.join(", "))
+        format!("{}\n\n{}", desc, modifier_strs.join("\n"))
     }
 }
 
@@ -363,24 +358,28 @@ pub fn format_class_description(
     let magical_label = localization.get("general.magical", language);
     let ability_label = localization.get("general.ability", language);
     let perk_label = localization.get("general.perk", language);
+    let weapon_label = localization.get("general.weapon", language);
     let bonus_desc = match class {
-        Class::Warrior => {
-            let hp_label = localization.get("general.health", language);
-            format!(" +1 {physical_label} {ability_label}\n +1 {physical_label} {perk_label}\n +20 max {hp_label}")
-        },
-        Class::Mage(_) => {
-            let mp_label = localization.get("general.mana", language);
-            format!(" +1 {magical_label} {ability_label}\n +1 {magical_label} {perk_label}\n +30 max {mp_label}")
-        },
         Class::Assassin => {
+            let finesse_label = localization.get("general.finesse", language);
             let init_label = localization.get("general.initiative", language);
-            format!(" +1 {physical_label} {ability_label}\n +1 {physical_label} {perk_label}\n +2 {init_label}")
+            format!(" +1 {physical_label} {ability_label}\n +1 {finesse_label} {weapon_label}\n +1 {perk_label}\n +2 {init_label}")
         },
         Class::Druid => {
             let nature_label = localization.get("general.nature", language);
             let pet_label = localization.get("general.pet", language);
-            format!(" +1 {magical_label} {ability_label} ({nature_label})\n +1 {magical_label} {perk_label}\n +1 {pet_label}")
+            format!(" +1 {magical_label} {ability_label} ({nature_label})\n +1 {magical_label} {weapon_label}\n +1 {perk_label}\n +1 {pet_label}")
         },
+        Class::Mage(_) => {
+            let mp_label = localization.get("general.mana", language);
+            format!(" +1 {magical_label} {ability_label}\n +1 {magical_label} {weapon_label}\n +1 {perk_label}\n +30 max {mp_label}")
+        },
+        Class::Warrior => {
+            let melee_label = localization.get("general.melee", language);
+            let hp_label = localization.get("general.health", language);
+            format!(" +1 {physical_label} {ability_label}\n +1 {melee_label} {weapon_label}\n +1 {perk_label}\n +20 max {hp_label}")
+        },
+
     };
 
     format!("{desc}\n\n{}", bonus_desc.to_lowercase())
@@ -393,9 +392,8 @@ pub fn format_ajah_description(
 ) -> String {
     let desc = localization.get(&format!("ajah.{}_desc", ajah.to_lowername()), language);
 
-    let magical_label = localization.get("general.magical", language);
     let ability_label = localization.get("general.ability", language);
-
+    let damage_label = localization.get("general.damage", language);
     let kind = match ajah {
         Ajah::Black => Kind::Shadow,
         Ajah::Green => Kind::Nature,
@@ -405,7 +403,7 @@ pub fn format_ajah_description(
 
     let kind_label = localization.get(format!("general.{}", kind.to_lowername()), language);
     let bonus_desc =
-        format!(" +1 {magical_label} {ability_label} ({kind_label})\n +20% {kind_label}");
+        format!(" +1 {kind_label} {ability_label}\n +20% {kind_label} {damage_label}");
 
     format!("{desc}\n\n{}", bonus_desc.to_lowercase())
 }

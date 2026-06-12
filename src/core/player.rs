@@ -181,7 +181,15 @@ impl Player {
     pub fn strength(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Strength);
         let sex_mod = self.sex.characteristic_mod(Attribute::Strength);
-        (self.strength as i32 + race_mod + sex_mod).max(0) as u32
+        let mut equip_mod = 0;
+        for eq in self.equipped_equipment() {
+            for modifier in eq.modifiers() {
+                if let Modifier::AttributeModifier(Attribute::Strength, val) = modifier {
+                    equip_mod += val;
+                }
+            }
+        }
+        (self.strength as i32 + race_mod + sex_mod + equip_mod).max(0) as u32
     }
 
     pub fn strength_mod(&self) -> u32 {
@@ -190,7 +198,15 @@ impl Player {
 
     pub fn dexterity(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Dexterity);
-        (self.dexterity as i32 + race_mod).max(0) as u32
+        let mut equip_mod = 0;
+        for eq in self.equipped_equipment() {
+            for modifier in eq.modifiers() {
+                if let Modifier::AttributeModifier(Attribute::Dexterity, val) = modifier {
+                    equip_mod += val;
+                }
+            }
+        }
+        (self.dexterity as i32 + race_mod + equip_mod).max(0) as u32
     }
 
     pub fn dexterity_mod(&self) -> u32 {
@@ -200,7 +216,15 @@ impl Player {
     pub fn constitution(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Constitution);
         let age_mod = self.stage.characteristic_mod(Attribute::Constitution);
-        (self.constitution as i32 + race_mod - age_mod).max(0) as u32
+        let mut equip_mod = 0;
+        for eq in self.equipped_equipment() {
+            for modifier in eq.modifiers() {
+                if let Modifier::AttributeModifier(Attribute::Constitution, val) = modifier {
+                    equip_mod += val;
+                }
+            }
+        }
+        (self.constitution as i32 + race_mod - age_mod + equip_mod).max(0) as u32
     }
 
     pub fn constitution_mod(&self) -> u32 {
@@ -209,13 +233,29 @@ impl Player {
 
     pub fn intelligence(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Intelligence);
-        (self.intelligence as i32 + race_mod).max(0) as u32
+        let mut equip_mod = 0;
+        for eq in self.equipped_equipment() {
+            for modifier in eq.modifiers() {
+                if let Modifier::AttributeModifier(Attribute::Intelligence, val) = modifier {
+                    equip_mod += val;
+                }
+            }
+        }
+        (self.intelligence as i32 + race_mod + equip_mod).max(0) as u32
     }
 
     pub fn wisdom(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Wisdom);
         let age_mod = self.stage.characteristic_mod(Attribute::Wisdom);
-        (self.wisdom as i32 + race_mod + age_mod).max(0) as u32
+        let mut equip_mod = 0;
+        for eq in self.equipped_equipment() {
+            for modifier in eq.modifiers() {
+                if let Modifier::AttributeModifier(Attribute::Wisdom, val) = modifier {
+                    equip_mod += val;
+                }
+            }
+        }
+        (self.wisdom as i32 + race_mod + age_mod + equip_mod).max(0) as u32
     }
 
     pub fn wisdom_mod(&self) -> u32 {
@@ -225,7 +265,15 @@ impl Player {
     pub fn charisma(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Charisma);
         let sex_mod = self.sex.characteristic_mod(Attribute::Charisma);
-        (self.charisma as i32 + race_mod + sex_mod).max(0) as u32
+        let mut equip_mod = 0;
+        for eq in self.equipped_equipment() {
+            for modifier in eq.modifiers() {
+                if let Modifier::AttributeModifier(Attribute::Charisma, val) = modifier {
+                    equip_mod += val;
+                }
+            }
+        }
+        (self.charisma as i32 + race_mod + sex_mod + equip_mod).max(0) as u32
     }
 
     /// All currently equipped pieces of gear.

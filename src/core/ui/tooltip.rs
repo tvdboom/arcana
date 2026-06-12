@@ -1,13 +1,11 @@
 use crate::core::assets::WorldAssets;
 use crate::core::constants::{BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, PLACEHOLDER_COLOR};
 use crate::core::localization::Localization;
-use crate::core::menu::utils::add_text;
+use crate::core::menu::utils::{add_text, spawn_rich_text_row};
 use crate::core::player::Player;
 use crate::core::settings::Language;
 use crate::utils::{capitalize_words, NameFromEnum};
 use bevy::prelude::*;
-
-const ICON_BADGE: Val = Val::Vw(1.9); // equipped badge overlay
 
 #[derive(Component)]
 pub struct TooltipNode {
@@ -31,6 +29,7 @@ pub struct TooltipContent {
     pub lines: Vec<String>,
     pub badge: Option<TooltipBadge>,
     pub pet_stats: Option<Vec<PetStat>>,
+    pub image: Option<String>,
 }
 
 pub fn spawn_tooltip(
@@ -47,29 +46,50 @@ pub fn spawn_tooltip(
 
     let max_allowed_width = window_width * 0.35;
 
-    let font_size_title = window_height * 0.019;
-    let font_size_desc = window_height * 0.016;
+    let font_size_title = window_height * 0.024;
+    let font_size_desc = window_height * 0.022;
     let char_width_desc = font_size_desc * 0.62;
     let line_height_title = font_size_title * 1.35;
     let line_height_desc = font_size_desc * 1.35;
 
     // Total padding + safety margins = 48.0 px
     let padding_width = 48.0_f32;
+
+    let mut text_allowed_width = max_allowed_width;
+    if content.image.is_some() {
+        text_allowed_width -= 144.0 + 16.0;
+    }
+
     let max_chars_per_line =
-        ((max_allowed_width - padding_width) / char_width_desc).floor().max(30.0) as usize;
+        ((text_allowed_width - padding_width) / char_width_desc).floor().max(15.0) as usize;
 
     // Wrap the description lines
     let mut wrapped_lines = Vec::new();
     for line in &content.lines {
         for sub_line in line.split('\n') {
-            wrapped_lines.extend(wrap_tooltip_line(sub_line, max_chars_per_line));
+            if sub_line.starts_with("• ") {
+                let rest = &sub_line["• ".len()..];
+                let wrapped = wrap_tooltip_line(rest, max_chars_per_line.saturating_sub(3));
+                for (i, wl) in wrapped.iter().enumerate() {
+                    if i == 0 {
+                        wrapped_lines.push(format!("• {}", wl));
+                    } else {
+                        wrapped_lines.push(format!("  {}", wl));
+                    }
+                }
+            } else {
+                wrapped_lines.extend(wrap_tooltip_line(sub_line, max_chars_per_line));
+            }
         }
     }
 
     // Estimate width of content
     let desc_max_chars =
-        wrapped_lines.iter().map(|line| line.chars().count()).max().unwrap_or(0) as f32;
-    let desc_width = desc_max_chars * char_width_desc;
+        wrapped_lines.iter().map(|line| visual_chars_count(line)).max().unwrap_or(0) as f32;
+    let mut desc_width = desc_max_chars * char_width_desc;
+    if content.image.is_some() {
+        desc_width += 144.0 + 16.0;
+    }
 
     let title_chars_width = content.title.chars().count() as f32 * char_width_desc * 1.1;
     let title_row_width = if content.badge.is_some() {
@@ -85,6 +105,9 @@ pub fn spawn_tooltip(
     // Calculate height
     let mut tooltip_height =
         line_height_title + (wrapped_lines.len() as f32) * line_height_desc + 36.0;
+    if content.image.is_some() {
+        tooltip_height = tooltip_height.max(144.0 + 36.0);
+    }
     if content.pet_stats.is_some() {
         let stat_box_height = tooltip_width * 0.32;
         tooltip_height += stat_box_height + 12.0;
@@ -115,7 +138,7 @@ pub fn spawn_tooltip(
             },
             BackgroundColor(Color::srgba_u8(10, 18, 45, 245)),
             BorderColor::all(BUTTON_BORDER_COLOR),
-            GlobalZIndex(200),
+            GlobalZIndex(1000),
             TooltipNode {
                 width: tooltip_width,
                 height: tooltip_height,
@@ -140,8 +163,8 @@ pub fn spawn_tooltip(
                                 // Gold icon
                                 parent.spawn((
                                     Node {
-                                        width: ICON_BADGE,
-                                        height: ICON_BADGE,
+                                        width: Val::Px(32.),
+                                        height: Val::Px(32.),
                                         ..default()
                                     },
                                     ImageNode::new(assets.image("gold"))
@@ -150,7 +173,7 @@ pub fn spawn_tooltip(
 
                                 // Price number
                                 parent.spawn((
-                                    add_text(format!("{}", price_value), "bold", 1.9, assets),
+                                    add_text(format!("{}", price_value), "bold", 2.6, assets),
                                     TextColor(BUTTON_TEXT_COLOR),
                                 ));
                             },
@@ -158,8 +181,8 @@ pub fn spawn_tooltip(
                                 // AP icon (larger!)
                                 parent.spawn((
                                     Node {
-                                        width: Val::Px(24.),
-                                        height: Val::Px(24.),
+                                        width: Val::Px(32.),
+                                        height: Val::Px(32.),
                                         ..default()
                                     },
                                     ImageNode::new(assets.image("ap"))
@@ -168,7 +191,7 @@ pub fn spawn_tooltip(
 
                                 // AP cost number
                                 parent.spawn((
-                                    add_text(format!("{}", ap_cost), "bold", 1.9, assets),
+                                    add_text(format!("{}", ap_cost), "bold", 2.6, assets),
                                     TextColor(BUTTON_TEXT_COLOR),
                                 ));
                             },
@@ -176,18 +199,80 @@ pub fn spawn_tooltip(
                     });
             }
 
-            // Title
-            parent.spawn((
-                add_text(content.title, "bold", 1.9, assets),
-                TextColor(BUTTON_TEXT_COLOR),
-            ));
-
-            // Description
-            if !wrapped_lines.is_empty() {
+            // Content display helper
+            let render_content = |parent: &mut ChildSpawnerCommands| {
+                // Title
                 parent.spawn((
-                    add_text(wrapped_lines.join("\n"), "medium", 1.6, assets),
-                    TextColor(Color::WHITE),
+                    add_text(content.title.clone(), "bold", 2.4, assets),
+                    TextColor(BUTTON_TEXT_COLOR),
                 ));
+
+                // Description
+                if !wrapped_lines.is_empty() {
+                    parent
+                        .spawn(Node {
+                            flex_direction: FlexDirection::Column,
+                            row_gap: Val::Px(2.),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            for line in &wrapped_lines {
+                                if line.starts_with("• ") || line.starts_with("  ") {
+                                    parent.spawn(Node {
+                                        padding: UiRect::left(Val::Px(32.)),
+                                        ..default()
+                                    }).with_children(|parent| {
+                                        spawn_rich_text_row(parent, assets, line, 2.2, "medium", Color::WHITE);
+                                    });
+                                } else {
+                                    spawn_rich_text_row(parent, assets, line, 2.2, "medium", Color::WHITE);
+                                }
+                            }
+                        });
+                }
+            };
+
+            if let Some(ref image_path) = content.image {
+                parent.spawn(Node {
+                    flex_direction: FlexDirection::Row,
+                    column_gap: Val::Px(16.),
+                    align_items: AlignItems::FlexStart,
+                    width: Val::Percent(100.),
+                    ..default()
+                }).with_children(|parent| {
+                    // Left: Image (50% larger!)
+                    parent.spawn((
+                        Node {
+                            width: Val::Px(144.),
+                            height: Val::Px(144.),
+                            flex_shrink: 0.,
+                            border: UiRect::all(Val::Px(1.)),
+                            ..default()
+                        },
+                        BorderColor::all(BUTTON_BORDER_COLOR),
+                    )).with_children(|parent| {
+                        parent.spawn((
+                            Node {
+                                width: Val::Percent(100.),
+                                height: Val::Percent(100.),
+                                ..default()
+                            },
+                            ImageNode::new(assets.image(format!("build_{}", image_path))).with_mode(NodeImageMode::Stretch),
+                        ));
+                    });
+
+                    // Right: Column of content
+                    parent.spawn(Node {
+                        flex_direction: FlexDirection::Column,
+                        row_gap: Val::Px(4.),
+                        width: Val::Percent(100.),
+                        ..default()
+                    }).with_children(|parent| {
+                        render_content(parent);
+                    });
+                });
+            } else {
+                render_content(parent);
             }
 
             // Pet stats if provided
@@ -239,20 +324,21 @@ pub fn spawn_pet_tooltip(
         pet_stats: Some(vec![
             PetStat {
                 label: localization.get("attack", lang),
-                image_key: "attack_icon".to_string(),
+                image_key: "attack".to_string(),
                 value: pet.attack,
             },
             PetStat {
                 label: localization.get("defense", lang),
-                image_key: "defense_icon".to_string(),
+                image_key: "defense".to_string(),
                 value: pet.defense,
             },
             PetStat {
                 label: localization.get("initiative", lang),
-                image_key: "initiative_icon".to_string(),
+                image_key: "initiative".to_string(),
                 value: pet.initiative,
             },
         ]),
+        image: None,
     };
 
     spawn_tooltip(commands, assets, content, windows);
@@ -271,6 +357,7 @@ pub fn spawn_action_tooltip(
         lines: vec![desc],
         badge: Some(TooltipBadge::ActionPoints(ap_cost)),
         pet_stats: None,
+        image: None,
     };
 
     spawn_tooltip(commands, assets, content, windows);
@@ -283,32 +370,52 @@ pub fn spawn_item_tooltip(
     lines: Vec<String>,
     windows: &Query<&Window>,
     price: Option<u32>,
+    image: Option<String>,
 ) {
     let content = TooltipContent {
         title,
         lines,
         badge: price.map(TooltipBadge::Price),
         pet_stats: None,
+        image,
     };
 
     spawn_tooltip(commands, assets, content, windows);
 }
 
+pub fn visual_chars_count(s: &str) -> usize {
+    let mut count = 0;
+    let mut in_brackets = false;
+    for c in s.chars() {
+        if c == '[' {
+            in_brackets = true;
+            count += 1;
+        } else if c == ']' {
+            in_brackets = false;
+        } else if !in_brackets {
+            count += 1;
+        }
+    }
+    count
+}
+
 pub fn wrap_tooltip_line(line: &str, max_chars: usize) -> Vec<String> {
-    if line.chars().count() <= max_chars {
+    if visual_chars_count(line) <= max_chars {
         return vec![line.to_string()];
     }
 
     let mut lines = Vec::new();
     let mut current = String::new();
     for word in line.split_whitespace() {
-        let next_len = current.chars().count()
+        let current_visual = visual_chars_count(&current);
+        let word_visual = visual_chars_count(word);
+        let next_len = current_visual
             + if current.is_empty() {
                 0
             } else {
                 1
             }
-            + word.chars().count();
+            + word_visual;
         if next_len > max_chars && !current.is_empty() {
             lines.push(current);
             current = word.to_string();

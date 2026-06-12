@@ -6,7 +6,7 @@ use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::build::equipment::Kind;
 use crate::core::build::weapons::Category;
-use crate::core::catalog::{all_abilities, all_weapons};
+use crate::core::catalog::{all_abilities, all_perks, all_weapons};
 use crate::core::classes::{Ajah, Class};
 use crate::core::constants::*;
 use crate::core::localization::*;
@@ -1349,10 +1349,18 @@ impl SelectionItem for Class {
 
         player.abilities = vec![ability.name.clone()];
 
+        let perk = all_perks()
+            .iter()
+            .filter(|a| a.level == 1)
+            .choose(&mut rng())
+            .unwrap();
+
+        player.perks = vec![perk.name.clone()];
+
         let weapon = all_weapons()
             .iter()
             .filter(|a| {
-                a.level == 1
+                a.level < 3
                     && match *self {
                         Class::Assassin => a.category == Category::Finesse,
                         Class::Druid => a.category == Category::Magical,
@@ -1403,13 +1411,14 @@ impl SelectionItem for Ajah {
         let ability = all_abilities()
             .iter()
             .filter(|a| {
-                a.level == 1
+                a.level < 3
                     && match *self {
                         Ajah::Black => a.kind == Kind::Shadow,
                         Ajah::Green => a.kind == Kind::Nature,
                         Ajah::Red => a.kind == Kind::Fire,
                         Ajah::White => a.kind == Kind::Ice,
                     }
+                    && !player.abilities.contains(&a.name)
             })
             .choose(&mut rng())
             .unwrap();

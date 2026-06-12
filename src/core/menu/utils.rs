@@ -70,3 +70,65 @@ pub fn reimage<E: Debug + Clone + Reflect>(
         };
     }
 }
+
+pub fn spawn_rich_text_row(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    line: impl Into<String>,
+    font_size: f32,
+    font: &str,
+    color: Color,
+) {
+    let line_str = line.into();
+    if !line_str.contains('[') || !line_str.contains(']') {
+        parent.spawn((
+            add_text(line_str, font, font_size, assets),
+            TextColor(color),
+        ));
+        return;
+    }
+
+    parent.spawn(Node {
+        flex_direction: FlexDirection::Row,
+        align_items: AlignItems::Center,
+        flex_wrap: FlexWrap::Wrap,
+        column_gap: Val::Px(2.),
+        ..default()
+    }).with_children(|parent| {
+        let mut remaining = &line_str[..];
+        while let Some(start_idx) = remaining.find('[') {
+            if let Some(end_idx) = remaining[start_idx..].find(']') {
+                let actual_end = start_idx + end_idx;
+                let before = &remaining[..start_idx];
+                if !before.is_empty() {
+                    parent.spawn((
+                        add_text(before, font, font_size, assets),
+                        TextColor(color),
+                    ));
+                }
+
+                parent.spawn((
+                    Node {
+                        width: Val::Vh(font_size * 1.35),
+                        height: Val::Vh(font_size * 1.35),
+                        align_self: AlignSelf::Center,
+                        ..default()
+                    },
+                    ImageNode::new(assets.image(&remaining[start_idx + 1..actual_end]))
+                        .with_mode(NodeImageMode::Stretch),
+                ));
+
+                remaining = &remaining[actual_end + 1..];
+            } else {
+                break;
+            }
+        }
+
+        if !remaining.is_empty() {
+            parent.spawn((
+                add_text(remaining, font, font_size, assets),
+                TextColor(color),
+            ));
+        }
+    });
+}

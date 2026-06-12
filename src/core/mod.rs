@@ -169,6 +169,7 @@ impl Plugin for GamePlugin {
                     scroll_system,
                     update_right_scrollbar_system.after(scroll_system),
                     equip_slot_tooltip_system,
+                    right_column_tooltip_system,
                     info_tooltip_system,
                     tooltip_follow_cursor_system,
                     tick_gold_toasts,

@@ -53,34 +53,6 @@ const UNIQUE_MODIFIERS: &[&str] = &[
     "of the skies",
 ];
 
-const COSMIC_POOL: &[&str] = &[
-    "Chronos Rift",
-    "Supernova Burst",
-    "Astral Alignment",
-    "Gravity Well",
-    "Nebula Shroud",
-    "Cosmic Flux",
-    "Celestial Gateway",
-    "Starfall Cascade",
-    "Galaxy Swirl",
-    "Singularity Event",
-    "Nebula Mist",
-    "Pulsar Beam",
-    "Starlight Blessing",
-    "Void Warp",
-    "Quantum Jump",
-    "Aetherial Shield",
-    "Temporal Loop",
-    "Solar Flare",
-    "Moonbeam Aegis",
-    "Eclipse Strike",
-    "Nebulous Barrier",
-    "Star Shard",
-    "Supernova Blast",
-    "Black Hole Vortex",
-    "Astral Grace",
-];
-
 const SHADOW_POOL: &[&str] = &[
     "Vampiric Touch",
     "Soul Drain",
@@ -165,34 +137,6 @@ const NATURE_POOL: &[&str] = &[
     "Ivy Lash",
 ];
 
-const LIGHTNING_POOL: &[&str] = &[
-    "Chain Capacitor",
-    "Overload Surge",
-    "Thunderclad Dash",
-    "Static Discharge",
-    "Volt Strike",
-    "Thunder Clap",
-    "Tesla Overcharge",
-    "Lightning Rod",
-    "Galvanic Arc",
-    "Storm Barrier",
-    "Shocking Grasp",
-    "Fulgurite Spike",
-    "Plasma Ray",
-    "Ion Storm",
-    "Blitz Speed",
-    "Magnetic Pull",
-    "Current Ripple",
-    "Spark shower",
-    "Sonic Boom",
-    "Nimbus Ride",
-    "Stormlord Call",
-    "Electro Spark",
-    "Volt Barrier",
-    "Sky Strike",
-    "Flash Bolt",
-];
-
 const FROST_POOL: &[&str] = &[
     "Glacial Spike",
     "Ice Shackle",
@@ -249,7 +193,7 @@ const FIRE_POOL: &[&str] = &[
     "Sunfire Spike",
 ];
 
-const MARTIAL_POOL: &[&str] = &[
+const PHYSICAL_POOL: &[&str] = &[
     "Heavy Strike",
     "Blade Rush",
     "Furious Slash",
@@ -265,9 +209,6 @@ const MARTIAL_POOL: &[&str] = &[
     "Rend Flesh",
     "Battle Cry",
     "Mortal Strike",
-];
-
-const BULWARK_POOL: &[&str] = &[
     "Iron Wall",
     "Shield Block",
     "Unbreakable Guard",
@@ -283,9 +224,6 @@ const BULWARK_POOL: &[&str] = &[
     "Guardian Barrier",
     "Last Stand",
     "Vanguard Aegis",
-];
-
-const ASSASSINATION_POOL: &[&str] = &[
     "Viper Venom",
     "Sneak Attack",
     "Backstab",
@@ -301,9 +239,6 @@ const ASSASSINATION_POOL: &[&str] = &[
     "Venomous Bite",
     "Agile Dagger",
     "Assassins Mark",
-];
-
-const SKIRMISH_POOL: &[&str] = &[
     "Swift Step",
     "Dodge Roll",
     "Quick Dash",
@@ -319,42 +254,6 @@ const SKIRMISH_POOL: &[&str] = &[
     "Quick Reflexes",
     "Fast Step",
     "Sidestep",
-];
-
-const TACTIC_POOL: &[&str] = &[
-    "Precision Aim",
-    "Find Weakness",
-    "Expose Armor",
-    "Tactical Focus",
-    "Target Mark",
-    "Analyze Flow",
-    "Calculated Strike",
-    "Clever Trap",
-    "Premeditated Shot",
-    "Smart Combat",
-    "Cunning Plan",
-    "Disarming Strike",
-    "Exploit Gap",
-    "Battle Map",
-    "Strategic Position",
-];
-
-const COMMAND_POOL: &[&str] = &[
-    "Rallying Cry",
-    "Inspirational Horn",
-    "Pack Leader",
-    "Summon Ally",
-    "Beast Frenzy",
-    "Commanding Voice",
-    "Roar of Triumph",
-    "Call of the Wild",
-    "Minion Fury",
-    "Tame Companion",
-    "Battle Orders",
-    "Coordinated Attack",
-    "Loyal Pack",
-    "Alpha Instinct",
-    "War Horn",
 ];
 
 fn get_last_number(s: &str) -> Option<f64> {
@@ -378,6 +277,19 @@ fn get_last_number(s: &str) -> Option<f64> {
         }
     }
     numbers.last().copied()
+}
+
+fn capitalize_words(s: &str) -> String {
+    s.split_whitespace()
+        .map(|word| {
+            let mut chars = word.chars();
+            match chars.next() {
+                None => String::new(),
+                Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+            }
+        })
+        .collect::<Vec<String>>()
+        .join(" ")
 }
 
 fn get_image_score(filename: &str) -> f64 {
@@ -516,7 +428,7 @@ fn main() {
     fs::create_dir_all("assets/inventory").unwrap();
 
     // 1. ABILITIES
-    let abilities_dir = "assets/images/inventory/abilities";
+    let abilities_dir = "assets/images/build/abilities";
     let mut abilities_files = Vec::new();
     if let Ok(entries) = fs::read_dir(abilities_dir) {
         for entry in entries {
@@ -548,28 +460,12 @@ fn main() {
         }
 
         let lower = filename.to_lowercase();
-        let mut kind = "Nature";
-        let mut pool = NATURE_POOL;
+        let mut kind = "Physical";
+        let mut pool = PHYSICAL_POOL;
 
         if [
-            "fire",
-            "pyro",
-            "flame",
-            "infernal",
-            "burn",
-            "cinder",
-            "combustion",
-            "lava",
-            "blast",
-            "sun",
-            "phoenix",
-            "red",
-            "heat",
-            "ash",
-            "meteor",
-            "scorch",
-            "singe",
-            "magma",
+            "fire", "pyro", "flame", "infernal", "burn", "cinder", "combustion", "lava", "blast",
+            "sun", "phoenix", "red", "heat", "ash", "meteor", "scorch", "singe", "magma",
         ]
         .iter()
         .any(|x| lower.contains(x))
@@ -583,36 +479,11 @@ fn main() {
         .iter()
         .any(|x| lower.contains(x))
         {
-            kind = "Frost";
+            kind = "Ice";
             pool = FROST_POOL;
         } else if [
-            "lightn",
-            "bolt",
-            "static",
-            "overload",
-            "volt",
-            "thunder",
-            "discharge",
-            "capacitor",
-            "surge",
-            "spark",
-            "storm",
-            "shock",
-            "electric",
-            "current",
-            "charge",
-            "plasma",
-            "flash",
-            "arc",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Lightning";
-            pool = LIGHTNING_POOL;
-        } else if [
             "holy", "smite", "divine", "radiance", "lay", "judgment", "sacred", "bastion", "light",
-            "heal", "shield", "bless", "angel", "glory", "pray", "aura", "cure",
+            "heal", "shield", "bless", "angel", "glory", "pray", "aura", "cure", "priest", "cleric",
         ]
         .iter()
         .any(|x| lower.contains(x))
@@ -620,30 +491,9 @@ fn main() {
             kind = "Holy";
             pool = HOLY_POOL;
         } else if [
-            "shadow",
-            "dark",
-            "curse",
-            "vampiric",
-            "agony",
-            "soul",
-            "covenant",
-            "withering",
-            "drain",
-            "death",
-            "devil",
-            "demonic",
-            "unholy",
-            "evil",
-            "hex",
-            "blackwater",
-            "plague",
-            "fear",
-            "terror",
-            "ghoul",
-            "spirit",
-            "chain",
-            "shackle",
-            "doom",
+            "shadow", "dark", "curse", "vampiric", "agony", "soul", "covenant", "withering", "drain",
+            "death", "devil", "demonic", "unholy", "evil", "hex", "blackwater", "plague", "fear",
+            "terror", "ghoul", "spirit", "chain", "shackle", "doom", "necrom",
         ]
         .iter()
         .any(|x| lower.contains(x))
@@ -651,128 +501,14 @@ fn main() {
             kind = "Shadow";
             pool = SHADOW_POOL;
         } else if [
-            "cosmic",
-            "chronos",
-            "rift",
-            "supernova",
-            "burst",
-            "astral",
-            "alignment",
-            "gravity",
-            "nebula",
-            "shroud",
-            "moon",
-            "star",
-            "time",
-            "void",
-            "portal",
-            "eclipse",
+            "nature", "bramble", "wild", "thorn", "bloom", "oak", "earth", "growth", "root",
+            "leaf", "spore", "ivy", "forest", "grove", "poison", "venom", "toxic",
         ]
         .iter()
         .any(|x| lower.contains(x))
         {
-            kind = "Cosmic";
-            pool = COSMIC_POOL;
-        } else if [
-            "slash", "cleave", "cut", "rend", "bash", "pierce", "blade", "sword", "weapon",
-            "punch", "kick", "heavy", "martial", "strike",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Martial";
-            pool = &[
-                "Heavy Strike",
-                "Overhead Slash",
-                "Cleaving Swing",
-                "Shield Bash",
-                "Piercing Thrust",
-                "Blade Dance",
-                "Flurry of Blows",
-                "Decisive Cut",
-                "Sweeping Kick",
-                "Concussive Blow",
-            ];
-        } else if [
-            "assassin",
-            "stab",
-            "poison",
-            "stealth",
-            "bleed",
-            "dagger",
-            "backstab",
-            "crit",
-            "critical",
-            "lethal",
-            "venom",
-            "shadowstep",
-            "cloak",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Assassination";
-            pool = &[
-                "Backstab",
-                "Poison Blade",
-                "Stealth Strike",
-                "Shadowstep",
-                "Lethal Venom",
-                "Bleeding Cut",
-                "Dagger Fan",
-                "Assassinate",
-                "Critical Pierce",
-                "Cloak of Shadows",
-            ];
-        } else if [
-            "guard",
-            "defend",
-            "block",
-            "wall",
-            "fortress",
-            "armor",
-            "iron",
-            "barricade",
-            "parry",
-            "taunt",
-            "bulwark",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Bulwark";
-            pool = &[
-                "Iron Guard",
-                "Shield Block",
-                "Unbreakable Wall",
-                "Defensive Parry",
-                "Challenging Taunt",
-                "Fortress Stance",
-                "Barricade",
-                "Bulwark Shield",
-                "Stalwart Defense",
-                "Spiked Armor",
-            ];
-        } else if [
-            "bow", "arrow", "shot", "shoot", "ranged", "skirmish", "trap", "hunt", "quiver", "aim",
-            "snipe",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Skirmish";
-            pool = &[
-                "Aimed Shot",
-                "Arrow Rain",
-                "Piercing Bolt",
-                "Skirmish Step",
-                "Hunter Trap",
-                "Sniper Focus",
-                "Quiver Burst",
-                "Double Shot",
-                "Concussive Arrow",
-                "Crippling Shot",
-            ];
+            kind = "Nature";
+            pool = NATURE_POOL;
         }
 
         let mut cleaned = clean_name(filename);
@@ -785,167 +521,88 @@ fn main() {
 
         let mut name = cleaned.to_lowercase();
         let mut ctr = 1;
-        while seen_abilities.contains(&name) {
+        while seen_abilities.contains(&capitalize_words(&name)) {
             let mod_idx = (idx + ctr as usize) % UNIQUE_MODIFIERS.len();
             name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx]);
             ctr += 1;
         }
+        let name = capitalize_words(&name);
         seen_abilities.push(name.clone());
 
         let mana_cost = 5 + level * 2 + (idx % 3) as u32;
-        let base_stat = 10 + level * 8 + (idx % 5) as u32 * 2;
-        let scaling_factor = 0.5 + level as f32 * 0.1 + (idx % 4) as f32 * 0.05;
-        let cooldown = 10.0 - level as f32 * 0.3 + (idx % 5) as f32 * 0.2;
+        let cooldown = (10.0 - level as f32 * 0.3 + (idx % 5) as f32 * 0.2).max(1.0);
         let is_aoe = (level % 4 == 0)
             || ["wave", "rain", "blizzard", "storm", "aoe", "clones", "explode"]
                 .iter()
                 .any(|x| lower.contains(x));
 
         let mut effects = Vec::new();
-        if level >= 5 {
-            match kind {
-                "Fire" => {
-                    if idx % 2 == 0 {
-                        effects.push(format!(
-                            "Burn(damage_per_sec: {}, duration: 4.0)",
-                            level * 2 + (idx % 3) as u32
-                        ));
-                    } else {
-                        effects.push(format!(
-                            "Empower(damage_bonus_pct: {:.2}, duration: 5.0)",
-                            0.05 + (idx % 3) as f32 * 0.02
-                        ));
-                    }
-                },
-                "Frost" => {
-                    if idx % 2 == 0 {
-                        effects.push(format!(
-                            "Freeze(attack_speed_reduction: {:.2}, duration: 3.0)",
-                            0.1 + level as f32 * 0.01 + (idx % 3) as f32 * 0.02
-                        ));
-                    } else {
-                        effects.push(format!(
-                            "ChillBlast(radius: 3.0, frost_damage: {})",
-                            level * 3 + (idx % 5) as u32
-                        ));
-                    }
-                },
-                "Lightning" => {
-                    if idx % 2 == 0 {
-                        effects.push(format!(
-                            "ChainArc(jumps: {}, damage_decay_pct: 0.2)",
-                            1 + level / 5 + (idx % 2) as u32
-                        ));
-                    } else {
-                        effects.push(format!(
-                            "Haste(initiative_bonus: {:.2}, duration: 4.0)",
-                            0.1 + (idx % 3) as f32 * 0.05
-                        ));
-                    }
-                },
-                "Nature" => {
-                    if idx % 2 == 0 {
-                        effects.push(format!(
-                            "Poison(damage_per_sec: {}, duration: 5.0)",
-                            level + (idx % 3) as u32
-                        ));
-                    } else {
-                        effects.push(format!(
-                            "Immobilize(duration: {:.1})",
-                            2.0 + (idx % 3) as f32 * 0.5
-                        ));
-                    }
-                },
-                "Holy" => {
-                    if idx % 3 == 0 {
-                        effects.push(format!(
-                            "Regen(heal_per_sec: {}, duration: 5.0)",
-                            level * 2 + (idx % 4) as u32
-                        ));
-                    } else if idx % 3 == 1 {
-                        effects.push(format!(
-                            "HealMaxHealthPct(percentage: {:.2})",
-                            0.15 + (level as f32 * 0.01) + (idx % 3) as f32 * 0.02
-                        ));
-                    } else {
-                        effects.push("Purge".to_string());
-                    }
-                },
-                "Shadow" => {
-                    if idx % 2 == 0 {
-                        effects.push(format!(
-                            "Vulnerability(damage_taken_multiplier: {:.2}, duration: 5.0)",
-                            1.05 + level as f32 * 0.01 + (idx % 3) as f32 * 0.02
-                        ));
-                    } else {
-                        effects.push(format!(
-                            "DoomCurse(stacks_required: 3, explosion_damage: {})",
-                            level * 10 + (idx % 5) as u32
-                        ));
-                    }
-                },
-                "Martial" => {
-                    if idx % 2 == 0 {
-                        effects.push(format!(
-                            "Bleed(damage_per_sec: {}, duration: 4.0)",
-                            level * 2 + (idx % 3) as u32
-                        ));
-                    } else {
-                        effects.push(format!(
-                            "Weaken(attack_power_reduction: {}, duration: 4.0)",
-                            level + (idx % 3) as u32
-                        ));
-                    }
-                },
-                "Assassination" => {
-                    if idx % 2 == 0 {
-                        effects.push(format!(
-                            "Lifesteal(percentage: {:.2})",
-                            0.05 + level as f32 * 0.01
-                        ));
-                    } else {
-                        effects.push("Blind(miss_chance: 0.25, duration: 3.0)".to_string());
-                    }
-                },
-                "Bulwark" => {
-                    if idx % 2 == 0 {
-                        effects.push(format!(
-                            "Fortify(armor_bonus_pct: {:.2}, duration: 5.0)",
-                            0.10 + level as f32 * 0.01
-                        ));
-                    } else {
-                        effects.push(format!(
-                            "Thorns(damage_reflected: {}, duration: 5.0)",
-                            level * 2 + (idx % 3) as u32
-                        ));
-                    }
-                },
-                "Skirmish" => {
-                    if idx % 2 == 0 {
-                        effects
-                            .push(format!("Stun(duration: {:.1})", 1.0 + (idx % 3) as f32 * 0.5));
-                    } else {
-                        effects.push(format!(
-                            "Focus(crit_chance_bonus: {:.2}, duration: 4.0)",
-                            0.05 + level as f32 * 0.01
-                        ));
-                    }
-                },
-                _ => {
-                    if idx % 3 == 0 {
-                        effects.push(format!(
-                            "TimeWarp(initiative_reduction: {:.2}, duration: 4.0)",
-                            0.05 + level as f32 * 0.01 + (idx % 3) as f32 * 0.01
-                        ));
-                    } else if idx % 3 == 1 {
-                        effects.push(format!(
-                            "HealMaxManaPct(percentage: {:.2})",
-                            0.15 + (level as f32 * 0.01) + (idx % 3) as f32 * 0.02
-                        ));
-                    } else {
-                        effects.push(format!("Silence(duration: {:.1})", 2.0 + (idx % 3) as f32));
-                    }
-                },
+        let mut on_self = false;
+
+        match kind {
+            "Fire" => {
+                effects.push(format!(
+                    "Burn(damage: {}, duration: 4.0)",
+                    level * 2 + (idx % 3) as u32
+                ));
+            },
+            "Ice" => {
+                effects.push(format!(
+                    "Freeze(attack_speed_pct: {:.1}, duration: 3.0)",
+                    -10.0 - (level as f32 * 1.5)
+                ));
+            },
+            "Nature" => {
+                if idx % 2 == 0 {
+                    effects.push(format!(
+                        "Poison(damage: {}, duration: 5.0)",
+                        level + (idx % 3) as u32
+                    ));
+                } else {
+                    effects.push(format!(
+                        "Immobilize(duration: {:.1})",
+                        2.0 + (idx % 3) as f32 * 0.5
+                    ));
+                }
+            },
+            "Holy" => {
+                on_self = true;
+                if idx % 2 == 0 {
+                    effects.push(format!(
+                        "Regen(heal: {}, duration: 5.0)",
+                        level * 2 + (idx % 4) as u32
+                    ));
+                } else {
+                    effects.push("Purge".to_string());
+                }
+            },
+            "Shadow" => {
+                if idx % 2 == 0 {
+                    effects.push(format!(
+                        "Vulnerability(damage_pct: {:.1}, duration: 5.0)",
+                        5.0 + level as f32 * 1.0
+                    ));
+                } else {
+                    effects.push(format!(
+                        "Paranoia(initiative_pct: {:.1}, duration: 5.0)",
+                        -5.0 - level as f32 * 1.0
+                    ));
+                }
+            },
+            _ => { // Physical
+                if idx % 3 == 0 {
+                    effects.push(format!(
+                        "Bleed(damage_pct: {:.1})",
+                        10.0 + level as f32 * 5.0
+                    ));
+                } else if idx % 3 == 1 {
+                    effects.push(format!(
+                        "Cleave(damage_pct: {:.1}, duration: 4.0)",
+                        20.0 + level as f32 * 2.0
+                    ));
+                } else {
+                    effects.push(format!("Pierce(damage: {})", level * 5));
+                }
             }
         }
         let effects_str = effects.join(", ");
@@ -953,13 +610,12 @@ fn main() {
         abilities_ron.push_str(&format!(
             "    (
         name: \"{}\",
-        image: \"images/inventory/abilities/{}\",
+        image: \"images/build/abilities/{}\",
         kind: {},
         level: {},
         mana_cost: {},
-        base: {},
-        scaling_factor: {:.1},
         cooldown: {:.1},
+        on_self: {},
         is_aoe: {},
         effects: [{}],
     ),
@@ -969,9 +625,8 @@ fn main() {
             kind,
             level,
             mana_cost,
-            base_stat,
-            scaling_factor,
             cooldown,
+            on_self,
             is_aoe,
             effects_str
         ));
@@ -982,7 +637,7 @@ fn main() {
     println!("Generated {} abilities in abilities.ron", total_abs);
 
     // 2. PERKS
-    let perks_dir = "assets/images/inventory/perks";
+    let perks_dir = "assets/images/build/perks";
     let mut perks_files = Vec::new();
     if let Ok(entries) = fs::read_dir(perks_dir) {
         for entry in entries {
@@ -1014,33 +669,15 @@ fn main() {
         }
 
         let lower = filename.to_lowercase();
-        let kind;
-        let pool;
+        let mut pool = PHYSICAL_POOL;
 
         if [
-            "fire",
-            "pyro",
-            "flame",
-            "infernal",
-            "burn",
-            "cinder",
-            "combustion",
-            "lava",
-            "blast",
-            "sun",
-            "phoenix",
-            "red",
-            "heat",
-            "ash",
-            "meteor",
-            "scorch",
-            "singe",
-            "magma",
+            "fire", "pyro", "flame", "infernal", "burn", "cinder", "combustion", "lava", "blast",
+            "sun", "phoenix", "red", "heat", "ash", "meteor", "scorch", "singe", "magma",
         ]
         .iter()
         .any(|x| lower.contains(x))
         {
-            kind = "Fire";
             pool = FIRE_POOL;
         } else if [
             "frost", "ice", "chill", "cold", "blizzard", "glacial", "tomb", "shackle", "freeze",
@@ -1049,283 +686,32 @@ fn main() {
         .iter()
         .any(|x| lower.contains(x))
         {
-            kind = "Frost";
             pool = FROST_POOL;
         } else if [
-            "lightn",
-            "bolt",
-            "static",
-            "overload",
-            "volt",
-            "thunder",
-            "discharge",
-            "capacitor",
-            "surge",
-            "spark",
-            "storm",
-            "shock",
-            "electric",
-            "current",
-            "charge",
-            "plasma",
-            "flash",
-            "arc",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Lightning";
-            pool = LIGHTNING_POOL;
-        } else if [
             "holy", "smite", "divine", "radiance", "lay", "judgment", "sacred", "bastion", "light",
-            "heal", "shield", "bless", "angel", "glory", "pray", "aura", "cure", "priest",
-            "cleric",
+            "heal", "shield", "bless", "angel", "glory", "pray", "aura", "cure", "priest", "cleric",
         ]
         .iter()
         .any(|x| lower.contains(x))
         {
-            kind = "Holy";
             pool = HOLY_POOL;
         } else if [
-            "shadow",
-            "dark",
-            "curse",
-            "vampiric",
-            "agony",
-            "soul",
-            "covenant",
-            "withering",
-            "drain",
-            "death",
-            "devil",
-            "demonic",
-            "unholy",
-            "evil",
-            "hex",
-            "blackwater",
-            "plague",
-            "fear",
-            "terror",
-            "ghoul",
-            "spirit",
-            "chain",
-            "shackle",
-            "doom",
-            "necrom",
+            "shadow", "dark", "curse", "vampiric", "agony", "soul", "covenant", "withering", "drain",
+            "death", "devil", "demonic", "unholy", "evil", "hex", "blackwater", "plague", "fear",
+            "terror", "ghoul", "spirit", "chain", "shackle", "doom", "necrom",
         ]
         .iter()
         .any(|x| lower.contains(x))
         {
-            kind = "Shadow";
             pool = SHADOW_POOL;
         } else if [
-            "cosmic",
-            "chronos",
-            "rift",
-            "supernova",
-            "burst",
-            "astral",
-            "alignment",
-            "gravity",
-            "nebula",
-            "shroud",
-            "moon",
-            "star",
-            "time",
-            "void",
-            "portal",
-            "eclipse",
-            "space",
-            "galaxy",
-            "pulsar",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Cosmic";
-            pool = COSMIC_POOL;
-        } else if [
-            "assassin",
-            "stab",
-            "stealth",
-            "hidden",
-            "sneak",
-            "backstab",
-            "dagger",
-            "poison",
-            "toxin",
-            "venom",
-            "bleed",
-            "lethal",
-            "fatal",
-            "execut",
-            "slice",
-            "cut",
-            "silent",
-            "shadowstrike",
-            "crit",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Assassination";
-            pool = ASSASSINATION_POOL;
-        } else if [
-            "shield",
-            "block",
-            "parry",
-            "guard",
-            "wall",
-            "defend",
-            "bastion",
-            "fortress",
-            "armor",
-            "absorb",
-            "barrier",
-            "bulk",
-            "sturdy",
-            "unyielding",
-            "iron",
-            "stone",
-            "hard",
-            "tough",
-            "heavy",
-            "fortify",
-            "resist",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Bulwark";
-            pool = BULWARK_POOL;
-        } else if [
-            "skirmish", "dodge", "evade", "swift", "quick", "dash", "roll", "flee", "mobility",
-            "jump", "leap", "throw", "toss", "ranger", "scout", "agile", "haste", "speed", "wind",
-            "arrow", "bow", "shoot", "distance", "run",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Skirmish";
-            pool = SKIRMISH_POOL;
-        } else if [
-            "tactic",
-            "plan",
-            "analyze",
-            "find",
-            "scout",
-            "expose",
-            "weakness",
-            "focus",
-            "precision",
-            "aim",
-            "target",
-            "mark",
-            "study",
-            "prep",
-            "exploit",
-            "cunning",
-            "smart",
-            "clever",
-            "trap",
-            "disarm",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Tactic";
-            pool = TACTIC_POOL;
-        } else if [
-            "command",
-            "leader",
-            "rally",
-            "shout",
-            "cry",
-            "horn",
-            "order",
-            "inspire",
-            "pet",
-            "summon",
-            "beast",
-            "minion",
-            "companion",
-            "tame",
-            "call",
-            "roar",
-            "frenzy",
-            "pack",
-            "ally",
-            "allies",
-            "wolf",
-            "bear",
-            "eagle",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Command";
-            pool = COMMAND_POOL;
-        } else if [
-            "martial",
-            "strike",
-            "attack",
-            "slash",
-            "cut",
-            "pierce",
-            "smash",
-            "punch",
-            "swing",
-            "kick",
-            "jab",
-            "claw",
-            "rend",
-            "combat",
-            "melee",
-            "blade",
-            "fist",
-            "bash",
-            "hammer",
-            "axe",
-            "sword",
-            "mace",
-            "weapon",
-            "fury",
-            "rage",
-            "warrior",
-            "damage",
-            "power",
-            "hit",
-            "cyclone",
-            "whirlwind",
-        ]
-        .iter()
-        .any(|x| lower.contains(x))
-        {
-            kind = "Martial";
-            pool = MARTIAL_POOL;
-        } else if [
             "nature", "bramble", "wild", "thorn", "bloom", "oak", "earth", "growth", "root",
-            "leaf", "spore", "ivy", "forest", "vine", "flora", "serpent", "wood", "green", "plant",
-            "herb", "season", "spring", "summer", "autumn", "fall",
+            "leaf", "spore", "ivy", "forest", "grove", "poison", "venom", "toxic",
         ]
         .iter()
         .any(|x| lower.contains(x))
         {
-            kind = "Nature";
             pool = NATURE_POOL;
-        } else {
-            let choices = [
-                ("Martial", MARTIAL_POOL),
-                ("Bulwark", BULWARK_POOL),
-                ("Assassination", ASSASSINATION_POOL),
-                ("Skirmish", SKIRMISH_POOL),
-                ("Tactic", TACTIC_POOL),
-                ("Command", COMMAND_POOL),
-                ("Nature", NATURE_POOL),
-            ];
-            let choice = choices[idx % choices.len()];
-            kind = choice.0;
-            pool = choice.1;
         }
 
         let mut cleaned = clean_name(filename);
@@ -1338,252 +724,75 @@ fn main() {
 
         let mut name = cleaned.to_lowercase();
         let mut ctr = 1;
-        while seen_perks.contains(&name) {
+        while seen_perks.contains(&capitalize_words(&name)) {
             let mod_idx = (idx + ctr as usize) % UNIQUE_MODIFIERS.len();
             name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx]);
             ctr += 1;
         }
+        let name = capitalize_words(&name);
         seen_perks.push(name.clone());
 
         let mut modifiers = Vec::new();
-        // 1. Primary attribute (determined based on kind)
-        let attr_val = level as i32;
-        let attr_name = match kind {
-            "Martial" => "BonusStrength",
-            "Bulwark" => "BonusConstitution",
-            "Assassination" => "BonusDexterity",
-            "Skirmish" => "BonusDexterity",
-            "Tactic" => "BonusWisdom",
-            "Command" => "BonusCharisma",
-            "Fire" => "BonusIntelligence",
-            "Frost" => "BonusWisdom",
-            "Lightning" => "BonusDexterity",
-            "Nature" => "BonusConstitution",
-            "Holy" => "BonusCharisma",
-            "Shadow" => "BonusStrength",
-            "Cosmic" => "BonusIntelligence",
-            _ => "BonusStrength",
-        };
-        modifiers.push(format!("{}({})", attr_name, attr_val));
+        let attrs = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
 
-        // 2. Secondary Modifier (ensures uniqueness even at level 1)
-        let sec_mod_idx = (idx + level as usize) % 15;
-        match sec_mod_idx {
-            0 => {
-                let val = (level as i32 * 2) + (idx % 3) as i32;
-                modifiers.push(format!("BonusAttack({})", val));
-            },
-            1 => {
-                let val = 1.02 + (level as f32 * 0.01) + (idx % 5) as f32 * 0.005;
-                modifiers.push(format!("AttackMultiplier({:.3})", val));
-            },
-            2 => {
-                let val = (level as i32 * 2) + (idx % 3) as i32;
-                modifiers.push(format!("BonusDefense({})", val));
-            },
-            3 => {
-                let val = 1.02 + (level as f32 * 0.01) + (idx % 5) as f32 * 0.005;
-                modifiers.push(format!("DefenseMultiplier({:.3})", val));
-            },
-            4 => {
-                let val = (level as i32 / 3) + 1 + (idx % 2) as i32;
-                modifiers.push(format!("BonusInitiative({})", val));
-            },
-            5 => {
-                let val = 1.01 + (level as f32 * 0.005) + (idx % 4) as f32 * 0.002;
-                modifiers.push(format!("InitiativeMultiplier({:.3})", val));
-            },
-            6 => {
-                let val = 0.01 + (level as f32 * 0.005) + (idx % 5) as f32 * 0.002;
-                modifiers.push(format!("BonusCritChance({:.3})", val));
-            },
-            7 => {
-                let val = 1.01 + (level as f32 * 0.005) + (idx % 4) as f32 * 0.002;
-                modifiers.push(format!("CritChanceMultiplier({:.3})", val));
-            },
-            8 => {
-                let val = 0.01 + (level as f32 * 0.005) + (idx % 4) as f32 * 0.002;
-                modifiers.push(format!("BonusAttackSpeed({:.3})", val));
-            },
-            9 => {
-                let val = 1.01 + (level as f32 * 0.005) + (idx % 4) as f32 * 0.002;
-                modifiers.push(format!("AttackSpeedMultiplier({:.3})", val));
-            },
-            10 => {
-                let val = (level as i32 * 2) + (idx % 3) as i32;
-                modifiers.push(format!("BonusPetDamage({})", val));
-            },
-            11 => {
-                let val = 1.02 + (level as f32 * 0.01) + (idx % 5) as f32 * 0.005;
-                modifiers.push(format!("PetDamageMultiplier({:.3})", val));
-            },
-            12 => {
-                let val = (level as i32 * 2) + (idx % 3) as i32;
-                modifiers.push(format!("BonusDefenseDamage({})", val));
-            },
-            13 => {
-                let val = (level as i32 / 3) + 1 + (idx % 2) as i32;
-                modifiers.push(format!("BonusPetInitiative({})", val));
-            },
-            _ => {
-                let val = 1.02 + (level as f32 * 0.01) + (idx % 5) as f32 * 0.005;
-                modifiers.push(format!("HealingReceivedMultiplier({:.3})", val));
-            },
-        }
+        // Determine modifiers based on level
+        if level < 5 {
+            // Low level perks: just one modifier (usually AttributeModifier, but some give other things)
+            // unless they are the ones giving a negative modifier as well.
+            if idx % 3 == 0 {
+                // Positive attribute modifier (boosted so net sum is always positive)
+                let attr_val = level as i32;
+                let pos_attr = attrs[idx % attrs.len()];
+                let neg_attr = attrs[(idx + 1 + (idx / attrs.len()) % (attrs.len() - 1)) % attrs.len()];
+                modifiers.push(format!("AttributeModifier({}, {})", pos_attr, attr_val + 1));
 
-        let mut templates = Vec::new();
-        match kind {
-            "Fire" => {
-                templates.push(format!(
-                    "AbilityDamageMultiplier(Fire, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!(
-                    "BurnDamageTakenMultiplier({:.3})",
-                    (0.95 - (level as f32 * 0.01)).max(0.5)
-                ));
-                templates.push(format!("BonusMaxMana({})", level * 5));
-            },
-            "Frost" => {
-                templates.push(format!(
-                    "AbilityDamageMultiplier(Frost, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!(
-                    "BurnDamageTakenMultiplier({:.3})",
-                    (0.95 - (level as f32 * 0.01)).max(0.5)
-                ));
-                templates.push(format!("BonusMaxHealth({})", level * 10));
-            },
-            "Lightning" => {
-                templates.push(format!(
-                    "AbilityDamageMultiplier(Lightning, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!("MaxManaMultiplier({:.3})", 1.02 + (level as f32 * 0.01)));
-                templates.push(format!(
-                    "BleedDamageTakenMultiplier({:.3})",
-                    (0.95 - (level as f32 * 0.01)).max(0.5)
-                ));
-            },
-            "Nature" => {
-                templates.push(format!(
-                    "AbilityHealingMultiplier(Nature, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!(
-                    "PoisonDamageTakenMultiplier({:.3})",
-                    (0.90 - (level as f32 * 0.01)).max(0.4)
-                ));
-                templates.push(format!("MaxHealthMultiplier({:.3})", 1.03 + (level as f32 * 0.01)));
-            },
-            "Holy" => {
-                templates.push(format!(
-                    "AbilityHealingMultiplier(Holy, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!("BonusMaxHealth({})", level * 12));
-                templates.push(format!("MaxManaMultiplier({:.3})", 1.02 + (level as f32 * 0.01)));
-            },
-            "Shadow" => {
-                templates.push(format!(
-                    "AbilityDamageMultiplier(Shadow, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!("BonusMaxMana({})", level * 6));
-                templates.push(format!(
-                    "PoisonDamageTakenMultiplier({:.3})",
-                    (0.95 - (level as f32 * 0.01)).max(0.5)
-                ));
-            },
-            "Cosmic" => {
-                templates.push(format!(
-                    "AbilityDamageMultiplier(Cosmic, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!("BonusMaxMana({})", level * 8));
-                templates.push(format!("MaxManaMultiplier({:.3})", 1.03 + (level as f32 * 0.01)));
-            },
-            "Martial" => {
-                templates.push(format!("MaxHealthMultiplier({:.3})", 1.04 + (level as f32 * 0.01)));
-                templates.push(format!(
-                    "BleedDamageTakenMultiplier({:.3})",
-                    (0.90 - (level as f32 * 0.01)).max(0.4)
-                ));
-                templates.push(format!("BonusMaxHealth({})", level * 10));
-            },
-            "Bulwark" => {
-                templates.push(format!("BonusMaxHealth({})", level * 15));
-                templates.push(format!("MaxHealthMultiplier({:.3})", 1.05 + (level as f32 * 0.01)));
-                templates.push(format!(
-                    "EnemyPetDamageTakenMultiplier({:.3})",
-                    (0.90 - (level as f32 * 0.01)).max(0.4)
-                ));
-            },
-            "Assassination" => {
-                templates.push(format!(
-                    "AbilityDamageMultiplier(Assassination, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!(
-                    "PoisonDamageTakenMultiplier({:.3})",
-                    (0.95 - (level as f32 * 0.01)).max(0.5)
-                ));
-                templates.push(format!("BonusMaxHealth({})", level * 6));
-            },
-            "Skirmish" => {
-                templates.push(format!(
-                    "AbilityDamageMultiplier(Skirmish, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!(
-                    "BurnDamageTakenMultiplier({:.3})",
-                    (0.95 - (level as f32 * 0.01)).max(0.5)
-                ));
-                templates.push(format!("BonusMaxMana({})", level * 4));
-            },
-            "Tactic" => {
-                templates.push(format!(
-                    "AbilityDamageMultiplier(Tactic, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!("BonusMaxMana({})", level * 5));
-                templates.push(format!(
-                    "EnemyPetDamageTakenMultiplier({:.3})",
-                    (0.95 - (level as f32 * 0.01)).max(0.5)
-                ));
-            },
-            "Command" => {
-                templates.push(format!(
-                    "AbilityDamageMultiplier(Command, {:.3})",
-                    1.05 + (level as f32 * 0.02)
-                ));
-                templates.push(format!(
-                    "EnemyPetDamageTakenMultiplier({:.3})",
-                    (0.90 - (level as f32 * 0.01)).max(0.4)
-                ));
-                templates.push(format!("BonusMaxHealth({})", level * 8));
-            },
-            _ => {
-                templates.push(format!("MaxHealthMultiplier({:.3})", 1.02 + (level as f32 * 0.01)));
-            },
-        }
-
-        // Determine number of modifiers based on level
-        let num_mods = if level <= 4 {
-            1
-        } else if level <= 12 {
-            2
-        } else {
-            3
-        };
-
-        for i in 0..num_mods {
-            if templates.is_empty() {
-                break;
+                // And a negative modifier besides the positive!
+                let neg_val = -attr_val;
+                modifiers.push(format!("AttributeModifier({}, {})", neg_attr, neg_val));
+            } else if idx % 3 == 1 {
+                // Something else than AttributeModifier (just one!)
+                let other_mod = match (idx + level as usize) % 5 {
+                    0 => format!("AttackModifier({})", level as i32),
+                    1 => format!("DefenseModifier({})", level as i32),
+                    2 => format!("InitiativeModifier({})", level as i32),
+                    3 => format!("MaxHealthModifier({})", (level * 10) as i32),
+                    _ => format!("MaxManaModifier({})", (level * 5) as i32),
+                };
+                modifiers.push(other_mod);
+            } else {
+                // Regular attribute modifier, and just one!
+                let attr_val = level as i32;
+                let attr_name = attrs[idx % attrs.len()];
+                modifiers.push(format!("AttributeModifier({}, {})", attr_name, attr_val));
             }
-            let template_idx = (idx + i as usize) % templates.len();
-            modifiers.push(templates[template_idx].clone());
+        } else {
+            // High level perks (level >= 5)
+            // 1. Primary attribute
+            let attr_val = level as i32;
+            let attr_name = attrs[idx % attrs.len()];
+            modifiers.push(format!("AttributeModifier({}, {})", attr_name, attr_val));
+
+            // 2. Extra modifiers for higher levels
+            if level >= 5 {
+                let extra_mod = match (idx + level as usize) % 6 {
+                    0 => format!("MaxHealthModifier({})", (level * 10) as i32),
+                    1 => format!("MaxManaModifier({})", (level * 5) as i32),
+                    2 => format!("AttackModifier({})", (level as i32 + 1) / 2),
+                    3 => format!("DefenseModifier({})", (level as i32 + 1) / 2),
+                    4 => format!("InitiativeModifier({})", (level as i32 + 2) / 3),
+                    _ => format!("LifeSteal({:.1})", level as f32 * 1.0),
+                };
+                modifiers.push(extra_mod);
+            }
+            if level >= 13 {
+                let third_mod = match (idx + 1) % 4 {
+                    0 => format!("HealthRegen({})", (level / 4) as i32 + 1),
+                    1 => format!("ManaRegen({})", (level / 5) as i32 + 1),
+                    2 => format!("HealingMultiplier({:.1})", level as f32 * 1.5),
+                    _ => format!("AttributeModifier(Constitution, {})", (level / 3) as i32),
+                };
+                modifiers.push(third_mod);
+            }
         }
 
         let mods_str = modifiers.join(", ");
@@ -1591,13 +800,12 @@ fn main() {
         perks_ron.push_str(&format!(
             "    (
         name: \"{}\",
-        image: \"images/inventory/perks/{}\",
+        image: \"images/build/perks/{}\",
         level: {},
-        kind: {},
         modifiers: [{}],
     ),
 ",
-            name, filename, kind, level, mods_str
+            name, filename, level, mods_str
         ));
     }
     perks_ron.push_str("]\n");
@@ -1606,7 +814,7 @@ fn main() {
     println!("Generated {} perks in perks.ron", total_pks);
 
     // 3. WEAPONS
-    let weapons_dir = "assets/images/inventory/equipment/weapon";
+    let weapons_dir = "assets/images/build/equipment/weapon";
     let mut weapons_files = Vec::new();
     if let Ok(entries) = fs::read_dir(weapons_dir) {
         for entry in entries {
@@ -1663,21 +871,62 @@ fn main() {
             hand = "TwoHand";
         }
 
-        let mut kind = "Martial";
+        let mut kind = "Physical";
         let mut category = "Melee";
-        if ["dagger", "assassin", "poison"].iter().any(|x| lower.contains(x)) {
-            kind = "Assassination";
-        } else if ["shield"].iter().any(|x| lower.contains(x)) {
+
+        if lower.contains("shield") {
             category = "Shield";
-            kind = "Bulwark";
-        } else if ["bulwark", "defend"].iter().any(|x| lower.contains(x)) {
-            kind = "Bulwark";
-        } else if ["staff", "wand", "scroll", "book"].iter().any(|x| lower.contains(x)) {
-            kind = "Tactic";
-            category = "Magic";
-        } else if ["bow", "crossbow", "sling"].iter().any(|x| lower.contains(x)) {
-            kind = "Skirmish";
+        } else if lower.contains("book") || lower.contains("scroll") || lower.contains("tome") {
+            category = "Book";
+        } else if lower.contains("wand") || lower.contains("staff") || lower.contains("scepter") {
+            category = "Magical";
+        } else if lower.contains("bow") || lower.contains("crossbow") || lower.contains("sling") {
             category = "Range";
+        } else if lower.contains("dagger") || lower.contains("rapier") || lower.contains("katar") {
+            category = "Finesse";
+        }
+
+        if [
+            "fire", "pyro", "flame", "infernal", "burn", "cinder", "combustion", "lava", "blast",
+            "sun", "phoenix", "red", "heat", "ash", "meteor", "scorch", "singe", "magma",
+        ]
+        .iter()
+        .any(|x| lower.contains(x))
+        {
+            kind = "Fire";
+        } else if [
+            "frost", "ice", "chill", "cold", "blizzard", "glacial", "tomb", "shackle", "freeze",
+            "crystal", "snow", "hail", "winter", "blue", "shiver",
+        ]
+        .iter()
+        .any(|x| lower.contains(x))
+        {
+            kind = "Ice";
+        } else if [
+            "holy", "smite", "divine", "radiance", "lay", "judgment", "sacred", "bastion", "light",
+            "heal", "bless", "angel", "glory", "pray", "aura", "cure", "priest", "cleric",
+        ]
+        .iter()
+        .any(|x| lower.contains(x))
+        {
+            kind = "Holy";
+        } else if [
+            "shadow", "dark", "curse", "vampiric", "agony", "soul", "covenant", "withering", "drain",
+            "death", "devil", "demonic", "unholy", "evil", "hex", "blackwater", "plague", "fear",
+            "terror", "ghoul", "spirit", "chain", "shackle", "doom", "necrom", "void", "abyss",
+        ]
+        .iter()
+        .any(|x| lower.contains(x))
+        {
+            kind = "Shadow";
+        } else if [
+            "nature", "bramble", "wild", "thorn", "bloom", "oak", "earth", "growth", "root",
+            "leaf", "spore", "ivy", "forest", "grove", "poison", "venom", "toxic",
+        ]
+        .iter()
+        .any(|x| lower.contains(x))
+        {
+            kind = "Nature";
         }
 
         let mut cleaned = clean_name(filename);
@@ -1694,7 +943,7 @@ fn main() {
         };
 
         let mut ctr = 1;
-        while seen_weapons.contains(&name) {
+        while seen_weapons.contains(&capitalize_words(&name)) {
             let mod_idx = (idx + ctr as usize) % UNIQUE_MODIFIERS.len();
             if is_unique {
                 name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx])
@@ -1705,128 +954,92 @@ fn main() {
             }
             ctr += 1;
         }
+        let name = capitalize_words(&name);
         seen_weapons.push(name.clone());
 
         let price = 10 + level * level * 25 + (idx % 10) as u32 * 15 + (idx % 3) as u32 * 3;
-        let base_attack = 5 + level * 4 + (idx % 5) as u32;
-        let attack_speed = 1.0 + level as f32 * 0.05 + (idx % 4) as f32 * 0.02;
-        let crit_chance = 0.05 + level as f32 * 0.01 + (idx % 5) as f32 * 0.005;
 
+        let mut attack = 0;
+        let mut attack_speed = 0.0;
+        let mut crit_chance = 0.0;
         let mut modifiers = Vec::new();
-        match kind {
-            "Assassination" => {
-                modifiers.push(format!("BonusDexterity({})", level as i32));
-                if level >= 5 {
-                    modifiers.push(format!("BonusCritChance({:.2})", (idx % 5 + 1) as f32 * 0.01));
-                }
-                if level >= 10 {
-                    modifiers
-                        .push(format!("BonusAttack({})", (idx % 3 + 1) as i32 * level as i32 / 2));
-                }
-            },
-            "Bulwark" => {
-                modifiers.push(format!("BonusConstitution({})", level as i32));
-                if level >= 5 {
-                    modifiers.push(format!(
-                        "BonusDefense({})",
-                        (idx % 3 + 1) as i32 * level as i32 / 4 + 1
-                    ));
-                }
-                if level >= 10 {
-                    modifiers.push(format!("BonusStrength({})", (idx % 3 + 1) as i32));
-                }
-            },
-            "Tactic" => {
-                modifiers.push(format!("BonusIntelligence({})", level as i32));
-                if level >= 5 {
-                    modifiers.push(format!("BonusWisdom({})", (idx % 3 + 1) as i32));
-                }
-                if level >= 10 {
-                    modifiers.push(format!("BonusInitiative({})", (idx % 4 + 1) as i32));
-                }
-            },
-            _ => {
-                modifiers.push(format!("BonusStrength({})", level as i32));
-                if level >= 5 {
-                    modifiers.push(format!("BonusAttackSpeed({:.2})", (idx % 5 + 1) as f32 * 0.01));
-                }
-                if level >= 10 {
-                    modifiers.push(format!("BonusDexterity({})", (idx % 3 + 1) as i32));
-                }
-            },
-        }
-        let mods_str = modifiers.join(", ");
-
         let mut effects = Vec::new();
-        if level >= 8 {
-            match kind {
-                "Assassination" => {
-                    if idx % 2 == 0 {
-                        effects.push("Blind(miss_chance: 0.25, duration: 3.0)".to_string());
-                    } else {
-                        effects.push("Lifesteal(percentage: 0.08)".to_string());
-                    }
-                },
-                "Bulwark" => {
-                    if idx % 2 == 0 {
-                        effects.push("Thorns(damage_reflected: 10, duration: 4.0)".to_string());
-                    } else {
-                        effects.push("Fortify(armor_bonus_pct: 0.15, duration: 5.0)".to_string());
-                    }
-                },
-                "Tactic" => {
-                    if idx % 2 == 0 {
-                        effects.push("Clearcasting(duration: 4.0)".to_string());
-                    } else {
-                        effects.push("ManaBurn(amount: 15)".to_string());
-                    }
-                },
-                "Skirmish" => {
-                    if idx % 2 == 0 {
-                        effects.push("Stun(duration: 1.5)".to_string());
-                    } else {
-                        effects.push("Focus(crit_chance_bonus: 0.20, duration: 4.0)".to_string());
-                    }
-                },
-                _ => {
-                    if idx % 2 == 0 {
-                        effects.push("Bleed(damage_per_sec: 8, duration: 4.0)".to_string());
-                    } else {
-                        effects.push("Cleave(radius: 2.5, damage_pct: 0.40)".to_string());
-                    }
-                },
+
+        let hand_mult = if hand == "TwoHand" { 2.0 } else { 1.0 };
+
+        match category {
+            "Shield" => {
+                let def_val = ((level as f32 + 1.0) * hand_mult) as i32;
+                modifiers.push(format!("DefenseModifier({})", def_val));
+                if level >= 8 {
+                    effects.push(format!("Thorns(damage_reflected_pct: {:.1}, duration: 4.0)", 10.0 + level as f32 * 2.0));
+                }
+            },
+            "Book" => {
+                let int_val = level as i32;
+                modifiers.push(format!("AttributeModifier(Intelligence, {})", int_val));
+                if level >= 5 {
+                    effects.push(format!("ManaFlow(amount: {}, duration: 5.0)", level + 2));
+                }
+            },
+            "Magical" => {
+                attack = (level as f32 * hand_mult) as u32;
+                attack_speed = 1.0;
+                let int_val = level as i32;
+                modifiers.push(format!("AttributeModifier(Intelligence, {})", int_val));
+                if level >= 8 {
+                    effects.push(format!("Clearcasting(reduction_pct: 20.0, duration: {:.1})", 3.0 + level as f32 * 0.2));
+                }
+            },
+            "Finesse" => {
+                attack = (level as f32 * hand_mult) as u32;
+                attack_speed = 1.4;
+                crit_chance = 0.10 + level as f32 * 0.01;
+                modifiers.push(format!("AttributeModifier(Dexterity, {})", level as i32));
+                if level >= 8 {
+                    effects.push(format!("Lifesteal(percentage: {:.1}, duration: 4.0)", 5.0 + level as f32 * 0.5));
+                }
+            },
+            "Range" => {
+                attack = ((level as f32 + 1.0) * hand_mult) as u32;
+                attack_speed = 0.9;
+                crit_chance = 0.03 + level as f32 * 0.005;
+                modifiers.push(format!("AttributeModifier(Dexterity, {})", level as i32));
+                if level >= 8 {
+                    effects.push(format!("Blind(miss_pct: 25.0, duration: {:.1})", 3.0 + level as f32 * 0.1));
+                }
+            },
+            _ => { // Melee
+                attack = ((level as f32 + 1.0) * hand_mult) as u32;
+                attack_speed = 1.1;
+                crit_chance = 0.05 + level as f32 * 0.008;
+                modifiers.push(format!("AttributeModifier(Strength, {})", level as i32));
+                if level >= 8 {
+                    effects.push(format!("Bleed(damage_pct: {:.1})", 15.0 + level as f32 * 1.5));
+                }
             }
         }
+
+        let mods_str = modifiers.join(", ");
         let effects_str = effects.join(", ");
 
         weapons_ron.push_str(&format!(
             "    (
         name: \"{}\",
-        image: \"images/inventory/equipment/weapon/{}\",
+        image: \"images/build/equipment/weapon/{}\",
         kind: {},
         category: {},
         hand: {},
         level: {},
         price: {},
-        base_attack: {},
+        attack: {},
         attack_speed: {:.2},
         crit_chance: {:.2},
         modifiers: [{}],
         effects: [{}],
     ),
 ",
-            name,
-            filename,
-            kind,
-            category,
-            hand,
-            level,
-            price,
-            base_attack,
-            attack_speed,
-            crit_chance,
-            mods_str,
-            effects_str
+            name, filename, kind, category, hand, level, price, attack, attack_speed, crit_chance, mods_str, effects_str
         ));
     }
     weapons_ron.push_str("]\n");
@@ -1834,7 +1047,7 @@ fn main() {
     file.write_all(weapons_ron.as_bytes()).unwrap();
     println!("Generated {} weapons in weapons.ron", total_wps);
 
-    // 4. ARMOR
+    // 4. ARMOR / WEARABLES
     let armor_folders = [
         ("accessory", "Accessory"),
         ("armor", "Chestplate"),
@@ -1846,7 +1059,7 @@ fn main() {
 
     let mut armor_files = Vec::new();
     for (folder, slot) in &armor_folders {
-        let dir_path = format!("assets/images/inventory/equipment/{}", folder);
+        let dir_path = format!("assets/images/build/equipment/{}", folder);
         if let Ok(entries) = fs::read_dir(&dir_path) {
             for entry in entries {
                 if let Ok(entry) = entry {
@@ -1893,14 +1106,17 @@ fn main() {
         }
 
         let lower = filename.to_lowercase();
-        let mut kind = "Bulwark";
-        if ["leather", "scout", "assassin", "ranger"].iter().any(|x| lower.contains(x)) {
-            kind = "Assassination";
-        } else if ["silk", "robe", "mage", "cloth", "wizard", "priest"]
-            .iter()
-            .any(|x| lower.contains(x))
-        {
-            kind = "Tactic";
+        let mut kind = "Physical";
+        if ["leather", "scout", "assassin", "ranger", "poison", "venom", "toxic"].iter().any(|x| lower.contains(x)) {
+            kind = "Nature";
+        } else if ["silk", "robe", "mage", "cloth", "wizard", "priest", "holy", "divine", "cleric", "solomon"].iter().any(|x| lower.contains(x)) {
+            kind = "Holy";
+        } else if ["dark", "shadow", "void", "curse", "unholy", "necrom", "abyss"].iter().any(|x| lower.contains(x)) {
+            kind = "Shadow";
+        } else if ["fire", "pyro", "flame", "lava", "sun", "phoenix", "scorch"].iter().any(|x| lower.contains(x)) {
+            kind = "Fire";
+        } else if ["frost", "ice", "chill", "cold", "winter"].iter().any(|x| lower.contains(x)) {
+            kind = "Ice";
         }
 
         let mut cleaned = clean_name(filename);
@@ -1917,7 +1133,7 @@ fn main() {
         };
 
         let mut ctr = 1;
-        while seen_armor.contains(&name) {
+        while seen_armor.contains(&capitalize_words(&name)) {
             let mod_idx = (idx + ctr as usize) % UNIQUE_MODIFIERS.len();
             if is_unique {
                 name = format!("{} {}", cleaned.to_lowercase(), UNIQUE_MODIFIERS[mod_idx])
@@ -1928,101 +1144,68 @@ fn main() {
             }
             ctr += 1;
         }
+        let name = capitalize_words(&name);
         seen_armor.push(name.clone());
 
         let price = 10 + level * level * 20 + (idx % 10) as u32 * 12 + (idx % 3) as u32 * 2;
-        let base_defense = 2 + level * 3 + (idx % 4) as u32;
 
         let mut modifiers = Vec::new();
-        match kind {
-            "Assassination" => {
-                modifiers.push(format!("BonusDexterity({})", level as i32));
-                if level >= 5 {
-                    modifiers.push(format!("BonusInitiative({})", (idx % 3 + 1) as i32));
-                }
-                if level >= 10 {
-                    modifiers.push(format!("BonusCritChance({:.2})", (idx % 4 + 1) as f32 * 0.01));
-                }
-            },
-            "Bulwark" => {
-                modifiers.push(format!("BonusConstitution({})", level as i32));
-                if level >= 5 {
-                    modifiers.push(format!(
-                        "BonusDefense({})",
-                        (idx % 3 + 1) as i32 * level as i32 / 5 + 1
-                    ));
-                }
-                if level >= 10 {
-                    modifiers.push(format!("BonusStrength({})", (idx % 3 + 1) as i32));
-                }
-            },
-            "Tactic" => {
-                modifiers.push(format!("BonusIntelligence({})", level as i32));
-                if level >= 5 {
-                    modifiers.push(format!("BonusWisdom({})", (idx % 3 + 1) as i32));
-                }
-                if level >= 10 {
-                    modifiers.push(format!("BonusCharisma({})", (idx % 3 + 1) as i32));
-                }
-            },
-            _ => {
-                modifiers.push(format!("BonusStrength({})", level as i32));
-                if level >= 5 {
-                    modifiers.push(format!("BonusConstitution({})", (idx % 3 + 1) as i32));
-                }
-                if level >= 10 {
-                    modifiers.push(format!("BonusDefense({})", (idx % 3 + 1) as i32));
-                }
-            },
-        }
-        let mods_str = modifiers.join(", ");
-
         let mut effects = Vec::new();
-        if level >= 8 {
-            match kind {
-                "Assassination" => {
-                    if idx % 2 == 0 {
-                        effects.push("Blind(miss_chance: 0.15, duration: 3.0)".to_string());
-                    } else {
-                        effects.push("Lifesteal(percentage: 0.05)".to_string());
-                    }
-                },
-                "Bulwark" => {
-                    if idx % 2 == 0 {
-                        effects.push("Thorns(damage_reflected: 6, duration: 4.0)".to_string());
-                    } else {
-                        effects.push("Fortify(armor_bonus_pct: 0.10, duration: 5.0)".to_string());
-                    }
-                },
-                _ => {
-                    if idx % 2 == 0 {
-                        effects.push("Regen(heal_per_sec: 4, duration: 6.0)".to_string());
-                    } else {
-                        effects.push("Clearcasting(duration: 3.0)".to_string());
-                    }
-                },
+
+        match slot.as_str() {
+            "Chestplate" | "Helmet" | "Boots" | "Gloves" => {
+                let def_val = level as i32 * 2 + 1;
+                modifiers.push(format!("DefenseModifier({})", def_val));
+                
+                let attr_name = match kind {
+                    "Nature" => "Dexterity",
+                    "Holy" | "Shadow" | "Fire" | "Ice" => "Intelligence",
+                    _ => "Constitution",
+                };
+                modifiers.push(format!("AttributeModifier({}, {})", attr_name, (level as i32 + 1) / 2));
+            },
+            "Accessory" => {
+                if idx % 2 == 0 {
+                    modifiers.push(format!("MaxHealthModifier({})", (level * 8) as i32));
+                } else {
+                    modifiers.push(format!("MaxManaModifier({})", (level * 4) as i32));
+                }
+            },
+            _ => { // Consumable
+                modifiers.push(format!("HealthRegen({})", (level as i32 + 1) / 2));
             }
         }
+
+        if level >= 8 && slot != "Accessory" && slot != "Consumable" {
+            if kind == "Physical" {
+                effects.push(format!("Thorns(damage_reflected_pct: {:.1}, duration: 3.0)", 5.0 + level as f32 * 1.0));
+            } else if kind == "Nature" {
+                effects.push(format!("Freeze(attack_speed_pct: -15.0, duration: {:.1})", 2.0 + level as f32 * 0.1));
+            } else {
+                effects.push(format!("Regen(heal: {}, duration: 4.0)", level + 1));
+            }
+        }
+
+        let mods_str = modifiers.join(", ");
         let effects_str = effects.join(", ");
 
         armor_ron.push_str(&format!(
             "    (
         name: \"{}\",
-        image: \"images/inventory/equipment/{}/{}\",
+        image: \"images/build/equipment/{}/{}\",
         kind: {},
-        level: {},
         price: {},
         slot: {},
-        base_defense: {},
         modifiers: [{}],
         effects: [{}],
+        level: {},
     ),
 ",
-            name, folder, filename, kind, level, price, slot, base_defense, mods_str, effects_str
+            name, folder, filename, kind, price, slot, mods_str, effects_str, level
         ));
     }
     armor_ron.push_str("]\n");
-    let mut file = File::create("assets/inventory/armor.ron").unwrap();
+    let mut file = File::create("assets/inventory/wearables.ron").unwrap();
     file.write_all(armor_ron.as_bytes()).unwrap();
-    println!("Generated {} armor pieces in armor.ron", total_arm);
+    println!("Generated {} wearables in wearables.ron", total_arm);
 }

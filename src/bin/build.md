@@ -65,6 +65,10 @@ The strength of a perk can also be determined by the number of modifiers it has,
 the presence of negative modifiers (a perk with more positive modifiers and fewer negative
 modifiers is stronger than a perk with fewer positive modifiers and more negative modifiers).
 
+Note the following:
+ - Not two perks can have the exact same modifiers, but they can have some modifiers in
+   common. For example, two perks can both have +5% fire damage, but one of them has also
+   -5% shadow damage, while the other has -5% shadow resistance.
 
 ### Abilities
 Abilities are active skills that a player can use during combat. They always have a cooldown

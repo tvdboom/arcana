@@ -32,9 +32,9 @@ pub fn all_weapons() -> &'static [Weapon] {
     })
 }
 
-pub fn all_armor() -> &'static [Wearable] {
+pub fn all_wearables() -> &'static [Wearable] {
     ARMOR.get_or_init(|| {
-        let ron_str = include_str!("../../assets/inventory/wearable.ron");
+        let ron_str = include_str!("../../assets/inventory/wearables.ron");
         ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse wearable.ron: {}", e))
     })
 }
@@ -45,7 +45,7 @@ pub fn all_equipment() -> &'static [Equipment] {
         for weapon in all_weapons() {
             items.push(Equipment::Weapon(weapon.clone()));
         }
-        for wearable in all_armor() {
+        for wearable in all_wearables() {
             items.push(Equipment::Wearable(wearable.clone()));
         }
         items
@@ -79,7 +79,7 @@ mod tests {
         let wps = all_weapons();
         assert!(!wps.is_empty(), "Weapons catalog is empty");
 
-        let arm = all_armor();
+        let arm = all_wearables();
         assert!(!arm.is_empty(), "Armor catalog is empty");
     }
 }
