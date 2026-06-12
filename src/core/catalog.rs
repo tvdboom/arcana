@@ -1,14 +1,14 @@
-use crate::core::inventory::abilities::Ability;
-use crate::core::inventory::armor::Armor;
-use crate::core::inventory::equipment::Equipment;
-use crate::core::inventory::perks::Perk;
-use crate::core::inventory::weapons::Weapon;
+use crate::core::build::abilities::Ability;
+use crate::core::build::wearable::Wearable;
+use crate::core::build::equipment::Equipment;
+use crate::core::build::perks::Perk;
+use crate::core::build::weapons::Weapon;
 use std::sync::OnceLock;
 
 static ABILITIES: OnceLock<Vec<Ability>> = OnceLock::new();
 static PERKS: OnceLock<Vec<Perk>> = OnceLock::new();
 static WEAPONS: OnceLock<Vec<Weapon>> = OnceLock::new();
-static ARMOR: OnceLock<Vec<Armor>> = OnceLock::new();
+static ARMOR: OnceLock<Vec<Wearable>> = OnceLock::new();
 static EQUIPMENT: OnceLock<Vec<Equipment>> = OnceLock::new();
 
 pub fn all_abilities() -> &'static [Ability] {
@@ -32,10 +32,10 @@ pub fn all_weapons() -> &'static [Weapon] {
     })
 }
 
-pub fn all_armor() -> &'static [Armor] {
+pub fn all_armor() -> &'static [Wearable] {
     ARMOR.get_or_init(|| {
-        let ron_str = include_str!("../../assets/inventory/armor.ron");
-        ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse armor.ron: {}", e))
+        let ron_str = include_str!("../../assets/inventory/wearable.ron");
+        ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse wearable.ron: {}", e))
     })
 }
 
@@ -45,8 +45,8 @@ pub fn all_equipment() -> &'static [Equipment] {
         for weapon in all_weapons() {
             items.push(Equipment::Weapon(weapon.clone()));
         }
-        for armor in all_armor() {
-            items.push(Equipment::Armor(armor.clone()));
+        for wearable in all_armor() {
+            items.push(Equipment::Wearable(wearable.clone()));
         }
         items
     })

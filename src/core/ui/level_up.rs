@@ -785,7 +785,6 @@ fn spawn_level_up_overlay(
                                                                 is_selected,
                                                                 true, // is_ability
                                                                 i,
-                                                                &player,
                                                             );
                                                         }
                                                     });
@@ -830,7 +829,6 @@ fn spawn_level_up_overlay(
                                                                 is_selected,
                                                                 false, // is_perk
                                                                 i,
-                                                                &player,
                                                             );
                                                         }
                                                     });
@@ -914,7 +912,6 @@ fn spawn_choice_card(
     is_selected: bool,
     is_ability: bool,
     index: usize,
-    player: &Player,
 ) {
     const SELECTED_BORDER: Color = Color::srgb(1.0, 0.85, 0.2);
     const UNSELECTED_BORDER: Color = BUTTON_BORDER_COLOR;
@@ -1003,9 +1000,9 @@ fn spawn_choice_card(
 
                     // Description
                     let desc_text = if is_ability {
-                        get_ability(name).map(|ab| ab.description(player)).unwrap_or_default()
+                        get_ability(name).map(|ab| ab.description(lang, &localization)).unwrap_or_default()
                     } else {
-                        get_perk(name).map(|pk| pk.description(player)).unwrap_or_default()
+                        get_perk(name).map(|pk| pk.description(lang, &localization)).unwrap_or_default()
                     };
 
                     parent.spawn((

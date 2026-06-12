@@ -1,8 +1,8 @@
+use crate::core::build::equipment::Equipment;
+use crate::core::build::modifiers::Modifier;
 use crate::core::catalog::{get_equipment, get_perk};
 use crate::core::classes::Class;
 use crate::core::constants::{NAMES, START_CHARACTERISTIC};
-use crate::core::inventory::equipment::Equipment;
-use crate::core::inventory::modifiers::Modifier;
 use crate::core::pets::Pet;
 use crate::core::races::Race;
 use bevy::prelude::*;

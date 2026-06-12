@@ -1,8 +1,6 @@
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::{all_abilities, all_equipment, all_perks};
-use crate::core::inventory::armor::EquipmentSlot;
-use crate::core::inventory::equipment::Equipment;
 use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;
 use crate::core::player::Player;
@@ -16,6 +14,8 @@ use rand::prelude::IndexedRandom;
 use rand::{rng, RngExt};
 use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumString};
+use crate::core::build::wearable::WearableSlot;
+use crate::core::build::equipment::Equipment;
 
 #[derive(
     EnumString, Debug, Display, Clone, Copy, PartialEq, Eq, Hash, Reflect, Serialize, Deserialize,
@@ -278,9 +278,9 @@ pub fn handle_playing_action_clicks(
                 let items: Vec<_> = all_equipment()
                     .iter()
                     .filter(|eq| match eq {
-                        Equipment::Armor(a) => {
-                            a.slot == EquipmentSlot::Consumable && a.level <= lvl as u32
-                        },
+                        Equipment::Wearable(w) => {
+                            w.slot == WearableSlot::Consumable && w.level <= lvl as u32
+                        }
                         _ => false,
                     })
                     .collect();

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
+use crate::core::build::equipment::Kind;
 use crate::core::classes::{Ajah, Class};
-use crate::core::inventory::abilities::AbilityKind;
 use crate::core::pets::PetKind;
 use crate::core::player::Attribute;
 use crate::core::races::Race;
@@ -107,6 +107,168 @@ fn map_localization_key(key: &str) -> String {
     format!("general.{}", normalized)
 }
 
+fn get_custom_localization(key: &str, language: Language) -> Option<String> {
+    let val = match (key, language) {
+        // Level
+        ("general.level", Language::English) => "Level",
+        ("general.level", Language::Spanish) => "Nivel",
+        ("general.level", Language::Dutch) => "Level",
+
+        // Modifiers
+        ("general.modifiers", Language::English) => "Modifiers",
+        ("general.modifiers", Language::Spanish) => "Modificadores",
+        ("general.modifiers", Language::Dutch) => "Modifiers",
+
+        // Mana
+        ("general.mana", Language::English) => "Mana",
+        ("general.mana", Language::Spanish) => "Maná",
+        ("general.mana", Language::Dutch) => "Mana",
+
+        // Cooldown
+        ("general.cooldown", Language::English) => "Cooldown",
+        ("general.cooldown", Language::Spanish) => "Enfriamiento",
+        ("general.cooldown", Language::Dutch) => "Afkoeltijd",
+
+        // Kind
+        ("general.kind", Language::English) => "Kind",
+        ("general.kind", Language::Spanish) => "Tipo",
+        ("general.kind", Language::Dutch) => "Type",
+
+        // Target
+        ("general.target", Language::English) => "Target",
+        ("general.target", Language::Spanish) => "Objetivo",
+        ("general.target", Language::Dutch) => "Doelwit",
+
+        // Area of effect
+        ("general.aoe", Language::English) => "Area of effect",
+        ("general.aoe", Language::Spanish) => "Área de efecto",
+        ("general.aoe", Language::Dutch) => "Gebiedseffect",
+
+        // Abilities
+        ("general.abilities", Language::English) => "Abilities",
+        ("general.abilities", Language::Spanish) => "Habilidades",
+        ("general.abilities", Language::Dutch) => "Vaardigheden",
+
+        // self
+        ("general.self", Language::English) => "self",
+        ("general.self", Language::Spanish) => "sí mismo",
+        ("general.self", Language::Dutch) => "jezelf",
+
+        // enemy
+        ("general.enemy", Language::English) => "enemy",
+        ("general.enemy", Language::Spanish) => "enemigo",
+        ("general.enemy", Language::Dutch) => "vijand",
+
+        // true (Yes)
+        ("general.true", Language::English) => "Yes",
+        ("general.true", Language::Spanish) => "Sí",
+        ("general.true", Language::Dutch) => "Ja",
+
+        // false (No)
+        ("general.false", Language::English) => "No",
+        ("general.false", Language::Spanish) => "No",
+        ("general.false", Language::Dutch) => "Nee",
+
+        // finesse
+        ("general.finesse", Language::English) => "Finesse",
+        ("general.finesse", Language::Spanish) => "Sutileza",
+        ("general.finesse", Language::Dutch) => "Finesse",
+
+        // magical
+        ("general.magical", Language::English) => "Magical",
+        ("general.magical", Language::Spanish) => "Mágico",
+        ("general.magical", Language::Dutch) => "Magisch",
+
+        // melee
+        ("general.melee", Language::English) => "Melee",
+        ("general.melee", Language::Spanish) => "Cuerpo a cuerpo",
+        ("general.melee", Language::Dutch) => "Melee",
+
+        // range
+        ("general.range", Language::English) => "Range",
+        ("general.range", Language::Spanish) => "A distancia",
+        ("general.range", Language::Dutch) => "Afstand",
+
+        // shield
+        ("general.shield", Language::English) => "Shield",
+        ("general.shield", Language::Spanish) => "Escudo",
+        ("general.shield", Language::Dutch) => "Schild",
+
+        // book
+        ("general.book", Language::English) => "Book",
+        ("general.book", Language::Spanish) => "Libro",
+        ("general.book", Language::Dutch) => "Boek",
+
+        // stats
+        ("general.max_health", Language::English) => "max health",
+        ("general.max_health", Language::Spanish) => "salud máx.",
+        ("general.max_health", Language::Dutch) => "max gezondheid",
+
+        ("general.max_mana", Language::English) => "max mana",
+        ("general.max_mana", Language::Spanish) => "maná máx.",
+        ("general.max_mana", Language::Dutch) => "max mana",
+
+        ("general.health_regen", Language::English) => "health regen",
+        ("general.health_regen", Language::Spanish) => "regen. de salud",
+        ("general.health_regen", Language::Dutch) => "gezondheidsregen.",
+
+        ("general.mana_regen", Language::English) => "mana regen",
+        ("general.mana_regen", Language::Spanish) => "regen. de maná",
+        ("general.mana_regen", Language::Dutch) => "manaregen.",
+
+        ("general.attack_speed", Language::English) => "attack speed",
+        ("general.attack_speed", Language::Spanish) => "velocidad de ataque",
+        ("general.attack_speed", Language::Dutch) => "aanvalsnelheid",
+
+        ("general.crit_chance", Language::English) => "crit chance",
+        ("general.crit_chance", Language::Spanish) => "probabilidad de crítico",
+        ("general.crit_chance", Language::Dutch) => "kritieke kans",
+
+        ("general.pet_attack", Language::English) => "pet attack",
+        ("general.pet_attack", Language::Spanish) => "ataque de mascota",
+        ("general.pet_attack", Language::Dutch) => "huisdier aanval",
+
+        ("general.pet_defense", Language::English) => "pet defense",
+        ("general.pet_defense", Language::Spanish) => "defensa de mascota",
+        ("general.pet_defense", Language::Dutch) => "huisdier verdediging",
+
+        ("general.pet_initiative", Language::English) => "pet initiative",
+        ("general.pet_initiative", Language::Spanish) => "iniciativa de mascota",
+        ("general.pet_initiative", Language::Dutch) => "huisdier initiatief",
+
+        ("general.pet_attack_speed", Language::English) => "pet attack speed",
+        ("general.pet_attack_speed", Language::Spanish) => "velocidad de ataque de mascota",
+        ("general.pet_attack_speed", Language::Dutch) => "huisdier aanvalsnelheid",
+
+        ("general.life_steal", Language::English) => "life steal",
+        ("general.life_steal", Language::Spanish) => "robo de vida",
+        ("general.life_steal", Language::Dutch) => "levensroof",
+
+        ("general.healing_multiplier", Language::English) => "healing",
+        ("general.healing_multiplier", Language::Spanish) => "curación",
+        ("general.healing_multiplier", Language::Dutch) => "genezing",
+
+        ("general.damage", Language::English) => "damage",
+        ("general.damage", Language::Spanish) => "daño",
+        ("general.damage", Language::Dutch) => "schade",
+
+        ("general.resistance", Language::English) => "resistance",
+        ("general.resistance", Language::Spanish) => "resistencia",
+        ("general.resistance", Language::Dutch) => "weerstand",
+
+        ("general.power", Language::English) => "power",
+        ("general.power", Language::Spanish) => "poder",
+        ("general.power", Language::Dutch) => "kracht",
+
+        ("general.healing", Language::English) => "healing",
+        ("general.healing", Language::Spanish) => "curación",
+        ("general.healing", Language::Dutch) => "genezing",
+
+        _ => return None,
+    };
+    Some(val.to_string())
+}
+
 impl Localization {
     pub fn get(&self, key: impl Into<String>, language: Language) -> String {
         let key = key.into();
@@ -116,9 +278,13 @@ impl Localization {
             Language::Spanish => &self.es,
             Language::Dutch => &self.nl,
         };
-        map.get(&mapped_key).cloned().unwrap_or_else(|| {
-            panic!("Missing localization key: '{}' (mapped from '{}')", mapped_key, key)
-        })
+        if let Some(val) = map.get(&mapped_key) {
+            return val.clone();
+        }
+        if let Some(val) = get_custom_localization(&mapped_key, language) {
+            return val;
+        }
+        panic!("Missing localization key: '{}' (mapped from '{}')", mapped_key, key)
     }
 
     pub fn get_opt(&self, key: &str, language: Language) -> Option<String> {
@@ -128,7 +294,10 @@ impl Localization {
             Language::Spanish => &self.es,
             Language::Dutch => &self.nl,
         };
-        map.get(&mapped_key).cloned()
+        if let Some(val) = map.get(&mapped_key) {
+            return Some(val.clone());
+        }
+        get_custom_localization(&mapped_key, language)
     }
 }
 
@@ -228,10 +397,10 @@ pub fn format_ajah_description(
     let ability_label = localization.get("general.ability", language);
 
     let kind = match ajah {
-        Ajah::Black => AbilityKind::Shadow,
-        Ajah::Green => AbilityKind::Nature,
-        Ajah::Red => AbilityKind::Fire,
-        Ajah::White => AbilityKind::Ice,
+        Ajah::Black => Kind::Shadow,
+        Ajah::Green => Kind::Nature,
+        Ajah::Red => Kind::Fire,
+        Ajah::White => Kind::Ice,
     };
 
     let kind_label = localization.get(format!("general.{}", kind.to_lowername()), language);

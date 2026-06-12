@@ -5,13 +5,13 @@ use strum::IntoEnumIterator;
 pub use crate::core::actions::{handle_playing_action_clicks, Action, ActionButton};
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
+use crate::core::build::wearable::WearableSlot;
+use crate::core::build::equipment::Equipment;
+use crate::core::build::modifiers::Modifier;
+use crate::core::build::weapons::{Category, Hand};
 use crate::core::catalog::{get_ability, get_equipment, get_perk};
 use crate::core::classes::Class;
 use crate::core::constants::*;
-use crate::core::inventory::armor::EquipmentSlot;
-use crate::core::inventory::equipment::Equipment;
-use crate::core::inventory::modifiers::Modifier;
-use crate::core::inventory::weapons::{Hand, WeaponKind};
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::buttons::DisabledButton;
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
@@ -176,11 +176,10 @@ fn name_with_level(
 /// Format the bonus characteristics of a weapon, e.g. "+6 attack | +10 crit | 1.2 as".
 fn weapon_stat_lines(
     weapon: &Equipment,
-    player: &Player,
-    _localization: &Localization,
-    _lang: Language,
+    localization: &Localization,
+    lang: Language,
 ) -> Vec<String> {
-    vec![weapon.description(player)]
+    vec![weapon.description(lang, localization)]
 }
 
 fn signed_line(label: impl Into<String>, value: i32) -> String {
@@ -205,7 +204,7 @@ fn weapon_bonus_lines(
             let value = value_for(&weapon);
             let prefix = match weapon {
                 Equipment::Weapon(_) => "weapon",
-                Equipment::Armor(_) => "armor",
+                Equipment::Wearable(_) => "wearable",
             };
             let key = format!("{}.{}", prefix, weapon.name().replace(" ", "_").to_lowercase());
             let localized_name =
@@ -1293,7 +1292,7 @@ pub fn equip_slot_tooltip_system(
                 if let Some(weapon) = get_equipment(key) {
                     let prefix = match weapon {
                         Equipment::Weapon(_) => "weapon",
-                        Equipment::Armor(_) => "armor",
+                        Equipment::Wearable(_) => "wearable",
                     };
                     let name = name_with_level(
                         weapon.name(),
@@ -1302,7 +1301,7 @@ pub fn equip_slot_tooltip_system(
                         &localization,
                         lang,
                     );
-                    let stat_lines = weapon_stat_lines(&weapon, &player, &localization, lang);
+                    let stat_lines = weapon_stat_lines(&weapon, &localization, lang);
 
                     spawn_item_tooltip(
                         &mut commands,
@@ -1833,7 +1832,7 @@ pub fn rebuild_playing_lists(
                 empty = false;
                 let prefix = match weapon {
                     Equipment::Weapon(_) => "weapon",
-                    Equipment::Armor(_) => "armor",
+                    Equipment::Wearable(_) => "wearable",
                 };
                 spawn_equipment_card(
                     parent,
@@ -1846,7 +1845,7 @@ pub fn rebuild_playing_lists(
                         &localization,
                         lang,
                     ),
-                    weapon_stat_lines(weapon, &player, &localization, lang),
+                    weapon_stat_lines(weapon, &localization, lang),
                     EquipmentCard {
                         key: weapon.name().to_string(),
                         is_equipped: true,
@@ -1863,7 +1862,7 @@ pub fn rebuild_playing_lists(
                 empty = false;
                 let prefix = match weapon {
                     Equipment::Weapon(_) => "weapon",
-                    Equipment::Armor(_) => "armor",
+                    Equipment::Wearable(_) => "wearable",
                 };
                 spawn_equipment_card(
                     parent,
@@ -1876,7 +1875,7 @@ pub fn rebuild_playing_lists(
                         &localization,
                         lang,
                     ),
-                    weapon_stat_lines(weapon, &player, &localization, lang),
+                    weapon_stat_lines(weapon, &localization, lang),
                     EquipmentCard {
                         key: weapon.name().to_string(),
                         is_equipped: false,
@@ -1919,7 +1918,7 @@ pub fn rebuild_playing_lists(
                         lang,
                     ),
                     None,
-                    vec![ability.description(&player)],
+                    vec![ability.description(lang, &localization)],
                 );
             }
         });
@@ -1945,7 +1944,7 @@ pub fn rebuild_playing_lists(
                     &perk.name,
                     name_with_level(&perk.name, "perk", perk.level as u8, &localization, lang),
                     None,
-                    vec![perk.description(&player)],
+                    vec![perk.description(lang, &localization)],
                 );
             }
         });
@@ -2240,9 +2239,9 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
         }
 
         match equipment {
-            Equipment::Armor(a) => match a.slot {
-                EquipmentSlot::Consumable => {
-                    let name = a.name.to_lowercase();
+            Equipment::Wearable(w) => match w.slot {
+                WearableSlot::Consumable => {
+                    let name = w.name.to_lowercase();
                     if name.contains("health") {
                         player.health = player.max_health();
                     } else if name.contains("mana") {
@@ -2267,27 +2266,27 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                     }
                     return Some("button");
                 },
-                EquipmentSlot::Helmet => {
+                WearableSlot::Helmet => {
                     if let Some(old) = player.helmet.replace(key.to_string()) {
                         player.inventory.push(old);
                     }
                 },
-                EquipmentSlot::Chestplate => {
+                WearableSlot::Chestplate => {
                     if let Some(old) = player.armor.replace(key.to_string()) {
                         player.inventory.push(old);
                     }
                 },
-                EquipmentSlot::Boots => {
+                WearableSlot::Boots => {
                     if let Some(old) = player.boots.replace(key.to_string()) {
                         player.inventory.push(old);
                     }
                 },
-                EquipmentSlot::Gloves => {
+                WearableSlot::Gloves => {
                     if let Some(old) = player.gloves.replace(key.to_string()) {
                         player.inventory.push(old);
                     }
                 },
-                EquipmentSlot::Accessory => {
+                WearableSlot::Accessory => {
                     if player.accessory.is_none() {
                         player.accessory = Some(key.to_string());
                     } else if player.accessory2.is_none() {
@@ -2319,8 +2318,8 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                         player.inventory.push(old_rh);
                     }
                     player.weapon_lh = Some(key.to_string());
-                } else if w.kind == WeaponKind::Shield {
-                    // Shield: unequip two-handed weapon from LH if present, then place in weapon_rh
+                } else if matches!(w.category, Category::Shield | Category::Book) {
+                    // Unequip two-handed weapon from LH if present, then place in weapon_rh
                     if is_lh_two_hand {
                         if let Some(old_lh) = player.weapon_lh.take() {
                             player.inventory.push(old_lh);
@@ -2407,15 +2406,15 @@ pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
 pub fn reward_equipment(player: &mut Player, key: String) {
     if let Some(equipment) = get_equipment(&key) {
         let is_empty = match equipment {
-            Equipment::Armor(a) => match a.slot {
-                EquipmentSlot::Helmet => player.helmet.is_none(),
-                EquipmentSlot::Chestplate => player.armor.is_none(),
-                EquipmentSlot::Boots => player.boots.is_none(),
-                EquipmentSlot::Gloves => player.gloves.is_none(),
-                EquipmentSlot::Accessory => {
+            Equipment::Wearable(w) => match w.slot {
+                WearableSlot::Helmet => player.helmet.is_none(),
+                WearableSlot::Chestplate => player.armor.is_none(),
+                WearableSlot::Boots => player.boots.is_none(),
+                WearableSlot::Gloves => player.gloves.is_none(),
+                WearableSlot::Accessory => {
                     player.accessory.is_none() || player.accessory2.is_none()
                 },
-                EquipmentSlot::Consumable => false,
+                WearableSlot::Consumable => false,
             },
             Equipment::Weapon(w) => {
                 let is_lh_two_hand = player
@@ -2430,7 +2429,7 @@ pub fn reward_equipment(player: &mut Player, key: String) {
 
                 if w.hand == Hand::TwoHand {
                     player.weapon_lh.is_none() && player.weapon_rh.is_none()
-                } else if w.kind == WeaponKind::Shield {
+                } else if matches!(w.category, Category::Shield | Category::Book) {
                     player.weapon_rh.is_none() && !is_lh_two_hand
                 } else {
                     !is_lh_two_hand && (player.weapon_lh.is_none() || player.weapon_rh.is_none())
@@ -2481,9 +2480,9 @@ pub fn handle_equipment_card_click(
         } else {
             // Check consumable restrictions
             if let Some(eq) = get_equipment(&card.key) {
-                if let Equipment::Armor(ref a) = eq {
-                    if a.slot == EquipmentSlot::Consumable {
-                        let name = a.name.to_lowercase();
+                if let Equipment::Wearable(ref w) = eq {
+                    if w.slot == WearableSlot::Consumable {
+                        let name = w.name.to_lowercase();
                         let blocked = if name.contains("rejuvenation") {
                             player.health >= player.max_health() && player.mana >= player.max_mana()
                         } else if name.contains("health") || name.contains("antidote") {

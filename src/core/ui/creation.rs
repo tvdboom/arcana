@@ -4,11 +4,11 @@ use strum::IntoEnumIterator;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
+use crate::core::build::equipment::Kind;
+use crate::core::build::weapons::Category;
 use crate::core::catalog::{all_abilities, all_weapons};
 use crate::core::classes::{Ajah, Class};
 use crate::core::constants::*;
-use crate::core::inventory::abilities::AbilityKind;
-use crate::core::inventory::weapons::WeaponKind;
 use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
@@ -1354,10 +1354,10 @@ impl SelectionItem for Class {
             .filter(|a| {
                 a.level == 1
                     && match *self {
-                        Class::Assassin => a.kind == WeaponKind::Finesse,
-                        Class::Druid => a.kind == WeaponKind::Range,
-                        Class::Mage(_) => a.kind == WeaponKind::Magical,
-                        Class::Warrior => a.kind == WeaponKind::Melee,
+                        Class::Assassin => a.category == Category::Finesse,
+                        Class::Druid => a.category == Category::Magical,
+                        Class::Mage(_) => a.category == Category::Magical,
+                        Class::Warrior => a.category == Category::Melee,
                     }
             })
             .choose(&mut rng())
@@ -1405,10 +1405,10 @@ impl SelectionItem for Ajah {
             .filter(|a| {
                 a.level == 1
                     && match *self {
-                        Ajah::Black => a.kind == AbilityKind::Shadow,
-                        Ajah::Green => a.kind == AbilityKind::Nature,
-                        Ajah::Red => a.kind == AbilityKind::Fire,
-                        Ajah::White => a.kind == AbilityKind::Ice,
+                        Ajah::Black => a.kind == Kind::Shadow,
+                        Ajah::Green => a.kind == Kind::Nature,
+                        Ajah::Red => a.kind == Kind::Fire,
+                        Ajah::White => a.kind == Kind::Ice,
                     }
             })
             .choose(&mut rng())
