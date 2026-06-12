@@ -98,6 +98,11 @@ impl Weapon {
 
         let kind_name = localization.get(format!("general.{}", self.kind.to_lowername()), language);
         let category_name = localization.get(format!("general.{}", self.category.to_lowername()), language);
+        let hand_label = localization.get("general.hand", language);
+        let hand_name = match self.hand {
+            Hand::OneHand => localization.get("general.one_hand", language),
+            Hand::TwoHand => localization.get("general.two_hand", language),
+        };
 
         lines.push(format!("[level] {}: {}", level_label, self.level));
         if self.attack > 0 {
@@ -111,6 +116,7 @@ impl Weapon {
         }
         lines.push(format!("[{}] {}: {}", self.kind.to_lowername(), kind_label, kind_name));
         lines.push(format!("[{}] {}: {}", self.category.to_lowername(), category_label, category_name));
+        lines.push(format!("[hand] {}: {}", hand_label, hand_name));
 
         if !self.modifiers.is_empty() {
             lines.push(format!("[modifier] {}:", modifiers_label));

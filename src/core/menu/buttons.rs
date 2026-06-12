@@ -12,6 +12,7 @@ use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
+use crate::core::player::Player;
 
 #[derive(Component)]
 pub struct MenuCmp;
@@ -35,6 +36,7 @@ pub struct DisabledButton;
 pub fn on_click_menu_button(
     event: On<Pointer<Click>>,
     btn_q: Query<(Option<&DisabledButton>, &MenuBtn)>,
+    mut player: ResMut<Player>,
     mut start_new_char_msg: MessageWriter<StartNewCharacterMsg>,
     #[cfg(not(target_arch = "wasm32"))] mut load_game_msg: MessageWriter<LoadCharacterMsg>,
     #[cfg(not(target_arch = "wasm32"))] mut save_game_msg: MessageWriter<SaveCharacterMsg>,
@@ -73,6 +75,7 @@ pub fn on_click_menu_button(
                     next_game_state.set(GameState::ChooseRace);
                 },
                 GameState::ChooseSubClass => {
+                    player.pet = None; // Reset pet selection
                     next_game_state.set(GameState::ChooseClass);
                 },
                 GameState::Settings => {

@@ -55,6 +55,7 @@ impl FromWorld for WorldAssets {
             ("work", assets.load("audio/work.ogg")),
             ("study", assets.load("audio/study.ogg")),
             ("train", assets.load("audio/train.ogg")),
+            ("poof", assets.load("audio/poof.ogg")),
         ]);
 
         let fonts = HashMap::from([
@@ -106,6 +107,7 @@ impl FromWorld for WorldAssets {
             ("target", assets.load("images/icons/target.png")),
             ("attack_speed", assets.load("images/icons/attack_speed.png")),
             ("crit_chance", assets.load("images/icons/crit_chance.png")),
+            ("hand", assets.load("images/icons/hand.png")),
             ("health", assets.load("images/icons/health.png")),
             ("equipment", assets.load("images/icons/equipment.png")),
             ("strength", assets.load("images/icons/strength.png")),

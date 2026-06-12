@@ -177,6 +177,9 @@ pub fn handle_playing_action_clicks(
                 };
             },
             Action::Study => {
+                let old_hp = player.max_health();
+                let old_mp = player.max_mana();
+
                 let int_bonus = (player.intelligence() as f32 - 10.).max(0.) * 0.025;
                 let perk_chance = (0.333 + int_bonus).min(0.65) as f64;
                 let ability_chance = (0.200 + int_bonus).min(0.45) as f64;
@@ -248,6 +251,8 @@ pub fn handle_playing_action_clicks(
                     Color::srgb(0.75, 0.90, 1.0),
                     toast,
                 );
+
+                player.adjust_health_mana_after_change(old_hp, old_mp);
             },
             Action::Hunt => {
                 let gold_earned = rng.random_range(10..=20);

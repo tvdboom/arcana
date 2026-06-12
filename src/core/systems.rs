@@ -6,6 +6,7 @@ use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
 use crate::core::ui::creation::SelectionItem;
 use crate::core::ui::level_up::{ApplyLevelUpMsg, LevelUpPending};
+use crate::core::ui::modal::ActiveModal;
 use bevy::prelude::*;
 
 pub fn check_keys_menu(
@@ -19,8 +20,12 @@ pub fn check_keys_menu(
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     level_up: Res<LevelUpPending>,
     mut apply_level_up_msg: MessageWriter<ApplyLevelUpMsg>,
+    active_modal: Res<ActiveModal>,
 ) {
     if keyboard.just_released(KeyCode::Escape) {
+        if active_modal.active {
+            return;
+        }
         if level_up.active {
             // Disable game menu / escape key when level up overlay is active
             return;
@@ -47,6 +52,7 @@ pub fn check_keys_menu(
                     next_game_state.set(GameState::ChooseRace);
                 },
                 GameState::ChooseSubClass => {
+                    player.pet = None; // Reset pet selection
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_game_state.set(GameState::ChooseClass);
                 },
@@ -61,6 +67,9 @@ pub fn check_keys_menu(
     }
 
     if keyboard.just_released(KeyCode::Enter) {
+        if active_modal.active {
+            return;
+        }
         if level_up.active {
             let ability_ok =
                 level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();

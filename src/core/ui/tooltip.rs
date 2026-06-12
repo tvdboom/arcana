@@ -47,8 +47,9 @@ pub fn spawn_tooltip(
     let max_allowed_width = window_width * 0.35;
 
     let font_size_title = window_height * 0.024;
-    let font_size_desc = window_height * 0.022;
-    let char_width_desc = font_size_desc * 0.62;
+    let font_size_desc = window_height * 0.018;
+    let char_width_desc = font_size_desc * 0.60;
+    let char_width_desc_for_width = font_size_desc * 0.68;
     let line_height_title = font_size_title * 1.35;
     let line_height_desc = font_size_desc * 1.35;
 
@@ -86,12 +87,12 @@ pub fn spawn_tooltip(
     // Estimate width of content
     let desc_max_chars =
         wrapped_lines.iter().map(|line| visual_chars_count(line)).max().unwrap_or(0) as f32;
-    let mut desc_width = desc_max_chars * char_width_desc;
+    let mut desc_width = desc_max_chars * char_width_desc_for_width;
     if content.image.is_some() {
         desc_width += 144.0 + 16.0;
     }
 
-    let title_chars_width = content.title.chars().count() as f32 * char_width_desc * 1.1;
+    let title_chars_width = content.title.chars().count() as f32 * char_width_desc_for_width * 1.1;
     let title_row_width = if content.badge.is_some() {
         title_chars_width + 80.0 // badge + spacing
     } else {
@@ -222,10 +223,10 @@ pub fn spawn_tooltip(
                                         padding: UiRect::left(Val::Px(32.)),
                                         ..default()
                                     }).with_children(|parent| {
-                                        spawn_rich_text_row(parent, assets, line, 2.2, "medium", Color::WHITE);
+                                        spawn_rich_text_row(parent, assets, line, 1.8, "medium", Color::WHITE);
                                     });
                                 } else {
-                                    spawn_rich_text_row(parent, assets, line, 2.2, "medium", Color::WHITE);
+                                    spawn_rich_text_row(parent, assets, line, 1.8, "medium", Color::WHITE);
                                 }
                             }
                         });

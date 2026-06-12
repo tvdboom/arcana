@@ -131,6 +131,9 @@ pub fn apply_level_up_system(
         let ability_ok = level_up.ability_choices.is_empty() || level_up.ability_chosen.is_some();
         let perk_ok = level_up.perk_choices.is_empty() || level_up.perk_chosen.is_some();
         if level_up.points_remaining == 0 && ability_ok && perk_ok {
+            let old_hp = player.max_health();
+            let old_mp = player.max_mana();
+
             play_audio_msg.write(PlayAudioMsg::new("button"));
 
             player.strength += level_up.attr_gains[0] as u32;
@@ -150,6 +153,8 @@ pub fn apply_level_up_system(
                     player.perks.push(name.clone());
                 }
             }
+
+            player.adjust_health_mana_after_change(old_hp, old_mp);
 
             level_up.active = false;
             level_up.attr_gains = [0; 6];

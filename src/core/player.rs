@@ -178,6 +178,35 @@ impl Default for Player {
 }
 
 impl Player {
+    pub fn adjust_health_mana_after_change(&mut self, old_max_hp: u32, old_max_mp: u32) {
+        let new_max_hp = self.max_health();
+        let new_max_mp = self.max_mana();
+        if new_max_hp > old_max_hp {
+            self.health += new_max_hp - old_max_hp;
+        }
+        if new_max_mp > old_max_mp {
+            self.mana += new_max_mp - old_max_mp;
+        }
+        self.health = self.health.min(new_max_hp);
+        self.mana = self.mana.min(new_max_mp);
+    }
+
+    pub fn attribute_perk_mod(&self, attr: Attribute) -> i32 {
+        let mut perk_mod = 0;
+        for perk_key in &self.perks {
+            if let Some(perk) = get_perk(perk_key) {
+                for modifier in &perk.modifiers {
+                    if let Modifier::AttributeModifier(target_attr, val) = modifier {
+                        if *target_attr == attr {
+                            perk_mod += val;
+                        }
+                    }
+                }
+            }
+        }
+        perk_mod
+    }
+
     pub fn strength(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Strength);
         let sex_mod = self.sex.characteristic_mod(Attribute::Strength);
@@ -189,7 +218,8 @@ impl Player {
                 }
             }
         }
-        (self.strength as i32 + race_mod + sex_mod + equip_mod).max(0) as u32
+        let perk_mod = self.attribute_perk_mod(Attribute::Strength);
+        (self.strength as i32 + race_mod + sex_mod + equip_mod + perk_mod).max(0) as u32
     }
 
     pub fn strength_mod(&self) -> u32 {
@@ -206,7 +236,8 @@ impl Player {
                 }
             }
         }
-        (self.dexterity as i32 + race_mod + equip_mod).max(0) as u32
+        let perk_mod = self.attribute_perk_mod(Attribute::Dexterity);
+        (self.dexterity as i32 + race_mod + equip_mod + perk_mod).max(0) as u32
     }
 
     pub fn dexterity_mod(&self) -> u32 {
@@ -224,7 +255,8 @@ impl Player {
                 }
             }
         }
-        (self.constitution as i32 + race_mod - age_mod + equip_mod).max(0) as u32
+        let perk_mod = self.attribute_perk_mod(Attribute::Constitution);
+        (self.constitution as i32 + race_mod - age_mod + equip_mod + perk_mod).max(0) as u32
     }
 
     pub fn constitution_mod(&self) -> u32 {
@@ -241,7 +273,8 @@ impl Player {
                 }
             }
         }
-        (self.intelligence as i32 + race_mod + equip_mod).max(0) as u32
+        let perk_mod = self.attribute_perk_mod(Attribute::Intelligence);
+        (self.intelligence as i32 + race_mod + equip_mod + perk_mod).max(0) as u32
     }
 
     pub fn wisdom(&self) -> u32 {
@@ -255,7 +288,8 @@ impl Player {
                 }
             }
         }
-        (self.wisdom as i32 + race_mod + age_mod + equip_mod).max(0) as u32
+        let perk_mod = self.attribute_perk_mod(Attribute::Wisdom);
+        (self.wisdom as i32 + race_mod + age_mod + equip_mod + perk_mod).max(0) as u32
     }
 
     pub fn wisdom_mod(&self) -> u32 {
@@ -273,7 +307,8 @@ impl Player {
                 }
             }
         }
-        (self.charisma as i32 + race_mod + sex_mod + equip_mod).max(0) as u32
+        let perk_mod = self.attribute_perk_mod(Attribute::Charisma);
+        (self.charisma as i32 + race_mod + sex_mod + equip_mod + perk_mod).max(0) as u32
     }
 
     /// All currently equipped pieces of gear.
@@ -295,23 +330,69 @@ impl Player {
     }
 
     pub fn max_health(&self) -> u32 {
-        let base = 100 + 10 * self.constitution_mod();
+        let base = 100 + 10 * self.constitution_mod() as i32;
         let class_mod = if self.class == Class::Warrior {
             20
         } else {
             0
         };
-        base + class_mod + self.bonus_max_health
+        let perk_health_mod: i32 = self.perks
+            .iter()
+            .filter_map(|key| get_perk(key))
+            .flat_map(|perk| perk.modifiers.clone().into_iter())
+            .filter_map(|m| {
+                if let Modifier::MaxHealthModifier(v) = m {
+                    Some(v)
+                } else {
+                    None
+                }
+            })
+            .sum();
+        let equip_health_mod: i32 = self.equipped_equipment()
+            .iter()
+            .flat_map(|eq| eq.modifiers().iter())
+            .filter_map(|m| {
+                if let Modifier::MaxHealthModifier(v) = m {
+                    Some(*v)
+                } else {
+                    None
+                }
+            })
+            .sum();
+        (base + class_mod + self.bonus_max_health as i32 + perk_health_mod + equip_health_mod).max(1) as u32
     }
 
     pub fn max_mana(&self) -> u32 {
-        let base = 100 + 10 * self.wisdom_mod();
+        let base = 100 + 10 * self.wisdom_mod() as i32;
         let class_mod = match self.class {
             Class::Mage(_) => 30,
             Class::Druid => 10,
             _ => 0,
         };
-        base + class_mod + self.bonus_max_mana
+        let perk_mana_mod: i32 = self.perks
+            .iter()
+            .filter_map(|key| get_perk(key))
+            .flat_map(|perk| perk.modifiers.clone().into_iter())
+            .filter_map(|m| {
+                if let Modifier::MaxManaModifier(v) = m {
+                    Some(v)
+                } else {
+                    None
+                }
+            })
+            .sum();
+        let equip_mana_mod: i32 = self.equipped_equipment()
+            .iter()
+            .flat_map(|eq| eq.modifiers().iter())
+            .filter_map(|m| {
+                if let Modifier::MaxManaModifier(v) = m {
+                    Some(*v)
+                } else {
+                    None
+                }
+            })
+            .sum();
+        (base + class_mod + self.bonus_max_mana as i32 + perk_mana_mod + equip_mana_mod).max(0) as u32
     }
 
     pub fn attack(&self) -> u32 {

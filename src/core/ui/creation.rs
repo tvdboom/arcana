@@ -1744,7 +1744,6 @@ pub fn setup_subclass_selection(
         },
         Class::Druid => {
             if player.pet.is_none() {
-                use rand::seq::IndexedRandom;
                 let pet_name =
                     PET_NAMES.choose(&mut rand::rng()).copied().unwrap_or("Ash").to_string();
                 player.pet = Some(Pet::new(pet_name, PetKind::Wolf));

@@ -133,7 +133,13 @@ pub fn setup_game_menu(
     localization: Res<Localization>,
 ) {
     let lang = settings.language;
-    commands.spawn((add_root_node(true), MenuCmp)).with_children(|parent| {
+    commands
+        .spawn((
+            add_root_node(true),
+            MenuCmp,
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6)),
+        ))
+        .with_children(|parent| {
         parent
             .spawn((
                 Node {
@@ -164,7 +170,13 @@ pub fn setup_game_settings(
     localization: Res<Localization>,
 ) {
     let lang = settings.language;
-    commands.spawn((add_root_node(true), MenuCmp)).with_children(|parent| {
+    commands
+        .spawn((
+            add_root_node(true),
+            MenuCmp,
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6)),
+        ))
+        .with_children(|parent| {
         parent
             .spawn((
                 Node {

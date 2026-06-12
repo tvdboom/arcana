@@ -21,9 +21,10 @@ use crate::core::ui::creation::SelectionItem;
 pub use crate::core::ui::level_up::{manage_level_up_overlay, LevelUpPending};
 pub use crate::core::ui::toast::ToastContainer;
 pub use crate::core::ui::tooltip::*;
+use crate::core::ui::modal::{spawn_modal, ActiveModal, ModalAction};
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
-use bevy::window::{CursorIcon, SystemCursorIcon};
+use bevy::window::SystemCursorIcon;
 
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
@@ -105,7 +106,7 @@ pub struct AbilitiesListWrapper;
 pub struct PerksListWrapper;
 
 /// The equipment image-slots overlaid on the character portrait.
-#[derive(Component, Clone, Copy, PartialEq, Eq)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Debug)]
 pub enum EquipSlot {
     Helmet,
     Chestplate,
@@ -344,10 +345,15 @@ fn spawn_card(
             Button,
             Interaction::default(),
             Pickable::default(),
-            t,
+            t.clone(),
         ));
         cmd.observe(recolor::<Over>(HOVERED_BUTTON_COLOR));
         cmd.observe(recolor::<Out>(BAR_BG_COLOR));
+        cmd.observe(cursor::<Over>(SystemCursorIcon::Pointer));
+        cmd.observe(cursor::<Out>(SystemCursorIcon::Default));
+        if let RightColumnTooltip::Perk(_) = t {
+            cmd.observe(handle_perk_card_click);
+        }
     }
 
     cmd.with_children(|parent| {
@@ -370,6 +376,26 @@ fn spawn_card(
                 }
             });
     });
+}
+
+pub fn handle_perk_card_click(
+    event: On<Pointer<Click>>,
+    mut commands: Commands,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    card_q: Query<&RightColumnTooltip>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+) {
+    if event.button == PointerButton::Secondary {
+        if let Ok(RightColumnTooltip::Perk(perk_name)) = card_q.get(event.entity) {
+            let lang = settings.language;
+            let action = ModalAction::RemovePerk {
+                perk_name: perk_name.clone(),
+            };
+            spawn_modal(&mut commands, &assets, &localization, lang, action, &mut play_audio_msg);
+        }
+    }
 }
 
 /// One of the three combat-stat boxes (attack / defense / initiative).
@@ -1261,11 +1287,19 @@ pub fn equip_slot_tooltip_system(
     settings: Res<Settings>,
     player: Res<Player>,
     level_up: Res<LevelUpPending>,
+    active_modal: Res<ActiveModal>,
     slot_q: Query<(&Interaction, &EquipSlot)>,
     changed_slot_q: Query<(), (With<EquipSlot>, Changed<Interaction>)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
     windows: Query<&Window>,
 ) {
+    if active_modal.active {
+        for entity in tooltip_q.iter() {
+            commands.entity(entity).try_despawn();
+        }
+        return;
+    }
+
     if level_up.active {
         return;
     }
@@ -1341,12 +1375,20 @@ pub fn right_column_tooltip_system(
     localization: Res<Localization>,
     settings: Res<Settings>,
     level_up: Res<LevelUpPending>,
+    active_modal: Res<ActiveModal>,
     right_tab: Res<RightTab>,
     card_q: Query<(&Interaction, &RightColumnTooltip)>,
     changed_card_q: Query<(), (With<RightColumnTooltip>, Changed<Interaction>)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
     windows: Query<&Window>,
 ) {
+    if active_modal.active {
+        for entity in tooltip_q.iter() {
+            commands.entity(entity).try_despawn();
+        }
+        return;
+    }
+
     if changed_card_q.is_empty() {
         return;
     }
@@ -1431,11 +1473,19 @@ pub fn info_tooltip_system(
     settings: Res<Settings>,
     player: Res<Player>,
     level_up: Res<LevelUpPending>,
+    active_modal: Res<ActiveModal>,
     info_q: Query<(&Interaction, &InfoTooltip)>,
     changed_info_q: Query<(), (With<InfoTooltip>, Changed<Interaction>)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
     windows: Query<&Window>,
 ) {
+    if active_modal.active {
+        for entity in tooltip_q.iter() {
+            commands.entity(entity).try_despawn();
+        }
+        return;
+    }
+
     if level_up.active {
         return;
     }
@@ -2347,6 +2397,8 @@ pub struct EquipmentCard {
 }
 
 pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
+    let old_hp = player.max_health();
+    let old_mp = player.max_mana();
     if let Some(equipment) = get_equipment(key) {
         // Remove from inventory first
         if let Some(pos) = player.inventory.iter().position(|k| k == key) {
@@ -2379,6 +2431,7 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                     } else if name.contains("antidote") {
                         player.health = player.max_health();
                     }
+                    player.adjust_health_mana_after_change(old_hp, old_mp);
                     return Some("button");
                 },
                 WearableSlot::Helmet => {
@@ -2464,10 +2517,13 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
             },
         }
     }
+    player.adjust_health_mana_after_change(old_hp, old_mp);
     None
 }
 
 pub fn unequip_item(player: &mut Player, key: &str) {
+    let old_hp = player.max_health();
+    let old_mp = player.max_mana();
     let mut removed = false;
     if player.helmet.as_deref() == Some(key) {
         player.helmet = None;
@@ -2497,9 +2553,12 @@ pub fn unequip_item(player: &mut Player, key: &str) {
     if removed {
         player.inventory.push(key.to_string());
     }
+    player.adjust_health_mana_after_change(old_hp, old_mp);
 }
 
 pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
+    let old_hp = player.max_health();
+    let old_mp = player.max_mana();
     let key_opt = match slot {
         EquipSlot::Helmet => player.helmet.take(),
         EquipSlot::Accessory => player.accessory.take(),
@@ -2510,12 +2569,14 @@ pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
         EquipSlot::Boots => player.boots.take(),
         EquipSlot::Gloves => player.gloves.take(),
     };
-    if let Some(key) = key_opt {
+    let res = if let Some(key) = key_opt {
         player.inventory.push(key);
         true
     } else {
         false
-    }
+    };
+    player.adjust_health_mana_after_change(old_hp, old_mp);
+    res
 }
 
 pub fn reward_equipment(player: &mut Player, key: String) {
@@ -2563,7 +2624,9 @@ pub fn reward_equipment(player: &mut Player, key: String) {
 pub fn handle_equipment_card_click(
     event: On<Pointer<Click>>,
     mut commands: Commands,
-    window_e: Single<Entity, With<Window>>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     right_tab: Res<RightTab>,
@@ -2573,22 +2636,17 @@ pub fn handle_equipment_card_click(
         return;
     }
     if let Ok(card) = card_q.get(event.entity) {
-        // Right-click: sell item for full price
+        // Right-click: sell item for full price with confirmation modal
         if event.button == PointerButton::Secondary {
             let sell_price = card.price;
-
-            // If equipped, unequip first
-            if card.is_equipped {
-                unequip_item(&mut player, &card.key);
-            }
-
-            // Remove from inventory
-            if let Some(pos) = player.inventory.iter().position(|k| k == &card.key) {
-                player.inventory.remove(pos);
-                player.gold += sell_price;
-                play_audio_msg.write(PlayAudioMsg::new("coins"));
-                commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
-            }
+            let lang = settings.language;
+            let action = ModalAction::SellItem {
+                key: card.key.clone(),
+                price: sell_price,
+                is_equipped: card.is_equipped,
+                slot: None,
+            };
+            spawn_modal(&mut commands, &assets, &localization, lang, action, &mut play_audio_msg);
             return;
         }
 
@@ -2627,7 +2685,9 @@ pub fn handle_equipment_card_click(
 pub fn handle_equipment_slot_click(
     event: On<Pointer<Click>>,
     mut commands: Commands,
-    window_e: Single<Entity, With<Window>>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     slot_q: Query<&EquipSlot>,
@@ -2648,26 +2708,18 @@ pub fn handle_equipment_slot_click(
         if let Some(key) = equipped_key {
             let key_str = key.to_string();
 
-            // Right-click: sell equipped item for full price
+            // Right-click: sell equipped item for full price with confirmation modal
             if event.button == PointerButton::Secondary {
                 if let Some(eq) = get_equipment(&key_str) {
                     let sell_price = eq.price();
-
-                    // Directly unequip from the slot without adding to inventory
-                    match slot {
-                        EquipSlot::Helmet => player.helmet = None,
-                        EquipSlot::Accessory => player.accessory = None,
-                        EquipSlot::Accessory2 => player.accessory2 = None,
-                        EquipSlot::WeaponLH => player.weapon_lh = None,
-                        EquipSlot::WeaponRH => player.weapon_rh = None,
-                        EquipSlot::Chestplate => player.armor = None,
-                        EquipSlot::Boots => player.boots = None,
-                        EquipSlot::Gloves => player.gloves = None,
-                    }
-
-                    player.gold += sell_price;
-                    play_audio_msg.write(PlayAudioMsg::new("coins"));
-                    commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
+                    let lang = settings.language;
+                    let action = ModalAction::SellItem {
+                        key: key_str.clone(),
+                        price: sell_price,
+                        is_equipped: true,
+                        slot: Some(*slot),
+                    };
+                    spawn_modal(&mut commands, &assets, &localization, lang, action, &mut play_audio_msg);
                 }
             } else {
                 // Left-click: unequip item

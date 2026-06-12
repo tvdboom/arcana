@@ -35,6 +35,7 @@ use crate::core::states::{AppState, GameState};
 use crate::core::systems::*;
 use crate::core::ui::creation::*;
 use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpOverlayCmp};
+use crate::core::ui::modal::{ActiveModal, modal_input_system};
 use crate::core::ui::playing::*;
 use crate::core::ui::toast::{tick_gold_toasts, GoldToast};
 use crate::core::utils::{despawn, reset_cursor};
@@ -85,6 +86,7 @@ impl Plugin for GamePlugin {
             .init_resource::<Settings>()
             .init_resource::<Player>()
             .init_resource::<LevelUpPending>()
+            .init_resource::<ActiveModal>()
             .init_resource::<RightTab>();
 
         // Sets
@@ -128,6 +130,7 @@ impl Plugin for GamePlugin {
                 (
                     check_keys_menu,
                     apply_level_up_system,
+                    modal_input_system,
                     update_localized_text.run_if(resource_changed::<Settings>),
                     update_playing_screen.run_if(resource_changed::<Settings>),
                 ),
