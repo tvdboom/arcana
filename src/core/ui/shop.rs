@@ -8,7 +8,7 @@ use crate::core::constants::{
     BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, HOVERED_BUTTON_COLOR, PRESSED_BUTTON_COLOR,
 };
 use crate::core::localization::Localization;
-use crate::core::menu::utils::recolor;
+use crate::core::menu::utils::{add_text, recolor};
 use crate::core::player::Player;
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
@@ -190,6 +190,7 @@ pub fn setup_shop_ui(
                 should_block_lower: false,
                 is_hoverable: true,
             },
+            GlobalZIndex(900),
             ShopOutsideOverlay,
             ShopPanelCmp,
         ))
@@ -202,8 +203,7 @@ pub fn setup_shop_ui(
                 .spawn((
                     Node {
                         width: percent(66.5),
-                        height: percent(105.),
-                        padding: UiRect::all(Val::Px(28.)),
+                        height: percent(100.),
                         align_items: AlignItems::Stretch,
                         justify_content: JustifyContent::Stretch,
                         ..default()
@@ -211,8 +211,16 @@ pub fn setup_shop_ui(
                     ImageNode {
                         image: assets.image("shop"),
                         image_mode: NodeImageMode::Stretch,
+                        color: Color::srgba(0.8, 0.8, 0.8, 1.0),
                         ..default()
                     },
+                    Button,
+                    Interaction::default(),
+                    Pickable {
+                        should_block_lower: true,
+                        is_hoverable: true,
+                    },
+                    GlobalZIndex(910),
                     ShopPanelCmp,
                 ))
                 .with_children(|parent| {
@@ -290,6 +298,7 @@ pub fn build_shop_content(
             Node {
                 width: percent(100.),
                 height: percent(100.),
+                padding: UiRect::all(percent(5.)),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
                 justify_content: JustifyContent::SpaceBetween,
@@ -402,7 +411,7 @@ pub fn build_shop_content_inner(
                             .observe(cursor::<Out>(SystemCursorIcon::Default))
                             .with_children(|parent| {
                                 parent.spawn((
-                                    crate::core::menu::utils::add_text(label, "bold", 1.8, assets),
+                                    add_text(label, "bold", 1.8, assets),
                                     TextColor(BUTTON_TEXT_COLOR),
                                 ));
                             });
@@ -425,19 +434,14 @@ pub fn build_shop_content_inner(
                 .with_children(|parent| {
                     parent.spawn((
                         Node {
-                            width: Val::Px(24.),
-                            height: Val::Px(24.),
+                            width: Val::Vw(2.4),
+                            height: Val::Vw(2.4),
                             ..default()
                         },
                         ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
                     ));
                     parent.spawn((
-                        crate::core::menu::utils::add_text(
-                            format!("{}", player_gold),
-                            "bold",
-                            2.4,
-                            assets,
-                        ),
+                        add_text(player_gold.to_string(), "bold", 2.4, assets),
                         TextColor(BUTTON_TEXT_COLOR),
                         ShopGoldLabel,
                     ));
@@ -480,9 +484,7 @@ pub fn build_shop_content_inner(
                                 ..default()
                             })
                             .with_children(|parent| {
-                                parent.spawn(crate::core::menu::utils::add_text(
-                                    "Hand: ", "bold", 1.4, assets,
-                                ));
+                                parent.spawn(add_text("Hand: ", "bold", 1.4, assets));
                                 for (opt, label) in [
                                     (None, "Both"),
                                     (Some(Hand::OneHand), "1-Hand"),
@@ -511,9 +513,7 @@ pub fn build_shop_content_inner(
                                         .observe(handle_shop_hand_filter_click)
                                         .with_children(|parent| {
                                             parent.spawn((
-                                                crate::core::menu::utils::add_text(
-                                                    label, "medium", 1.2, assets,
-                                                ),
+                                                add_text(label, "medium", 1.2, assets),
                                                 TextColor(BUTTON_TEXT_COLOR),
                                             ));
                                         });
@@ -529,9 +529,7 @@ pub fn build_shop_content_inner(
                                 ..default()
                             })
                             .with_children(|parent| {
-                                parent.spawn(crate::core::menu::utils::add_text(
-                                    "Type: ", "bold", 1.4, assets,
-                                ));
+                                parent.spawn(add_text("Type: ", "bold", 1.4, assets));
                                 for (opt, label) in [
                                     (WeaponTypeFilter::All, "All"),
                                     (WeaponTypeFilter::Weapons, "Weapons"),
@@ -561,9 +559,7 @@ pub fn build_shop_content_inner(
                                         .observe(handle_shop_type_filter_click)
                                         .with_children(|parent| {
                                             parent.spawn((
-                                                crate::core::menu::utils::add_text(
-                                                    label, "medium", 1.2, assets,
-                                                ),
+                                                add_text(label, "medium", 1.2, assets),
                                                 TextColor(BUTTON_TEXT_COLOR),
                                             ));
                                         });
@@ -589,12 +585,7 @@ pub fn build_shop_content_inner(
                                 ..default()
                             })
                             .with_children(|parent| {
-                                parent.spawn(crate::core::menu::utils::add_text(
-                                    "Category: ",
-                                    "bold",
-                                    1.4,
-                                    assets,
-                                ));
+                                parent.spawn(add_text("Category: ", "bold", 1.4, assets));
                                 for (opt, label) in [
                                     (None, "All"),
                                     (Some(Category::Melee), "Melee"),
@@ -625,9 +616,7 @@ pub fn build_shop_content_inner(
                                         .observe(handle_shop_category_filter_click)
                                         .with_children(|parent| {
                                             parent.spawn((
-                                                crate::core::menu::utils::add_text(
-                                                    label, "medium", 1.2, assets,
-                                                ),
+                                                add_text(label, "medium", 1.2, assets),
                                                 TextColor(BUTTON_TEXT_COLOR),
                                             ));
                                         });
@@ -643,9 +632,7 @@ pub fn build_shop_content_inner(
                                 ..default()
                             })
                             .with_children(|parent| {
-                                parent.spawn(crate::core::menu::utils::add_text(
-                                    "Kind: ", "bold", 1.4, assets,
-                                ));
+                                parent.spawn(add_text("Kind: ", "bold", 1.4, assets));
                                 for (opt, label) in [
                                     (None, "All"),
                                     (Some(Kind::Physical), "Physical"),
@@ -678,9 +665,7 @@ pub fn build_shop_content_inner(
                                         .observe(handle_shop_kind_filter_click)
                                         .with_children(|parent| {
                                             parent.spawn((
-                                                crate::core::menu::utils::add_text(
-                                                    label, "medium", 1.2, assets,
-                                                ),
+                                                add_text(label, "medium", 1.2, assets),
                                                 TextColor(BUTTON_TEXT_COLOR),
                                             ));
                                         });
@@ -788,12 +773,7 @@ pub fn build_shop_content_inner(
 
             if empty {
                 parent.spawn((
-                    crate::core::menu::utils::add_text(
-                        "No items fit these conditions.",
-                        "bold",
-                        2.0,
-                        assets,
-                    ),
+                    add_text("No items fit these conditions.", "bold", 2.0, assets),
                     TextColor(Color::WHITE),
                 ));
             }
@@ -869,10 +849,8 @@ fn spawn_shop_item_card(
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn((
-                        crate::core::menu::utils::add_text(name, "bold", 1.3, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
+                    parent
+                        .spawn((add_text(name, "bold", 1.3, assets), TextColor(BUTTON_TEXT_COLOR)));
 
                     parent
                         .spawn(Node {
@@ -892,12 +870,7 @@ fn spawn_shop_item_card(
                                     .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
-                                crate::core::menu::utils::add_text(
-                                    format!("{}", item.price()),
-                                    "bold",
-                                    1.3,
-                                    assets,
-                                ),
+                                add_text(format!("{}", item.price()), "bold", 1.3, assets),
                                 TextColor(BUTTON_TEXT_COLOR),
                             ));
                         });
