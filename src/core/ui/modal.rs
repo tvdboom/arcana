@@ -8,8 +8,8 @@ use crate::core::localization::Localization;
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
 use crate::core::player::Player;
 use crate::core::settings::Language;
-use crate::core::utils::cursor;
 use crate::core::ui::playing::{unequip_item, EquipSlot};
+use crate::core::utils::cursor;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ModalAction {
@@ -52,8 +52,12 @@ pub fn spawn_modal(
 
     // Translate texts
     let (title_key, text_key) = match action {
-        ModalAction::SellItem { .. } => ("modal.sell_item_title", "modal.sell_item_text"),
-        ModalAction::RemovePerk { .. } => ("modal.remove_perk_title", "modal.remove_perk_text"),
+        ModalAction::SellItem {
+            ..
+        } => ("modal.sell_item_title", "modal.sell_item_text"),
+        ModalAction::RemovePerk {
+            ..
+        } => ("modal.remove_perk_title", "modal.remove_perk_text"),
     };
 
     let title_text = localization.get(title_key, lang);
@@ -238,17 +242,19 @@ fn confirm_modal_action(
                     player.inventory.remove(pos);
                 }
                 player.gold += price;
-                play_audio_msg.write(PlayAudioMsg::new("coins"));
+                play_audio_msg.write(PlayAudioMsg::new("sell"));
                 if let Some(win_e) = window_entity {
                     commands.entity(win_e).insert(CursorIcon::from(SystemCursorIcon::Default));
                 }
-            }
-            ModalAction::RemovePerk { perk_name } => {
+            },
+            ModalAction::RemovePerk {
+                perk_name,
+            } => {
                 if let Some(pos) = player.perks.iter().position(|p| p == &perk_name) {
                     player.perks.remove(pos);
                 }
                 play_audio_msg.write(PlayAudioMsg::new("poof"));
-            }
+            },
         }
     }
 
@@ -298,12 +304,7 @@ pub fn handle_modal_cancel_click(
     mut active_modal: ResMut<ActiveModal>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
-    cancel_modal_action(
-        &mut commands,
-        &mut active_modal,
-        &mut play_audio_msg,
-        &overlay_q,
-    );
+    cancel_modal_action(&mut commands, &mut active_modal, &mut play_audio_msg, &overlay_q);
 }
 
 pub fn handle_modal_overlay_click(
@@ -313,12 +314,7 @@ pub fn handle_modal_overlay_click(
     mut active_modal: ResMut<ActiveModal>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
-    cancel_modal_action(
-        &mut commands,
-        &mut active_modal,
-        &mut play_audio_msg,
-        &overlay_q,
-    );
+    cancel_modal_action(&mut commands, &mut active_modal, &mut play_audio_msg, &overlay_q);
 }
 
 pub fn modal_input_system(
@@ -346,11 +342,6 @@ pub fn modal_input_system(
         );
     } else if keyboard.just_released(KeyCode::Escape) {
         keyboard.reset(KeyCode::Escape);
-        cancel_modal_action(
-            &mut commands,
-            &mut active_modal,
-            &mut play_audio_msg,
-            &overlay_q,
-        );
+        cancel_modal_action(&mut commands, &mut active_modal, &mut play_audio_msg, &overlay_q);
     }
 }

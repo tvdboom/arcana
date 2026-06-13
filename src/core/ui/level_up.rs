@@ -8,9 +8,9 @@ use crate::core::constants::*;
 use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;
 use crate::core::menu::utils::{add_text, spawn_rich_text_row};
-use crate::core::ui::playing::RightColumnTooltip;
 use crate::core::player::{Attribute, Player};
 use crate::core::settings::Language;
+use crate::core::ui::playing::RightColumnTooltip;
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
 
@@ -154,7 +154,7 @@ pub fn apply_level_up_system(
                 }
             }
 
-            player.adjust_health_mana_after_change(old_hp, old_mp);
+            player.update_health_mana(old_hp, old_mp);
 
             level_up.active = false;
             level_up.attr_gains = [0; 6];
@@ -991,7 +991,8 @@ fn spawn_choice_card(
                 },
                 BackgroundColor(PLACEHOLDER_COLOR),
                 BorderColor::all(BUTTON_BORDER_COLOR),
-                ImageNode::new(assets.image(format!("build_{}", img_name))).with_mode(NodeImageMode::Stretch),
+                ImageNode::new(assets.image(format!("build_{}", img_name)))
+                    .with_mode(NodeImageMode::Stretch),
             ));
 
             // Text content
@@ -1009,9 +1010,13 @@ fn spawn_choice_card(
 
                     // Description
                     let desc_text = if is_ability {
-                        get_ability(name).map(|ab| ab.description(lang, &localization)).unwrap_or_default()
+                        get_ability(name)
+                            .map(|ab| ab.description(lang, &localization))
+                            .unwrap_or_default()
                     } else {
-                        get_perk(name).map(|pk| pk.description(lang, &localization)).unwrap_or_default()
+                        get_perk(name)
+                            .map(|pk| pk.description(lang, &localization))
+                            .unwrap_or_default()
                     };
 
                     spawn_rich_text_row(parent, assets, desc_text, 2.0, "medium", Color::WHITE);

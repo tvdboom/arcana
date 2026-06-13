@@ -1,4 +1,4 @@
-use crate::core::build::equipment::{Kind};
+use crate::core::build::equipment::Kind;
 use crate::core::build::weapons::Category;
 use crate::core::localization::Localization;
 use crate::core::player::Attribute;
@@ -94,7 +94,8 @@ impl Modifier {
                 format!("{amount:+} {max_mana}")
             },
             Self::HealthRegen(amount) => {
-                let health_regen = localization.get("general.health_regen", language).to_lowercase();
+                let health_regen =
+                    localization.get("general.health_regen", language).to_lowercase();
                 format!("{amount:+} {health_regen}")
             },
             Self::ManaRegen(amount) => {
@@ -102,22 +103,30 @@ impl Modifier {
                 format!("{amount:+} {mana_regen}")
             },
             Self::KindPowerMultiplier(kind, percentage) => {
-                let kind_str = localization.get(format!("general.{}", kind.to_lowername()), language).to_lowercase();
+                let kind_str = localization
+                    .get(format!("general.{}", kind.to_lowername()), language)
+                    .to_lowercase();
                 let damage_str = localization.get("general.damage", language).to_lowercase();
                 format!("{percentage:+.0}% {kind_str} {damage_str}")
             },
             Self::KindResistanceMultiplier(kind, percentage) => {
-                let kind_str = localization.get(format!("general.{}", kind.to_lowername()), language).to_lowercase();
+                let kind_str = localization
+                    .get(format!("general.{}", kind.to_lowername()), language)
+                    .to_lowercase();
                 let resist_str = localization.get("general.resistance", language).to_lowercase();
                 format!("{percentage:+.0}% {kind_str} {resist_str}")
             },
             Self::CategoryPowerMultiplier(category, percentage) => {
-                let category_str = localization.get(format!("general.{}", category.to_lowername()), language).to_lowercase();
+                let category_str = localization
+                    .get(format!("general.{}", category.to_lowername()), language)
+                    .to_lowercase();
                 let damage_str = localization.get("general.damage", language).to_lowercase();
                 format!("{percentage:+.0}% {category_str} {damage_str}")
             },
             Self::CategoryResistanceMultiplier(category, percentage) => {
-                let category_str = localization.get(format!("general.{}", category.to_lowername()), language).to_lowercase();
+                let category_str = localization
+                    .get(format!("general.{}", category.to_lowername()), language)
+                    .to_lowercase();
                 let resist_str = localization.get("general.resistance", language).to_lowercase();
                 format!("{percentage:+.0}% {category_str} {resist_str}")
             },
@@ -126,7 +135,8 @@ impl Modifier {
                 format!("{percentage:+.0}% {lifesteal_str}")
             },
             Self::HealingMultiplier(percentage) => {
-                let healing_str = localization.get("general.healing_multiplier", language).to_lowercase();
+                let healing_str =
+                    localization.get("general.healing_multiplier", language).to_lowercase();
                 format!("{percentage:+.0}% {healing_str}")
             },
         }

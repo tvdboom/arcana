@@ -25,4 +25,5 @@ pub enum GameState {
     GameMenu,
     Settings,
     EndGame,
+    Shop,
 }

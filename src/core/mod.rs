@@ -35,7 +35,7 @@ use crate::core::states::{AppState, GameState};
 use crate::core::systems::*;
 use crate::core::ui::creation::*;
 use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpOverlayCmp};
-use crate::core::ui::modal::{ActiveModal, modal_input_system};
+use crate::core::ui::modal::{modal_input_system, ActiveModal};
 use crate::core::ui::playing::*;
 use crate::core::ui::toast::{tick_gold_toasts, GoldToast};
 use crate::core::utils::{despawn, reset_cursor};
@@ -87,6 +87,8 @@ impl Plugin for GamePlugin {
             .init_resource::<Player>()
             .init_resource::<LevelUpPending>()
             .init_resource::<ActiveModal>()
+            .init_resource::<crate::core::ui::shop::ShopInventory>()
+            .init_resource::<crate::core::ui::shop::ShopFilters>()
             .init_resource::<RightTab>();
 
         // Sets
@@ -191,7 +193,25 @@ impl Plugin for GamePlugin {
             .add_systems(OnEnter(GameState::GameMenu), setup_game_menu)
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::Settings), setup_game_settings)
-            .add_systems(OnExit(GameState::Settings), despawn::<MenuCmp>);
+            .add_systems(OnExit(GameState::Settings), despawn::<MenuCmp>)
+            .add_systems(OnEnter(GameState::Shop), crate::core::ui::shop::setup_shop_ui)
+            .add_systems(
+                OnExit(GameState::Shop),
+                (crate::core::ui::shop::cleanup_shop_ui, despawn::<TooltipNode>),
+            )
+            .add_systems(
+                Update,
+                (
+                    crate::core::ui::shop::update_shop_ui,
+                    crate::core::ui::shop::update_shop_gold_system,
+                    crate::core::ui::shop::shop_tooltip_system,
+                    tooltip_follow_cursor_system,
+                    tick_gold_toasts,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Shop)),
+            );
 
         #[cfg(not(target_arch = "wasm32"))]
         app

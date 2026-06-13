@@ -1,14 +1,15 @@
 use crate::core::build::abilities::Ability;
-use crate::core::build::wearable::Wearable;
+use crate::core::build::consumables::Consumable;
 use crate::core::build::equipment::Equipment;
 use crate::core::build::perks::Perk;
 use crate::core::build::weapons::Weapon;
+use crate::core::build::wearables::Wearable;
 use std::sync::OnceLock;
 
 static ABILITIES: OnceLock<Vec<Ability>> = OnceLock::new();
 static PERKS: OnceLock<Vec<Perk>> = OnceLock::new();
 static WEAPONS: OnceLock<Vec<Weapon>> = OnceLock::new();
-static ARMOR: OnceLock<Vec<Wearable>> = OnceLock::new();
+static WEARABLE: OnceLock<Vec<Wearable>> = OnceLock::new();
 static EQUIPMENT: OnceLock<Vec<Equipment>> = OnceLock::new();
 
 pub fn all_abilities() -> &'static [Ability] {
@@ -33,9 +34,30 @@ pub fn all_weapons() -> &'static [Weapon] {
 }
 
 pub fn all_wearables() -> &'static [Wearable] {
-    ARMOR.get_or_init(|| {
+    WEARABLE.get_or_init(|| {
+        let mut wearables = Vec::new();
         let ron_str = include_str!("../../assets/inventory/wearables.ron");
-        ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse wearable.ron: {}", e))
+        let mut loaded: Vec<Wearable> = ron::from_str(ron_str)
+            .unwrap_or_else(|e| panic!("Failed to parse wearables.ron: {}", e));
+        wearables.append(&mut loaded);
+
+        let cons_str = include_str!("../../assets/inventory/consumables.ron");
+        let loaded_cons: Vec<Consumable> = ron::from_str(cons_str)
+            .unwrap_or_else(|e| panic!("Failed to parse consumables.ron: {}", e));
+        for c in loaded_cons {
+            wearables.push(Wearable {
+                name: c.name,
+                image: c.image,
+                level: c.level,
+                kind: crate::core::build::equipment::Kind::Physical,
+                price: c.price,
+                slot: crate::core::build::wearables::WearableSlot::Consumable,
+                modifiers: Vec::new(),
+                effects: c.effects,
+            });
+        }
+
+        wearables
     })
 }
 
@@ -80,6 +102,6 @@ mod tests {
         assert!(!wps.is_empty(), "Weapons catalog is empty");
 
         let arm = all_wearables();
-        assert!(!arm.is_empty(), "Armor catalog is empty");
+        assert!(!arm.is_empty(), "Wearable catalog is empty");
     }
 }

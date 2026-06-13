@@ -1,9 +1,11 @@
 use crate::core::localization::Localization;
+use crate::core::player::Attribute;
 use crate::core::settings::Language;
+use crate::utils::NameFromEnum;
 use serde::Deserialize;
 use strum_macros::Display;
 
-#[derive(Debug, Clone, Copy, Display, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Display, PartialEq, Deserialize)]
 pub enum Effect {
     /// Enrages your pet, boosting its stats.
     BeastFrenzy {
@@ -75,9 +77,9 @@ pub enum Effect {
         duration: f32,
     },
 
-    /// Increases armor.
+    /// Increases defense.
     Fortify {
-        armor_pct: f32,
+        defense_pct: f32,
         duration: f32,
     },
 
@@ -101,6 +103,11 @@ pub enum Effect {
     /// Prevents the target from dodging attacks or abilities.
     Immobilize {
         duration: f32,
+    },
+
+    /// Instantly restores a flat amount of mana.
+    InstantMana {
+        amount: u32,
     },
 
     /// Restores a flat percentage of health on inflicted damage.
@@ -163,6 +170,13 @@ pub enum Effect {
         duration: f32,
     },
 
+    /// Temporarily boosts a specific attribute.
+    StatBoost {
+        attribute: Attribute,
+        amount: u32,
+        duration: f32,
+    },
+
     /// Freezes the target's ability cooldown recovery.
     Stun {
         duration: f32,
@@ -188,126 +202,181 @@ pub enum Effect {
 
 impl Effect {
     pub fn description(&self, language: Language, localization: &Localization) -> String {
-        let template = localization.get(format!("effect.{}", self.to_string().to_lowercase()), language);
+        let template =
+            localization.get(format!("effect.{}", self.to_string().to_lowercase()), language);
 
         match self {
-            Self::BeastFrenzy { attack_pct, attack_speed_pct, duration } => {
-                template.replace("{attack_pct}", &format!("{attack_pct:+.0}"))
-                    .replace("{attack_speed_pct}", &format!("{attack_speed_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Berserk { attack_pct, duration } => {
-                template.replace("{attack_pct}", &format!("{attack_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Bleed { damage_pct } => {
-                template.replace("{damage_pct}", &format!("{damage_pct:+.0}"))
-            },
-            Self::Blind { miss_pct, duration } => {
-                template.replace("{miss_pct}", &format!("{miss_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Burn { damage, duration } => {
-                template.replace("{damage}", &format!("{damage:+}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Clearcasting { reduction_pct, duration } => {
-                template.replace("{reduction_pct}", &format!("{reduction_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Cleave { damage_pct, duration } => {
-                template.replace("{damage_pct}", &format!("{damage_pct:.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Curse { damage, timer } => {
-                template.replace("{damage}", &format!("{damage}"))
-                    .replace("{timer}", &format!("{timer}"))
-            },
-            Self::Pierce { damage } => {
-                template.replace("{damage}", &format!("{damage}"))
-            },
-            Self::EchoStruck { reset_pct } => {
-                template.replace("{reset_pct}", &format!("{reset_pct:+.0}"))
-            },
-            Self::Empower { damage_pct, duration } => {
-                template.replace("{damage_pct}", &format!("{damage_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Focus { crit_chance_pct, duration } => {
-                template.replace("{crit_chance_pct}", &format!("{crit_chance_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Fortify { armor_pct, duration } => {
-                template.replace("{armor_pct}", &format!("{armor_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Freeze { attack_speed_pct, duration } => {
-                template.replace("{attack_speed_pct}", &format!("{attack_speed_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Haste { initiative_pct, duration } => {
-                template.replace("{initiative_pct}", &format!("{initiative_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Heal { heal_pct } => {
-                template.replace("{heal_pct}", &format!("{heal_pct}"))
-            },
-            Self::Immobilize { duration } => {
-                template.replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Lifesteal { percentage, duration } => {
-                template.replace("{percentage}", &format!("{percentage:.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::ManaBurn { amount } => {
-                template.replace("{amount}", &format!("{amount}"))
-            },
-            Self::ManaFlow { amount, duration } => {
-                template.replace("{amount}", &format!("{amount:+}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Manasteal { percentage } => {
-                template.replace("{percentage}", &format!("{percentage:.0}"))
-            },
-            Self::MonarchShield { duration } => {
-                template.replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Poison { damage, duration } => {
-                template.replace("{damage}", &format!("{damage:+}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Paranoia { initiative_pct, duration } => {
-                template.replace("{initiative_pct}", &format!("{initiative_pct:+.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Purge => {
+            Self::BeastFrenzy {
+                attack_pct,
+                attack_speed_pct,
+                duration,
+            } => template
+                .replace("{attack_pct}", &format!("{attack_pct:+.0}"))
+                .replace("{attack_speed_pct}", &format!("{attack_speed_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Berserk {
+                attack_pct,
+                duration,
+            } => template
+                .replace("{attack_pct}", &format!("{attack_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Bleed {
+                damage_pct,
+            } => template.replace("{damage_pct}", &format!("{damage_pct:+.0}")),
+            Self::Blind {
+                miss_pct,
+                duration,
+            } => template
+                .replace("{miss_pct}", &format!("{miss_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Burn {
+                damage,
+                duration,
+            } => template
+                .replace("{damage}", &format!("{damage:+}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Clearcasting {
+                reduction_pct,
+                duration,
+            } => template
+                .replace("{reduction_pct}", &format!("{reduction_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Cleave {
+                damage_pct,
+                duration,
+            } => template
+                .replace("{damage_pct}", &format!("{damage_pct:.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Curse {
+                damage,
+                timer,
+            } => template
+                .replace("{damage}", &format!("{damage}"))
+                .replace("{timer}", &format!("{timer}")),
+            Self::Pierce {
+                damage,
+            } => template.replace("{damage}", &format!("{damage}")),
+            Self::EchoStruck {
+                reset_pct,
+            } => template.replace("{reset_pct}", &format!("{reset_pct:+.0}")),
+            Self::Empower {
+                damage_pct,
+                duration,
+            } => template
+                .replace("{damage_pct}", &format!("{damage_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Focus {
+                crit_chance_pct,
+                duration,
+            } => template
+                .replace("{crit_chance_pct}", &format!("{crit_chance_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Fortify {
+                defense_pct: armor_pct,
+                duration,
+            } => template
+                .replace("{armor_pct}", &format!("{armor_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Freeze {
+                attack_speed_pct,
+                duration,
+            } => template
+                .replace("{attack_speed_pct}", &format!("{attack_speed_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Haste {
+                initiative_pct,
+                duration,
+            } => template
+                .replace("{initiative_pct}", &format!("{initiative_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Heal {
+                heal_pct,
+            } => template.replace("{heal_pct}", &format!("{heal_pct}")),
+            Self::Immobilize {
+                duration,
+            } => template.replace("{duration}", &format!("{duration:.1}")),
+            Self::Lifesteal {
+                percentage,
+                duration,
+            } => template
+                .replace("{percentage}", &format!("{percentage:.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::ManaBurn {
+                amount,
+            } => template.replace("{amount}", &format!("{amount}")),
+            Self::InstantMana {
+                amount,
+            } => template.replace("{amount}", &format!("{amount}")),
+            Self::StatBoost {
+                attribute,
+                amount,
+                duration,
+            } => {
+                let key = format!("attribute.{}", attribute.to_lowername());
+                let stat_localized = localization.get(&key, language);
                 template
-            },
-            Self::Regen { heal, duration } => {
-                template.replace("{heal}", &format!("{heal:+}"))
+                    .replace("{stat}", &stat_localized)
+                    .replace("{amount}", &format!("{amount}"))
                     .replace("{duration}", &format!("{duration:.1}"))
             },
-            Self::Silence { duration } => {
-                template.replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::SoulLink { damage_transfer_pct, duration } => {
-                template.replace("{damage_transfer_pct}", &format!("{damage_transfer_pct:.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Stun { duration } => {
-                template.replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Taunt { duration } => {
-                template.replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Thorns { damage_reflected_pct, duration } => {
-                template.replace("{damage_reflected_pct}", &format!("{damage_reflected_pct:.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
-            Self::Vulnerability { damage_pct, duration } => {
-                template.replace("{damage_pct}", &format!("{damage_pct:.0}"))
-                    .replace("{duration}", &format!("{duration:.1}"))
-            },
+            Self::ManaFlow {
+                amount,
+                duration,
+            } => template
+                .replace("{amount}", &format!("{amount:+}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Manasteal {
+                percentage,
+            } => template.replace("{percentage}", &format!("{percentage:.0}")),
+            Self::MonarchShield {
+                duration,
+            } => template.replace("{duration}", &format!("{duration:.1}")),
+            Self::Poison {
+                damage,
+                duration,
+            } => template
+                .replace("{damage}", &format!("{damage:+}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Paranoia {
+                initiative_pct,
+                duration,
+            } => template
+                .replace("{initiative_pct}", &format!("{initiative_pct:+.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Purge => template,
+            Self::Regen {
+                heal,
+                duration,
+            } => template
+                .replace("{heal}", &format!("{heal:+}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Silence {
+                duration,
+            } => template.replace("{duration}", &format!("{duration:.1}")),
+            Self::SoulLink {
+                damage_transfer_pct,
+                duration,
+            } => template
+                .replace("{damage_transfer_pct}", &format!("{damage_transfer_pct:.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Stun {
+                duration,
+            } => template.replace("{duration}", &format!("{duration:.1}")),
+            Self::Taunt {
+                duration,
+            } => template.replace("{duration}", &format!("{duration:.1}")),
+            Self::Thorns {
+                damage_reflected_pct,
+                duration,
+            } => template
+                .replace("{damage_reflected_pct}", &format!("{damage_reflected_pct:.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
+            Self::Vulnerability {
+                damage_pct,
+                duration,
+            } => template
+                .replace("{damage_pct}", &format!("{damage_pct:.0}"))
+                .replace("{duration}", &format!("{duration:.1}")),
         }
     }
 }

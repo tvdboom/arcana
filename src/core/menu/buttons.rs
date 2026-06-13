@@ -6,13 +6,13 @@ use crate::core::menu::systems::StartNewCharacterMsg;
 use crate::core::menu::utils::{add_text, recolor};
 #[cfg(not(target_arch = "wasm32"))]
 use crate::core::persistence::{LoadCharacterMsg, SaveCharacterMsg};
+use crate::core::player::Player;
 use crate::core::settings::Language;
 use crate::core::states::{AppState, GameState};
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
-use crate::core::player::Player;
 
 #[derive(Component)]
 pub struct MenuCmp;

@@ -134,33 +134,29 @@ pub fn setup_game_menu(
 ) {
     let lang = settings.language;
     commands
-        .spawn((
-            add_root_node(true),
-            MenuCmp,
-            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6)),
-        ))
+        .spawn((add_root_node(true), MenuCmp, BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6))))
         .with_children(|parent| {
-        parent
-            .spawn((
-                Node {
-                    width: Val::Vh(66.67),
-                    height: Val::Vh(62.22),
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    padding: UiRect::all(Val::Vh(2.78)),
-                    ..default()
-                },
-                ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
-            ))
-            .with_children(|parent| {
-                spawn_menu_button(parent, MenuBtn::Continue, &assets, &localization, lang);
-                #[cfg(not(target_arch = "wasm32"))]
-                spawn_menu_button(parent, MenuBtn::SaveCharacter, &assets, &localization, lang);
-                spawn_menu_button(parent, MenuBtn::Settings, &assets, &localization, lang);
-                spawn_menu_button(parent, MenuBtn::Quit, &assets, &localization, lang);
-            });
-    });
+            parent
+                .spawn((
+                    Node {
+                        width: Val::Vh(66.67),
+                        height: Val::Vh(62.22),
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        padding: UiRect::all(Val::Vh(2.78)),
+                        ..default()
+                    },
+                    ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
+                ))
+                .with_children(|parent| {
+                    spawn_menu_button(parent, MenuBtn::Continue, &assets, &localization, lang);
+                    #[cfg(not(target_arch = "wasm32"))]
+                    spawn_menu_button(parent, MenuBtn::SaveCharacter, &assets, &localization, lang);
+                    spawn_menu_button(parent, MenuBtn::Settings, &assets, &localization, lang);
+                    spawn_menu_button(parent, MenuBtn::Quit, &assets, &localization, lang);
+                });
+        });
 }
 
 pub fn setup_game_settings(
@@ -171,60 +167,56 @@ pub fn setup_game_settings(
 ) {
     let lang = settings.language;
     commands
-        .spawn((
-            add_root_node(true),
-            MenuCmp,
-            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6)),
-        ))
+        .spawn((add_root_node(true), MenuCmp, BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6))))
         .with_children(|parent| {
-        parent
-            .spawn((
-                Node {
-                    width: Val::Vh(64.44),
-                    height: Val::Vh(75.56),
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    padding: UiRect::all(Val::Vh(2.78)),
-                    ..default()
-                },
-                ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
-            ))
-            .with_children(|parent| {
-                spawn_label(
-                    parent,
-                    "language",
-                    vec![SettingsBtn::English, SettingsBtn::Spanish, SettingsBtn::Dutch],
-                    &settings,
-                    &assets,
-                    &localization,
-                );
-                spawn_label(
-                    parent,
-                    "audio",
-                    vec![SettingsBtn::Mute, SettingsBtn::Sound, SettingsBtn::Music],
-                    &settings,
-                    &assets,
-                    &localization,
-                );
-                spawn_label(
-                    parent,
-                    "autosave",
-                    vec![SettingsBtn::True, SettingsBtn::False],
-                    &settings,
-                    &assets,
-                    &localization,
-                );
+            parent
+                .spawn((
+                    Node {
+                        width: Val::Vh(64.44),
+                        height: Val::Vh(75.56),
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        padding: UiRect::all(Val::Vh(2.78)),
+                        ..default()
+                    },
+                    ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
+                ))
+                .with_children(|parent| {
+                    spawn_label(
+                        parent,
+                        "language",
+                        vec![SettingsBtn::English, SettingsBtn::Spanish, SettingsBtn::Dutch],
+                        &settings,
+                        &assets,
+                        &localization,
+                    );
+                    spawn_label(
+                        parent,
+                        "audio",
+                        vec![SettingsBtn::Mute, SettingsBtn::Sound, SettingsBtn::Music],
+                        &settings,
+                        &assets,
+                        &localization,
+                    );
+                    spawn_label(
+                        parent,
+                        "autosave",
+                        vec![SettingsBtn::True, SettingsBtn::False],
+                        &settings,
+                        &assets,
+                        &localization,
+                    );
 
-                // Spacer to push the back button lower down
-                parent.spawn(Node {
-                    height: Val::Vh(8.33),
-                    ..default()
+                    // Spacer to push the back button lower down
+                    parent.spawn(Node {
+                        height: Val::Vh(8.33),
+                        ..default()
+                    });
+
+                    spawn_menu_button(parent, MenuBtn::Back, &assets, &localization, lang);
                 });
-
-                spawn_menu_button(parent, MenuBtn::Back, &assets, &localization, lang);
-            });
-    });
+        });
 }
 
 pub fn start_new_game_message(

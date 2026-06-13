@@ -22,13 +22,13 @@ pub struct Wearable {
     /// Lowercase with space -> underscore matches the language key for name
     pub name: String,
 
-    /// Name of the image the armor corresponds to
+    /// Name of the image the wearable corresponds to
     pub image: String,
 
     /// Level or upgrade tier of the wearable
     pub level: u32,
 
-    /// Kind of armor
+    /// Kind of wearable
     pub kind: Kind,
 
     /// Gold value for buying and selling at merchants
@@ -46,10 +46,8 @@ pub struct Wearable {
 
 impl Wearable {
     pub fn description(&self, _language: Language, _localization: &Localization) -> String {
-        let mut parts = vec![
-            format!("[level]{}", self.level),
-            format!("[{}]", self.kind.to_lowername()),
-        ];
+        let mut parts =
+            vec![format!("[level]{}", self.level), format!("[{}]", self.kind.to_lowername())];
         if !self.modifiers.is_empty() {
             parts.push(format!("[modifier]{}", self.modifiers.len()));
         }

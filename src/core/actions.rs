@@ -1,6 +1,10 @@
+use super::states::GameState;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
+use crate::core::build::abilities::Ability;
+use crate::core::build::equipment::Kind;
 use crate::core::catalog::{all_abilities, all_equipment, all_perks};
+use crate::core::classes::Class;
 use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;
 use crate::core::player::Player;
@@ -14,8 +18,6 @@ use rand::prelude::IndexedRandom;
 use rand::{rng, RngExt};
 use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumString};
-use crate::core::build::wearable::WearableSlot;
-use crate::core::build::equipment::Equipment;
 
 #[derive(
     EnumString, Debug, Display, Clone, Copy, PartialEq, Eq, Hash, Reflect, Serialize, Deserialize,
@@ -33,14 +35,6 @@ pub enum Action {
 }
 
 impl Action {
-    pub fn gold_cost(&self) -> u32 {
-        match self {
-            Action::Craft => 15,
-            Action::Shop => 30,
-            _ => 0,
-        }
-    }
-
     pub fn ap_cost(&self) -> u32 {
         match self {
             Action::Shop | Action::Duel => 0,
@@ -65,6 +59,8 @@ pub fn handle_playing_action_clicks(
     toast_container_q: Query<Entity, With<ToastContainer>>,
     localization: Res<Localization>,
     settings: Res<Settings>,
+    game_state: Res<State<GameState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     if let Ok(action_btn) = action_btn_q.get(event.entity) {
         let action = action_btn.0;
@@ -78,8 +74,6 @@ pub fn handle_playing_action_clicks(
         } else {
             play_audio_msg.write(PlayAudioMsg::new("button"));
         }
-
-        player.gold -= action.gold_cost();
 
         let mut rng = rng();
 
@@ -100,7 +94,7 @@ pub fn handle_playing_action_clicks(
                     )
                 };
 
-                let player_missing = player.health < max_hp || player.mana < max_mp;
+                let player_missing = player.health() < max_hp || player.mana() < max_mp;
                 let pet_missing =
                     player.pet.as_ref().map(|p| p.health < p.max_health).unwrap_or(false);
 
@@ -117,11 +111,13 @@ pub fn handle_playing_action_clicks(
                         let recover_health = rng.random_range(0..max_recover_health);
                         let recover_mana = rng.random_range(0..max_recover_mana);
 
-                        let health_gained = recover_health.min(max_hp - player.health);
-                        let mana_gained = recover_mana.min(max_mp - player.mana);
+                        let health_gained = recover_health.min(max_hp - player.health());
+                        let mana_gained = recover_mana.min(max_mp - player.mana());
 
-                        player.health = (player.health + health_gained).min(max_hp);
-                        player.mana = (player.mana + mana_gained).min(max_mp);
+                        let next_health = (player.health() + health_gained).min(max_hp);
+                        let next_mana = (player.mana() + mana_gained).min(max_mp);
+                        player.set_health(next_health);
+                        player.set_mana(next_mana);
 
                         spawn_toast(
                             localization
@@ -152,7 +148,8 @@ pub fn handle_playing_action_clicks(
                     if rng.random_bool(0.25) {
                         let bonus_health =
                             rng.random_range(1..=5) * 5 * (1 + player.wisdom_mod()).max(0);
-                        player.health += bonus_health;
+                        let next_hp = player.health() + bonus_health;
+                        player.set_health(next_hp);
                         player.bonus_max_health += bonus_health;
 
                         spawn_toast(
@@ -163,7 +160,8 @@ pub fn handle_playing_action_clicks(
                     } else if rng.random_bool(0.25) {
                         let bonus_mana =
                             rng.random_range(1..=5) * 5 * (1 + player.wisdom_mod()).max(0);
-                        player.mana += bonus_mana;
+                        let next_mp = player.mana() + bonus_mana;
+                        player.set_mana(next_mp);
                         player.bonus_max_mana += bonus_mana;
 
                         spawn_toast(
@@ -252,7 +250,7 @@ pub fn handle_playing_action_clicks(
                     toast,
                 );
 
-                player.adjust_health_mana_after_change(old_hp, old_mp);
+                player.update_health_mana(old_hp, old_mp);
             },
             Action::Hunt => {
                 let gold_earned = rng.random_range(10..=20);
@@ -279,21 +277,12 @@ pub fn handle_playing_action_clicks(
                 );
             },
             Action::Shop => {
-                let lvl = player.level;
-                let items: Vec<_> = all_equipment()
-                    .iter()
-                    .filter(|eq| match eq {
-                        Equipment::Wearable(w) => {
-                            w.slot == WearableSlot::Consumable && w.level <= lvl as u32
-                        }
-                        _ => false,
-                    })
-                    .collect();
-
-                if let Some(item) = items.choose(&mut rng) {
-                    let name = item.name().to_string();
-                    reward_equipment(&mut player, name);
+                if *game_state.get() == GameState::Shop {
+                    next_game_state.set(GameState::Playing);
+                } else {
+                    next_game_state.set(GameState::Shop);
                 }
+                play_audio_msg.write(PlayAudioMsg::new("button"));
             },
             Action::Quest => {
                 let gold_earned = rng.random_range(20..=40);
@@ -314,8 +303,10 @@ pub fn handle_playing_action_clicks(
                 let hp_cost = rng.random_range(max_hp as f32 * 0.1..=max_hp as f32 * 0.3);
                 let mp_cost = rng.random_range(max_mp as f32 * 0.1..=max_mp as f32 * 0.3);
 
-                player.health = (player.health - hp_cost as u32).max(1);
-                player.mana = (player.mana - mp_cost as u32).max(0);
+                let next_hp = player.health().saturating_sub(hp_cost as u32).max(1);
+                let next_mp = player.mana().saturating_sub(mp_cost as u32);
+                player.set_health(next_hp);
+                player.set_mana(next_mp);
 
                 let str_bonus = player.strength() as f64;
                 let dex_bonus = player.dexterity() as f64;
@@ -394,8 +385,6 @@ pub fn handle_playing_action_clicks(
         if player.ap <= action.ap_cost() {
             player.level += 1;
             player.ap = 10;
-            player.health += 10;
-            player.mana += 10;
             player.bonus_max_health += 10;
             player.bonus_max_mana += 10;
 
@@ -405,20 +394,59 @@ pub fn handle_playing_action_clicks(
             }
 
             let mut ability_choices = Vec::new();
-            let mut ability_pool: Vec<_> = all_abilities()
+            let ability_pool: Vec<_> = all_abilities()
                 .iter()
                 .filter(|ab| {
                     ab.level == player.level as u32
                         && !player.abilities.contains(&ab.name.to_string())
                 })
                 .collect();
+
+            // Calculate weights for each ability
+            let mut weighted_pool: Vec<(&Ability, f64)> = ability_pool
+                .iter()
+                .map(|ab| {
+                    let mut weight = 1.0;
+                    let is_magical = ab.kind.is_magic();
+                    if matches!(player.class, Class::Druid | Class::Mage(_)) && is_magical {
+                        weight *= 2.0;
+                    }
+                    if let Class::Mage(ajah) = player.class {
+                        if ab.kind == ajah.kind() {
+                            weight *= 3.0;
+                        }
+                    }
+                    if matches!(player.class, Class::Warrior | Class::Assassin)
+                        && ab.kind == Kind::Physical
+                    {
+                        weight *= 2.0;
+                    }
+                    (*ab, weight)
+                })
+                .collect();
+
             for _ in 0..3 {
-                if ability_pool.is_empty() {
+                if weighted_pool.is_empty() {
                     break;
                 }
-                let idx = rng.random_range(0..ability_pool.len());
-                ability_choices.push(ability_pool[idx].name.to_string());
-                ability_pool.remove(idx);
+                let total_weight: f64 = weighted_pool.iter().map(|(_, w)| *w).sum();
+                if total_weight <= 0.0 {
+                    let idx = rng.random_range(0..weighted_pool.len());
+                    let (ab, _) = weighted_pool.remove(idx);
+                    ability_choices.push(ab.name.to_string());
+                } else {
+                    let mut r = rng.random_range(0.0..total_weight);
+                    let mut chosen_idx = 0;
+                    for (idx, (_, w)) in weighted_pool.iter().enumerate() {
+                        r -= *w;
+                        if r <= 0.0 {
+                            chosen_idx = idx;
+                            break;
+                        }
+                    }
+                    let (ab, _) = weighted_pool.remove(chosen_idx);
+                    ability_choices.push(ab.name.to_string());
+                }
             }
 
             let mut perk_choices = Vec::new();

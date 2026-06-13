@@ -114,8 +114,8 @@ pub struct Player {
     pub age: u32,
     pub level: u8,
     pub ap: u32,
-    pub health: u32,
-    pub mana: u32,
+    pub missing_health: u32,
+    pub missing_mana: u32,
     pub bonus_max_health: u32,
     pub bonus_max_mana: u32,
     pub strength: u32,
@@ -150,8 +150,8 @@ impl Default for Player {
             age: 0,
             level: 1,
             ap: 10,
-            health: 100,
-            mana: 100,
+            missing_health: 0,
+            missing_mana: 0,
             bonus_max_health: 0,
             bonus_max_mana: 0,
             strength: START_CHARACTERISTIC,
@@ -178,17 +178,29 @@ impl Default for Player {
 }
 
 impl Player {
-    pub fn adjust_health_mana_after_change(&mut self, old_max_hp: u32, old_max_mp: u32) {
-        let new_max_hp = self.max_health();
-        let new_max_mp = self.max_mana();
-        if new_max_hp > old_max_hp {
-            self.health += new_max_hp - old_max_hp;
-        }
-        if new_max_mp > old_max_mp {
-            self.mana += new_max_mp - old_max_mp;
-        }
-        self.health = self.health.min(new_max_hp);
-        self.mana = self.mana.min(new_max_mp);
+    pub fn health(&self) -> u32 {
+        self.max_health().saturating_sub(self.missing_health)
+    }
+
+    pub fn set_health(&mut self, val: u32) {
+        let max_hp = self.max_health();
+        let val = val.min(max_hp);
+        self.missing_health = max_hp.saturating_sub(val);
+    }
+
+    pub fn mana(&self) -> u32 {
+        self.max_mana().saturating_sub(self.missing_mana)
+    }
+
+    pub fn set_mana(&mut self, val: u32) {
+        let max_mp = self.max_mana();
+        let val = val.min(max_mp);
+        self.missing_mana = max_mp.saturating_sub(val);
+    }
+
+    pub fn update_health_mana(&mut self, _old_max_hp: u32, _old_max_mp: u32) {
+        self.missing_health = self.missing_health.min(self.max_health());
+        self.missing_mana = self.missing_mana.min(self.max_mana());
     }
 
     pub fn attribute_perk_mod(&self, attr: Attribute) -> i32 {
@@ -336,7 +348,8 @@ impl Player {
         } else {
             0
         };
-        let perk_health_mod: i32 = self.perks
+        let perk_health_mod: i32 = self
+            .perks
             .iter()
             .filter_map(|key| get_perk(key))
             .flat_map(|perk| perk.modifiers.clone().into_iter())
@@ -348,7 +361,8 @@ impl Player {
                 }
             })
             .sum();
-        let equip_health_mod: i32 = self.equipped_equipment()
+        let equip_health_mod: i32 = self
+            .equipped_equipment()
             .iter()
             .flat_map(|eq| eq.modifiers().iter())
             .filter_map(|m| {
@@ -359,7 +373,8 @@ impl Player {
                 }
             })
             .sum();
-        (base + class_mod + self.bonus_max_health as i32 + perk_health_mod + equip_health_mod).max(1) as u32
+        (base + class_mod + self.bonus_max_health as i32 + perk_health_mod + equip_health_mod)
+            .max(1) as u32
     }
 
     pub fn max_mana(&self) -> u32 {
@@ -369,7 +384,8 @@ impl Player {
             Class::Druid => 10,
             _ => 0,
         };
-        let perk_mana_mod: i32 = self.perks
+        let perk_mana_mod: i32 = self
+            .perks
             .iter()
             .filter_map(|key| get_perk(key))
             .flat_map(|perk| perk.modifiers.clone().into_iter())
@@ -381,7 +397,8 @@ impl Player {
                 }
             })
             .sum();
-        let equip_mana_mod: i32 = self.equipped_equipment()
+        let equip_mana_mod: i32 = self
+            .equipped_equipment()
             .iter()
             .flat_map(|eq| eq.modifiers().iter())
             .filter_map(|m| {
@@ -392,7 +409,8 @@ impl Player {
                 }
             })
             .sum();
-        (base + class_mod + self.bonus_max_mana as i32 + perk_mana_mod + equip_mana_mod).max(0) as u32
+        (base + class_mod + self.bonus_max_mana as i32 + perk_mana_mod + equip_mana_mod).max(0)
+            as u32
     }
 
     pub fn attack(&self) -> u32 {

@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use crate::core::build::equipment::Kind;
 use crate::core::classes::{Ajah, Class};
 use crate::core::pets::PetKind;
 use crate::core::player::Attribute;
@@ -379,7 +378,6 @@ pub fn format_class_description(
             let hp_label = localization.get("general.health", language);
             format!(" +1 {physical_label} {ability_label}\n +1 {melee_label} {weapon_label}\n +1 {perk_label}\n +20 max {hp_label}")
         },
-
     };
 
     format!("{desc}\n\n{}", bonus_desc.to_lowercase())
@@ -394,16 +392,8 @@ pub fn format_ajah_description(
 
     let ability_label = localization.get("general.ability", language);
     let damage_label = localization.get("general.damage", language);
-    let kind = match ajah {
-        Ajah::Black => Kind::Shadow,
-        Ajah::Green => Kind::Nature,
-        Ajah::Red => Kind::Fire,
-        Ajah::White => Kind::Ice,
-    };
-
-    let kind_label = localization.get(format!("general.{}", kind.to_lowername()), language);
-    let bonus_desc =
-        format!(" +1 {kind_label} {ability_label}\n +20% {kind_label} {damage_label}");
+    let kind_label = localization.get(format!("general.{}", ajah.kind().to_lowername()), language);
+    let bonus_desc = format!(" +1 {kind_label} {ability_label}\n +20% {kind_label} {damage_label}");
 
     format!("{desc}\n\n{}", bonus_desc.to_lowercase())
 }

@@ -1,6 +1,6 @@
-use crate::core::build::wearable::Wearable;
 use crate::core::build::modifiers::Modifier;
 use crate::core::build::weapons::Weapon;
+use crate::core::build::wearables::Wearable;
 use crate::core::localization::Localization;
 use crate::core::settings::Language;
 use serde::Deserialize;

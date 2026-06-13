@@ -1,8 +1,8 @@
+use crate::core::catalog::{all_abilities, all_perks, all_weapons, all_wearables};
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
 use std::collections::HashMap;
-use crate::core::catalog::{all_abilities, all_perks, all_weapons, all_wearables};
 
 #[derive(Resource)]
 pub struct WorldAssets {
@@ -50,7 +50,8 @@ impl FromWorld for WorldAssets {
             ("defeat", assets.load("audio/defeat.ogg")),
             ("levelup", assets.load("audio/levelup.ogg")),
             ("inventory", assets.load("audio/inventory.ogg")),
-            ("coins", assets.load("audio/coins.ogg")),
+            ("buy", assets.load("audio/buy.ogg")),
+            ("sell", assets.load("audio/sell.ogg")),
             ("rest", assets.load("audio/rest.ogg")),
             ("work", assets.load("audio/work.ogg")),
             ("study", assets.load("audio/study.ogg")),

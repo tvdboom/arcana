@@ -139,6 +139,17 @@ Wearables always have one or more have modifiers and/or effects (never zero). Mo
 when the wearable is equipped, while effects apply when hit by an enemy's basic attack.
 
 
+
+### Consumables
+Consumables are items that can actively be used during combat (e.g., potions, herbs, etc...).
+They are not equipped, but are used from the inventory. Consumables disappear from the inventory
+once used. Consumables always have one or more effects (never zero) that apply to self. Low
+level consumables usually just provide health or mana, but the higher the level the more
+complex the effects, for example a high level consumable that grants extra (temporary) defense
+and max health and removes negative effects.
+
+
+
 ### General remarks
 Same logic as for perks and abilities applies to modifiers and effects of equipment: the higher
 the level, the stronger the modifiers and effects, as well as the more modifiers and effects.

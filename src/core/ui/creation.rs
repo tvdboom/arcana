@@ -1349,11 +1349,7 @@ impl SelectionItem for Class {
 
         player.abilities = vec![ability.name.clone()];
 
-        let perk = all_perks()
-            .iter()
-            .filter(|a| a.level == 1)
-            .choose(&mut rng())
-            .unwrap();
+        let perk = all_perks().iter().filter(|a| a.level == 1).choose(&mut rng()).unwrap();
 
         player.perks = vec![perk.name.clone()];
 
@@ -1372,8 +1368,8 @@ impl SelectionItem for Class {
             .unwrap();
 
         player.weapon_lh = Some(weapon.name.clone());
-        player.health = player.max_health();
-        player.mana = player.max_mana();
+        player.missing_health = 0;
+        player.missing_mana = 0;
 
         if matches!(*self, Class::Mage(_) | Class::Druid) {
             next_game_state.set(GameState::ChooseSubClass);

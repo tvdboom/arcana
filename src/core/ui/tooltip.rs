@@ -92,14 +92,29 @@ pub fn spawn_tooltip(
         desc_width += 144.0 + 16.0;
     }
 
-    let title_chars_width = content.title.chars().count() as f32 * char_width_desc_for_width * 1.1;
-    let title_row_width = if content.badge.is_some() {
-        title_chars_width + 80.0 // badge + spacing
+    let char_width_title_for_width = font_size_title * 0.65;
+    let title_chars_width = content.title.chars().count() as f32 * char_width_title_for_width;
+    let badge_width = if let Some(ref badge) = content.badge {
+        match badge {
+            TooltipBadge::Price(val) => {
+                32.0 + 12.0
+                    + (format!("{}", val).chars().count() as f32) * char_width_desc_for_width
+            },
+            TooltipBadge::ActionPoints(val) => {
+                32.0 + 12.0
+                    + (format!("{}", val).chars().count() as f32) * char_width_desc_for_width
+            },
+        }
+    } else {
+        0.0
+    };
+    let title_row_width = if badge_width > 0.0 {
+        title_chars_width + badge_width + 24.0
     } else {
         title_chars_width
     };
 
-    let content_width = desc_width.max(title_row_width) * 1.10;
+    let content_width = desc_width.max(title_row_width) * 1.15;
     let tooltip_width =
         (content_width + padding_width).clamp(320.0_f32.min(max_allowed_width), max_allowed_width);
 
@@ -219,14 +234,30 @@ pub fn spawn_tooltip(
                         .with_children(|parent| {
                             for line in &wrapped_lines {
                                 if line.starts_with("• ") || line.starts_with("  ") {
-                                    parent.spawn(Node {
-                                        padding: UiRect::left(Val::Px(32.)),
-                                        ..default()
-                                    }).with_children(|parent| {
-                                        spawn_rich_text_row(parent, assets, line, 1.8, "medium", Color::WHITE);
-                                    });
+                                    parent
+                                        .spawn(Node {
+                                            padding: UiRect::left(Val::Px(32.)),
+                                            ..default()
+                                        })
+                                        .with_children(|parent| {
+                                            spawn_rich_text_row(
+                                                parent,
+                                                assets,
+                                                line,
+                                                1.8,
+                                                "medium",
+                                                Color::WHITE,
+                                            );
+                                        });
                                 } else {
-                                    spawn_rich_text_row(parent, assets, line, 1.8, "medium", Color::WHITE);
+                                    spawn_rich_text_row(
+                                        parent,
+                                        assets,
+                                        line,
+                                        1.8,
+                                        "medium",
+                                        Color::WHITE,
+                                    );
                                 }
                             }
                         });
@@ -234,44 +265,51 @@ pub fn spawn_tooltip(
             };
 
             if let Some(ref image_path) = content.image {
-                parent.spawn(Node {
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(16.),
-                    align_items: AlignItems::FlexStart,
-                    width: Val::Percent(100.),
-                    ..default()
-                }).with_children(|parent| {
-                    // Left: Image (50% larger!)
-                    parent.spawn((
-                        Node {
-                            width: Val::Px(144.),
-                            height: Val::Px(144.),
-                            flex_shrink: 0.,
-                            border: UiRect::all(Val::Px(1.)),
-                            ..default()
-                        },
-                        BorderColor::all(BUTTON_BORDER_COLOR),
-                    )).with_children(|parent| {
-                        parent.spawn((
-                            Node {
-                                width: Val::Percent(100.),
-                                height: Val::Percent(100.),
-                                ..default()
-                            },
-                            ImageNode::new(assets.image(format!("build_{}", image_path))).with_mode(NodeImageMode::Stretch),
-                        ));
-                    });
-
-                    // Right: Column of content
-                    parent.spawn(Node {
-                        flex_direction: FlexDirection::Column,
-                        row_gap: Val::Px(4.),
+                parent
+                    .spawn(Node {
+                        flex_direction: FlexDirection::Row,
+                        column_gap: Val::Px(16.),
+                        align_items: AlignItems::FlexStart,
                         width: Val::Percent(100.),
                         ..default()
-                    }).with_children(|parent| {
-                        render_content(parent);
+                    })
+                    .with_children(|parent| {
+                        // Left: Image (50% larger!)
+                        parent
+                            .spawn((
+                                Node {
+                                    width: Val::Px(144.),
+                                    height: Val::Px(144.),
+                                    flex_shrink: 0.,
+                                    border: UiRect::all(Val::Px(1.)),
+                                    ..default()
+                                },
+                                BorderColor::all(BUTTON_BORDER_COLOR),
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn((
+                                    Node {
+                                        width: Val::Percent(100.),
+                                        height: Val::Percent(100.),
+                                        ..default()
+                                    },
+                                    ImageNode::new(assets.image(format!("build_{}", image_path)))
+                                        .with_mode(NodeImageMode::Stretch),
+                                ));
+                            });
+
+                        // Right: Column of content
+                        parent
+                            .spawn(Node {
+                                flex_direction: FlexDirection::Column,
+                                row_gap: Val::Px(4.),
+                                width: Val::Percent(100.),
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                render_content(parent);
+                            });
                     });
-                });
             } else {
                 render_content(parent);
             }

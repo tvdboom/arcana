@@ -6,7 +6,7 @@ default-run = "arcana"
 authors = ["Mavs"]
 
 [dependencies]
-bevy = { version = "0.19.0-rc.2", default-features = false, features = [
+bevy = { version = "0.19.0-rc.3", default-features = false, features = [
     "bevy_asset",
     "bevy_color",
     "bevy_core_pipeline",

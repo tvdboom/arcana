@@ -67,7 +67,8 @@ impl Ability {
             localization.get("general.enemy", language)
         };
         if let Some(first_char) = target_val.chars().next() {
-            let capitalized = first_char.to_uppercase().to_string() + &target_val[first_char.len_utf8()..];
+            let capitalized =
+                first_char.to_uppercase().to_string() + &target_val[first_char.len_utf8()..];
             target_val = capitalized;
         }
         let aoe_val = if self.is_aoe {

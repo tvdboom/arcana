@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 pub struct SaveAll {
     pub settings: Settings,
     pub player: Player,
+    pub shop_inventory: crate::core::ui::shop::ShopInventory,
 }
 
 #[derive(Message)]
@@ -61,6 +62,7 @@ pub fn load_game(
 
             commands.insert_resource(data.settings);
             commands.insert_resource(data.player);
+            commands.insert_resource(data.shop_inventory);
 
             next_game_state.set(GameState::Playing);
             next_app_state.set(AppState::Game);
@@ -73,6 +75,7 @@ pub fn save_game(
     mut save_game_msg: MessageReader<SaveCharacterMsg>,
     settings: Res<Settings>,
     player: Res<Player>,
+    shop_inventory: Res<crate::core::ui::shop::ShopInventory>,
 ) {
     for msg in save_game_msg.read() {
         let file_path = if msg.0 {
@@ -91,6 +94,7 @@ pub fn save_game(
             let data = SaveAll {
                 settings: settings.clone(),
                 player: player.clone(),
+                shop_inventory: shop_inventory.clone(),
             };
 
             save_to_bin(&file_path_str, &data).expect("Failed to save the game.");

@@ -1,3 +1,4 @@
+use crate::core::build::equipment::Kind;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
@@ -17,4 +18,15 @@ pub enum Ajah {
     Red,
     Green,
     White,
+}
+
+impl Ajah {
+    pub fn kind(&self) -> Kind {
+        match self {
+            Ajah::Black => Kind::Shadow,
+            Ajah::Green => Kind::Nature,
+            Ajah::Red => Kind::Fire,
+            Ajah::White => Kind::Ice,
+        }
+    }
 }
