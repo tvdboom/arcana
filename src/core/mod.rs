@@ -87,8 +87,10 @@ impl Plugin for GamePlugin {
             .init_resource::<Player>()
             .init_resource::<LevelUpPending>()
             .init_resource::<ActiveModal>()
-            .init_resource::<crate::core::ui::shop::ShopInventory>()
-            .init_resource::<crate::core::ui::shop::ShopFilters>()
+            .init_resource::<crate::core::actions::shop::ShopInventory>()
+            .init_resource::<crate::core::actions::shop::ShopFilters>()
+            .init_resource::<crate::core::actions::work::WorkSliderState>()
+            .init_resource::<crate::core::actions::study::StudySliderState>()
             .init_resource::<RightTab>();
 
         // Sets
@@ -121,7 +123,12 @@ impl Plugin for GamePlugin {
                 .add_systems(OnExit(state), despawn::<MenuCmp>);
         }
         for state in GameState::iter() {
-            app.add_systems(OnEnter(state), reset_cursor);
+            if !matches!(
+                state,
+                GameState::Shop | GameState::Work | GameState::Study | GameState::Train | GameState::Rest
+            ) {
+                app.add_systems(OnEnter(state), reset_cursor);
+            }
         }
         app.add_systems(Update, start_new_game_message.run_if(not(in_state(AppState::Game))));
 
@@ -194,23 +201,81 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::GameMenu), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::Settings), setup_game_settings)
             .add_systems(OnExit(GameState::Settings), despawn::<MenuCmp>)
-            .add_systems(OnEnter(GameState::Shop), crate::core::ui::shop::setup_shop_ui)
+            // Shop Systems
+            .add_systems(OnEnter(GameState::Shop), crate::core::actions::shop::setup_shop_ui)
             .add_systems(
                 OnExit(GameState::Shop),
-                (crate::core::ui::shop::cleanup_shop_ui, despawn::<TooltipNode>),
+                (crate::core::ui::utils::cleanup_panel_ui, despawn::<TooltipNode>),
             )
             .add_systems(
                 Update,
                 (
-                    crate::core::ui::shop::update_shop_ui,
-                    crate::core::ui::shop::update_shop_gold_system,
-                    crate::core::ui::shop::shop_tooltip_system,
+                    crate::core::actions::shop::update_shop_ui,
+                    crate::core::actions::shop::update_shop_gold_system,
+                    crate::core::actions::shop::shop_tooltip_system,
                     tooltip_follow_cursor_system,
                     tick_gold_toasts,
                     right_column_tooltip_system,
                     equip_slot_tooltip_system,
                 )
                     .run_if(in_state(GameState::Shop)),
+            )
+            // Work Systems
+            .add_systems(OnEnter(GameState::Work), crate::core::actions::work::setup_work_ui)
+            .add_systems(
+                OnExit(GameState::Work),
+                (crate::core::ui::utils::cleanup_panel_ui, despawn::<TooltipNode>),
+            )
+            .add_systems(
+                Update,
+                (
+                    crate::core::actions::work::update_work_ui,
+                    tooltip_follow_cursor_system,
+                    tick_gold_toasts,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Work)),
+            )
+            // Study Systems
+            .add_systems(OnEnter(GameState::Study), crate::core::actions::study::setup_study_ui)
+            .add_systems(
+                OnExit(GameState::Study),
+                (crate::core::ui::utils::cleanup_panel_ui, despawn::<TooltipNode>),
+            )
+            .add_systems(
+                Update,
+                (
+                    crate::core::actions::study::update_study_ui,
+                    tooltip_follow_cursor_system,
+                    tick_gold_toasts,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Study)),
+            )
+            // Rest Systems
+            .add_systems(OnEnter(GameState::Rest), crate::core::actions::rest::setup_rest_ui)
+            .add_systems(
+                OnExit(GameState::Rest),
+                (crate::core::ui::utils::cleanup_panel_ui, despawn::<TooltipNode>),
+            )
+            .add_systems(
+                Update,
+                (
+                    crate::core::actions::rest::update_rest_ui,
+                    tooltip_follow_cursor_system,
+                    tick_gold_toasts,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Rest)),
+            )
+            // Train Systems
+            .add_systems(OnEnter(GameState::Train), crate::core::actions::train::setup_train_ui)
+            .add_systems(
+                OnExit(GameState::Train),
+                (crate::core::ui::utils::cleanup_panel_ui, despawn::<TooltipNode>),
             );
 
         #[cfg(not(target_arch = "wasm32"))]

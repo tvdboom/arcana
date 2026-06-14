@@ -10,8 +10,21 @@ pub fn despawn<T: Component>(mut commands: Commands, query_c: Query<Entity, With
     }
 }
 
-pub fn reset_cursor(mut commands: Commands, window_e: Single<Entity, With<Window>>) {
-    commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
+pub fn reset_cursor(
+    mut commands: Commands,
+    window_e: Single<Entity, With<Window>>,
+    hovered_q: Query<&Interaction>,
+) {
+    let mut any_hovered = false;
+    for interaction in &hovered_q {
+        if *interaction == Interaction::Hovered {
+            any_hovered = true;
+            break;
+        }
+    }
+    if !any_hovered {
+        commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
+    }
 }
 
 /// Set cursor icon on event

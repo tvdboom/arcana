@@ -302,7 +302,7 @@ pub fn manage_level_up_overlay(
                 pickable.should_block_lower = false;
                 pickable.is_hoverable = false;
             } else {
-                *z_index = GlobalZIndex(500); // Above everything else
+                *z_index = GlobalZIndex(980); // Above everything else, but below tooltips (1000)
                 pickable.should_block_lower = true;
                 pickable.is_hoverable = true;
             }
@@ -347,7 +347,7 @@ fn spawn_level_up_overlay(
                 ..default()
             },
             BackgroundColor(Color::srgba(0., 0., 0., 0.85)),
-            GlobalZIndex(500),
+            GlobalZIndex(980),
             Pickable {
                 should_block_lower: true,
                 is_hoverable: true,

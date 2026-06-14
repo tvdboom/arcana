@@ -122,7 +122,11 @@ impl FromWorld for WorldAssets {
             ("bg", assets.load("images/bg/bg.png")),
             ("bg2", assets.load("images/bg/bg2.png")),
             ("basebg", assets.load("images/bg/base.png")),
-            ("shop", assets.load("images/bg/shop.png")),
+            ("bg_shop", assets.load("images/bg/shop.png")),
+            ("bg_work", assets.load("images/bg/work.png")),
+            ("bg_study", assets.load("images/bg/study.png")),
+            ("bg_train", assets.load("images/bg/train.png")),
+            ("bg_rest", assets.load("images/bg/rest.png")),
             ("victory", assets.load("images/bg/victory.png")),
             ("defeat", assets.load("images/bg/defeat.png")),
             // UI
@@ -229,6 +233,16 @@ impl FromWorld for WorldAssets {
             ("tiger", assets.load("images/pets/tiger.png")),
             ("unicorn", assets.load("images/pets/unicorn.png")),
             ("vulture", assets.load("images/pets/vulture.png")),
+            // Actions
+            ("action_clerical_labor", assets.load("images/actions/clerical_labor.png")),
+            ("action_craft_labor", assets.load("images/actions/craft_labor.png")),
+            ("action_manual_labor", assets.load("images/actions/manual_labor.png")),
+            ("action_apprenticeship", assets.load("images/actions/apprenticeship.png")),
+            ("action_mentorship", assets.load("images/actions/mentorship.png")),
+            ("action_conditioning", assets.load("images/actions/conditioning.png")),
+            ("action_simple_rest", assets.load("images/actions/simple_rest.png")),
+            ("action_common_lodging", assets.load("images/actions/common_lodging.png")),
+            ("action_grand_accommodation", assets.load("images/actions/grand_accomodation.png")),
         ]);
 
         for ability in all_abilities() {

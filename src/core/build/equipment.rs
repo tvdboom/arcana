@@ -64,6 +64,13 @@ impl Equipment {
         }
     }
 
+    pub fn sell_price(&self, modifier: i32) -> u32 {
+        match self {
+            Equipment::Wearable(a) => (a.price as f32 * (0.5 + 0.01 * modifier as f32)) as u32,
+            Equipment::Weapon(w) => (w.price as f32 * (0.5 + 0.01 * modifier as f32)) as u32,
+        }
+    }
+
     pub fn attack(&self) -> i32 {
         let base = match self {
             Equipment::Weapon(w) => w.attack as i32,

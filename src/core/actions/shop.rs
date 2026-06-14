@@ -11,9 +11,9 @@ use crate::core::localization::Localization;
 use crate::core::menu::utils::{add_text, recolor};
 use crate::core::player::Player;
 use crate::core::settings::{Language, Settings};
-use crate::core::states::GameState;
 use crate::core::ui::toast::{spawn_toast, ToastContainer};
 use crate::core::ui::tooltip::{spawn_item_tooltip, TooltipNode};
+use crate::core::ui::utils::*;
 use crate::core::utils::cursor;
 use bevy::picking::pointer::PointerButton;
 use bevy::prelude::*;
@@ -21,31 +21,6 @@ use bevy::window::SystemCursorIcon;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-
-fn despawn_recursive_manual(
-    commands: &mut Commands,
-    entity: Entity,
-    children_q: &Query<&Children>,
-) {
-    if let Ok(children) = children_q.get(entity) {
-        for child in children.iter() {
-            despawn_recursive_manual(commands, child, children_q);
-        }
-    }
-    commands.entity(entity).try_despawn();
-}
-
-fn despawn_descendants_manual(
-    commands: &mut Commands,
-    entity: Entity,
-    children_q: &Query<&Children>,
-) {
-    if let Ok(children) = children_q.get(entity) {
-        for child in children.iter() {
-            despawn_recursive_manual(commands, child, children_q);
-        }
-    }
-}
 
 #[derive(Resource, Clone, Serialize, Deserialize, Default, Debug)]
 pub struct ShopInventory {
@@ -73,7 +48,6 @@ pub enum WeaponTypeFilter {
     Books,
 }
 
-// Resource for Shop Filters
 #[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ShopFilters {
     pub tab: ShopTab,
@@ -142,19 +116,7 @@ pub fn generate_deterministic_shop(player_name: &str, player_level: u32) -> Vec<
 }
 
 #[derive(Component)]
-pub struct ShopPanelCmp;
-
-#[derive(Component)]
-pub struct ShopOutsideOverlay;
-
-#[derive(Component)]
 pub struct ShopContentWrapper;
-
-#[derive(Component)]
-pub struct PlayScreenColumns2And3;
-
-#[derive(Component)]
-pub struct PlayScreenColumnsContainer;
 
 pub fn setup_shop_ui(
     mut commands: Commands,
@@ -164,94 +126,27 @@ pub fn setup_shop_ui(
     player: Res<Player>,
     mut shop_inventory: ResMut<ShopInventory>,
     columns_container_q: Query<Entity, With<PlayScreenColumnsContainer>>,
-    mut columns_2_3_q: Query<&mut Node, (With<PlayScreenColumns2And3>, Without<ShopPanelCmp>)>,
+    mut columns_2_3_q: Query<&mut Node, (With<PlayScreenColumns2And3>, Without<PanelCmp>)>,
 ) {
-    // 1. Hide columns 2 & 3
     for mut node in &mut columns_2_3_q {
         node.display = Display::None;
     }
 
-    // 2. Generate shop inventory
     shop_inventory.items = generate_deterministic_shop(&player.name, player.level as u32);
 
-    // Spawn full screen transparent click-outside overlay
-    commands
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                width: percent(100.),
-                height: percent(100.),
-                ..default()
-            },
-            BackgroundColor(Color::NONE),
-            Button,
-            Interaction::default(),
-            Pickable {
-                should_block_lower: false,
-                is_hoverable: true,
-            },
-            GlobalZIndex(900),
-            ShopOutsideOverlay,
-            ShopPanelCmp,
-        ))
-        .observe(handle_shop_outside_click);
-
-    // 3. Spawn ShopPanel inside columns container
     if let Some(container_entity) = columns_container_q.iter().next() {
-        commands.entity(container_entity).with_children(|parent| {
-            parent
-                .spawn((
-                    Node {
-                        width: percent(66.5),
-                        height: percent(100.),
-                        align_items: AlignItems::Stretch,
-                        justify_content: JustifyContent::Stretch,
-                        ..default()
-                    },
-                    ImageNode {
-                        image: assets.image("shop"),
-                        image_mode: NodeImageMode::Stretch,
-                        color: Color::srgba(0.8, 0.8, 0.8, 1.0),
-                        ..default()
-                    },
-                    Button,
-                    Interaction::default(),
-                    Pickable {
-                        should_block_lower: true,
-                        is_hoverable: true,
-                    },
-                    GlobalZIndex(910),
-                    ShopPanelCmp,
-                ))
-                .with_children(|parent| {
-                    build_shop_content(
-                        parent,
-                        &assets,
-                        &localization,
-                        settings.language,
-                        &shop_inventory,
-                        ShopFilters::default(),
-                        player.gold,
-                    );
-                });
+        let panel_entity = spawn_panel_base(&mut commands, &assets, container_entity, "bg_shop");
+        commands.entity(panel_entity).with_children(|parent| {
+            build_shop_content(
+                parent,
+                &assets,
+                &localization,
+                settings.language,
+                &shop_inventory,
+                ShopFilters::default(),
+                player.gold,
+            );
         });
-    }
-}
-
-pub fn cleanup_shop_ui(
-    mut commands: Commands,
-    shop_panel_q: Query<Entity, With<ShopPanelCmp>>,
-    mut columns_2_3_q: Query<&mut Node, With<PlayScreenColumns2And3>>,
-    children_q: Query<&Children>,
-) {
-    // 1. Despawn ShopPanel
-    for entity in &shop_panel_q {
-        despawn_recursive_manual(&mut commands, entity, &children_q);
-    }
-
-    // 2. Restore columns 2 & 3
-    for mut node in &mut columns_2_3_q {
-        node.display = Display::Flex;
     }
 }
 
@@ -327,7 +222,6 @@ pub fn build_shop_content(
                     );
                 });
 
-            // Banner decoration at bottom of the shop
             parent.spawn((
                 Node {
                     width: percent(100.),
@@ -349,7 +243,6 @@ pub fn build_shop_content_inner(
     filters: ShopFilters,
     player_gold: u32,
 ) {
-    // Top Row: Container for Tabs (Left) and Gold (Right)
     parent
         .spawn(Node {
             width: percent(100.),
@@ -360,7 +253,6 @@ pub fn build_shop_content_inner(
             ..default()
         })
         .with_children(|parent| {
-            // Left: Tabs
             parent
                 .spawn(Node {
                     flex_direction: FlexDirection::Row,
@@ -418,7 +310,6 @@ pub fn build_shop_content_inner(
                     }
                 });
 
-            // Right: Gold
             parent
                 .spawn((
                     Node {
@@ -448,7 +339,6 @@ pub fn build_shop_content_inner(
                 });
         });
 
-    // Weapon Filters Row (Only shown for Weapons tab)
     if filters.tab == ShopTab::Weapons {
         parent
             .spawn(Node {
@@ -466,7 +356,6 @@ pub fn build_shop_content_inner(
                 ..default()
             })
             .with_children(|parent| {
-                // Hand & Type Filters
                 parent
                     .spawn(Node {
                         width: percent(100.),
@@ -475,7 +364,6 @@ pub fn build_shop_content_inner(
                         ..default()
                     })
                     .with_children(|parent| {
-                        // Hand
                         parent
                             .spawn(Node {
                                 flex_direction: FlexDirection::Row,
@@ -520,7 +408,6 @@ pub fn build_shop_content_inner(
                                 }
                             });
 
-                        // Type
                         parent
                             .spawn(Node {
                                 flex_direction: FlexDirection::Row,
@@ -567,7 +454,6 @@ pub fn build_shop_content_inner(
                             });
                     });
 
-                // Category & Kind Filters
                 parent
                     .spawn(Node {
                         width: percent(100.),
@@ -576,7 +462,6 @@ pub fn build_shop_content_inner(
                         ..default()
                     })
                     .with_children(|parent| {
-                        // Category
                         parent
                             .spawn(Node {
                                 flex_direction: FlexDirection::Row,
@@ -623,7 +508,6 @@ pub fn build_shop_content_inner(
                                 }
                             });
 
-                        // Kind
                         parent
                             .spawn(Node {
                                 flex_direction: FlexDirection::Row,
@@ -675,7 +559,6 @@ pub fn build_shop_content_inner(
             });
     }
 
-    // Grid of Items (scrollable container/layout)
     parent
         .spawn(Node {
             width: percent(100.),
@@ -691,7 +574,6 @@ pub fn build_shop_content_inner(
             let mut empty = true;
             for item_key in &shop_inventory.items {
                 if let Some(equipment) = get_equipment(item_key) {
-                    // Apply tab filter
                     let matches_tab = match filters.tab {
                         ShopTab::Weapons => matches!(equipment, Equipment::Weapon(_)),
                         ShopTab::Helmets => match &equipment {
@@ -723,7 +605,6 @@ pub fn build_shop_content_inner(
                         continue;
                     }
 
-                    // Apply Weapons filters
                     if filters.tab == ShopTab::Weapons {
                         if let Equipment::Weapon(ref w) = equipment {
                             if let Some(hand) = filters.weapon_hand {
@@ -838,7 +719,6 @@ fn spawn_shop_item_card(
         .observe(cursor::<Out>(SystemCursorIcon::Default))
         .observe(handle_shop_item_card_click)
         .with_children(|parent| {
-            // Top Row: Name and Price
             parent
                 .spawn(Node {
                     width: percent(100.),
@@ -876,7 +756,6 @@ fn spawn_shop_item_card(
                         });
                 });
 
-            // Image Container
             parent.spawn((
                 Node {
                     width: Val::Px(100.),
@@ -1023,15 +902,6 @@ pub fn update_shop_gold_system(
             **text = format!("{}", player.gold);
         }
     }
-}
-
-pub fn handle_shop_outside_click(
-    _event: On<Pointer<Click>>,
-    mut next_game_state: ResMut<NextState<GameState>>,
-    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-) {
-    play_audio_msg.write(PlayAudioMsg::new("button"));
-    next_game_state.set(GameState::Playing);
 }
 
 pub fn shop_tooltip_system(

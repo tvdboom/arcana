@@ -37,7 +37,7 @@ pub fn check_keys_menu(
             },
             AppState::Game => match game_state.get() {
                 GameState::Playing => next_game_state.set(GameState::GameMenu),
-                GameState::Shop => {
+                GameState::Shop | GameState::Work | GameState::Study | GameState::Train | GameState::Rest => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_game_state.set(GameState::Playing);
                 },

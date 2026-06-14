@@ -234,8 +234,8 @@ impl Player {
         (self.strength as i32 + race_mod + sex_mod + equip_mod + perk_mod).max(0) as u32
     }
 
-    pub fn strength_mod(&self) -> u32 {
-        self.strength().checked_sub(START_CHARACTERISTIC).unwrap_or_default()
+    pub fn strength_mod(&self) -> i32 {
+        self.strength() as i32 - START_CHARACTERISTIC as i32
     }
 
     pub fn dexterity(&self) -> u32 {
@@ -252,8 +252,8 @@ impl Player {
         (self.dexterity as i32 + race_mod + equip_mod + perk_mod).max(0) as u32
     }
 
-    pub fn dexterity_mod(&self) -> u32 {
-        self.dexterity().checked_sub(START_CHARACTERISTIC).unwrap_or_default()
+    pub fn dexterity_mod(&self) -> i32 {
+        self.dexterity() as i32 - START_CHARACTERISTIC as i32
     }
 
     pub fn constitution(&self) -> u32 {
@@ -271,8 +271,8 @@ impl Player {
         (self.constitution as i32 + race_mod - age_mod + equip_mod + perk_mod).max(0) as u32
     }
 
-    pub fn constitution_mod(&self) -> u32 {
-        self.constitution().checked_sub(START_CHARACTERISTIC).unwrap_or_default()
+    pub fn constitution_mod(&self) -> i32 {
+        self.constitution() as i32 - START_CHARACTERISTIC as i32
     }
 
     pub fn intelligence(&self) -> u32 {
@@ -287,6 +287,10 @@ impl Player {
         }
         let perk_mod = self.attribute_perk_mod(Attribute::Intelligence);
         (self.intelligence as i32 + race_mod + equip_mod + perk_mod).max(0) as u32
+    }
+
+    pub fn intelligence_mod(&self) -> i32 {
+        self.intelligence() as i32 - START_CHARACTERISTIC as i32
     }
 
     pub fn wisdom(&self) -> u32 {
@@ -304,8 +308,8 @@ impl Player {
         (self.wisdom as i32 + race_mod + age_mod + equip_mod + perk_mod).max(0) as u32
     }
 
-    pub fn wisdom_mod(&self) -> u32 {
-        self.wisdom().checked_sub(START_CHARACTERISTIC).unwrap_or_default()
+    pub fn wisdom_mod(&self) -> i32 {
+        self.wisdom() as i32 - START_CHARACTERISTIC as i32
     }
 
     pub fn charisma(&self) -> u32 {
@@ -321,6 +325,10 @@ impl Player {
         }
         let perk_mod = self.attribute_perk_mod(Attribute::Charisma);
         (self.charisma as i32 + race_mod + sex_mod + equip_mod + perk_mod).max(0) as u32
+    }
+
+    pub fn charisma_mod(&self) -> i32 {
+        self.charisma() as i32 - START_CHARACTERISTIC as i32
     }
 
     /// All currently equipped pieces of gear.
@@ -342,7 +350,7 @@ impl Player {
     }
 
     pub fn max_health(&self) -> u32 {
-        let base = 100 + 10 * self.constitution_mod() as i32;
+        let base = 100 + 10 * self.constitution_mod();
         let class_mod = if self.class == Class::Warrior {
             20
         } else {
@@ -378,7 +386,7 @@ impl Player {
     }
 
     pub fn max_mana(&self) -> u32 {
-        let base = 100 + 10 * self.wisdom_mod() as i32;
+        let base = 100 + 10 * self.wisdom_mod();
         let class_mod = match self.class {
             Class::Mage(_) => 30,
             Class::Druid => 10,
@@ -414,7 +422,7 @@ impl Player {
     }
 
     pub fn attack(&self) -> u32 {
-        (5 + self.strength_mod() as i32
+        (5 + self.strength_mod()
             + self.equipped_equipment().iter().map(|w| w.attack()).sum::<i32>()
             + self
                 .perks
@@ -433,7 +441,7 @@ impl Player {
     }
 
     pub fn defense(&self) -> u32 {
-        (5 + self.constitution_mod() as i32
+        (5 + self.constitution_mod()
             + self.equipped_equipment().iter().map(|w| w.defense()).sum::<i32>()
             + self
                 .perks
@@ -452,7 +460,7 @@ impl Player {
     }
 
     pub fn initiative(&self) -> u32 {
-        (5 + self.dexterity_mod() as i32
+        (5 + self.dexterity_mod()
             + self.equipped_equipment().iter().map(|w| w.initiative()).sum::<i32>()
             + self
                 .perks

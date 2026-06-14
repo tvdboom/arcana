@@ -132,6 +132,7 @@ pub enum InfoTooltip {
     Gold,
     ActionPoints,
     Combat(PlayingStat),
+    #[allow(dead_code)]
     Action(Action),
     Pet,
 }
@@ -502,6 +503,7 @@ pub fn setup_playing_screen(
             },
             PlayingCmp,
         ))
+        .observe(crate::core::ui::utils::global_click_listener)
         .with_children(|parent| {
             // Toast container: stacks notifications top-right of the whole screen
             parent.spawn((
@@ -516,7 +518,7 @@ pub fn setup_playing_screen(
                 },
                 PlayingCmp,
                 ToastContainer,
-                GlobalZIndex(600),
+                GlobalZIndex(970),
             ));
 
             // Content column: maintains aspect ratio on wide screens, centered horizontally
@@ -584,7 +586,7 @@ pub fn setup_playing_screen(
                                 padding: UiRect::horizontal(Val::Px(26.)),
                                 ..default()
                             },
-                            crate::core::ui::shop::PlayScreenColumnsContainer,
+                            crate::core::ui::utils::PlayScreenColumnsContainer,
                         ))
                         .with_children(|parent| {
                             // Column 1: Character portrait image
@@ -599,21 +601,24 @@ pub fn setup_playing_screen(
 
                     // Bottom row: Action buttons
                     parent
-                        .spawn(Node {
-                            width: percent(100.),
-                            height: Val::Vh(14.5),
-                            flex_shrink: 0.,
-                            flex_direction: FlexDirection::Row,
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            column_gap: Val::Px(4.),
-                            padding: UiRect {
-                                top: Val::Vh(1.5),
-                                bottom: Val::Px(4.),
+                        .spawn((
+                            Node {
+                                width: percent(100.),
+                                height: Val::Vh(14.5),
+                                flex_shrink: 0.,
+                                flex_direction: FlexDirection::Row,
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(4.),
+                                padding: UiRect {
+                                    top: Val::Vh(1.5),
+                                    bottom: Val::Px(4.),
+                                    ..default()
+                                },
                                 ..default()
                             },
-                            ..default()
-                        })
+                            GlobalZIndex(890),
+                        ))
                         .with_children(|parent| {
                             spawn_playing_action_button(
                                 parent,
@@ -686,13 +691,16 @@ pub fn setup_playing_screen(
 /// Column 1: Character portrait image with equipment slot overlays and pet.
 fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, player: &Player) {
     parent
-        .spawn((Node {
-            width: percent(33.5),
-            flex_direction: FlexDirection::Column,
-            align_items: AlignItems::Stretch,
-            padding: UiRect::all(Val::Px(6.)),
-            ..default()
-        },))
+        .spawn((
+            Node {
+                width: percent(33.5),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Stretch,
+                padding: UiRect::all(Val::Px(6.)),
+                ..default()
+            },
+            GlobalZIndex(850),
+        ))
         .with_children(|parent| {
             // Portrait (relative container for equipment slot / pet overlays)
             parent
@@ -896,7 +904,7 @@ fn spawn_stats_column(
                 overflow: Overflow::clip(),
                 ..default()
             },
-            crate::core::ui::shop::PlayScreenColumns2And3,
+            crate::core::ui::utils::PlayScreenColumns2And3,
         ))
         .with_children(|parent| {
             // Level / class text + AP on the right
@@ -1350,6 +1358,7 @@ pub fn equip_slot_tooltip_system(
                     lang,
                 );
                 let stat_lines = weapon.full_description(lang, &localization);
+                let sell_price = weapon.sell_price(player.charisma_mod());
 
                 spawn_item_tooltip(
                     &mut commands,
@@ -1357,7 +1366,7 @@ pub fn equip_slot_tooltip_system(
                     name,
                     stat_lines,
                     &windows,
-                    Some(weapon.price()),
+                    Some(sell_price),
                     Some(weapon.name().to_string()),
                 );
             }
@@ -1380,6 +1389,7 @@ pub fn right_column_tooltip_system(
     level_up: Res<LevelUpPending>,
     active_modal: Res<ActiveModal>,
     right_tab: Res<RightTab>,
+    player: Res<Player>,
     card_q: Query<(&Interaction, &RightColumnTooltip)>,
     changed_card_q: Query<(), (With<RightColumnTooltip>, Changed<Interaction>)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
@@ -1475,13 +1485,14 @@ pub fn right_column_tooltip_system(
                         lang,
                     );
                     let lines = equipment.full_description(lang, &localization);
+                    let sell_price = equipment.sell_price(player.charisma_mod());
                     spawn_item_tooltip(
                         &mut commands,
                         &assets,
                         title,
                         lines,
                         &windows,
-                        Some(equipment.price()),
+                        Some(sell_price),
                         Some(equipment.name().to_string()),
                     );
                 }
@@ -1617,7 +1628,7 @@ fn spawn_right_column(
                 position_type: PositionType::Relative,
                 ..default()
             },
-            crate::core::ui::shop::PlayScreenColumns2And3,
+            crate::core::ui::utils::PlayScreenColumns2And3,
         ))
         .with_children(|parent| {
             // Tab row + gold icon at the top
@@ -2086,7 +2097,7 @@ pub fn rebuild_playing_lists(
                     EquipmentCard {
                         key: weapon.name().to_string(),
                         is_equipped: true,
-                        price: (weapon.price() * 60) / 100,
+                        price: weapon.sell_price(player.charisma_mod()),
                     },
                 );
             }
@@ -2123,7 +2134,7 @@ pub fn rebuild_playing_lists(
                     EquipmentCard {
                         key: weapon.name().to_string(),
                         is_equipped: false,
-                        price: (weapon.price() * 60) / 100,
+                        price: weapon.sell_price(player.charisma_mod()),
                     },
                 );
             }
@@ -2194,7 +2205,7 @@ pub fn rebuild_playing_lists(
                     EquipmentCard {
                         key: weapon.name().to_string(),
                         is_equipped: false,
-                        price: (weapon.price() * 60) / 100,
+                        price: weapon.sell_price(player.charisma_mod()),
                     },
                 );
             }
@@ -2530,7 +2541,6 @@ pub fn spawn_playing_action_button(
                         .with_mode(NodeImageMode::Stretch),
                     Button,
                     ActionButton(action),
-                    InfoTooltip::Action(action),
                 ))
                 .observe(handle_playing_action_clicks)
                 .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
@@ -2540,7 +2550,8 @@ pub fn spawn_playing_action_button(
                 .observe(highlight_border::<Press>(Color::srgb_u8(240, 190, 60), Val::Px(3.)))
                 .observe(highlight_border::<Release>(HOVERED_BUTTON_COLOR, Val::Px(3.)))
                 .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                .observe(cursor::<Out>(SystemCursorIcon::Default));
+                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                .observe(cursor::<Release>(SystemCursorIcon::Pointer));
 
             // Plain action name label below icon
             parent.spawn((
@@ -2589,22 +2600,12 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                                 amount,
                                 ..
                             } => match attribute {
-                                crate::core::player::Attribute::Strength => {
-                                    player.strength += amount
-                                },
-                                crate::core::player::Attribute::Dexterity => {
-                                    player.dexterity += amount
-                                },
-                                crate::core::player::Attribute::Constitution => {
-                                    player.constitution += amount
-                                },
-                                crate::core::player::Attribute::Intelligence => {
-                                    player.intelligence += amount
-                                },
-                                crate::core::player::Attribute::Wisdom => player.wisdom += amount,
-                                crate::core::player::Attribute::Charisma => {
-                                    player.charisma += amount
-                                },
+                                Attribute::Strength => player.strength += amount,
+                                Attribute::Dexterity => player.dexterity += amount,
+                                Attribute::Constitution => player.constitution += amount,
+                                Attribute::Intelligence => player.intelligence += amount,
+                                Attribute::Wisdom => player.wisdom += amount,
+                                Attribute::Charisma => player.charisma += amount,
                             },
                             _ => {},
                         }
@@ -2903,7 +2904,7 @@ pub fn handle_equipment_slot_click(
             // Right-click: sell equipped item for full price with confirmation modal
             if event.button == PointerButton::Secondary {
                 if let Some(eq) = get_equipment(&key_str) {
-                    let sell_price = eq.price();
+                    let sell_price = eq.sell_price(player.charisma_mod());
                     let lang = settings.language;
                     let action = ModalAction::SellItem {
                         key: key_str.clone(),

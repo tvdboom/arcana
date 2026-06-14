@@ -26,4 +26,8 @@ pub enum GameState {
     Settings,
     EndGame,
     Shop,
+    Work,
+    Study,
+    Train,
+    Rest,
 }
