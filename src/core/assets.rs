@@ -1,9 +1,8 @@
-use crate::core::catalog::{all_abilities, all_perks, all_weapons, all_wearables};
+use crate::core::catalog::catalog::{all_abilities, all_perks, all_weapons, all_wearables};
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
 use std::collections::HashMap;
-
 
 #[derive(Resource)]
 pub struct WorldAssets {
@@ -183,17 +182,11 @@ impl FromWorld for WorldAssets {
             ("druid_orc_man", assets.load("images/classes/druid_orc_man.ktx2")),
             ("druid_orc_woman", assets.load("images/classes/druid_orc_woman.ktx2")),
             ("mage_black_human_man", assets.load("images/classes/mage_black_human_man.ktx2")),
-            (
-                "mage_black_human_woman",
-                assets.load("images/classes/mage_black_human_woman.ktx2"),
-            ),
+            ("mage_black_human_woman", assets.load("images/classes/mage_black_human_woman.ktx2")),
             ("mage_black_elf_man", assets.load("images/classes/mage_black_elf_man.ktx2")),
             ("mage_black_elf_woman", assets.load("images/classes/mage_black_elf_woman.ktx2")),
             ("mage_black_dwarf_man", assets.load("images/classes/mage_black_dwarf_man.ktx2")),
-            (
-                "mage_black_dwarf_woman",
-                assets.load("images/classes/mage_black_dwarf_woman.ktx2"),
-            ),
+            ("mage_black_dwarf_woman", assets.load("images/classes/mage_black_dwarf_woman.ktx2")),
             ("mage_black_orc_man", assets.load("images/classes/mage_black_orc_man.ktx2")),
             ("mage_black_orc_woman", assets.load("images/classes/mage_black_orc_woman.ktx2")),
             ("mage_red_human_man", assets.load("images/classes/mage_red_man.ktx2")),
@@ -205,37 +198,19 @@ impl FromWorld for WorldAssets {
             ("mage_red_orc_man", assets.load("images/classes/mage_red_orc_man.ktx2")),
             ("mage_red_orc_woman", assets.load("images/classes/mage_red_orc_woman.ktx2")),
             ("mage_green_human_man", assets.load("images/classes/mage_green_human_man.ktx2")),
-            (
-                "mage_green_human_woman",
-                assets.load("images/classes/mage_green_human_woman.ktx2"),
-            ),
+            ("mage_green_human_woman", assets.load("images/classes/mage_green_human_woman.ktx2")),
             ("mage_green_elf_man", assets.load("images/classes/mage_green_elf_man.ktx2")),
             ("mage_green_elf_woman", assets.load("images/classes/mage_green_elf_woman.ktx2")),
-            (
-                "mage_green_dwarf_man",
-                assets.load("images/classes/mage_green_dwarf_man.ktx2"),
-            ),
-            (
-                "mage_green_dwarf_woman",
-                assets.load("images/classes/mage_green_dwarf_woman.ktx2"),
-            ),
+            ("mage_green_dwarf_man", assets.load("images/classes/mage_green_dwarf_man.ktx2")),
+            ("mage_green_dwarf_woman", assets.load("images/classes/mage_green_dwarf_woman.ktx2")),
             ("mage_green_orc_man", assets.load("images/classes/mage_green_orc_man.ktx2")),
             ("mage_green_orc_woman", assets.load("images/classes/mage_green_orc_woman.ktx2")),
             ("mage_white_human_man", assets.load("images/classes/mage_white_man.ktx2")),
-            (
-                "mage_white_human_woman",
-                assets.load("images/classes/mage_white_human_woman.ktx2"),
-            ),
+            ("mage_white_human_woman", assets.load("images/classes/mage_white_human_woman.ktx2")),
             ("mage_white_elf_man", assets.load("images/classes/mage_white_elf_man.ktx2")),
             ("mage_white_elf_woman", assets.load("images/classes/mage_white_elf_woman.ktx2")),
-            (
-                "mage_white_dwarf_man",
-                assets.load("images/classes/mage_white_dwarf_man.ktx2"),
-            ),
-            (
-                "mage_white_dwarf_woman",
-                assets.load("images/classes/mage_white_dwarf_woman.ktx2"),
-            ),
+            ("mage_white_dwarf_man", assets.load("images/classes/mage_white_dwarf_man.ktx2")),
+            ("mage_white_dwarf_woman", assets.load("images/classes/mage_white_dwarf_woman.ktx2")),
             ("mage_white_orc_man", assets.load("images/classes/mage_white_orc_man.ktx2")),
             ("mage_white_orc_woman", assets.load("images/classes/mage_white_orc_woman.ktx2")),
             // Pets
@@ -267,10 +242,7 @@ impl FromWorld for WorldAssets {
             ("action_conditioning", assets.load("images/actions/conditioning.ktx2")),
             ("action_simple_rest", assets.load("images/actions/simple_rest.ktx2")),
             ("action_common_lodging", assets.load("images/actions/common_lodging.ktx2")),
-            (
-                "action_grand_accommodation",
-                assets.load("images/actions/grand_accomodation.ktx2"),
-            ),
+            ("action_grand_accommodation", assets.load("images/actions/grand_accomodation.ktx2")),
         ]);
 
         for ability in all_abilities() {

@@ -3,7 +3,7 @@ use bevy::window::SystemCursorIcon;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
-use crate::core::catalog::{get_ability, get_perk};
+use crate::core::catalog::catalog::{get_ability, get_perk};
 use crate::core::constants::*;
 use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;

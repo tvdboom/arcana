@@ -1,6 +1,6 @@
-use crate::core::build::equipment::Equipment;
-use crate::core::build::modifiers::Modifier;
-use crate::core::catalog::{get_equipment, get_perk};
+use crate::core::catalog::equipment::Equipment;
+use crate::core::catalog::modifiers::Modifier;
+use crate::core::catalog::catalog::{get_equipment, get_perk};
 use crate::core::classes::Class;
 use crate::core::constants::{NAMES, START_CHARACTERISTIC};
 use crate::core::pets::Pet;

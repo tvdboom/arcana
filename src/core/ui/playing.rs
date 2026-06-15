@@ -5,11 +5,11 @@ use strum::IntoEnumIterator;
 pub use crate::core::actions::{handle_playing_action_clicks, Action, ActionButton};
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
-use crate::core::build::equipment::Equipment;
-use crate::core::build::modifiers::Modifier;
-use crate::core::build::weapons::{Category, Hand};
-use crate::core::build::wearables::WearableSlot;
-use crate::core::catalog::{get_ability, get_equipment, get_perk};
+use crate::core::catalog::equipment::Equipment;
+use crate::core::catalog::modifiers::Modifier;
+use crate::core::catalog::weapons::{Category, Hand};
+use crate::core::catalog::wearables::WearableSlot;
+use crate::core::catalog::catalog::{get_ability, get_equipment, get_perk};
 use crate::core::classes::Class;
 use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
@@ -203,6 +203,7 @@ fn weapon_bonus_lines(
             let prefix = match weapon {
                 Equipment::Weapon(_) => "weapon",
                 Equipment::Wearable(_) => "wearable",
+                Equipment::Consumable(_) => "consumable",
             };
             let key = format!("{}.{}", prefix, weapon.name().replace(" ", "_").to_lowercase());
             let raw_name =
@@ -1349,6 +1350,7 @@ pub fn equip_slot_tooltip_system(
                 let prefix = match weapon {
                     Equipment::Weapon(_) => "weapon",
                     Equipment::Wearable(_) => "wearable",
+                    Equipment::Consumable(_) => "consumable",
                 };
                 let name = name_with_level(
                     weapon.name(),
@@ -1476,6 +1478,7 @@ pub fn right_column_tooltip_system(
                     let prefix = match equipment {
                         Equipment::Weapon(_) => "weapon",
                         Equipment::Wearable(_) => "wearable",
+                        Equipment::Consumable(_) => "consumable",
                     };
                     let title = name_with_level(
                         equipment.name(),
@@ -2070,10 +2073,7 @@ pub fn rebuild_playing_lists(
             let mut equipped_items: Vec<Equipment> = equipped_slots
                 .iter()
                 .filter_map(|(slot_val, _)| slot_val.as_deref().and_then(get_equipment))
-                .filter(|eq| match eq {
-                    Equipment::Wearable(w) => w.slot != WearableSlot::Consumable,
-                    _ => true,
-                })
+                .filter(|eq| !matches!(eq, Equipment::Consumable(_)))
                 .collect();
             equipped_items.sort_by(|a, b| a.level().cmp(&b.level()).then(a.name().cmp(b.name())));
             for weapon in &equipped_items {
@@ -2081,6 +2081,7 @@ pub fn rebuild_playing_lists(
                 let prefix = match weapon {
                     Equipment::Weapon(_) => "weapon",
                     Equipment::Wearable(_) => "wearable",
+                    Equipment::Consumable(_) => "consumable",
                 };
                 spawn_equipment_card(
                     parent,
@@ -2107,10 +2108,7 @@ pub fn rebuild_playing_lists(
                 .inventory
                 .iter()
                 .filter_map(|key| get_equipment(key))
-                .filter(|eq| match eq {
-                    Equipment::Wearable(w) => w.slot != WearableSlot::Consumable,
-                    _ => true,
-                })
+                .filter(|eq| !matches!(eq, Equipment::Consumable(_)))
                 .collect();
             inventory_items.sort_by(|a, b| a.level().cmp(&b.level()).then(a.name().cmp(b.name())));
             for weapon in &inventory_items {
@@ -2118,6 +2116,7 @@ pub fn rebuild_playing_lists(
                 let prefix = match weapon {
                     Equipment::Weapon(_) => "weapon",
                     Equipment::Wearable(_) => "wearable",
+                    Equipment::Consumable(_) => "consumable",
                 };
                 spawn_equipment_card(
                     parent,
@@ -2155,10 +2154,8 @@ pub fn rebuild_playing_lists(
             let mut consumables_map = std::collections::HashMap::new();
             for key in &player.inventory {
                 if let Some(eq) = get_equipment(key) {
-                    if let Equipment::Wearable(ref w) = eq {
-                        if w.slot == WearableSlot::Consumable {
-                            *consumables_map.entry(key.clone()).or_insert(0) += 1;
-                        }
+                    if let Equipment::Consumable(_) = eq {
+                        *consumables_map.entry(key.clone()).or_insert(0) += 1;
                     }
                 }
             }
@@ -2175,12 +2172,12 @@ pub fn rebuild_playing_lists(
                 empty = false;
                 let weapon = get_equipment(key).unwrap();
                 let count = consumables_map.get(key).unwrap();
-                let display_name = if *count > 1 {
+                 let display_name = if *count > 1 {
                     format!(
                         "{} (x{})",
                         name_with_level(
                             weapon.name(),
-                            "wearable",
+                            "consumable",
                             weapon.level() as u8,
                             &localization,
                             lang,
@@ -2190,7 +2187,7 @@ pub fn rebuild_playing_lists(
                 } else {
                     name_with_level(
                         weapon.name(),
-                        "wearable",
+                        "consumable",
                         weapon.level() as u8,
                         &localization,
                         lang,
@@ -2579,40 +2576,40 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
         }
 
         match equipment {
-            Equipment::Wearable(w) => match w.slot {
-                WearableSlot::Consumable => {
-                    for effect in &w.effects {
-                        match effect {
-                            crate::core::build::effects::Effect::Heal {
-                                heal_pct,
-                            } => {
-                                let max_hp = player.max_health();
-                                let heal_amount = (max_hp * heal_pct) / 100;
-                                player.set_health(player.health() + heal_amount);
-                            },
-                            crate::core::build::effects::Effect::InstantMana {
-                                amount,
-                            } => {
-                                player.set_mana(player.mana() + amount);
-                            },
-                            crate::core::build::effects::Effect::StatBoost {
-                                attribute,
-                                amount,
-                                ..
-                            } => match attribute {
-                                Attribute::Strength => player.strength += amount,
-                                Attribute::Dexterity => player.dexterity += amount,
-                                Attribute::Constitution => player.constitution += amount,
-                                Attribute::Intelligence => player.intelligence += amount,
-                                Attribute::Wisdom => player.wisdom += amount,
-                                Attribute::Charisma => player.charisma += amount,
-                            },
-                            _ => {},
-                        }
+            Equipment::Consumable(c) => {
+                for effect in &c.effects {
+                    match effect {
+                        crate::core::catalog::effects::Effect::Heal {
+                            heal_pct,
+                        } => {
+                            let max_hp = player.max_health();
+                            let heal_amount = (max_hp * heal_pct) / 100;
+                            player.set_health(player.health() + heal_amount);
+                        },
+                        crate::core::catalog::effects::Effect::InstantMana {
+                            amount,
+                        } => {
+                            player.set_mana(player.mana() + amount);
+                        },
+                        crate::core::catalog::effects::Effect::StatBoost {
+                            attribute,
+                            amount,
+                            ..
+                        } => match attribute {
+                            Attribute::Strength => player.strength += amount,
+                            Attribute::Dexterity => player.dexterity += amount,
+                            Attribute::Constitution => player.constitution += amount,
+                            Attribute::Intelligence => player.intelligence += amount,
+                            Attribute::Wisdom => player.wisdom += amount,
+                            Attribute::Charisma => player.charisma += amount,
+                        },
+                        _ => {},
                     }
-                    player.update_health_mana(old_hp, old_mp);
-                    return Some("button");
-                },
+                }
+                player.update_health_mana(old_hp, old_mp);
+                return Some("button");
+            },
+            Equipment::Wearable(w) => match w.slot {
                 WearableSlot::Helmet => {
                     if let Some(old) = player.helmet.replace(key.to_string()) {
                         player.inventory.push(old);
@@ -2761,6 +2758,7 @@ pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
 pub fn reward_equipment(player: &mut Player, key: String) {
     if let Some(equipment) = get_equipment(&key) {
         let is_empty = match equipment {
+            Equipment::Consumable(_) => false,
             Equipment::Wearable(w) => match w.slot {
                 WearableSlot::Helmet => player.helmet.is_none(),
                 WearableSlot::Chestplate => player.armor.is_none(),
@@ -2769,7 +2767,6 @@ pub fn reward_equipment(player: &mut Player, key: String) {
                 WearableSlot::Accessory => {
                     player.accessory.is_none() || player.accessory2.is_none()
                 },
-                WearableSlot::Consumable => false,
             },
             Equipment::Weapon(w) => {
                 let is_lh_two_hand = player
@@ -2836,36 +2833,34 @@ pub fn handle_equipment_card_click(
         } else {
             // Check consumable restrictions
             if let Some(eq) = get_equipment(&card.key) {
-                if let Equipment::Wearable(ref w) = eq {
-                    if w.slot == WearableSlot::Consumable {
-                        let mut has_heal = false;
-                        let mut has_mana = false;
-                        for effect in &w.effects {
-                            match effect {
-                                crate::core::build::effects::Effect::Heal {
-                                    ..
-                                } => has_heal = true,
-                                crate::core::build::effects::Effect::InstantMana {
-                                    ..
-                                } => has_mana = true,
-                                _ => {},
-                            }
+                if let Equipment::Consumable(ref c) = eq {
+                    let mut has_heal = false;
+                    let mut has_mana = false;
+                    for effect in &c.effects {
+                        match effect {
+                            crate::core::catalog::effects::Effect::Heal {
+                                ..
+                            } => has_heal = true,
+                            crate::core::catalog::effects::Effect::InstantMana {
+                                ..
+                            } => has_mana = true,
+                            _ => {},
                         }
+                    }
 
-                        let blocked = if has_heal && has_mana {
-                            player.missing_health == 0 && player.missing_mana == 0
-                        } else if has_heal {
-                            player.missing_health == 0
-                        } else if has_mana {
-                            player.missing_mana == 0
-                        } else {
-                            false
-                        };
+                    let blocked = if has_heal && has_mana {
+                        player.missing_health == 0 && player.missing_mana == 0
+                    } else if has_heal {
+                        player.missing_health == 0
+                    } else if has_mana {
+                        player.missing_mana == 0
+                    } else {
+                        false
+                    };
 
-                        if blocked {
-                            play_audio_msg.write(PlayAudioMsg::new("error"));
-                            return;
-                        }
+                    if blocked {
+                        play_audio_msg.write(PlayAudioMsg::new("error"));
+                        return;
                     }
                 }
             }

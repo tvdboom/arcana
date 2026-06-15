@@ -207,11 +207,15 @@ pub fn build_work_content_inner(
     let ap_cost = slider_val + 1;
 
     // Fixed costs calculations:
-    let craft_percentage = (5.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
-    let craft_cost = ((craft_percentage / 100.0) * player.max_mana() as f32 * slider_mult).max(1.0) as u32;
+    let craft_percentage =
+        (5.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
+    let craft_cost =
+        ((craft_percentage / 100.0) * player.max_mana() as f32 * slider_mult).max(1.0) as u32;
 
-    let manual_percentage = (7.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
-    let manual_cost = ((manual_percentage / 100.0) * player.max_health() as f32 * slider_mult).max(1.0) as u32;
+    let manual_percentage =
+        (7.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
+    let manual_cost =
+        ((manual_percentage / 100.0) * player.max_health() as f32 * slider_mult).max(1.0) as u32;
 
     // Top Row
     parent
@@ -373,7 +377,7 @@ pub fn build_work_content_inner(
                 &desc2,
                 "action_craft_labor",
                 Some(ap_cost),
-                Some((craft_cost, "mana", Color::srgb(40./255., 80./255., 185./255.))),
+                Some((craft_cost, "mana", Color::srgb(40. / 255., 80. / 255., 185. / 255.))),
                 WorkCardMarker(1),
             );
             card_ents.push(c2);
@@ -392,7 +396,7 @@ pub fn build_work_content_inner(
                 &desc3,
                 "action_manual_labor",
                 Some(ap_cost),
-                Some((manual_cost, "health", Color::srgb(170./255., 35./255., 35./255.))),
+                Some((manual_cost, "health", Color::srgb(170. / 255., 35. / 255., 35. / 255.))),
                 WorkCardMarker(2),
             );
             card_ents.push(c3);

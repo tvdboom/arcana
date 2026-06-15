@@ -1,4 +1,4 @@
-use crate::core::build::equipment::Kind;
+use crate::core::catalog::equipment::Kind;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 

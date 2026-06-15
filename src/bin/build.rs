@@ -32,10 +32,12 @@ fn main() {
     }
 
     if gen_catalogs {
-        let img_ext = if process_assets { "ktx2" } else { "png" };
+        let img_ext = if process_assets {
+            "ktx2"
+        } else {
+            "png"
+        };
         println!("Generating catalogs (img_ext={img_ext})…");
         catalog_gen::run("assets-src/images", "assets/inventory", img_ext);
     }
 }
-
-

@@ -1,12 +1,10 @@
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
-use crate::core::build::equipment::{Equipment, Kind};
-use crate::core::build::weapons::{Category, Hand};
-use crate::core::build::wearables::WearableSlot;
-use crate::core::catalog::{all_equipment, get_equipment};
-use crate::core::constants::{
-    BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, HOVERED_BUTTON_COLOR, PRESSED_BUTTON_COLOR,
-};
+use crate::core::catalog::equipment::{Equipment, Kind};
+use crate::core::catalog::weapons::{Category, Hand};
+use crate::core::catalog::wearables::WearableSlot;
+use crate::core::catalog::catalog::{all_equipment, get_equipment};
+use crate::core::constants::*;
 use crate::core::localization::Localization;
 use crate::core::menu::utils::{add_text, recolor};
 use crate::core::player::Player;
@@ -21,6 +19,7 @@ use bevy::window::SystemCursorIcon;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use crate::utils::NameFromEnum;
 
 #[derive(Resource, Clone, Serialize, Deserialize, Default, Debug)]
 pub struct ShopInventory {
@@ -275,15 +274,6 @@ pub fn build_shop_content_inner(
                         } else {
                             Color::srgba_u8(20, 20, 35, 200)
                         };
-                        let label = match tab {
-                            ShopTab::Weapons => "Weapons",
-                            ShopTab::Helmets => "Helmets",
-                            ShopTab::Chestplates => "Chestplates",
-                            ShopTab::Boots => "Boots",
-                            ShopTab::Gloves => "Gloves",
-                            ShopTab::Accessories => "Accessories",
-                            ShopTab::Consumables => "Consumables",
-                        };
                         parent
                             .spawn((
                                 Node {
@@ -303,7 +293,7 @@ pub fn build_shop_content_inner(
                             .observe(cursor::<Out>(SystemCursorIcon::Default))
                             .with_children(|parent| {
                                 parent.spawn((
-                                    add_text(label, "bold", 1.8, assets),
+                                    add_text(tab.to_name(), "bold", 1.8, assets),
                                     TextColor(BUTTON_TEXT_COLOR),
                                 ));
                             });
@@ -596,10 +586,7 @@ pub fn build_shop_content_inner(
                             Equipment::Wearable(w) => w.slot == WearableSlot::Accessory,
                             _ => false,
                         },
-                        ShopTab::Consumables => match &equipment {
-                            Equipment::Wearable(w) => w.slot == WearableSlot::Consumable,
-                            _ => false,
-                        },
+                        ShopTab::Consumables => matches!(equipment, Equipment::Consumable(_)),
                     };
                     if !matches_tab {
                         continue;
@@ -681,6 +668,7 @@ fn spawn_shop_item_card(
     let prefix = match item {
         Equipment::Weapon(_) => "weapon",
         Equipment::Wearable(_) => "wearable",
+        Equipment::Consumable(_) => "consumable",
     };
     let name = crate::core::ui::playing::name_with_level(
         item.name(),
@@ -879,10 +867,7 @@ pub fn handle_shop_item_card_click(
         if event.button == PointerButton::Primary {
             player.inventory.push(card.key.clone());
             let is_consumable = get_equipment(&card.key)
-                .map(|eq| match eq {
-                    Equipment::Wearable(w) => w.slot == WearableSlot::Consumable,
-                    _ => false,
-                })
+                .map(|eq| matches!(eq, Equipment::Consumable(_)))
                 .unwrap_or(false);
             if !is_consumable {
                 crate::core::ui::playing::equip_item(&mut player, &card.key);
@@ -922,6 +907,7 @@ pub fn shop_tooltip_system(
                 let prefix = match equipment {
                     Equipment::Weapon(_) => "weapon",
                     Equipment::Wearable(_) => "wearable",
+                    Equipment::Consumable(_) => "consumable",
                 };
                 let lang = settings.language;
                 let title = crate::core::ui::playing::name_with_level(

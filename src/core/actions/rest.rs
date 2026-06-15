@@ -1,19 +1,19 @@
+use crate::core::actions::trigger_level_up;
 use crate::core::assets::WorldAssets;
+use crate::core::audio::PlayAudioMsg;
 use crate::core::localization::Localization;
+use crate::core::menu::utils::{add_text, reimage};
 use crate::core::player::Player;
 use crate::core::settings::{Language, Settings};
+use crate::core::states::GameState;
+use crate::core::ui::level_up::LevelUpPending;
+use crate::core::ui::playing::ToastContainer;
+use crate::core::ui::toast::spawn_toast;
 use crate::core::ui::utils::*;
 use crate::core::utils::cursor;
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
 use rand::{rng, RngExt};
-use crate::core::actions::{trigger_level_up};
-use crate::core::audio::PlayAudioMsg;
-use crate::core::menu::utils::{add_text, reimage};
-use crate::core::states::GameState;
-use crate::core::ui::level_up::LevelUpPending;
-use crate::core::ui::playing::ToastContainer;
-use crate::core::ui::toast::spawn_toast;
 
 #[derive(Component)]
 pub struct RestContentWrapper;
@@ -39,13 +39,8 @@ pub fn setup_rest_ui(
         let mut card_ents = Vec::new();
 
         commands.entity(panel_entity).with_children(|parent| {
-            card_ents = build_rest_content(
-                parent,
-                &assets,
-                &localization,
-                settings.language,
-                &player,
-            );
+            card_ents =
+                build_rest_content(parent, &assets, &localization, settings.language, &player);
         });
 
         for card in card_ents {
@@ -177,7 +172,8 @@ pub fn build_rest_content_inner(
                                     height: Val::Vw(2.4),
                                     ..default()
                                 },
-                                ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                                ImageNode::new(assets.image("gold"))
+                                    .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
                                 add_text(player.gold.to_string(), "bold", 2.4, assets),
@@ -205,7 +201,8 @@ pub fn build_rest_content_inner(
                                     height: Val::Vw(2.4),
                                     ..default()
                                 },
-                                ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
+                                ImageNode::new(assets.image("ap"))
+                                    .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
                                 add_text(player.ap.to_string(), "bold", 2.4, assets),
@@ -388,7 +385,8 @@ pub fn spawn_rest_card_ui<M: Component>(
                                             height: Val::Px(20.),
                                             ..default()
                                         },
-                                        ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                                        ImageNode::new(assets.image("gold"))
+                                            .with_mode(NodeImageMode::Stretch),
                                     ));
                                     parent.spawn((
                                         add_text(gold_cost.to_string(), "bold", 1.6, assets),
@@ -417,7 +415,8 @@ pub fn spawn_rest_card_ui<M: Component>(
                                             height: Val::Px(20.),
                                             ..default()
                                         },
-                                        ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
+                                        ImageNode::new(assets.image("ap"))
+                                            .with_mode(NodeImageMode::Stretch),
                                     ));
                                     parent.spawn((
                                         add_text(ap_cost.to_string(), "bold", 1.6, assets),
@@ -519,12 +518,7 @@ pub fn handle_rest_card_clicks(
         player.gold -= gold_cost;
         let triggers_level_up = player.ap <= ap_cost;
         if triggers_level_up {
-            trigger_level_up(
-                &mut player,
-                &mut level_up,
-                &mut play_audio_msg,
-                &mut next_game_state,
-            );
+            trigger_level_up(&mut player, &mut level_up, &mut play_audio_msg, &mut next_game_state);
         } else {
             player.ap -= ap_cost;
         }
@@ -612,7 +606,9 @@ pub fn handle_rest_card_clicks(
                     msg = format!(
                         "{} (+{})",
                         msg,
-                        localization.get("toast_rest_grand_bonus", lang).replace("{bonus}", &bonus.to_string())
+                        localization
+                            .get("toast_rest_grand_bonus", lang)
+                            .replace("{bonus}", &bonus.to_string())
                     );
                 }
                 spawn_toast(
@@ -625,7 +621,7 @@ pub fn handle_rest_card_clicks(
                     toast,
                 );
             },
-            _ => {}
+            _ => {},
         }
     }
 }

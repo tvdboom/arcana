@@ -458,7 +458,8 @@ pub fn spawn_card_ui<M: Component>(
                                             height: Val::Px(20.),
                                             ..default()
                                         },
-                                        ImageNode::new(assets.image(icon_key)).with_mode(NodeImageMode::Stretch),
+                                        ImageNode::new(assets.image(icon_key))
+                                            .with_mode(NodeImageMode::Stretch),
                                     ));
                                     parent.spawn((
                                         add_text(val.to_string(), "bold", 1.6, assets),
@@ -487,7 +488,8 @@ pub fn spawn_card_ui<M: Component>(
                                             height: Val::Px(20.),
                                             ..default()
                                         },
-                                        ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
+                                        ImageNode::new(assets.image("ap"))
+                                            .with_mode(NodeImageMode::Stretch),
                                     ));
                                     parent.spawn((
                                         add_text(ap_cost.to_string(), "bold", 1.6, assets),

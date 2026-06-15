@@ -2,7 +2,6 @@
 /// This file is used in two ways:
 ///   1. As the `convert_to_ktx2` binary  (`cargo run --bin convert_to_ktx2`)
 ///   2. Included via `include!()` in both `src/bin/build.rs` and the root `build.rs`
-
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -78,11 +77,7 @@ pub fn run(src_root: &str, dst_root: &str) {
 
     for src_path in collect_files(src_root) {
         let relative = src_path.strip_prefix(src_root).expect("strip prefix");
-        let ext = src_path
-            .extension()
-            .and_then(|e| e.to_str())
-            .unwrap_or("")
-            .to_lowercase();
+        let ext = src_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
 
         if ext == "png" {
             let dst_path = dst_root.join(relative).with_extension("ktx2");
@@ -108,11 +103,7 @@ pub fn copy_only(src_root: &str, dst_root: &str) {
 
     for src_path in collect_files(src_root) {
         let relative = src_path.strip_prefix(src_root).expect("strip prefix");
-        let ext = src_path
-            .extension()
-            .and_then(|e| e.to_str())
-            .unwrap_or("")
-            .to_lowercase();
+        let ext = src_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
         if ext == "png" {
             continue;
         }
@@ -128,4 +119,3 @@ pub fn copy_only(src_root: &str, dst_root: &str) {
 fn main() {
     run("assets-src", "assets");
 }
-

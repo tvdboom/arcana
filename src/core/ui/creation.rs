@@ -4,9 +4,9 @@ use strum::IntoEnumIterator;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
-use crate::core::build::equipment::Kind;
-use crate::core::build::weapons::Category;
-use crate::core::catalog::{all_abilities, all_perks, all_weapons};
+use crate::core::catalog::equipment::Kind;
+use crate::core::catalog::weapons::Category;
+use crate::core::catalog::catalog::{all_abilities, all_perks, all_weapons};
 use crate::core::classes::{Ajah, Class};
 use crate::core::constants::*;
 use crate::core::localization::*;

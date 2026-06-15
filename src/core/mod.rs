@@ -1,9 +1,8 @@
 pub mod actions;
 mod assets;
 mod audio;
-mod build;
+mod catalog;
 mod camera;
-pub mod catalog;
 pub mod classes;
 mod constants;
 pub mod localization;
@@ -125,7 +124,11 @@ impl Plugin for GamePlugin {
         for state in GameState::iter() {
             if !matches!(
                 state,
-                GameState::Shop | GameState::Work | GameState::Study | GameState::Train | GameState::Rest
+                GameState::Shop
+                    | GameState::Work
+                    | GameState::Study
+                    | GameState::Train
+                    | GameState::Rest
             ) {
                 app.add_systems(OnEnter(state), reset_cursor);
             }

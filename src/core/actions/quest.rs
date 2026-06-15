@@ -1,4 +1,4 @@
-use crate::core::catalog::all_equipment;
+use crate::core::catalog::catalog::all_equipment;
 use crate::core::player::Player;
 use crate::core::ui::playing::reward_equipment;
 use rand::{rng, seq::IndexedRandom, RngExt};

@@ -10,9 +10,9 @@ pub mod work;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
-use crate::core::build::abilities::Ability;
-use crate::core::build::equipment::Kind;
-use crate::core::catalog::{all_abilities, all_perks};
+use crate::core::catalog::abilities::Ability;
+use crate::core::catalog::equipment::Kind;
+use crate::core::catalog::catalog::{all_abilities, all_perks};
 use crate::core::classes::Class;
 use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;
@@ -47,7 +47,12 @@ pub enum Action {
 impl Action {
     pub fn ap_cost(&self) -> u32 {
         match self {
-            Action::Shop | Action::Duel | Action::Work | Action::Study | Action::Train | Action::Rest => 0,
+            Action::Shop
+            | Action::Duel
+            | Action::Work
+            | Action::Study
+            | Action::Train
+            | Action::Rest => 0,
             Action::Craft | Action::Hunt => 2,
             Action::Quest => 3,
         }
@@ -202,10 +207,7 @@ pub fn handle_playing_action_clicks(
 
         // Close any open panel if clicking a non-panel action
         if *current_state != GameState::Playing
-            && matches!(
-                action,
-                Action::Hunt | Action::Craft | Action::Quest | Action::Duel
-            )
+            && matches!(action, Action::Hunt | Action::Craft | Action::Quest | Action::Duel)
         {
             next_game_state.set(GameState::Playing);
         }
@@ -305,11 +307,15 @@ pub fn handle_work_card_clicks(
         let slider_mult = [1.0, 2.5, 4.0][slider_val as usize];
 
         // Fixed costs calculations:
-        let craft_percentage = (5.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
-        let craft_cost = ((craft_percentage / 100.0) * player.max_mana() as f32 * slider_mult).max(1.0) as u32;
+        let craft_percentage =
+            (5.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
+        let craft_cost =
+            ((craft_percentage / 100.0) * player.max_mana() as f32 * slider_mult).max(1.0) as u32;
 
-        let manual_percentage = (7.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
-        let manual_cost = ((manual_percentage / 100.0) * player.max_health() as f32 * slider_mult).max(1.0) as u32;
+        let manual_percentage =
+            (7.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
+        let manual_cost = ((manual_percentage / 100.0) * player.max_health() as f32 * slider_mult)
+            .max(1.0) as u32;
 
         match marker.0 {
             0 => {
@@ -345,7 +351,7 @@ pub fn handle_work_card_clicks(
                     return;
                 }
             },
-            _ => {}
+            _ => {},
         }
 
         let mut rng = rng();
