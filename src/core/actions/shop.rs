@@ -19,6 +19,7 @@ use bevy::window::SystemCursorIcon;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use crate::core::ui::playing::name_with_level;
 use crate::utils::NameFromEnum;
 
 #[derive(Resource, Clone, Serialize, Deserialize, Default, Debug)]
@@ -665,14 +666,9 @@ fn spawn_shop_item_card(
     item: &Equipment,
 ) {
     let name_str = item.name().to_string();
-    let prefix = match item {
-        Equipment::Weapon(_) => "weapon",
-        Equipment::Wearable(_) => "wearable",
-        Equipment::Consumable(_) => "consumable",
-    };
-    let name = crate::core::ui::playing::name_with_level(
+    let name = name_with_level(
         item.name(),
-        prefix,
+        item.to_lowername().as_str(),
         item.level() as u8,
         localization,
         lang,
@@ -904,15 +900,10 @@ pub fn shop_tooltip_system(
                 commands.entity(entity).try_despawn();
             }
             if let Some(equipment) = get_equipment(&tooltip.0) {
-                let prefix = match equipment {
-                    Equipment::Weapon(_) => "weapon",
-                    Equipment::Wearable(_) => "wearable",
-                    Equipment::Consumable(_) => "consumable",
-                };
                 let lang = settings.language;
-                let title = crate::core::ui::playing::name_with_level(
+                let title = name_with_level(
                     equipment.name(),
-                    prefix,
+                    equipment.to_lowername().as_str(),
                     equipment.level() as u8,
                     &localization,
                     lang,
