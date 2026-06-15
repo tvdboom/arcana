@@ -4,3 +4,6 @@
 .spyproject/
 
 target/
+
+# Generated assets (processed from assets-src/)
+assets/

@@ -1,7 +1,7 @@
 [
     (
         name: "Holy",
-        image: "images/build/abilities/holy.png",
+        image: "images/build/abilities/holy.ktx2",
         kind: Holy,
         level: 1,
         mana_cost: 7,
@@ -12,7 +12,7 @@
     ),
     (
         name: "Blade Rush",
-        image: "images/build/abilities/Skill_348.png",
+        image: "images/build/abilities/Skill_348.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 8,
@@ -23,7 +23,7 @@
     ),
     (
         name: "Dark Net",
-        image: "images/build/abilities/DarkNet.png",
+        image: "images/build/abilities/DarkNet.ktx2",
         kind: Shadow,
         level: 1,
         mana_cost: 9,
@@ -34,7 +34,7 @@
     ),
     (
         name: "Doublesword",
-        image: "images/build/abilities/skill_34_doublesword.png",
+        image: "images/build/abilities/skill_34_doublesword.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -45,7 +45,7 @@
     ),
     (
         name: "Crushing Blow",
-        image: "images/build/abilities/Skill_347.png",
+        image: "images/build/abilities/Skill_347.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 8,
@@ -56,7 +56,7 @@
     ),
     (
         name: "Sweeping Cleave",
-        image: "images/build/abilities/Skill_304.png",
+        image: "images/build/abilities/Skill_304.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 9,
@@ -67,7 +67,7 @@
     ),
     (
         name: "Hail Storm",
-        image: "images/build/abilities/HailStorm.png",
+        image: "images/build/abilities/HailStorm.ktx2",
         kind: Ice,
         level: 1,
         mana_cost: 7,
@@ -78,7 +78,7 @@
     ),
     (
         name: "Creating Shadow",
-        image: "images/build/abilities/creating_shadow.png",
+        image: "images/build/abilities/creating_shadow.ktx2",
         kind: Shadow,
         level: 1,
         mana_cost: 8,
@@ -89,7 +89,7 @@
     ),
     (
         name: "Firelasso",
-        image: "images/build/abilities/skill_181_firelasso.png",
+        image: "images/build/abilities/skill_181_firelasso.ktx2",
         kind: Fire,
         level: 1,
         mana_cost: 9,
@@ -100,7 +100,7 @@
     ),
     (
         name: "Y Shoot",
-        image: "images/build/abilities/Y_shoot.png",
+        image: "images/build/abilities/Y_shoot.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -111,7 +111,7 @@
     ),
     (
         name: "Magic Bolt",
-        image: "images/build/abilities/magic_bolt.png",
+        image: "images/build/abilities/magic_bolt.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 8,
@@ -122,7 +122,7 @@
     ),
     (
         name: "Ice Nova Electric",
-        image: "images/build/abilities/IceNovaElectric.png",
+        image: "images/build/abilities/IceNovaElectric.ktx2",
         kind: Ice,
         level: 1,
         mana_cost: 9,
@@ -133,7 +133,7 @@
     ),
     (
         name: "Rend Flesh",
-        image: "images/build/abilities/skill_58.png",
+        image: "images/build/abilities/skill_58.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -144,7 +144,7 @@
     ),
     (
         name: "Y Assassination",
-        image: "images/build/abilities/Y_Assassination.png",
+        image: "images/build/abilities/Y_Assassination.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 8,
@@ -155,7 +155,7 @@
     ),
     (
         name: "Vampiric",
-        image: "images/build/abilities/Vampiric.png",
+        image: "images/build/abilities/Vampiric.ktx2",
         kind: Shadow,
         level: 1,
         mana_cost: 9,
@@ -166,7 +166,7 @@
     ),
     (
         name: "Cut",
-        image: "images/build/abilities/cut.png",
+        image: "images/build/abilities/cut.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -177,7 +177,7 @@
     ),
     (
         name: "Shield Block",
-        image: "images/build/abilities/skill_198.png",
+        image: "images/build/abilities/skill_198.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 8,
@@ -188,7 +188,7 @@
     ),
     (
         name: "Magicshield",
-        image: "images/build/abilities/Skill_255_magicshield.png",
+        image: "images/build/abilities/Skill_255_magicshield.ktx2",
         kind: Holy,
         level: 1,
         mana_cost: 9,
@@ -199,7 +199,7 @@
     ),
     (
         name: "Y Cabalistic",
-        image: "images/build/abilities/Y_cabalistic.png",
+        image: "images/build/abilities/Y_cabalistic.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -210,7 +210,7 @@
     ),
     (
         name: "Frostdemon",
-        image: "images/build/abilities/skill_230_frostdemon.png",
+        image: "images/build/abilities/skill_230_frostdemon.ktx2",
         kind: Ice,
         level: 1,
         mana_cost: 8,
@@ -221,7 +221,7 @@
     ),
     (
         name: "Dragon Coldbreath",
-        image: "images/build/abilities/dragon_coldbreath.png",
+        image: "images/build/abilities/dragon_coldbreath.ktx2",
         kind: Ice,
         level: 1,
         mana_cost: 9,
@@ -232,7 +232,7 @@
     ),
     (
         name: "Absorb Shield",
-        image: "images/build/abilities/Skill_402.png",
+        image: "images/build/abilities/Skill_402.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -243,7 +243,7 @@
     ),
     (
         name: "Sturdy Wall",
-        image: "images/build/abilities/skill_129.png",
+        image: "images/build/abilities/skill_129.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 8,
@@ -254,7 +254,7 @@
     ),
     (
         name: "Ironclad Resolve",
-        image: "images/build/abilities/skill_192.png",
+        image: "images/build/abilities/skill_192.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 9,
@@ -265,7 +265,7 @@
     ),
     (
         name: "Watershock",
-        image: "images/build/abilities/Skill_332_watershock.png",
+        image: "images/build/abilities/Skill_332_watershock.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -276,7 +276,7 @@
     ),
     (
         name: "Defenders Oath",
-        image: "images/build/abilities/skill_244.png",
+        image: "images/build/abilities/skill_244.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 8,
@@ -287,7 +287,7 @@
     ),
     (
         name: "Hypnosis",
-        image: "images/build/abilities/hypnosis.png",
+        image: "images/build/abilities/hypnosis.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 9,
@@ -298,7 +298,7 @@
     ),
     (
         name: "Three Shoots",
-        image: "images/build/abilities/Skill_ThreeShoots.png",
+        image: "images/build/abilities/Skill_ThreeShoots.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -309,7 +309,7 @@
     ),
     (
         name: "Last Stand",
-        image: "images/build/abilities/Skill_346.png",
+        image: "images/build/abilities/Skill_346.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 8,
@@ -320,7 +320,7 @@
     ),
     (
         name: "Swordsofshadow",
-        image: "images/build/abilities/Skill_482_swordsofshadow.png",
+        image: "images/build/abilities/Skill_482_swordsofshadow.ktx2",
         kind: Shadow,
         level: 1,
         mana_cost: 9,
@@ -331,7 +331,7 @@
     ),
     (
         name: "Waterattack",
-        image: "images/build/abilities/Skill_302_waterattack.png",
+        image: "images/build/abilities/Skill_302_waterattack.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -342,7 +342,7 @@
     ),
     (
         name: "Summon Succubus",
-        image: "images/build/abilities/summon_succubus.png",
+        image: "images/build/abilities/summon_succubus.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 8,
@@ -353,7 +353,7 @@
     ),
     (
         name: "Chariot",
-        image: "images/build/abilities/chariot.png",
+        image: "images/build/abilities/chariot.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 9,
@@ -364,7 +364,7 @@
     ),
     (
         name: "Hit",
-        image: "images/build/abilities/Skill_405_hit.png",
+        image: "images/build/abilities/Skill_405_hit.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -375,7 +375,7 @@
     ),
     (
         name: "Evil",
-        image: "images/build/abilities/Evil.png",
+        image: "images/build/abilities/Evil.ktx2",
         kind: Shadow,
         level: 1,
         mana_cost: 8,
@@ -386,7 +386,7 @@
     ),
     (
         name: "Silent Cut",
-        image: "images/build/abilities/Skill_449.png",
+        image: "images/build/abilities/Skill_449.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 9,
@@ -397,7 +397,7 @@
     ),
     (
         name: "Headshoot",
-        image: "images/build/abilities/Skill_Headshoot.png",
+        image: "images/build/abilities/Skill_Headshoot.ktx2",
         kind: Physical,
         level: 1,
         mana_cost: 7,
@@ -408,7 +408,7 @@
     ),
     (
         name: "Shield",
-        image: "images/build/abilities/shield3.png",
+        image: "images/build/abilities/shield3.ktx2",
         kind: Holy,
         level: 2,
         mana_cost: 10,
@@ -419,7 +419,7 @@
     ),
     (
         name: "Magicarrows",
-        image: "images/build/abilities/Skill_321_magicarrows.png",
+        image: "images/build/abilities/Skill_321_magicarrows.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -430,7 +430,7 @@
     ),
     (
         name: "Venom",
-        image: "images/build/abilities/venom02.png",
+        image: "images/build/abilities/venom02.ktx2",
         kind: Nature,
         level: 2,
         mana_cost: 9,
@@ -441,7 +441,7 @@
     ),
     (
         name: "Needles",
-        image: "images/build/abilities/needles.png",
+        image: "images/build/abilities/needles.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 10,
@@ -452,7 +452,7 @@
     ),
     (
         name: "Fatal Strike",
-        image: "images/build/abilities/Skill_493.png",
+        image: "images/build/abilities/Skill_493.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -463,7 +463,7 @@
     ),
     (
         name: "Venomous Bite",
-        image: "images/build/abilities/Skill_377.png",
+        image: "images/build/abilities/Skill_377.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 9,
@@ -474,7 +474,7 @@
     ),
     (
         name: "Balistic Shoot",
-        image: "images/build/abilities/Skill_BalisticShoot.png",
+        image: "images/build/abilities/Skill_BalisticShoot.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 10,
@@ -485,7 +485,7 @@
     ),
     (
         name: "Science Ancient",
-        image: "images/build/abilities/Skill_ScienceAncient.png",
+        image: "images/build/abilities/Skill_ScienceAncient.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -496,7 +496,7 @@
     ),
     (
         name: "Swift Step",
-        image: "images/build/abilities/Skill_452.png",
+        image: "images/build/abilities/Skill_452.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 9,
@@ -507,7 +507,7 @@
     ),
     (
         name: "Fear",
-        image: "images/build/abilities/Fear.png",
+        image: "images/build/abilities/Fear.ktx2",
         kind: Shadow,
         level: 2,
         mana_cost: 10,
@@ -518,7 +518,7 @@
     ),
     (
         name: "Quick Dash",
-        image: "images/build/abilities/skill_89.png",
+        image: "images/build/abilities/skill_89.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -529,7 +529,7 @@
     ),
     (
         name: "Moon",
-        image: "images/build/abilities/moon.png",
+        image: "images/build/abilities/moon.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 9,
@@ -540,7 +540,7 @@
     ),
     (
         name: "Healing Touch",
-        image: "images/build/abilities/Skill_HealingTouch.png",
+        image: "images/build/abilities/Skill_HealingTouch.ktx2",
         kind: Holy,
         level: 2,
         mana_cost: 10,
@@ -551,7 +551,7 @@
     ),
     (
         name: "Throwing Axe",
-        image: "images/build/abilities/skill_166.png",
+        image: "images/build/abilities/skill_166.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -562,7 +562,7 @@
     ),
     (
         name: "Healdemon",
-        image: "images/build/abilities/Skill_231_healdemon.png",
+        image: "images/build/abilities/Skill_231_healdemon.ktx2",
         kind: Holy,
         level: 2,
         mana_cost: 9,
@@ -573,7 +573,7 @@
     ),
     (
         name: "Shadow Clone",
-        image: "images/build/abilities/ShadowClone.png",
+        image: "images/build/abilities/ShadowClone.ktx2",
         kind: Shadow,
         level: 2,
         mana_cost: 10,
@@ -584,7 +584,7 @@
     ),
     (
         name: "Purpledream",
-        image: "images/build/abilities/Skill_271_purpledream.png",
+        image: "images/build/abilities/Skill_271_purpledream.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -595,7 +595,7 @@
     ),
     (
         name: "Brist",
-        image: "images/build/abilities/skill_432_brist.png",
+        image: "images/build/abilities/skill_432_brist.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 9,
@@ -606,7 +606,7 @@
     ),
     (
         name: "Fleet Footed",
-        image: "images/build/abilities/skill_60.png",
+        image: "images/build/abilities/skill_60.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 10,
@@ -617,7 +617,7 @@
     ),
     (
         name: "Agile Shot",
-        image: "images/build/abilities/skill_51.png",
+        image: "images/build/abilities/skill_51.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -628,7 +628,7 @@
     ),
     (
         name: "Heal",
-        image: "images/build/abilities/skill_139_heal.png",
+        image: "images/build/abilities/skill_139_heal.ktx2",
         kind: Holy,
         level: 2,
         mana_cost: 9,
@@ -639,7 +639,7 @@
     ),
     (
         name: "Fast Step",
-        image: "images/build/abilities/Skill_391.png",
+        image: "images/build/abilities/Skill_391.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 10,
@@ -650,7 +650,7 @@
     ),
     (
         name: "Run",
-        image: "images/build/abilities/run.png",
+        image: "images/build/abilities/run.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -661,7 +661,7 @@
     ),
     (
         name: "Bull",
-        image: "images/build/abilities/bull.png",
+        image: "images/build/abilities/bull.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 9,
@@ -672,7 +672,7 @@
     ),
     (
         name: "Ice",
-        image: "images/build/abilities/skill_41_ice.png",
+        image: "images/build/abilities/skill_41_ice.ktx2",
         kind: Ice,
         level: 2,
         mana_cost: 10,
@@ -683,7 +683,7 @@
     ),
     (
         name: "Furious Slash",
-        image: "images/build/abilities/Skill_297.png",
+        image: "images/build/abilities/Skill_297.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -694,7 +694,7 @@
     ),
     (
         name: "Pet Attack",
-        image: "images/build/abilities/Skill_PetAttack.png",
+        image: "images/build/abilities/Skill_PetAttack.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 9,
@@ -705,7 +705,7 @@
     ),
     (
         name: "Storm",
-        image: "images/build/abilities/Storm.png",
+        image: "images/build/abilities/Storm.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 10,
@@ -716,7 +716,7 @@
     ),
     (
         name: "Sweeping Cleave Of The Desert",
-        image: "images/build/abilities/Skill_248.png",
+        image: "images/build/abilities/Skill_248.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -727,7 +727,7 @@
     ),
     (
         name: "Skinning",
-        image: "images/build/abilities/skill_19_Skinning.png",
+        image: "images/build/abilities/skill_19_Skinning.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 9,
@@ -738,7 +738,7 @@
     ),
     (
         name: "Decimate",
-        image: "images/build/abilities/Skill_212.png",
+        image: "images/build/abilities/Skill_212.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 10,
@@ -749,7 +749,7 @@
     ),
     (
         name: "Whirlwind",
-        image: "images/build/abilities/Skill_415.png",
+        image: "images/build/abilities/Skill_415.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -760,7 +760,7 @@
     ),
     (
         name: "Heal Of The Marsh",
-        image: "images/build/abilities/skill_134_heal.png",
+        image: "images/build/abilities/skill_134_heal.ktx2",
         kind: Holy,
         level: 2,
         mana_cost: 9,
@@ -771,7 +771,7 @@
     ),
     (
         name: "Axe",
-        image: "images/build/abilities/axe3.png",
+        image: "images/build/abilities/axe3.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 10,
@@ -782,7 +782,7 @@
     ),
     (
         name: "Concussive Blow",
-        image: "images/build/abilities/Skill_362.png",
+        image: "images/build/abilities/Skill_362.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 11,
@@ -793,7 +793,7 @@
     ),
     (
         name: "Summon Demon",
-        image: "images/build/abilities/summon_demon.png",
+        image: "images/build/abilities/summon_demon.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 9,
@@ -804,7 +804,7 @@
     ),
     (
         name: "Summon Skeleton Knight",
-        image: "images/build/abilities/summon_skeleton_knight.png",
+        image: "images/build/abilities/summon_skeleton_knight.ktx2",
         kind: Physical,
         level: 2,
         mana_cost: 10,
@@ -815,7 +815,7 @@
     ),
     (
         name: "Mortal Strike",
-        image: "images/build/abilities/Skill_280.png",
+        image: "images/build/abilities/Skill_280.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 13,
@@ -826,7 +826,7 @@
     ),
     (
         name: "Summon Ghoul",
-        image: "images/build/abilities/summon_ghoul.png",
+        image: "images/build/abilities/summon_ghoul.ktx2",
         kind: Shadow,
         level: 3,
         mana_cost: 11,
@@ -837,7 +837,7 @@
     ),
     (
         name: "Shield Block Of The Storm",
-        image: "images/build/abilities/skill_65.png",
+        image: "images/build/abilities/skill_65.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 12,
@@ -848,7 +848,7 @@
     ),
     (
         name: "Voodoo",
-        image: "images/build/abilities/voodoo.png",
+        image: "images/build/abilities/voodoo.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 13,
@@ -859,7 +859,7 @@
     ),
     (
         name: "Dodge",
-        image: "images/build/abilities/skill_52_dodge.png",
+        image: "images/build/abilities/skill_52_dodge.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 11,
@@ -870,7 +870,7 @@
     ),
     (
         name: "Shield Bash",
-        image: "images/build/abilities/skill_124.png",
+        image: "images/build/abilities/skill_124.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 12,
@@ -881,7 +881,7 @@
     ),
     (
         name: "Fortress Stance",
-        image: "images/build/abilities/skill_25.png",
+        image: "images/build/abilities/skill_25.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 13,
@@ -892,7 +892,7 @@
     ),
     (
         name: "Absorb Shield Of The Wind",
-        image: "images/build/abilities/Skill_206.png",
+        image: "images/build/abilities/Skill_206.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 11,
@@ -903,7 +903,7 @@
     ),
     (
         name: "Defiled Leaves",
-        image: "images/build/abilities/defiled_leaves.png",
+        image: "images/build/abilities/defiled_leaves.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 12,
@@ -914,7 +914,7 @@
     ),
     (
         name: "Ironclad Resolve Of The Flame",
-        image: "images/build/abilities/Skill_386.png",
+        image: "images/build/abilities/Skill_386.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 13,
@@ -925,7 +925,7 @@
     ),
     (
         name: "Phoenix",
-        image: "images/build/abilities/phoenix.png",
+        image: "images/build/abilities/phoenix.ktx2",
         kind: Fire,
         level: 3,
         mana_cost: 11,
@@ -936,7 +936,7 @@
     ),
     (
         name: "Fire Rain",
-        image: "images/build/abilities/fire_rain.png",
+        image: "images/build/abilities/fire_rain.ktx2",
         kind: Fire,
         level: 3,
         mana_cost: 12,
@@ -947,7 +947,7 @@
     ),
     (
         name: "Bear Paw",
-        image: "images/build/abilities/bear_paw.png",
+        image: "images/build/abilities/bear_paw.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 13,
@@ -958,7 +958,7 @@
     ),
     (
         name: "Holy Rain",
-        image: "images/build/abilities/Holy_rain.png",
+        image: "images/build/abilities/Holy_rain.ktx2",
         kind: Holy,
         level: 3,
         mana_cost: 11,
@@ -969,7 +969,7 @@
     ),
     (
         name: "Mind Control",
-        image: "images/build/abilities/mind_control.png",
+        image: "images/build/abilities/mind_control.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 12,
@@ -980,7 +980,7 @@
     ),
     (
         name: "Holypower",
-        image: "images/build/abilities/skill_172_holypower.png",
+        image: "images/build/abilities/skill_172_holypower.ktx2",
         kind: Holy,
         level: 3,
         mana_cost: 13,
@@ -991,7 +991,7 @@
     ),
     (
         name: "Kick",
-        image: "images/build/abilities/kick.png",
+        image: "images/build/abilities/kick.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 11,
@@ -1002,7 +1002,7 @@
     ),
     (
         name: "Shield Of The Tundra",
-        image: "images/build/abilities/shield4.png",
+        image: "images/build/abilities/shield4.ktx2",
         kind: Holy,
         level: 3,
         mana_cost: 12,
@@ -1013,7 +1013,7 @@
     ),
     (
         name: "Backstab",
-        image: "images/build/abilities/Skill_359.png",
+        image: "images/build/abilities/Skill_359.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 13,
@@ -1024,7 +1024,7 @@
     ),
     (
         name: "Bow Shot",
-        image: "images/build/abilities/bow_shot4.png",
+        image: "images/build/abilities/bow_shot4.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 11,
@@ -1035,7 +1035,7 @@
     ),
     (
         name: "Telekinesis",
-        image: "images/build/abilities/telekinesis.png",
+        image: "images/build/abilities/telekinesis.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 12,
@@ -1046,7 +1046,7 @@
     ),
     (
         name: "Spirit",
-        image: "images/build/abilities/spirit.png",
+        image: "images/build/abilities/spirit.ktx2",
         kind: Shadow,
         level: 3,
         mana_cost: 13,
@@ -1057,7 +1057,7 @@
     ),
     (
         name: "Dead Shadow",
-        image: "images/build/abilities/dead_shadow.png",
+        image: "images/build/abilities/dead_shadow.ktx2",
         kind: Shadow,
         level: 3,
         mana_cost: 11,
@@ -1068,7 +1068,7 @@
     ),
     (
         name: "Shadow Rain",
-        image: "images/build/abilities/Shadow_rain.png",
+        image: "images/build/abilities/Shadow_rain.ktx2",
         kind: Shadow,
         level: 3,
         mana_cost: 12,
@@ -1079,7 +1079,7 @@
     ),
     (
         name: "Shadowing",
-        image: "images/build/abilities/Shadowing.png",
+        image: "images/build/abilities/Shadowing.ktx2",
         kind: Shadow,
         level: 3,
         mana_cost: 13,
@@ -1090,7 +1090,7 @@
     ),
     (
         name: "Noxious Wound",
-        image: "images/build/abilities/skill_42.png",
+        image: "images/build/abilities/skill_42.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 11,
@@ -1101,7 +1101,7 @@
     ),
     (
         name: "Ambush",
-        image: "images/build/abilities/Skill_494.png",
+        image: "images/build/abilities/Skill_494.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 12,
@@ -1112,7 +1112,7 @@
     ),
     (
         name: "Holywater",
-        image: "images/build/abilities/holywater.png",
+        image: "images/build/abilities/holywater.ktx2",
         kind: Holy,
         level: 3,
         mana_cost: 13,
@@ -1123,7 +1123,7 @@
     ),
     (
         name: "Summon Spiders",
-        image: "images/build/abilities/summon_spiders.png",
+        image: "images/build/abilities/summon_spiders.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 11,
@@ -1134,7 +1134,7 @@
     ),
     (
         name: "Atom",
-        image: "images/build/abilities/atom.png",
+        image: "images/build/abilities/atom.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 12,
@@ -1145,7 +1145,7 @@
     ),
     (
         name: "Fireflower",
-        image: "images/build/abilities/skill_184_fireflower.png",
+        image: "images/build/abilities/skill_184_fireflower.ktx2",
         kind: Fire,
         level: 3,
         mana_cost: 13,
@@ -1156,7 +1156,7 @@
     ),
     (
         name: "Summon Imp Army",
-        image: "images/build/abilities/summon_imp_army.png",
+        image: "images/build/abilities/summon_imp_army.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 11,
@@ -1167,7 +1167,7 @@
     ),
     (
         name: "Nature Push",
-        image: "images/build/abilities/NaturePush.png",
+        image: "images/build/abilities/NaturePush.ktx2",
         kind: Nature,
         level: 3,
         mana_cost: 12,
@@ -1178,7 +1178,7 @@
     ),
     (
         name: "Quick Dash Of The Sea",
-        image: "images/build/abilities/Skill_469.png",
+        image: "images/build/abilities/Skill_469.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 13,
@@ -1189,7 +1189,7 @@
     ),
     (
         name: "Tower",
-        image: "images/build/abilities/tower.png",
+        image: "images/build/abilities/tower.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 11,
@@ -1200,7 +1200,7 @@
     ),
     (
         name: "Wind Runner",
-        image: "images/build/abilities/Skill_284.png",
+        image: "images/build/abilities/Skill_284.ktx2",
         kind: Physical,
         level: 3,
         mana_cost: 12,
@@ -1211,7 +1211,7 @@
     ),
     (
         name: "Light Blow",
-        image: "images/build/abilities/Light_blow.png",
+        image: "images/build/abilities/Light_blow.ktx2",
         kind: Holy,
         level: 3,
         mana_cost: 13,
@@ -1222,7 +1222,7 @@
     ),
     (
         name: "Skeletons",
-        image: "images/build/abilities/skill_92_skeletons.png",
+        image: "images/build/abilities/skill_92_skeletons.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1233,7 +1233,7 @@
     ),
     (
         name: "Devouver",
-        image: "images/build/abilities/skill_94_devouver.png",
+        image: "images/build/abilities/skill_94_devouver.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 14,
@@ -1244,7 +1244,7 @@
     ),
     (
         name: "Skirmish Dodge",
-        image: "images/build/abilities/Skill_250.png",
+        image: "images/build/abilities/Skill_250.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1255,7 +1255,7 @@
     ),
     (
         name: "Wall",
-        image: "images/build/abilities/wall2.png",
+        image: "images/build/abilities/wall2.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1266,7 +1266,7 @@
     ),
     (
         name: "Fireshock",
-        image: "images/build/abilities/skill_175_fireshock.png",
+        image: "images/build/abilities/skill_175_fireshock.ktx2",
         kind: Fire,
         level: 4,
         mana_cost: 14,
@@ -1277,7 +1277,7 @@
     ),
     (
         name: "Agile Shot Of The Tundra",
-        image: "images/build/abilities/Skill_298.png",
+        image: "images/build/abilities/Skill_298.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1288,7 +1288,7 @@
     ),
     (
         name: "Quick Reflexes",
-        image: "images/build/abilities/skill_90.png",
+        image: "images/build/abilities/skill_90.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1299,7 +1299,7 @@
     ),
     (
         name: "Axe Of The Abyss",
-        image: "images/build/abilities/axe1.png",
+        image: "images/build/abilities/axe1.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 14,
@@ -1310,7 +1310,7 @@
     ),
     (
         name: "Sidestep",
-        image: "images/build/abilities/skill_132.png",
+        image: "images/build/abilities/skill_132.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1321,7 +1321,7 @@
     ),
     (
         name: "Heavy Strike",
-        image: "images/build/abilities/skill_125.png",
+        image: "images/build/abilities/skill_125.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1332,7 +1332,7 @@
     ),
     (
         name: "Blade Rush Of The Forest",
-        image: "images/build/abilities/Skill_310.png",
+        image: "images/build/abilities/Skill_310.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 14,
@@ -1343,7 +1343,7 @@
     ),
     (
         name: "Furious Slash Of The Hearth",
-        image: "images/build/abilities/Skill_424.png",
+        image: "images/build/abilities/Skill_424.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1354,7 +1354,7 @@
     ),
     (
         name: "Earthspirit",
-        image: "images/build/abilities/Skill_223_earthspirit.png",
+        image: "images/build/abilities/Skill_223_earthspirit.ktx2",
         kind: Shadow,
         level: 4,
         mana_cost: 13,
@@ -1365,7 +1365,7 @@
     ),
     (
         name: "Crushing Blow Of The Dawn",
-        image: "images/build/abilities/skill_55.png",
+        image: "images/build/abilities/skill_55.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 14,
@@ -1376,7 +1376,7 @@
     ),
     (
         name: "Sweeping Cleave Of The Night",
-        image: "images/build/abilities/skill_379.png",
+        image: "images/build/abilities/skill_379.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1387,7 +1387,7 @@
     ),
     (
         name: "Unholydodge",
-        image: "images/build/abilities/Skill_282_unholydodge.png",
+        image: "images/build/abilities/Skill_282_unholydodge.ktx2",
         kind: Holy,
         level: 4,
         mana_cost: 13,
@@ -1398,7 +1398,7 @@
     ),
     (
         name: "Archer Frost",
-        image: "images/build/abilities/skill_326_archerFrost.png",
+        image: "images/build/abilities/skill_326_archerFrost.ktx2",
         kind: Ice,
         level: 4,
         mana_cost: 14,
@@ -1409,7 +1409,7 @@
     ),
     (
         name: "Whirlwind Of The Moon",
-        image: "images/build/abilities/Skill_456.png",
+        image: "images/build/abilities/Skill_456.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1420,7 +1420,7 @@
     ),
     (
         name: "Shield Breaker",
-        image: "images/build/abilities/Skill_259.png",
+        image: "images/build/abilities/Skill_259.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1431,7 +1431,7 @@
     ),
     (
         name: "Heroic Strike",
-        image: "images/build/abilities/skill_10.png",
+        image: "images/build/abilities/skill_10.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 14,
@@ -1442,7 +1442,7 @@
     ),
     (
         name: "Wave Of Evil",
-        image: "images/build/abilities/Wave_of_evil3.png",
+        image: "images/build/abilities/Wave_of_evil3.ktx2",
         kind: Shadow,
         level: 4,
         mana_cost: 15,
@@ -1453,7 +1453,7 @@
     ),
     (
         name: "Rend Flesh Of The Sea",
-        image: "images/build/abilities/skill_88.png",
+        image: "images/build/abilities/skill_88.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1464,7 +1464,7 @@
     ),
     (
         name: "Death Blow",
-        image: "images/build/abilities/Death_blow2.png",
+        image: "images/build/abilities/Death_blow2.ktx2",
         kind: Shadow,
         level: 4,
         mana_cost: 14,
@@ -1475,7 +1475,7 @@
     ),
     (
         name: "Thousand Hits",
-        image: "images/build/abilities/thousand_hits.png",
+        image: "images/build/abilities/thousand_hits.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1486,7 +1486,7 @@
     ),
     (
         name: "Iron Wall",
-        image: "images/build/abilities/skill_110.png",
+        image: "images/build/abilities/skill_110.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1497,7 +1497,7 @@
     ),
     (
         name: "Witch",
-        image: "images/build/abilities/Witch.png",
+        image: "images/build/abilities/Witch.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 14,
@@ -1508,7 +1508,7 @@
     ),
     (
         name: "Magic Bolt Of The Peak",
-        image: "images/build/abilities/magic_bolt2.png",
+        image: "images/build/abilities/magic_bolt2.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1519,7 +1519,7 @@
     ),
     (
         name: "Deity",
-        image: "images/build/abilities/Skill_274_deity.png",
+        image: "images/build/abilities/Skill_274_deity.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1530,7 +1530,7 @@
     ),
     (
         name: "Wand Shot",
-        image: "images/build/abilities/wand_shot2.png",
+        image: "images/build/abilities/wand_shot2.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 14,
@@ -1541,7 +1541,7 @@
     ),
     (
         name: "Sword Attack",
-        image: "images/build/abilities/Skill_SwordAttack.png",
+        image: "images/build/abilities/Skill_SwordAttack.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1552,7 +1552,7 @@
     ),
     (
         name: "Hit Of The Tundra",
-        image: "images/build/abilities/skill_1_hit.png",
+        image: "images/build/abilities/skill_1_hit.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1563,7 +1563,7 @@
     ),
     (
         name: "Sturdy Wall Of The Mist",
-        image: "images/build/abilities/skill_367.png",
+        image: "images/build/abilities/skill_367.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 14,
@@ -1574,7 +1574,7 @@
     ),
     (
         name: "Ironclad Resolve Of The Abyss",
-        image: "images/build/abilities/skill_153.png",
+        image: "images/build/abilities/skill_153.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1585,7 +1585,7 @@
     ),
     (
         name: "Stone Aegis",
-        image: "images/build/abilities/skill_68.png",
+        image: "images/build/abilities/skill_68.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 13,
@@ -1596,7 +1596,7 @@
     ),
     (
         name: "Defenders Oath Of The Vale",
-        image: "images/build/abilities/skill_64.png",
+        image: "images/build/abilities/skill_64.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 14,
@@ -1607,7 +1607,7 @@
     ),
     (
         name: "Get",
-        image: "images/build/abilities/skill_31_get.png",
+        image: "images/build/abilities/skill_31_get.ktx2",
         kind: Physical,
         level: 4,
         mana_cost: 15,
@@ -1618,7 +1618,7 @@
     ),
     (
         name: "Ice Block",
-        image: "images/build/abilities/Ice_block.png",
+        image: "images/build/abilities/Ice_block.ktx2",
         kind: Ice,
         level: 5,
         mana_cost: 15,
@@ -1629,7 +1629,7 @@
     ),
     (
         name: "Catapult Shot",
-        image: "images/build/abilities/catapult_shot.png",
+        image: "images/build/abilities/catapult_shot.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1640,7 +1640,7 @@
     ),
     (
         name: "Vanguard Aegis",
-        image: "images/build/abilities/Skill_375.png",
+        image: "images/build/abilities/Skill_375.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1651,7 +1651,7 @@
     ),
     (
         name: "Viper Venom",
-        image: "images/build/abilities/Skill_411.png",
+        image: "images/build/abilities/Skill_411.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 15,
@@ -1662,7 +1662,7 @@
     ),
     (
         name: "Shield Of The Storm",
-        image: "images/build/abilities/shield2.png",
+        image: "images/build/abilities/shield2.ktx2",
         kind: Holy,
         level: 5,
         mana_cost: 16,
@@ -1673,7 +1673,7 @@
     ),
     (
         name: "Fish Speed",
-        image: "images/build/abilities/fish_speed.png",
+        image: "images/build/abilities/fish_speed.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1684,7 +1684,7 @@
     ),
     (
         name: "Shadowstrike",
-        image: "images/build/abilities/skill_33.png",
+        image: "images/build/abilities/skill_33.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 15,
@@ -1695,7 +1695,7 @@
     ),
     (
         name: "Lethal Poison",
-        image: "images/build/abilities/Skill_246.png",
+        image: "images/build/abilities/Skill_246.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1706,7 +1706,7 @@
     ),
     (
         name: "Silent Cut Of The Void",
-        image: "images/build/abilities/skill_131.png",
+        image: "images/build/abilities/skill_131.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1717,7 +1717,7 @@
     ),
     (
         name: "Eviscerate",
-        image: "images/build/abilities/Skill_443.png",
+        image: "images/build/abilities/Skill_443.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 15,
@@ -1728,7 +1728,7 @@
     ),
     (
         name: "Garrote",
-        image: "images/build/abilities/skill_141.png",
+        image: "images/build/abilities/skill_141.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1739,7 +1739,7 @@
     ),
     (
         name: "Deadly Toxins",
-        image: "images/build/abilities/Skill_224.png",
+        image: "images/build/abilities/Skill_224.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1750,7 +1750,7 @@
     ),
     (
         name: "Noxious Wound Of The Frost",
-        image: "images/build/abilities/skill_165.png",
+        image: "images/build/abilities/skill_165.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 15,
@@ -1761,7 +1761,7 @@
     ),
     (
         name: "Spear",
-        image: "images/build/abilities/spear.png",
+        image: "images/build/abilities/spear.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1772,7 +1772,7 @@
     ),
     (
         name: "Fatal Strike Of The Grove",
-        image: "images/build/abilities/skill_156.png",
+        image: "images/build/abilities/skill_156.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1783,7 +1783,7 @@
     ),
     (
         name: "Venomous Bite Of The Peak",
-        image: "images/build/abilities/Skill_216.png",
+        image: "images/build/abilities/Skill_216.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 15,
@@ -1794,7 +1794,7 @@
     ),
     (
         name: "Jump",
-        image: "images/build/abilities/skill_8_jump.png",
+        image: "images/build/abilities/skill_8_jump.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1805,7 +1805,7 @@
     ),
     (
         name: "Timechanging",
-        image: "images/build/abilities/timechanging.png",
+        image: "images/build/abilities/timechanging.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1816,7 +1816,7 @@
     ),
     (
         name: "Swift Step Of The Desert",
-        image: "images/build/abilities/Skill_257.png",
+        image: "images/build/abilities/Skill_257.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 15,
@@ -1827,7 +1827,7 @@
     ),
     (
         name: "Permeate",
-        image: "images/build/abilities/Skill_277_Permeate.png",
+        image: "images/build/abilities/Skill_277_Permeate.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1838,7 +1838,7 @@
     ),
     (
         name: "Vortex",
-        image: "images/build/abilities/vortex2.png",
+        image: "images/build/abilities/vortex2.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1849,7 +1849,7 @@
     ),
     (
         name: "Shadow Bolt",
-        image: "images/build/abilities/Shadow_bolt2.png",
+        image: "images/build/abilities/Shadow_bolt2.ktx2",
         kind: Shadow,
         level: 5,
         mana_cost: 15,
@@ -1860,7 +1860,7 @@
     ),
     (
         name: "Wind Runner Of The Marsh",
-        image: "images/build/abilities/Skill_478.png",
+        image: "images/build/abilities/Skill_478.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1871,7 +1871,7 @@
     ),
     (
         name: "See",
-        image: "images/build/abilities/Skill_312_see.png",
+        image: "images/build/abilities/Skill_312_see.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1882,7 +1882,7 @@
     ),
     (
         name: "Double Jump",
-        image: "images/build/abilities/Skill_232.png",
+        image: "images/build/abilities/Skill_232.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 15,
@@ -1893,7 +1893,7 @@
     ),
     (
         name: "Martial Arts",
-        image: "images/build/abilities/martial_arts.png",
+        image: "images/build/abilities/martial_arts.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1904,7 +1904,7 @@
     ),
     (
         name: "Fireball",
-        image: "images/build/abilities/skill_187_fireball.png",
+        image: "images/build/abilities/skill_187_fireball.ktx2",
         kind: Fire,
         level: 5,
         mana_cost: 17,
@@ -1915,7 +1915,7 @@
     ),
     (
         name: "Critical Strike",
-        image: "images/build/abilities/CriticalStrike_3.png",
+        image: "images/build/abilities/CriticalStrike_3.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 15,
@@ -1926,7 +1926,7 @@
     ),
     (
         name: "Fleet Footed Of The Night",
-        image: "images/build/abilities/skill_130.png",
+        image: "images/build/abilities/skill_130.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1937,7 +1937,7 @@
     ),
     (
         name: "Axe Of The Storm",
-        image: "images/build/abilities/axe2.png",
+        image: "images/build/abilities/axe2.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1948,7 +1948,7 @@
     ),
     (
         name: "Quick Reflexes Of The Sun",
-        image: "images/build/abilities/Skill_268.png",
+        image: "images/build/abilities/Skill_268.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 15,
@@ -1959,7 +1959,7 @@
     ),
     (
         name: "Summon Raven",
-        image: "images/build/abilities/summon_raven.png",
+        image: "images/build/abilities/summon_raven.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 16,
@@ -1970,7 +1970,7 @@
     ),
     (
         name: "Hammerthrow",
-        image: "images/build/abilities/Skill_441_hammerthrow.png",
+        image: "images/build/abilities/Skill_441_hammerthrow.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -1981,7 +1981,7 @@
     ),
     (
         name: "Megashield",
-        image: "images/build/abilities/Skill_458_megashield.png",
+        image: "images/build/abilities/Skill_458_megashield.ktx2",
         kind: Fire,
         level: 5,
         mana_cost: 15,
@@ -1992,7 +1992,7 @@
     ),
     (
         name: "Shadow",
-        image: "images/build/abilities/Skill_483_shadow.png",
+        image: "images/build/abilities/Skill_483_shadow.ktx2",
         kind: Shadow,
         level: 5,
         mana_cost: 16,
@@ -2003,7 +2003,7 @@
     ),
     (
         name: "Furious Slash Of The Sea",
-        image: "images/build/abilities/Skill_426.png",
+        image: "images/build/abilities/Skill_426.ktx2",
         kind: Physical,
         level: 5,
         mana_cost: 17,
@@ -2014,7 +2014,7 @@
     ),
     (
         name: "Demonic",
-        image: "images/build/abilities/skill_197_demonic.png",
+        image: "images/build/abilities/skill_197_demonic.ktx2",
         kind: Shadow,
         level: 5,
         mana_cost: 15,
@@ -2025,7 +2025,7 @@
     ),
     (
         name: "Critical Strike Of The Frost",
-        image: "images/build/abilities/CriticalStrike_2.png",
+        image: "images/build/abilities/CriticalStrike_2.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2036,7 +2036,7 @@
     ),
     (
         name: "Debuf",
-        image: "images/build/abilities/Skill_498_debuf.png",
+        image: "images/build/abilities/Skill_498_debuf.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2047,7 +2047,7 @@
     ),
     (
         name: "Horns",
-        image: "images/build/abilities/horns.png",
+        image: "images/build/abilities/horns.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2058,7 +2058,7 @@
     ),
     (
         name: "Decimate Of The Peak",
-        image: "images/build/abilities/Skill_345.png",
+        image: "images/build/abilities/Skill_345.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2069,7 +2069,7 @@
     ),
     (
         name: "Starfall",
-        image: "images/build/abilities/starfall.png",
+        image: "images/build/abilities/starfall.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2080,7 +2080,7 @@
     ),
     (
         name: "Shield Breaker Of The Wild",
-        image: "images/build/abilities/Skill_296.png",
+        image: "images/build/abilities/Skill_296.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2091,7 +2091,7 @@
     ),
     (
         name: "Swords Of Light",
-        image: "images/build/abilities/swords_of_light.png",
+        image: "images/build/abilities/swords_of_light.ktx2",
         kind: Holy,
         level: 6,
         mana_cost: 18,
@@ -2102,7 +2102,7 @@
     ),
     (
         name: "Concussive Blow Of The Tundra",
-        image: "images/build/abilities/Skill_407.png",
+        image: "images/build/abilities/Skill_407.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2113,7 +2113,7 @@
     ),
     (
         name: "Rend Flesh Of The Mist",
-        image: "images/build/abilities/skill_112.png",
+        image: "images/build/abilities/skill_112.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2124,7 +2124,7 @@
     ),
     (
         name: "Monsterclaw",
-        image: "images/build/abilities/skill_144Monsterclaw.png",
+        image: "images/build/abilities/skill_144Monsterclaw.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2135,7 +2135,7 @@
     ),
     (
         name: "Summon Brutal Army",
-        image: "images/build/abilities/summon_brutal_army.png",
+        image: "images/build/abilities/summon_brutal_army.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2146,7 +2146,7 @@
     ),
     (
         name: "Shadowblast",
-        image: "images/build/abilities/skill_111_shadowblast.png",
+        image: "images/build/abilities/skill_111_shadowblast.ktx2",
         kind: Fire,
         level: 6,
         mana_cost: 17,
@@ -2157,7 +2157,7 @@
     ),
     (
         name: "Balistic Shoot Of The Forest",
-        image: "images/build/abilities/Skill_BalisticShoot2.png",
+        image: "images/build/abilities/Skill_BalisticShoot2.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2168,7 +2168,7 @@
     ),
     (
         name: "Unbreakable Guard",
-        image: "images/build/abilities/Skill_315.png",
+        image: "images/build/abilities/Skill_315.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2179,7 +2179,7 @@
     ),
     (
         name: "Disarmament",
-        image: "images/build/abilities/disarmament.png",
+        image: "images/build/abilities/disarmament.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2190,7 +2190,7 @@
     ),
     (
         name: "Unholy Capture",
-        image: "images/build/abilities/UnholyCapture.png",
+        image: "images/build/abilities/UnholyCapture.ktx2",
         kind: Holy,
         level: 6,
         mana_cost: 18,
@@ -2201,7 +2201,7 @@
     ),
     (
         name: "Fortress Stance Of The Night",
-        image: "images/build/abilities/skill_149.png",
+        image: "images/build/abilities/skill_149.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2212,7 +2212,7 @@
     ),
     (
         name: "Absorb Shield Of The Storm",
-        image: "images/build/abilities/Skill_289.png",
+        image: "images/build/abilities/Skill_289.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2223,7 +2223,7 @@
     ),
     (
         name: "Sturdy Wall Of The Sun",
-        image: "images/build/abilities/Skill_398.png",
+        image: "images/build/abilities/Skill_398.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2234,7 +2234,7 @@
     ),
     (
         name: "Dagger Attack",
-        image: "images/build/abilities/Skill_DaggerAttack2.png",
+        image: "images/build/abilities/Skill_DaggerAttack2.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2245,7 +2245,7 @@
     ),
     (
         name: "Stone Aegis Of The Stars",
-        image: "images/build/abilities/skill_71.png",
+        image: "images/build/abilities/skill_71.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2256,7 +2256,7 @@
     ),
     (
         name: "Defenders Oath Of The Void",
-        image: "images/build/abilities/Skill_487.png",
+        image: "images/build/abilities/Skill_487.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2267,7 +2267,7 @@
     ),
     (
         name: "Unyielding Will",
-        image: "images/build/abilities/skill_158.png",
+        image: "images/build/abilities/skill_158.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2278,7 +2278,7 @@
     ),
     (
         name: "Sun Armor",
-        image: "images/build/abilities/SunArmor.png",
+        image: "images/build/abilities/SunArmor.ktx2",
         kind: Fire,
         level: 6,
         mana_cost: 17,
@@ -2289,7 +2289,7 @@
     ),
     (
         name: "Last Stand Of The Flame",
-        image: "images/build/abilities/Skill_219.png",
+        image: "images/build/abilities/Skill_219.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2300,7 +2300,7 @@
     ),
     (
         name: "Vanguard Aegis Of The Frost",
-        image: "images/build/abilities/Skill_251.png",
+        image: "images/build/abilities/Skill_251.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2311,7 +2311,7 @@
     ),
     (
         name: "Viper Venom Of The Shadow",
-        image: "images/build/abilities/skill_140.png",
+        image: "images/build/abilities/skill_140.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2322,7 +2322,7 @@
     ),
     (
         name: "Root",
-        image: "images/build/abilities/skill_85_root.png",
+        image: "images/build/abilities/skill_85_root.ktx2",
         kind: Nature,
         level: 6,
         mana_cost: 18,
@@ -2333,7 +2333,7 @@
     ),
     (
         name: "Backstab Of The Peak",
-        image: "images/build/abilities/Skill_342.png",
+        image: "images/build/abilities/Skill_342.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2344,7 +2344,7 @@
     ),
     (
         name: "Spawn",
-        image: "images/build/abilities/spawn.png",
+        image: "images/build/abilities/spawn.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2355,7 +2355,7 @@
     ),
     (
         name: "Rage",
-        image: "images/build/abilities/Skill_462_rage.png",
+        image: "images/build/abilities/Skill_462_rage.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2366,7 +2366,7 @@
     ),
     (
         name: "Summon Death",
-        image: "images/build/abilities/summon_death.png",
+        image: "images/build/abilities/summon_death.ktx2",
         kind: Shadow,
         level: 6,
         mana_cost: 19,
@@ -2377,7 +2377,7 @@
     ),
     (
         name: "Arcaneshot",
-        image: "images/build/abilities/Skill_392_arcaneshot.png",
+        image: "images/build/abilities/Skill_392_arcaneshot.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2388,7 +2388,7 @@
     ),
     (
         name: "Hook",
-        image: "images/build/abilities/Skill_439_hook.png",
+        image: "images/build/abilities/Skill_439_hook.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2399,7 +2399,7 @@
     ),
     (
         name: "Deadly Toxins Of The Abyss",
-        image: "images/build/abilities/Skill_301.png",
+        image: "images/build/abilities/Skill_301.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 19,
@@ -2410,7 +2410,7 @@
     ),
     (
         name: "Form",
-        image: "images/build/abilities/skill_137_form.png",
+        image: "images/build/abilities/skill_137_form.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 17,
@@ -2421,7 +2421,7 @@
     ),
     (
         name: "Ambush Of The Vale",
-        image: "images/build/abilities/skill_13.png",
+        image: "images/build/abilities/skill_13.ktx2",
         kind: Physical,
         level: 6,
         mana_cost: 18,
@@ -2432,7 +2432,7 @@
     ),
     (
         name: "Fatal Strike Of The Forest",
-        image: "images/build/abilities/Skill_263.png",
+        image: "images/build/abilities/Skill_263.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 21,
@@ -2443,7 +2443,7 @@
     ),
     (
         name: "Army",
-        image: "images/build/abilities/Skill_294_army.png",
+        image: "images/build/abilities/Skill_294_army.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 19,
@@ -2454,7 +2454,7 @@
     ),
     (
         name: "Summon Shadow Wolf",
-        image: "images/build/abilities/summon_shadow_wolf.png",
+        image: "images/build/abilities/summon_shadow_wolf.ktx2",
         kind: Shadow,
         level: 7,
         mana_cost: 20,
@@ -2465,7 +2465,7 @@
     ),
     (
         name: "Wand Shot Of The Dawn",
-        image: "images/build/abilities/wand_shot4.png",
+        image: "images/build/abilities/wand_shot4.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 21,
@@ -2476,7 +2476,7 @@
     ),
     (
         name: "Swift Step Of The Night",
-        image: "images/build/abilities/skill_170.png",
+        image: "images/build/abilities/skill_170.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 19,
@@ -2487,7 +2487,7 @@
     ),
     (
         name: "Critical Strike Of The Storm",
-        image: "images/build/abilities/CriticalStrike_1.png",
+        image: "images/build/abilities/CriticalStrike_1.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 20,
@@ -2498,7 +2498,7 @@
     ),
     (
         name: "Rupture",
-        image: "images/build/abilities/skill_22_rupture.png",
+        image: "images/build/abilities/skill_22_rupture.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 21,
@@ -2509,7 +2509,7 @@
     ),
     (
         name: "Axe Of The Moon",
-        image: "images/build/abilities/axe4.png",
+        image: "images/build/abilities/axe4.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 19,
@@ -2520,7 +2520,7 @@
     ),
     (
         name: "Wind Runner Of The Stars",
-        image: "images/build/abilities/Skill_349.png",
+        image: "images/build/abilities/Skill_349.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 20,
@@ -2531,7 +2531,7 @@
     ),
     (
         name: "Waveform",
-        image: "images/build/abilities/skill_106_waveform.png",
+        image: "images/build/abilities/skill_106_waveform.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 21,
@@ -2542,7 +2542,7 @@
     ),
     (
         name: "Deahcry",
-        image: "images/build/abilities/skill_45_deahcry.png",
+        image: "images/build/abilities/skill_45_deahcry.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 19,
@@ -2553,7 +2553,7 @@
     ),
     (
         name: "Claw Strike",
-        image: "images/build/abilities/claw_strike.png",
+        image: "images/build/abilities/claw_strike.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 20,
@@ -2564,7 +2564,7 @@
     ),
     (
         name: "Dragon Firebreath",
-        image: "images/build/abilities/dragon_firebreath.png",
+        image: "images/build/abilities/dragon_firebreath.ktx2",
         kind: Fire,
         level: 7,
         mana_cost: 21,
@@ -2575,7 +2575,7 @@
     ),
     (
         name: "Acrobatic Leap",
-        image: "images/build/abilities/Skill_490.png",
+        image: "images/build/abilities/Skill_490.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 19,
@@ -2586,7 +2586,7 @@
     ),
     (
         name: "Naturalarmor",
-        image: "images/build/abilities/skill_87_naturalarmor.png",
+        image: "images/build/abilities/skill_87_naturalarmor.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 20,
@@ -2597,7 +2597,7 @@
     ),
     (
         name: "Summon Devil",
-        image: "images/build/abilities/summon_devil.png",
+        image: "images/build/abilities/summon_devil.ktx2",
         kind: Shadow,
         level: 7,
         mana_cost: 21,
@@ -2608,7 +2608,7 @@
     ),
     (
         name: "Sword Power",
-        image: "images/build/abilities/skill_40_SwordPower.png",
+        image: "images/build/abilities/skill_40_SwordPower.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 19,
@@ -2619,7 +2619,7 @@
     ),
     (
         name: "Wings",
-        image: "images/build/abilities/wings.png",
+        image: "images/build/abilities/wings.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 20,
@@ -2630,7 +2630,7 @@
     ),
     (
         name: "Demonicstun",
-        image: "images/build/abilities/Skill_445_demonicstun.png",
+        image: "images/build/abilities/Skill_445_demonicstun.ktx2",
         kind: Shadow,
         level: 7,
         mana_cost: 21,
@@ -2641,7 +2641,7 @@
     ),
     (
         name: "Big Frost Arrow",
-        image: "images/build/abilities/big_frost_arrow.png",
+        image: "images/build/abilities/big_frost_arrow.ktx2",
         kind: Ice,
         level: 7,
         mana_cost: 19,
@@ -2652,7 +2652,7 @@
     ),
     (
         name: "Transformation",
-        image: "images/build/abilities/skill_157_transformation.png",
+        image: "images/build/abilities/skill_157_transformation.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 20,
@@ -2663,7 +2663,7 @@
     ),
     (
         name: "Stuned",
-        image: "images/build/abilities/skill_3_stuned.png",
+        image: "images/build/abilities/skill_3_stuned.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 21,
@@ -2674,7 +2674,7 @@
     ),
     (
         name: "Firesword",
-        image: "images/build/abilities/skill_186_firesword.png",
+        image: "images/build/abilities/skill_186_firesword.ktx2",
         kind: Fire,
         level: 7,
         mana_cost: 19,
@@ -2685,7 +2685,7 @@
     ),
     (
         name: "Blackwater",
-        image: "images/build/abilities/blackwater.png",
+        image: "images/build/abilities/blackwater.ktx2",
         kind: Shadow,
         level: 7,
         mana_cost: 20,
@@ -2696,7 +2696,7 @@
     ),
     (
         name: "Demonicarmor",
-        image: "images/build/abilities/skill_36_demonicarmor.png",
+        image: "images/build/abilities/skill_36_demonicarmor.ktx2",
         kind: Shadow,
         level: 7,
         mana_cost: 21,
@@ -2707,7 +2707,7 @@
     ),
     (
         name: "Break Chain",
-        image: "images/build/abilities/skill_17_breakChain.png",
+        image: "images/build/abilities/skill_17_breakChain.ktx2",
         kind: Shadow,
         level: 7,
         mana_cost: 19,
@@ -2718,7 +2718,7 @@
     ),
     (
         name: "Decimate Of The Hearth",
-        image: "images/build/abilities/Skill_303.png",
+        image: "images/build/abilities/Skill_303.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 20,
@@ -2729,7 +2729,7 @@
     ),
     (
         name: "Shadow Bolt Of The Skies",
-        image: "images/build/abilities/Shadow_bolt.png",
+        image: "images/build/abilities/Shadow_bolt.ktx2",
         kind: Shadow,
         level: 7,
         mana_cost: 21,
@@ -2740,7 +2740,7 @@
     ),
     (
         name: "Shadow Of The Dawn",
-        image: "images/build/abilities/skill_93_shadow.png",
+        image: "images/build/abilities/skill_93_shadow.ktx2",
         kind: Shadow,
         level: 7,
         mana_cost: 19,
@@ -2751,7 +2751,7 @@
     ),
     (
         name: "Y Engeneering",
-        image: "images/build/abilities/Y_engeneering.png",
+        image: "images/build/abilities/Y_engeneering.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 20,
@@ -2762,7 +2762,7 @@
     ),
     (
         name: "Suri",
-        image: "images/build/abilities/Skill_222_suri.png",
+        image: "images/build/abilities/Skill_222_suri.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 21,
@@ -2773,7 +2773,7 @@
     ),
     (
         name: "Defence",
-        image: "images/build/abilities/Skill_Defence.png",
+        image: "images/build/abilities/Skill_Defence.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 19,
@@ -2784,7 +2784,7 @@
     ),
     (
         name: "Hex",
-        image: "images/build/abilities/skill_437_hex.png",
+        image: "images/build/abilities/skill_437_hex.ktx2",
         kind: Shadow,
         level: 7,
         mana_cost: 20,
@@ -2795,7 +2795,7 @@
     ),
     (
         name: "Mortal Strike Of The Stars",
-        image: "images/build/abilities/skill_16.png",
+        image: "images/build/abilities/skill_16.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 21,
@@ -2806,7 +2806,7 @@
     ),
     (
         name: "Iron Wall Of The Void",
-        image: "images/build/abilities/skill_57.png",
+        image: "images/build/abilities/skill_57.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 19,
@@ -2817,7 +2817,7 @@
     ),
     (
         name: "Shield Block Of The Wind",
-        image: "images/build/abilities/skill_146.png",
+        image: "images/build/abilities/skill_146.ktx2",
         kind: Physical,
         level: 7,
         mana_cost: 20,
@@ -2828,7 +2828,7 @@
     ),
     (
         name: "Big Fire Arrow",
-        image: "images/build/abilities/Big_fire_arrow.png",
+        image: "images/build/abilities/Big_fire_arrow.ktx2",
         kind: Fire,
         level: 7,
         mana_cost: 21,
@@ -2839,7 +2839,7 @@
     ),
     (
         name: "Stalwart Defense",
-        image: "images/build/abilities/Skill_369.png",
+        image: "images/build/abilities/Skill_369.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -2850,7 +2850,7 @@
     ),
     (
         name: "Y Music",
-        image: "images/build/abilities/Y_music.png",
+        image: "images/build/abilities/Y_music.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 22,
@@ -2861,7 +2861,7 @@
     ),
     (
         name: "Fortress Stance Of The Shadow",
-        image: "images/build/abilities/skill_14.png",
+        image: "images/build/abilities/skill_14.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -2872,7 +2872,7 @@
     ),
     (
         name: "Muscles",
-        image: "images/build/abilities/skill_163_muscles.png",
+        image: "images/build/abilities/skill_163_muscles.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -2883,7 +2883,7 @@
     ),
     (
         name: "Tentacles",
-        image: "images/build/abilities/tentacles.png",
+        image: "images/build/abilities/tentacles.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 22,
@@ -2894,7 +2894,7 @@
     ),
     (
         name: "Ironclad Resolve Of The Deep",
-        image: "images/build/abilities/skill_189.png",
+        image: "images/build/abilities/skill_189.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -2905,7 +2905,7 @@
     ),
     (
         name: "Fishbite",
-        image: "images/build/abilities/fishbite.png",
+        image: "images/build/abilities/fishbite.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -2916,7 +2916,7 @@
     ),
     (
         name: "Defenders Oath Of The Desert",
-        image: "images/build/abilities/Skill_290.png",
+        image: "images/build/abilities/Skill_290.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 22,
@@ -2927,7 +2927,7 @@
     ),
     (
         name: "Unyielding Will Of The Tundra",
-        image: "images/build/abilities/Skill_215.png",
+        image: "images/build/abilities/Skill_215.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -2938,7 +2938,7 @@
     ),
     (
         name: "Blizzard",
-        image: "images/build/abilities/skill_49_blizzard.png",
+        image: "images/build/abilities/skill_49_blizzard.ktx2",
         kind: Ice,
         level: 8,
         mana_cost: 21,
@@ -2949,7 +2949,7 @@
     ),
     (
         name: "Last Stand Of The Abyss",
-        image: "images/build/abilities/Skill_500.png",
+        image: "images/build/abilities/Skill_500.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 22,
@@ -2960,7 +2960,7 @@
     ),
     (
         name: "Vanguard Aegis Of The Marsh",
-        image: "images/build/abilities/Skill_365.png",
+        image: "images/build/abilities/Skill_365.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -2971,7 +2971,7 @@
     ),
     (
         name: "Explosion",
-        image: "images/build/abilities/Skill_Explosion.png",
+        image: "images/build/abilities/Skill_Explosion.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -2982,7 +2982,7 @@
     ),
     (
         name: "Demonicdnk",
-        image: "images/build/abilities/skill_196_demonicdnk.png",
+        image: "images/build/abilities/skill_196_demonicdnk.ktx2",
         kind: Shadow,
         level: 8,
         mana_cost: 22,
@@ -2993,7 +2993,7 @@
     ),
     (
         name: "Backstab Of The Hearth",
-        image: "images/build/abilities/skill_83.png",
+        image: "images/build/abilities/skill_83.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -3004,7 +3004,7 @@
     ),
     (
         name: "Shadowstrike Of The Skies",
-        image: "images/build/abilities/Skill_340.png",
+        image: "images/build/abilities/Skill_340.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -3015,7 +3015,7 @@
     ),
     (
         name: "Lethal Poison Of The Dawn",
-        image: "images/build/abilities/Skill_470.png",
+        image: "images/build/abilities/Skill_470.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 22,
@@ -3026,7 +3026,7 @@
     ),
     (
         name: "Silent Cut Of The Night",
-        image: "images/build/abilities/Skill_414.png",
+        image: "images/build/abilities/Skill_414.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -3037,7 +3037,7 @@
     ),
     (
         name: "Brakearmor",
-        image: "images/build/abilities/skill_54_brakearmor.png",
+        image: "images/build/abilities/skill_54_brakearmor.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -3048,7 +3048,7 @@
     ),
     (
         name: "Iceelement",
-        image: "images/build/abilities/Skill_256_iceelement.png",
+        image: "images/build/abilities/Skill_256_iceelement.ktx2",
         kind: Ice,
         level: 8,
         mana_cost: 22,
@@ -3059,7 +3059,7 @@
     ),
     (
         name: "Deadly Toxins Of The Moon",
-        image: "images/build/abilities/Skill_471.png",
+        image: "images/build/abilities/Skill_471.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -3070,7 +3070,7 @@
     ),
     (
         name: "Noxious Wound Of The Stars",
-        image: "images/build/abilities/Skill_293.png",
+        image: "images/build/abilities/Skill_293.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -3081,7 +3081,7 @@
     ),
     (
         name: "Music",
-        image: "images/build/abilities/music.png",
+        image: "images/build/abilities/music.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 22,
@@ -3092,7 +3092,7 @@
     ),
     (
         name: "Fatal Strike Of The Wind",
-        image: "images/build/abilities/skill_191.png",
+        image: "images/build/abilities/skill_191.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -3103,7 +3103,7 @@
     ),
     (
         name: "Cursed",
-        image: "images/build/abilities/Skill_Cursed.png",
+        image: "images/build/abilities/Skill_Cursed.ktx2",
         kind: Shadow,
         level: 8,
         mana_cost: 21,
@@ -3114,7 +3114,7 @@
     ),
     (
         name: "Knight Attack",
-        image: "images/build/abilities/Skill_KnightAttack.png",
+        image: "images/build/abilities/Skill_KnightAttack.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 22,
@@ -3125,7 +3125,7 @@
     ),
     (
         name: "Summon Insect Army",
-        image: "images/build/abilities/summon_insect_army.png",
+        image: "images/build/abilities/summon_insect_army.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -3136,7 +3136,7 @@
     ),
     (
         name: "Swift Step Of The Shadow",
-        image: "images/build/abilities/skill_84.png",
+        image: "images/build/abilities/skill_84.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -3147,7 +3147,7 @@
     ),
     (
         name: "Hex Of The Grove",
-        image: "images/build/abilities/skill_427_hex.png",
+        image: "images/build/abilities/skill_427_hex.ktx2",
         kind: Shadow,
         level: 8,
         mana_cost: 22,
@@ -3158,7 +3158,7 @@
     ),
     (
         name: "Darkmagic",
-        image: "images/build/abilities/skill_21_darkmagic.png",
+        image: "images/build/abilities/skill_21_darkmagic.ktx2",
         kind: Shadow,
         level: 8,
         mana_cost: 23,
@@ -3169,7 +3169,7 @@
     ),
     (
         name: "Y Multishot",
-        image: "images/build/abilities/Y_multishot.png",
+        image: "images/build/abilities/Y_multishot.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -3180,7 +3180,7 @@
     ),
     (
         name: "Root Of The Wild",
-        image: "images/build/abilities/skill_133_root.png",
+        image: "images/build/abilities/skill_133_root.ktx2",
         kind: Nature,
         level: 8,
         mana_cost: 22,
@@ -3191,7 +3191,7 @@
     ),
     (
         name: "Shadow Damage",
-        image: "images/build/abilities/ShadowDamage.png",
+        image: "images/build/abilities/ShadowDamage.ktx2",
         kind: Shadow,
         level: 8,
         mana_cost: 23,
@@ -3202,7 +3202,7 @@
     ),
     (
         name: "Double Jump Of The Tundra",
-        image: "images/build/abilities/Skill_337.png",
+        image: "images/build/abilities/Skill_337.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 21,
@@ -3213,7 +3213,7 @@
     ),
     (
         name: "Flank Strike",
-        image: "images/build/abilities/Skill_237.png",
+        image: "images/build/abilities/Skill_237.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 22,
@@ -3224,7 +3224,7 @@
     ),
     (
         name: "Skirmish Dodge Of The Abyss",
-        image: "images/build/abilities/skill_76.png",
+        image: "images/build/abilities/skill_76.ktx2",
         kind: Physical,
         level: 8,
         mana_cost: 23,
@@ -3235,7 +3235,7 @@
     ),
     (
         name: "Acrobatic Leap Of The Marsh",
-        image: "images/build/abilities/skill_154.png",
+        image: "images/build/abilities/skill_154.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 23,
@@ -3246,7 +3246,7 @@
     ),
     (
         name: "Superiority",
-        image: "images/build/abilities/superiority.png",
+        image: "images/build/abilities/superiority.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3257,7 +3257,7 @@
     ),
     (
         name: "Wound",
-        image: "images/build/abilities/wound.png",
+        image: "images/build/abilities/wound.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 25,
@@ -3268,7 +3268,7 @@
     ),
     (
         name: "Approximation",
-        image: "images/build/abilities/Skill_495_approximation.png",
+        image: "images/build/abilities/Skill_495_approximation.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 23,
@@ -3279,7 +3279,7 @@
     ),
     (
         name: "Summon Zombie",
-        image: "images/build/abilities/summon_zombie.png",
+        image: "images/build/abilities/summon_zombie.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3290,7 +3290,7 @@
     ),
     (
         name: "Sidestep Of The Dawn",
-        image: "images/build/abilities/Skill_385.png",
+        image: "images/build/abilities/Skill_385.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 25,
@@ -3301,7 +3301,7 @@
     ),
     (
         name: "Death Blow Of The Night",
-        image: "images/build/abilities/Death_blow3.png",
+        image: "images/build/abilities/Death_blow3.ktx2",
         kind: Shadow,
         level: 9,
         mana_cost: 23,
@@ -3312,7 +3312,7 @@
     ),
     (
         name: "Blade Rush Of The Storm",
-        image: "images/build/abilities/Skill_371.png",
+        image: "images/build/abilities/Skill_371.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3323,7 +3323,7 @@
     ),
     (
         name: "Furious Slash Of The Sun",
-        image: "images/build/abilities/skill_95.png",
+        image: "images/build/abilities/skill_95.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 25,
@@ -3334,7 +3334,7 @@
     ),
     (
         name: "Savage Rend",
-        image: "images/build/abilities/skill_73.png",
+        image: "images/build/abilities/skill_73.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 23,
@@ -3345,7 +3345,7 @@
     ),
     (
         name: "Crushing Blow Of The Stars",
-        image: "images/build/abilities/skill_80.png",
+        image: "images/build/abilities/skill_80.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3356,7 +3356,7 @@
     ),
     (
         name: "Icetaunt",
-        image: "images/build/abilities/Skill_258_icetaunt.png",
+        image: "images/build/abilities/Skill_258_icetaunt.ktx2",
         kind: Ice,
         level: 9,
         mana_cost: 25,
@@ -3367,7 +3367,7 @@
     ),
     (
         name: "Metalarmor",
-        image: "images/build/abilities/skill_226_metalarmor.png",
+        image: "images/build/abilities/skill_226_metalarmor.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 23,
@@ -3378,7 +3378,7 @@
     ),
     (
         name: "Decimate Of The Sea",
-        image: "images/build/abilities/Skill_406.png",
+        image: "images/build/abilities/Skill_406.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3389,7 +3389,7 @@
     ),
     (
         name: "Balistic Shoot Of The Flame",
-        image: "images/build/abilities/Skill_BalisticShoot3.png",
+        image: "images/build/abilities/Skill_BalisticShoot3.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 25,
@@ -3400,7 +3400,7 @@
     ),
     (
         name: "Shield Breaker Of The Frost",
-        image: "images/build/abilities/Skill_307.png",
+        image: "images/build/abilities/Skill_307.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 23,
@@ -3411,7 +3411,7 @@
     ),
     (
         name: "Heart",
-        image: "images/build/abilities/skill_114_heart.png",
+        image: "images/build/abilities/skill_114_heart.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3422,7 +3422,7 @@
     ),
     (
         name: "Poison Claw",
-        image: "images/build/abilities/poison_claw.png",
+        image: "images/build/abilities/poison_claw.ktx2",
         kind: Nature,
         level: 9,
         mana_cost: 25,
@@ -3433,7 +3433,7 @@
     ),
     (
         name: "Ice Nova Strong",
-        image: "images/build/abilities/IceNovaStrong.png",
+        image: "images/build/abilities/IceNovaStrong.ktx2",
         kind: Ice,
         level: 9,
         mana_cost: 23,
@@ -3444,7 +3444,7 @@
     ),
     (
         name: "Battle Cry",
-        image: "images/build/abilities/Skill_235.png",
+        image: "images/build/abilities/Skill_235.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3455,7 +3455,7 @@
     ),
     (
         name: "Spirit Wolves",
-        image: "images/build/abilities/spirit_wolves.png",
+        image: "images/build/abilities/spirit_wolves.ktx2",
         kind: Shadow,
         level: 9,
         mana_cost: 25,
@@ -3466,7 +3466,7 @@
     ),
     (
         name: "Scratch",
-        image: "images/build/abilities/skill_138_scratch.png",
+        image: "images/build/abilities/skill_138_scratch.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 23,
@@ -3477,7 +3477,7 @@
     ),
     (
         name: "Shield Block Of The Tundra",
-        image: "images/build/abilities/Skill_252.png",
+        image: "images/build/abilities/Skill_252.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3488,7 +3488,7 @@
     ),
     (
         name: "Unbreakable Guard Of The Mist",
-        image: "images/build/abilities/skill_69.png",
+        image: "images/build/abilities/skill_69.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 25,
@@ -3499,7 +3499,7 @@
     ),
     (
         name: "Shadow Swords",
-        image: "images/build/abilities/shadow_swords.png",
+        image: "images/build/abilities/shadow_swords.ktx2",
         kind: Shadow,
         level: 9,
         mana_cost: 23,
@@ -3510,7 +3510,7 @@
     ),
     (
         name: "Shield Bash Of The Marsh",
-        image: "images/build/abilities/skill_81.png",
+        image: "images/build/abilities/skill_81.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3521,7 +3521,7 @@
     ),
     (
         name: "Fortress Stance Of The Vale",
-        image: "images/build/abilities/Skill_341.png",
+        image: "images/build/abilities/Skill_341.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 25,
@@ -3532,7 +3532,7 @@
     ),
     (
         name: "Tranquility",
-        image: "images/build/abilities/tranquility.png",
+        image: "images/build/abilities/tranquility.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 23,
@@ -3543,7 +3543,7 @@
     ),
     (
         name: "Sturdy Wall Of The Hearth",
-        image: "images/build/abilities/Skill_238.png",
+        image: "images/build/abilities/Skill_238.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 24,
@@ -3554,7 +3554,7 @@
     ),
     (
         name: "Ironclad Resolve Of The Skies",
-        image: "images/build/abilities/Skill_390.png",
+        image: "images/build/abilities/Skill_390.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 25,
@@ -3565,7 +3565,7 @@
     ),
     (
         name: "Stone Aegis Of The Dawn",
-        image: "images/build/abilities/skill_99.png",
+        image: "images/build/abilities/skill_99.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 23,
@@ -3576,7 +3576,7 @@
     ),
     (
         name: "Shadowworld",
-        image: "images/build/abilities/shadowworld.png",
+        image: "images/build/abilities/shadowworld.ktx2",
         kind: Shadow,
         level: 9,
         mana_cost: 24,
@@ -3587,7 +3587,7 @@
     ),
     (
         name: "Demonic Fate",
-        image: "images/build/abilities/DemonicFate.png",
+        image: "images/build/abilities/DemonicFate.ktx2",
         kind: Shadow,
         level: 9,
         mana_cost: 25,
@@ -3598,7 +3598,7 @@
     ),
     (
         name: "Guardian Barrier",
-        image: "images/build/abilities/skill_75.png",
+        image: "images/build/abilities/skill_75.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 23,
@@ -3609,7 +3609,7 @@
     ),
     (
         name: "Arcane Blast",
-        image: "images/build/abilities/skill_116_arcaneBlast.png",
+        image: "images/build/abilities/skill_116_arcaneBlast.ktx2",
         kind: Fire,
         level: 9,
         mana_cost: 24,
@@ -3620,7 +3620,7 @@
     ),
     (
         name: "Vanguard Aegis Of The Stars",
-        image: "images/build/abilities/Skill_317.png",
+        image: "images/build/abilities/Skill_317.ktx2",
         kind: Physical,
         level: 9,
         mana_cost: 25,
@@ -3631,7 +3631,7 @@
     ),
     (
         name: "Shield Enchant",
-        image: "images/build/abilities/Shield_enchant.png",
+        image: "images/build/abilities/Shield_enchant.ktx2",
         kind: Holy,
         level: 9,
         mana_cost: 23,
@@ -3642,7 +3642,7 @@
     ),
     (
         name: "Shadowtouch",
-        image: "images/build/abilities/Skill_272_shadowtouch.png",
+        image: "images/build/abilities/Skill_272_shadowtouch.ktx2",
         kind: Shadow,
         level: 10,
         mana_cost: 26,
@@ -3653,7 +3653,7 @@
     ),
     (
         name: "Portal",
-        image: "images/build/abilities/portal.png",
+        image: "images/build/abilities/portal.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3664,7 +3664,7 @@
     ),
     (
         name: "Frost Current",
-        image: "images/build/abilities/skill_101.png",
+        image: "images/build/abilities/skill_101.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 25,
@@ -3675,7 +3675,7 @@
     ),
     (
         name: "Shock",
-        image: "images/build/abilities/Skill_Shock.png",
+        image: "images/build/abilities/Skill_Shock.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 26,
@@ -3686,7 +3686,7 @@
     ),
     (
         name: "Silent Cut Of The Shadow",
-        image: "images/build/abilities/Skill_476.png",
+        image: "images/build/abilities/Skill_476.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3697,7 +3697,7 @@
     ),
     (
         name: "Break Chains",
-        image: "images/build/abilities/Skill_217.png",
+        image: "images/build/abilities/Skill_217.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 25,
@@ -3708,7 +3708,7 @@
     ),
     (
         name: "Axe Mastery",
-        image: "images/build/abilities/Skill_AxeMastery.png",
+        image: "images/build/abilities/Skill_AxeMastery.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 26,
@@ -3719,7 +3719,7 @@
     ),
     (
         name: "Rogue Ambush",
-        image: "images/build/abilities/Skill_RogueAmbush.png",
+        image: "images/build/abilities/Skill_RogueAmbush.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3730,7 +3730,7 @@
     ),
     (
         name: "Noxious Wound Of The Wild",
-        image: "images/build/abilities/skill_109.png",
+        image: "images/build/abilities/skill_109.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 25,
@@ -3741,7 +3741,7 @@
     ),
     (
         name: "Holyshield",
-        image: "images/build/abilities/skill_245_holyshield.png",
+        image: "images/build/abilities/skill_245_holyshield.ktx2",
         kind: Holy,
         level: 10,
         mana_cost: 26,
@@ -3752,7 +3752,7 @@
     ),
     (
         name: "Fatal Strike Of The Tundra",
-        image: "images/build/abilities/Skill_408.png",
+        image: "images/build/abilities/Skill_408.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3763,7 +3763,7 @@
     ),
     (
         name: "Venomous Bite Of The Mist",
-        image: "images/build/abilities/skill_161.png",
+        image: "images/build/abilities/skill_161.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 25,
@@ -3774,7 +3774,7 @@
     ),
     (
         name: "Agile Dagger",
-        image: "images/build/abilities/skill_103.png",
+        image: "images/build/abilities/skill_103.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 26,
@@ -3785,7 +3785,7 @@
     ),
     (
         name: "Obsession",
-        image: "images/build/abilities/obsession.png",
+        image: "images/build/abilities/obsession.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3796,7 +3796,7 @@
     ),
     (
         name: "Unholy Energy",
-        image: "images/build/abilities/unholy_energy.png",
+        image: "images/build/abilities/unholy_energy.ktx2",
         kind: Holy,
         level: 10,
         mana_cost: 25,
@@ -3807,7 +3807,7 @@
     ),
     (
         name: "Holyshock",
-        image: "images/build/abilities/skill_179_holyshock.png",
+        image: "images/build/abilities/skill_179_holyshock.ktx2",
         kind: Holy,
         level: 10,
         mana_cost: 26,
@@ -3818,7 +3818,7 @@
     ),
     (
         name: "Quick Dash Of The Hearth",
-        image: "images/build/abilities/Skill_204.png",
+        image: "images/build/abilities/Skill_204.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3829,7 +3829,7 @@
     ),
     (
         name: "Overtake",
-        image: "images/build/abilities/skill_107_overtake.png",
+        image: "images/build/abilities/skill_107_overtake.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 25,
@@ -3840,7 +3840,7 @@
     ),
     (
         name: "Wind Runner Of The Dawn",
-        image: "images/build/abilities/skill_126.png",
+        image: "images/build/abilities/skill_126.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 26,
@@ -3851,7 +3851,7 @@
     ),
     (
         name: "Throwing Axe Of The Night",
-        image: "images/build/abilities/Skill_479.png",
+        image: "images/build/abilities/Skill_479.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3862,7 +3862,7 @@
     ),
     (
         name: "Hexed",
-        image: "images/build/abilities/skill_147_hexed.png",
+        image: "images/build/abilities/skill_147_hexed.ktx2",
         kind: Shadow,
         level: 10,
         mana_cost: 25,
@@ -3873,7 +3873,7 @@
     ),
     (
         name: "Voracity",
-        image: "images/build/abilities/voracity.png",
+        image: "images/build/abilities/voracity.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 26,
@@ -3884,7 +3884,7 @@
     ),
     (
         name: "Skirmish Dodge Of The Moon",
-        image: "images/build/abilities/Skill_343.png",
+        image: "images/build/abilities/Skill_343.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3895,7 +3895,7 @@
     ),
     (
         name: "Deadly Potion",
-        image: "images/build/abilities/deadly_potion.png",
+        image: "images/build/abilities/deadly_potion.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 25,
@@ -3906,7 +3906,7 @@
     ),
     (
         name: "Scorpion",
-        image: "images/build/abilities/Skill_Scorpion.png",
+        image: "images/build/abilities/Skill_Scorpion.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 26,
@@ -3917,7 +3917,7 @@
     ),
     (
         name: "Agile Shot Of The Wind",
-        image: "images/build/abilities/skill_26.png",
+        image: "images/build/abilities/skill_26.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3928,7 +3928,7 @@
     ),
     (
         name: "Net",
-        image: "images/build/abilities/Skill_335_net.png",
+        image: "images/build/abilities/Skill_335_net.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 25,
@@ -3939,7 +3939,7 @@
     ),
     (
         name: "Secret Community",
-        image: "images/build/abilities/secret_community.png",
+        image: "images/build/abilities/secret_community.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 26,
@@ -3950,7 +3950,7 @@
     ),
     (
         name: "Sidestep Of The Frost",
-        image: "images/build/abilities/Skill_474.png",
+        image: "images/build/abilities/Skill_474.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3961,7 +3961,7 @@
     ),
     (
         name: "Heavy Strike Of The Shadow",
-        image: "images/build/abilities/Skill_358.png",
+        image: "images/build/abilities/Skill_358.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 25,
@@ -3972,7 +3972,7 @@
     ),
     (
         name: "Blade Rush Of The Grove",
-        image: "images/build/abilities/skill_145.png",
+        image: "images/build/abilities/skill_145.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 26,
@@ -3983,7 +3983,7 @@
     ),
     (
         name: "Mind",
-        image: "images/build/abilities/skill_29_mind.png",
+        image: "images/build/abilities/skill_29_mind.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -3994,7 +3994,7 @@
     ),
     (
         name: "Overheal",
-        image: "images/build/abilities/skill_151_overheal.png",
+        image: "images/build/abilities/skill_151_overheal.ktx2",
         kind: Holy,
         level: 10,
         mana_cost: 25,
@@ -4005,7 +4005,7 @@
     ),
     (
         name: "Goldfarm",
-        image: "images/build/abilities/skill_59_goldfarm.png",
+        image: "images/build/abilities/skill_59_goldfarm.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 26,
@@ -4016,7 +4016,7 @@
     ),
     (
         name: "Sweeping Cleave Of The Tundra",
-        image: "images/build/abilities/skill_195.png",
+        image: "images/build/abilities/skill_195.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 27,
@@ -4027,7 +4027,7 @@
     ),
     (
         name: "Overpower",
-        image: "images/build/abilities/Skill_344.png",
+        image: "images/build/abilities/Skill_344.ktx2",
         kind: Physical,
         level: 10,
         mana_cost: 25,
@@ -4038,7 +4038,7 @@
     ),
     (
         name: "Unholytouch",
-        image: "images/build/abilities/Skill_262unholytouch.png",
+        image: "images/build/abilities/Skill_262unholytouch.ktx2",
         kind: Holy,
         level: 10,
         mana_cost: 26,
@@ -4049,7 +4049,7 @@
     ),
     (
         name: "Storm Of The Abyss",
-        image: "images/build/abilities/Storm2.png",
+        image: "images/build/abilities/Storm2.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4060,7 +4060,7 @@
     ),
     (
         name: "Devour",
-        image: "images/build/abilities/skill_143_devour.png",
+        image: "images/build/abilities/skill_143_devour.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4071,7 +4071,7 @@
     ),
     (
         name: "Heroic Strike Of The Vale",
-        image: "images/build/abilities/Skill_201.png",
+        image: "images/build/abilities/Skill_201.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4082,7 +4082,7 @@
     ),
     (
         name: "Concussive Blow Of The Forest",
-        image: "images/build/abilities/Skill_480.png",
+        image: "images/build/abilities/Skill_480.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4093,7 +4093,7 @@
     ),
     (
         name: "Healing Wave",
-        image: "images/build/abilities/healing_wave.png",
+        image: "images/build/abilities/healing_wave.ktx2",
         kind: Holy,
         level: 11,
         mana_cost: 27,
@@ -4104,7 +4104,7 @@
     ),
     (
         name: "Battle Cry Of The Skies",
-        image: "images/build/abilities/Skill_373.png",
+        image: "images/build/abilities/Skill_373.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4115,7 +4115,7 @@
     ),
     (
         name: "Summon Ent",
-        image: "images/build/abilities/summon_ent.png",
+        image: "images/build/abilities/summon_ent.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4126,7 +4126,7 @@
     ),
     (
         name: "Iron Wall Of The Night",
-        image: "images/build/abilities/Skill_292.png",
+        image: "images/build/abilities/Skill_292.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4137,7 +4137,7 @@
     ),
     (
         name: "Shield Block Of The Sun",
-        image: "images/build/abilities/Skill_209.png",
+        image: "images/build/abilities/Skill_209.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4148,7 +4148,7 @@
     ),
     (
         name: "Unbreakable Guard Of The Sun",
-        image: "images/build/abilities/Skill_286.png",
+        image: "images/build/abilities/Skill_286.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4159,7 +4159,7 @@
     ),
     (
         name: "Stalwart Defense Of The Moon",
-        image: "images/build/abilities/Skill_433.png",
+        image: "images/build/abilities/Skill_433.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4170,7 +4170,7 @@
     ),
     (
         name: "Time",
-        image: "images/build/abilities/Skill_395_time.png",
+        image: "images/build/abilities/Skill_395_time.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4181,7 +4181,7 @@
     ),
     (
         name: "Bow Shot Of The Void",
-        image: "images/build/abilities/bow_shot3.png",
+        image: "images/build/abilities/bow_shot3.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4192,7 +4192,7 @@
     ),
     (
         name: "Summon Stone Army",
-        image: "images/build/abilities/summon_stone_army.png",
+        image: "images/build/abilities/summon_stone_army.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4203,7 +4203,7 @@
     ),
     (
         name: "Sturdy Wall Of The Sea",
-        image: "images/build/abilities/skill_37.png",
+        image: "images/build/abilities/skill_37.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4214,7 +4214,7 @@
     ),
     (
         name: "Ironclad Resolve Of The Frost",
-        image: "images/build/abilities/Skill_448.png",
+        image: "images/build/abilities/Skill_448.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4225,7 +4225,7 @@
     ),
     (
         name: "Hit Of The Frost",
-        image: "images/build/abilities/Skill_288_hit.png",
+        image: "images/build/abilities/Skill_288_hit.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4236,7 +4236,7 @@
     ),
     (
         name: "Mindbreak",
-        image: "images/build/abilities/skill_119_mindbreak.png",
+        image: "images/build/abilities/skill_119_mindbreak.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4247,7 +4247,7 @@
     ),
     (
         name: "Unyielding Will Of The Grove",
-        image: "images/build/abilities/skill_97.png",
+        image: "images/build/abilities/skill_97.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4258,7 +4258,7 @@
     ),
     (
         name: "Guardian Barrier Of The Peak",
-        image: "images/build/abilities/skill_194.png",
+        image: "images/build/abilities/skill_194.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4269,7 +4269,7 @@
     ),
     (
         name: "Silence",
-        image: "images/build/abilities/skill_79_silence.png",
+        image: "images/build/abilities/skill_79_silence.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4280,7 +4280,7 @@
     ),
     (
         name: "Rage Of The Wild",
-        image: "images/build/abilities/skill_177_rage.png",
+        image: "images/build/abilities/skill_177_rage.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4291,7 +4291,7 @@
     ),
     (
         name: "Viper Venom Of The Desert",
-        image: "images/build/abilities/Skill_446.png",
+        image: "images/build/abilities/Skill_446.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4302,7 +4302,7 @@
     ),
     (
         name: "Sneak Attack",
-        image: "images/build/abilities/skill_169.png",
+        image: "images/build/abilities/skill_169.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4313,7 +4313,7 @@
     ),
     (
         name: "Backstab Of The Mist",
-        image: "images/build/abilities/Skill_279.png",
+        image: "images/build/abilities/Skill_279.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4324,7 +4324,7 @@
     ),
     (
         name: "Summon Skeleton Warrior",
-        image: "images/build/abilities/summon_skeleton_warrior.png",
+        image: "images/build/abilities/summon_skeleton_warrior.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4335,7 +4335,7 @@
     ),
     (
         name: "Lethal Poison Of The Marsh",
-        image: "images/build/abilities/Skill_220.png",
+        image: "images/build/abilities/Skill_220.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4346,7 +4346,7 @@
     ),
     (
         name: "Staff Strike",
-        image: "images/build/abilities/staff_strike.png",
+        image: "images/build/abilities/staff_strike.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4357,7 +4357,7 @@
     ),
     (
         name: "Axethrow",
-        image: "images/build/abilities/skill_70_axethrow.png",
+        image: "images/build/abilities/skill_70_axethrow.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4368,7 +4368,7 @@
     ),
     (
         name: "Garrote Of The Hearth",
-        image: "images/build/abilities/skill_167.png",
+        image: "images/build/abilities/skill_167.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4379,7 +4379,7 @@
     ),
     (
         name: "Deadly Toxins Of The Skies",
-        image: "images/build/abilities/Skill_413.png",
+        image: "images/build/abilities/Skill_413.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4390,7 +4390,7 @@
     ),
     (
         name: "Sea",
-        image: "images/build/abilities/Skill_331_sea.png",
+        image: "images/build/abilities/Skill_331_sea.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4401,7 +4401,7 @@
     ),
     (
         name: "Scullbreaker",
-        image: "images/build/abilities/skill_200_scullbreaker.png",
+        image: "images/build/abilities/skill_200_scullbreaker.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4412,7 +4412,7 @@
     ),
     (
         name: "Update",
-        image: "images/build/abilities/skill_190_update.png",
+        image: "images/build/abilities/skill_190_update.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 29,
@@ -4423,7 +4423,7 @@
     ),
     (
         name: "Venomous Bite Of The Sun",
-        image: "images/build/abilities/skill_185.png",
+        image: "images/build/abilities/skill_185.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 27,
@@ -4434,7 +4434,7 @@
     ),
     (
         name: "Agile Dagger Of The Moon",
-        image: "images/build/abilities/Skill_425.png",
+        image: "images/build/abilities/Skill_425.ktx2",
         kind: Physical,
         level: 11,
         mana_cost: 28,
@@ -4445,7 +4445,7 @@
     ),
     (
         name: "Iceshock",
-        image: "images/build/abilities/skill_46_iceshock.png",
+        image: "images/build/abilities/skill_46_iceshock.ktx2",
         kind: Ice,
         level: 11,
         mana_cost: 29,
@@ -4456,7 +4456,7 @@
     ),
     (
         name: "Absorb",
-        image: "images/build/abilities/Skill_351_absorb.png",
+        image: "images/build/abilities/Skill_351_absorb.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 29,
@@ -4467,7 +4467,7 @@
     ),
     (
         name: "Arcane",
-        image: "images/build/abilities/skill_23_arcane.png",
+        image: "images/build/abilities/skill_23_arcane.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4478,7 +4478,7 @@
     ),
     (
         name: "Fastattack",
-        image: "images/build/abilities/skill_211_fastattack.png",
+        image: "images/build/abilities/skill_211_fastattack.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4489,7 +4489,7 @@
     ),
     (
         name: "Evasive Maneuver",
-        image: "images/build/abilities/Skill_300.png",
+        image: "images/build/abilities/Skill_300.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 29,
@@ -4500,7 +4500,7 @@
     ),
     (
         name: "Witchtouch",
-        image: "images/build/abilities/Witchtouch.png",
+        image: "images/build/abilities/Witchtouch.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4511,7 +4511,7 @@
     ),
     (
         name: "Throwing Axe Of The Shadow",
-        image: "images/build/abilities/Skill_339.png",
+        image: "images/build/abilities/Skill_339.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4522,7 +4522,7 @@
     ),
     (
         name: "Wand Shot Of The Grove",
-        image: "images/build/abilities/wand_shot3.png",
+        image: "images/build/abilities/wand_shot3.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 29,
@@ -4533,7 +4533,7 @@
     ),
     (
         name: "Shadow Clones",
-        image: "images/build/abilities/shadow_clones.png",
+        image: "images/build/abilities/shadow_clones.ktx2",
         kind: Shadow,
         level: 12,
         mana_cost: 30,
@@ -4544,7 +4544,7 @@
     ),
     (
         name: "Skirmish Dodge Of The Deep",
-        image: "images/build/abilities/Skill_202.png",
+        image: "images/build/abilities/Skill_202.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4555,7 +4555,7 @@
     ),
     (
         name: "Pierce",
-        image: "images/build/abilities/skill_24_pierce.png",
+        image: "images/build/abilities/skill_24_pierce.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 29,
@@ -4566,7 +4566,7 @@
     ),
     (
         name: "Sneakyattack",
-        image: "images/build/abilities/Skill_221_sneakyattack.png",
+        image: "images/build/abilities/Skill_221_sneakyattack.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4577,7 +4577,7 @@
     ),
     (
         name: "Magic Rain",
-        image: "images/build/abilities/magic_rain.png",
+        image: "images/build/abilities/magic_rain.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4588,7 +4588,7 @@
     ),
     (
         name: "Shield Of The Mist",
-        image: "images/build/abilities/shield1.png",
+        image: "images/build/abilities/shield1.ktx2",
         kind: Holy,
         level: 12,
         mana_cost: 29,
@@ -4599,7 +4599,7 @@
     ),
     (
         name: "Fast Step Of The Abyss",
-        image: "images/build/abilities/Skill_291.png",
+        image: "images/build/abilities/Skill_291.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4610,7 +4610,7 @@
     ),
     (
         name: "Sidestep Of The Marsh",
-        image: "images/build/abilities/skill_78.png",
+        image: "images/build/abilities/skill_78.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4621,7 +4621,7 @@
     ),
     (
         name: "Healing",
-        image: "images/build/abilities/Skill_Healing.png",
+        image: "images/build/abilities/Skill_Healing.ktx2",
         kind: Holy,
         level: 12,
         mana_cost: 29,
@@ -4632,7 +4632,7 @@
     ),
     (
         name: "Blade Rush Of The Hearth",
-        image: "images/build/abilities/skill_82.png",
+        image: "images/build/abilities/skill_82.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4643,7 +4643,7 @@
     ),
     (
         name: "Devil Mark",
-        image: "images/build/abilities/devil_mark.png",
+        image: "images/build/abilities/devil_mark.ktx2",
         kind: Shadow,
         level: 12,
         mana_cost: 31,
@@ -4654,7 +4654,7 @@
     ),
     (
         name: "Savage Rend Of The Skies",
-        image: "images/build/abilities/Skill_354.png",
+        image: "images/build/abilities/Skill_354.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 29,
@@ -4665,7 +4665,7 @@
     ),
     (
         name: "Light Arrow",
-        image: "images/build/abilities/Light_arrow.png",
+        image: "images/build/abilities/Light_arrow.ktx2",
         kind: Holy,
         level: 12,
         mana_cost: 30,
@@ -4676,7 +4676,7 @@
     ),
     (
         name: "Sweeping Cleave Of The Storm",
-        image: "images/build/abilities/Skill_328.png",
+        image: "images/build/abilities/Skill_328.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4687,7 +4687,7 @@
     ),
     (
         name: "Fire Arrow",
-        image: "images/build/abilities/fire_arrow.png",
+        image: "images/build/abilities/fire_arrow.ktx2",
         kind: Fire,
         level: 12,
         mana_cost: 29,
@@ -4698,7 +4698,7 @@
     ),
     (
         name: "Rip",
-        image: "images/build/abilities/Skill_214_rip.png",
+        image: "images/build/abilities/Skill_214_rip.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4709,7 +4709,7 @@
     ),
     (
         name: "Y Fell Cloak",
-        image: "images/build/abilities/Y_fellCloak.png",
+        image: "images/build/abilities/Y_fellCloak.ktx2",
         kind: Nature,
         level: 12,
         mana_cost: 31,
@@ -4720,7 +4720,7 @@
     ),
     (
         name: "Shield Breaker Of The Stars",
-        image: "images/build/abilities/Skill_253.png",
+        image: "images/build/abilities/Skill_253.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 29,
@@ -4731,7 +4731,7 @@
     ),
     (
         name: "Heroic Strike Of The Void",
-        image: "images/build/abilities/skill_98.png",
+        image: "images/build/abilities/skill_98.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4742,7 +4742,7 @@
     ),
     (
         name: "Concussive Blow Of The Wind",
-        image: "images/build/abilities/Skill_366.png",
+        image: "images/build/abilities/Skill_366.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4753,7 +4753,7 @@
     ),
     (
         name: "Rend Flesh Of The Flame",
-        image: "images/build/abilities/Skill_399.png",
+        image: "images/build/abilities/Skill_399.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 29,
@@ -4764,7 +4764,7 @@
     ),
     (
         name: "Battle Cry Of The Flame",
-        image: "images/build/abilities/skill_63.png",
+        image: "images/build/abilities/skill_63.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4775,7 +4775,7 @@
     ),
     (
         name: "Summon Imp",
-        image: "images/build/abilities/summon_imp.png",
+        image: "images/build/abilities/summon_imp.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4786,7 +4786,7 @@
     ),
     (
         name: "Aggro",
-        image: "images/build/abilities/Skill_295_aggro.png",
+        image: "images/build/abilities/Skill_295_aggro.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 29,
@@ -4797,7 +4797,7 @@
     ),
     (
         name: "Buff",
-        image: "images/build/abilities/skill_43_buff.png",
+        image: "images/build/abilities/skill_43_buff.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4808,7 +4808,7 @@
     ),
     (
         name: "Def Stance",
-        image: "images/build/abilities/Skill_DefStance.png",
+        image: "images/build/abilities/Skill_DefStance.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4819,7 +4819,7 @@
     ),
     (
         name: "Root Of The Deep",
-        image: "images/build/abilities/skill_135_root.png",
+        image: "images/build/abilities/skill_135_root.ktx2",
         kind: Nature,
         level: 12,
         mana_cost: 29,
@@ -4830,7 +4830,7 @@
     ),
     (
         name: "Shield Bash Of The Wild",
-        image: "images/build/abilities/Skill_278.png",
+        image: "images/build/abilities/Skill_278.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 30,
@@ -4841,7 +4841,7 @@
     ),
     (
         name: "Renew",
-        image: "images/build/abilities/skill_18_renew.png",
+        image: "images/build/abilities/skill_18_renew.ktx2",
         kind: Physical,
         level: 12,
         mana_cost: 31,
@@ -4852,7 +4852,7 @@
     ),
     (
         name: "Absorb Shield Of The Tundra",
-        image: "images/build/abilities/Skill_205.png",
+        image: "images/build/abilities/Skill_205.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -4863,7 +4863,7 @@
     ),
     (
         name: "Sturdy Wall Of The Abyss",
-        image: "images/build/abilities/Skill_492.png",
+        image: "images/build/abilities/Skill_492.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -4874,7 +4874,7 @@
     ),
     (
         name: "Ironclad Resolve Of The Marsh",
-        image: "images/build/abilities/Skill_270.png",
+        image: "images/build/abilities/Skill_270.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -4885,7 +4885,7 @@
     ),
     (
         name: "Stone Aegis Of The Marsh",
-        image: "images/build/abilities/Skill_336.png",
+        image: "images/build/abilities/Skill_336.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -4896,7 +4896,7 @@
     ),
     (
         name: "Defenders Oath Of The Forest",
-        image: "images/build/abilities/Skill_236.png",
+        image: "images/build/abilities/Skill_236.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -4907,7 +4907,7 @@
     ),
     (
         name: "Light",
-        image: "images/build/abilities/light.png",
+        image: "images/build/abilities/light.ktx2",
         kind: Holy,
         level: 13,
         mana_cost: 33,
@@ -4918,7 +4918,7 @@
     ),
     (
         name: "Guardian Barrier Of The Hearth",
-        image: "images/build/abilities/Skill_227.png",
+        image: "images/build/abilities/Skill_227.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -4929,7 +4929,7 @@
     ),
     (
         name: "Last Stand Of The Skies",
-        image: "images/build/abilities/Skill_429.png",
+        image: "images/build/abilities/Skill_429.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -4940,7 +4940,7 @@
     ),
     (
         name: "Reaper",
-        image: "images/build/abilities/Skill_225_reaper.png",
+        image: "images/build/abilities/Skill_225_reaper.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -4951,7 +4951,7 @@
     ),
     (
         name: "Gutting",
-        image: "images/build/abilities/gutting.png",
+        image: "images/build/abilities/gutting.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -4962,7 +4962,7 @@
     ),
     (
         name: "Sneak Attack Of The Storm",
-        image: "images/build/abilities/Skill_247.png",
+        image: "images/build/abilities/Skill_247.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -4973,7 +4973,7 @@
     ),
     (
         name: "Backstab Of The Sun",
-        image: "images/build/abilities/Skill_213.png",
+        image: "images/build/abilities/Skill_213.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -4984,7 +4984,7 @@
     ),
     (
         name: "Buff Of The Moon",
-        image: "images/build/abilities/skill_136_buff.png",
+        image: "images/build/abilities/skill_136_buff.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -4995,7 +4995,7 @@
     ),
     (
         name: "Ghost",
-        image: "images/build/abilities/skill_118_ghost.png",
+        image: "images/build/abilities/skill_118_ghost.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -5006,7 +5006,7 @@
     ),
     (
         name: "Silent Cut Of The Wind",
-        image: "images/build/abilities/skill_96.png",
+        image: "images/build/abilities/skill_96.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -5017,7 +5017,7 @@
     ),
     (
         name: "Eviscerate Of The Wind",
-        image: "images/build/abilities/Skill_489.png",
+        image: "images/build/abilities/Skill_489.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -5028,7 +5028,7 @@
     ),
     (
         name: "Garrote Of The Sea",
-        image: "images/build/abilities/skill_178.png",
+        image: "images/build/abilities/skill_178.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -5039,7 +5039,7 @@
     ),
     (
         name: "Deadly Toxins Of The Flame",
-        image: "images/build/abilities/skill_434.png",
+        image: "images/build/abilities/skill_434.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -5050,7 +5050,7 @@
     ),
     (
         name: "Hard",
-        image: "images/build/abilities/Skill_Hard.png",
+        image: "images/build/abilities/Skill_Hard.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -5061,7 +5061,7 @@
     ),
     (
         name: "Ambush Of The Shadow",
-        image: "images/build/abilities/Skill_260.png",
+        image: "images/build/abilities/Skill_260.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -5072,7 +5072,7 @@
     ),
     (
         name: "Fatal Strike Of The Peak",
-        image: "images/build/abilities/Skill_241.png",
+        image: "images/build/abilities/Skill_241.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -5083,7 +5083,7 @@
     ),
     (
         name: "Venomous Bite Of The Deep",
-        image: "images/build/abilities/Skill_382.png",
+        image: "images/build/abilities/Skill_382.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -5094,7 +5094,7 @@
     ),
     (
         name: "Agile Dagger Of The Deep",
-        image: "images/build/abilities/Skill_397.png",
+        image: "images/build/abilities/Skill_397.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -5105,7 +5105,7 @@
     ),
     (
         name: "Shadow Knight",
-        image: "images/build/abilities/shadowKnight.png",
+        image: "images/build/abilities/shadowKnight.ktx2",
         kind: Shadow,
         level: 13,
         mana_cost: 33,
@@ -5116,7 +5116,7 @@
     ),
     (
         name: "Evilmind",
-        image: "images/build/abilities/Skill_273_evilmind.png",
+        image: "images/build/abilities/Skill_273_evilmind.ktx2",
         kind: Shadow,
         level: 13,
         mana_cost: 31,
@@ -5127,7 +5127,7 @@
     ),
     (
         name: "Icenova",
-        image: "images/build/abilities/skill_48Icenova.png",
+        image: "images/build/abilities/skill_48Icenova.ktx2",
         kind: Ice,
         level: 13,
         mana_cost: 32,
@@ -5138,7 +5138,7 @@
     ),
     (
         name: "Quick Dash Of The Mist",
-        image: "images/build/abilities/skill_32.png",
+        image: "images/build/abilities/skill_32.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -5149,7 +5149,7 @@
     ),
     (
         name: "Evasive Maneuver Of The Abyss",
-        image: "images/build/abilities/Skill_410.png",
+        image: "images/build/abilities/Skill_410.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -5160,7 +5160,7 @@
     ),
     (
         name: "Wind Runner Of The Vale",
-        image: "images/build/abilities/Skill_327.png",
+        image: "images/build/abilities/Skill_327.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -5171,7 +5171,7 @@
     ),
     (
         name: "Tail Strike",
-        image: "images/build/abilities/tail_strike.png",
+        image: "images/build/abilities/tail_strike.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -5182,7 +5182,7 @@
     ),
     (
         name: "Holydamage",
-        image: "images/build/abilities/skill_180_holydamage.png",
+        image: "images/build/abilities/skill_180_holydamage.ktx2",
         kind: Holy,
         level: 13,
         mana_cost: 31,
@@ -5193,7 +5193,7 @@
     ),
     (
         name: "Flank Strike Of The Hearth",
-        image: "images/build/abilities/Skill_318.png",
+        image: "images/build/abilities/Skill_318.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -5204,7 +5204,7 @@
     ),
     (
         name: "Skirmish Dodge Of The Skies",
-        image: "images/build/abilities/Skill_228.png",
+        image: "images/build/abilities/Skill_228.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -5215,7 +5215,7 @@
     ),
     (
         name: "Explosion Of The Dawn",
-        image: "images/build/abilities/Skill_468_explosion.png",
+        image: "images/build/abilities/Skill_468_explosion.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -5226,7 +5226,7 @@
     ),
     (
         name: "Fleet Footed Of The Storm",
-        image: "images/build/abilities/Skill_234.png",
+        image: "images/build/abilities/Skill_234.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 32,
@@ -5237,7 +5237,7 @@
     ),
     (
         name: "Agile Shot Of The Storm",
-        image: "images/build/abilities/Skill_423.png",
+        image: "images/build/abilities/Skill_423.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 33,
@@ -5248,7 +5248,7 @@
     ),
     (
         name: "Clones",
-        image: "images/build/abilities/clones.png",
+        image: "images/build/abilities/clones.ktx2",
         kind: Physical,
         level: 13,
         mana_cost: 31,
@@ -5259,7 +5259,7 @@
     ),
     (
         name: "Hammerbonus",
-        image: "images/build/abilities/Skill_447_hammerbonus.png",
+        image: "images/build/abilities/Skill_447_hammerbonus.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 34,
@@ -5270,7 +5270,7 @@
     ),
     (
         name: "Move",
-        image: "images/build/abilities/Skill_325_move.png",
+        image: "images/build/abilities/Skill_325_move.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5281,7 +5281,7 @@
     ),
     (
         name: "Ray",
-        image: "images/build/abilities/Skill_266_ray.png",
+        image: "images/build/abilities/Skill_266_ray.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5292,7 +5292,7 @@
     ),
     (
         name: "Targetingmobs",
-        image: "images/build/abilities/Skill_320_targetingmobs.png",
+        image: "images/build/abilities/Skill_320_targetingmobs.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 34,
@@ -5303,7 +5303,7 @@
     ),
     (
         name: "Furious Slash Of The Flame",
-        image: "images/build/abilities/skill_61.png",
+        image: "images/build/abilities/skill_61.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5314,7 +5314,7 @@
     ),
     (
         name: "Magic Spear",
-        image: "images/build/abilities/Skill_314MagicSpear.png",
+        image: "images/build/abilities/Skill_314MagicSpear.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5325,7 +5325,7 @@
     ),
     (
         name: "Crushing Blow Of The Frost",
-        image: "images/build/abilities/skill_67.png",
+        image: "images/build/abilities/skill_67.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 34,
@@ -5336,7 +5336,7 @@
     ),
     (
         name: "Sweeping Cleave Of The Shadow",
-        image: "images/build/abilities/Skill_374.png",
+        image: "images/build/abilities/Skill_374.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5347,7 +5347,7 @@
     ),
     (
         name: "Overpower Of The Grove",
-        image: "images/build/abilities/skill_47.png",
+        image: "images/build/abilities/skill_47.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5358,7 +5358,7 @@
     ),
     (
         name: "Demonic Move",
-        image: "images/build/abilities/Skill_368_demonic_move.png",
+        image: "images/build/abilities/Skill_368_demonic_move.ktx2",
         kind: Shadow,
         level: 14,
         mana_cost: 34,
@@ -5369,7 +5369,7 @@
     ),
     (
         name: "Whirlwind Of The Deep",
-        image: "images/build/abilities/skill_105.png",
+        image: "images/build/abilities/skill_105.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5380,7 +5380,7 @@
     ),
     (
         name: "Shield Breaker Of The Desert",
-        image: "images/build/abilities/Skill_269.png",
+        image: "images/build/abilities/Skill_269.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5391,7 +5391,7 @@
     ),
     (
         name: "Unholyaura",
-        image: "images/build/abilities/skill_91_unholyaura.png",
+        image: "images/build/abilities/skill_91_unholyaura.ktx2",
         kind: Holy,
         level: 14,
         mana_cost: 34,
@@ -5402,7 +5402,7 @@
     ),
     (
         name: "Destroy",
-        image: "images/build/abilities/Skill_276_destroy.png",
+        image: "images/build/abilities/Skill_276_destroy.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5413,7 +5413,7 @@
     ),
     (
         name: "Rend Flesh Of The Abyss",
-        image: "images/build/abilities/Skill_207.png",
+        image: "images/build/abilities/Skill_207.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5424,7 +5424,7 @@
     ),
     (
         name: "Shadow Bomb",
-        image: "images/build/abilities/Shadow_bomb.png",
+        image: "images/build/abilities/Shadow_bomb.ktx2",
         kind: Shadow,
         level: 14,
         mana_cost: 34,
@@ -5435,7 +5435,7 @@
     ),
     (
         name: "Firearmor",
-        image: "images/build/abilities/skill_35_firearmor.png",
+        image: "images/build/abilities/skill_35_firearmor.ktx2",
         kind: Fire,
         level: 14,
         mana_cost: 35,
@@ -5446,7 +5446,7 @@
     ),
     (
         name: "Iron Wall Of The Vale",
-        image: "images/build/abilities/Skill_481.png",
+        image: "images/build/abilities/Skill_481.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5457,7 +5457,7 @@
     ),
     (
         name: "Big Light Arrow",
-        image: "images/build/abilities/Big_Light_arrow.png",
+        image: "images/build/abilities/Big_Light_arrow.ktx2",
         kind: Holy,
         level: 14,
         mana_cost: 34,
@@ -5468,7 +5468,7 @@
     ),
     (
         name: "Unbreakable Guard Of The Hearth",
-        image: "images/build/abilities/Skill_264.png",
+        image: "images/build/abilities/Skill_264.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5479,7 +5479,7 @@
     ),
     (
         name: "Drainlife",
-        image: "images/build/abilities/drainlife.png",
+        image: "images/build/abilities/drainlife.ktx2",
         kind: Shadow,
         level: 14,
         mana_cost: 33,
@@ -5490,7 +5490,7 @@
     ),
     (
         name: "Diamond Blade",
-        image: "images/build/abilities/diamond_blade.png",
+        image: "images/build/abilities/diamond_blade.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 34,
@@ -5501,7 +5501,7 @@
     ),
     (
         name: "Waterwave",
-        image: "images/build/abilities/Skill_333_waterwave.png",
+        image: "images/build/abilities/Skill_333_waterwave.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5512,7 +5512,7 @@
     ),
     (
         name: "Hammerpower",
-        image: "images/build/abilities/skill_457_hammerpower.png",
+        image: "images/build/abilities/skill_457_hammerpower.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5523,7 +5523,7 @@
     ),
     (
         name: "Sharp Dagger",
-        image: "images/build/abilities/Skill_SharpDagger.png",
+        image: "images/build/abilities/Skill_SharpDagger.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 34,
@@ -5534,7 +5534,7 @@
     ),
     (
         name: "Ironclad Resolve Of The Moon",
-        image: "images/build/abilities/Skill_308.png",
+        image: "images/build/abilities/Skill_308.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5545,7 +5545,7 @@
     ),
     (
         name: "Fate",
-        image: "images/build/abilities/skill_160_Fate.png",
+        image: "images/build/abilities/skill_160_Fate.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5556,7 +5556,7 @@
     ),
     (
         name: "Deception",
-        image: "images/build/abilities/Skill_deception.png",
+        image: "images/build/abilities/Skill_deception.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 34,
@@ -5567,7 +5567,7 @@
     ),
     (
         name: "Unyielding Will Of The Wind",
-        image: "images/build/abilities/Skill_203.png",
+        image: "images/build/abilities/Skill_203.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5578,7 +5578,7 @@
     ),
     (
         name: "Guardian Barrier Of The Sea",
-        image: "images/build/abilities/Skill_218.png",
+        image: "images/build/abilities/Skill_218.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5589,7 +5589,7 @@
     ),
     (
         name: "Execute",
-        image: "images/build/abilities/Skill_Execute.png",
+        image: "images/build/abilities/Skill_Execute.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 34,
@@ -5600,7 +5600,7 @@
     ),
     (
         name: "Swords",
-        image: "images/build/abilities/Skill_Swords.png",
+        image: "images/build/abilities/Skill_Swords.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 35,
@@ -5611,7 +5611,7 @@
     ),
     (
         name: "Two Powers",
-        image: "images/build/abilities/two_powers.png",
+        image: "images/build/abilities/two_powers.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5622,7 +5622,7 @@
     ),
     (
         name: "Sneak Attack Of The Grove",
-        image: "images/build/abilities/skill_142.png",
+        image: "images/build/abilities/skill_142.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 34,
@@ -5633,7 +5633,7 @@
     ),
     (
         name: "Light Hit",
-        image: "images/build/abilities/light_hit.png",
+        image: "images/build/abilities/light_hit.ktx2",
         kind: Holy,
         level: 14,
         mana_cost: 35,
@@ -5644,7 +5644,7 @@
     ),
     (
         name: "Shadowstrike Of The Deep",
-        image: "images/build/abilities/skill_44.png",
+        image: "images/build/abilities/skill_44.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 33,
@@ -5655,7 +5655,7 @@
     ),
     (
         name: "Axe Of The Wild",
-        image: "images/build/abilities/Skill_299_axe.png",
+        image: "images/build/abilities/Skill_299_axe.ktx2",
         kind: Physical,
         level: 14,
         mana_cost: 34,
@@ -5666,7 +5666,7 @@
     ),
     (
         name: "Cry",
-        image: "images/build/abilities/Skill_305_cry.png",
+        image: "images/build/abilities/Skill_305_cry.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -5677,7 +5677,7 @@
     ),
     (
         name: "Execute Of The Tundra",
-        image: "images/build/abilities/Execute.png",
+        image: "images/build/abilities/Execute.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 35,
@@ -5688,7 +5688,7 @@
     ),
     (
         name: "Health",
-        image: "images/build/abilities/Skill_459_health.png",
+        image: "images/build/abilities/Skill_459_health.ktx2",
         kind: Holy,
         level: 15,
         mana_cost: 36,
@@ -5699,7 +5699,7 @@
     ),
     (
         name: "Bug",
-        image: "images/build/abilities/bug.png",
+        image: "images/build/abilities/bug.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -5710,7 +5710,7 @@
     ),
     (
         name: "Y Shadowstun",
-        image: "images/build/abilities/Y_shadowstun.png",
+        image: "images/build/abilities/Y_shadowstun.ktx2",
         kind: Shadow,
         level: 15,
         mana_cost: 35,
@@ -5721,7 +5721,7 @@
     ),
     (
         name: "Iron Skin",
-        image: "images/build/abilities/iron_skin.png",
+        image: "images/build/abilities/iron_skin.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 36,
@@ -5732,7 +5732,7 @@
     ),
     (
         name: "Demonicspines",
-        image: "images/build/abilities/Skill_435_demonicspines.png",
+        image: "images/build/abilities/Skill_435_demonicspines.ktx2",
         kind: Shadow,
         level: 15,
         mana_cost: 37,
@@ -5743,7 +5743,7 @@
     ),
     (
         name: "Targeting",
-        image: "images/build/abilities/Skill_330_targeting.png",
+        image: "images/build/abilities/Skill_330_targeting.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 35,
@@ -5754,7 +5754,7 @@
     ),
     (
         name: "Agile Dagger Of The Skies",
-        image: "images/build/abilities/Skill_380.png",
+        image: "images/build/abilities/Skill_380.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 36,
@@ -5765,7 +5765,7 @@
     ),
     (
         name: "Assassins Mark",
-        image: "images/build/abilities/Skill_454.png",
+        image: "images/build/abilities/Skill_454.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -5776,7 +5776,7 @@
     ),
     (
         name: "Swift Step Of The Storm",
-        image: "images/build/abilities/Skill_360.png",
+        image: "images/build/abilities/Skill_360.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 35,
@@ -5787,7 +5787,7 @@
     ),
     (
         name: "Taunt",
-        image: "images/build/abilities/skill_38_taunt.png",
+        image: "images/build/abilities/skill_38_taunt.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 36,
@@ -5798,7 +5798,7 @@
     ),
     (
         name: "Quick Dash Of The Sun",
-        image: "images/build/abilities/skill_127.png",
+        image: "images/build/abilities/skill_127.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -5809,7 +5809,7 @@
     ),
     (
         name: "Fastmove",
-        image: "images/build/abilities/Skill_418_fastmove.png",
+        image: "images/build/abilities/Skill_418_fastmove.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 35,
@@ -5820,7 +5820,7 @@
     ),
     (
         name: "Magicarrow",
-        image: "images/build/abilities/Skill_324_magicarrow.png",
+        image: "images/build/abilities/Skill_324_magicarrow.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 36,
@@ -5831,7 +5831,7 @@
     ),
     (
         name: "Throwing Axe Of The Void",
-        image: "images/build/abilities/skill_15.png",
+        image: "images/build/abilities/skill_15.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -5842,7 +5842,7 @@
     ),
     (
         name: "Nature Wrath",
-        image: "images/build/abilities/NatureWrath.png",
+        image: "images/build/abilities/NatureWrath.ktx2",
         kind: Nature,
         level: 15,
         mana_cost: 35,
@@ -5853,7 +5853,7 @@
     ),
     (
         name: "Blizzard Of The Sea",
-        image: "images/build/abilities/blizzard.png",
+        image: "images/build/abilities/blizzard.ktx2",
         kind: Ice,
         level: 15,
         mana_cost: 36,
@@ -5864,7 +5864,7 @@
     ),
     (
         name: "Up",
-        image: "images/build/abilities/up.png",
+        image: "images/build/abilities/up.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -5875,7 +5875,7 @@
     ),
     (
         name: "Wave Of Evil Of The Frost",
-        image: "images/build/abilities/Wave_of_evil.png",
+        image: "images/build/abilities/Wave_of_evil.ktx2",
         kind: Shadow,
         level: 15,
         mana_cost: 35,
@@ -5886,7 +5886,7 @@
     ),
     (
         name: "Daggeroflove",
-        image: "images/build/abilities/Daggeroflove.png",
+        image: "images/build/abilities/Daggeroflove.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 36,
@@ -5897,7 +5897,7 @@
     ),
     (
         name: "Agile Shot Of The Grove",
-        image: "images/build/abilities/Skill_381.png",
+        image: "images/build/abilities/Skill_381.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -5908,7 +5908,7 @@
     ),
     (
         name: "Wand Shot Of The Peak",
-        image: "images/build/abilities/wand_shot1.png",
+        image: "images/build/abilities/wand_shot1.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 35,
@@ -5919,7 +5919,7 @@
     ),
     (
         name: "Fast Step Of The Deep",
-        image: "images/build/abilities/skill_183.png",
+        image: "images/build/abilities/skill_183.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 36,
@@ -5930,7 +5930,7 @@
     ),
     (
         name: "Shoot",
-        image: "images/build/abilities/Skill_Shoot.png",
+        image: "images/build/abilities/Skill_Shoot.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -5941,7 +5941,7 @@
     ),
     (
         name: "Holyfly",
-        image: "images/build/abilities/skill_173_holyfly.png",
+        image: "images/build/abilities/skill_173_holyfly.ktx2",
         kind: Holy,
         level: 15,
         mana_cost: 35,
@@ -5952,7 +5952,7 @@
     ),
     (
         name: "Angry",
-        image: "images/build/abilities/skill_30_angry.png",
+        image: "images/build/abilities/skill_30_angry.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 36,
@@ -5963,7 +5963,7 @@
     ),
     (
         name: "Venom Of The Mist",
-        image: "images/build/abilities/venom.png",
+        image: "images/build/abilities/venom.ktx2",
         kind: Nature,
         level: 15,
         mana_cost: 37,
@@ -5974,7 +5974,7 @@
     ),
     (
         name: "Tosic Wave",
-        image: "images/build/abilities/skill_378_tosicWave.png",
+        image: "images/build/abilities/skill_378_tosicWave.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 35,
@@ -5985,7 +5985,7 @@
     ),
     (
         name: "Shuriken",
-        image: "images/build/abilities/skill_12_Shuriken.png",
+        image: "images/build/abilities/skill_12_Shuriken.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 36,
@@ -5996,7 +5996,7 @@
     ),
     (
         name: "Sweeping Cleave Of The Vale",
-        image: "images/build/abilities/skill_72.png",
+        image: "images/build/abilities/skill_72.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -6007,7 +6007,7 @@
     ),
     (
         name: "Weather",
-        image: "images/build/abilities/Skill_394_weather.png",
+        image: "images/build/abilities/Skill_394_weather.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 35,
@@ -6018,7 +6018,7 @@
     ),
     (
         name: "Capture",
-        image: "images/build/abilities/capture.png",
+        image: "images/build/abilities/capture.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 36,
@@ -6029,7 +6029,7 @@
     ),
     (
         name: "Whirlwind Of The Skies",
-        image: "images/build/abilities/skill_122.png",
+        image: "images/build/abilities/skill_122.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -6040,7 +6040,7 @@
     ),
     (
         name: "Shield Breaker Of The Dawn",
-        image: "images/build/abilities/Skill_239.png",
+        image: "images/build/abilities/Skill_239.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 35,
@@ -6051,7 +6051,7 @@
     ),
     (
         name: "Firetouch",
-        image: "images/build/abilities/skill_7_firetouch.png",
+        image: "images/build/abilities/skill_7_firetouch.ktx2",
         kind: Fire,
         level: 15,
         mana_cost: 36,
@@ -6062,7 +6062,7 @@
     ),
     (
         name: "Wave",
-        image: "images/build/abilities/Skill_361_wave.png",
+        image: "images/build/abilities/Skill_361_wave.ktx2",
         kind: Physical,
         level: 15,
         mana_cost: 37,
@@ -6073,7 +6073,7 @@
     ),
     (
         name: "Dagger Attack Of The Sun",
-        image: "images/build/abilities/Skill_DaggerAttack.png",
+        image: "images/build/abilities/Skill_DaggerAttack.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 37,
@@ -6084,7 +6084,7 @@
     ),
     (
         name: "Fire Wave",
-        image: "images/build/abilities/FireWave.png",
+        image: "images/build/abilities/FireWave.ktx2",
         kind: Fire,
         level: 16,
         mana_cost: 38,
@@ -6095,7 +6095,7 @@
     ),
     (
         name: "Mortal Strike Of The Void",
-        image: "images/build/abilities/skill_193.png",
+        image: "images/build/abilities/skill_193.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 39,
@@ -6106,7 +6106,7 @@
     ),
     (
         name: "Weapon Switch",
-        image: "images/build/abilities/Skill_WeaponSwitch.png",
+        image: "images/build/abilities/Skill_WeaponSwitch.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 37,
@@ -6117,7 +6117,7 @@
     ),
     (
         name: "Demonic Cry",
-        image: "images/build/abilities/Skill_352_demonic_cry.png",
+        image: "images/build/abilities/Skill_352_demonic_cry.ktx2",
         kind: Shadow,
         level: 16,
         mana_cost: 38,
@@ -6128,7 +6128,7 @@
     ),
     (
         name: "Venom Of The Sea",
-        image: "images/build/abilities/Skill_420_venom.png",
+        image: "images/build/abilities/Skill_420_venom.ktx2",
         kind: Nature,
         level: 16,
         mana_cost: 39,
@@ -6139,7 +6139,7 @@
     ),
     (
         name: "Flock Of Mice",
-        image: "images/build/abilities/flock_of_mice.png",
+        image: "images/build/abilities/flock_of_mice.ktx2",
         kind: Ice,
         level: 16,
         mana_cost: 37,
@@ -6150,7 +6150,7 @@
     ),
     (
         name: "Moonshot",
-        image: "images/build/abilities/Skill_323_moonshot.png",
+        image: "images/build/abilities/Skill_323_moonshot.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 38,
@@ -6161,7 +6161,7 @@
     ),
     (
         name: "Death Blow Of The Shadow",
-        image: "images/build/abilities/Death_blow.png",
+        image: "images/build/abilities/Death_blow.ktx2",
         kind: Shadow,
         level: 16,
         mana_cost: 39,
@@ -6172,7 +6172,7 @@
     ),
     (
         name: "Absorb Shield Of The Grove",
-        image: "images/build/abilities/Skill_422.png",
+        image: "images/build/abilities/Skill_422.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 37,
@@ -6183,7 +6183,7 @@
     ),
     (
         name: "Sturdy Wall Of The Peak",
-        image: "images/build/abilities/Skill_306.png",
+        image: "images/build/abilities/Skill_306.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 38,
@@ -6194,7 +6194,7 @@
     ),
     (
         name: "Ironclad Resolve Of The Wild",
-        image: "images/build/abilities/Skill_450.png",
+        image: "images/build/abilities/Skill_450.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 39,
@@ -6205,7 +6205,7 @@
     ),
     (
         name: "Hoof Blow",
-        image: "images/build/abilities/hoof_blow.png",
+        image: "images/build/abilities/hoof_blow.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 37,
@@ -6216,7 +6216,7 @@
     ),
     (
         name: "Water Green",
-        image: "images/build/abilities/Skill_372_waterGreen.png",
+        image: "images/build/abilities/Skill_372_waterGreen.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 38,
@@ -6227,7 +6227,7 @@
     ),
     (
         name: "Summon Ent Of The Tundra",
-        image: "images/build/abilities/Summon_ent2.png",
+        image: "images/build/abilities/Summon_ent2.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 39,
@@ -6238,7 +6238,7 @@
     ),
     (
         name: "Fire Element",
-        image: "images/build/abilities/FireElement.png",
+        image: "images/build/abilities/FireElement.ktx2",
         kind: Fire,
         level: 16,
         mana_cost: 37,
@@ -6249,7 +6249,7 @@
     ),
     (
         name: "Last Stand Of The Marsh",
-        image: "images/build/abilities/Skill_400.png",
+        image: "images/build/abilities/Skill_400.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 38,
@@ -6260,7 +6260,7 @@
     ),
     (
         name: "Magic Bolt Of The Marsh",
-        image: "images/build/abilities/magic_bolt3.png",
+        image: "images/build/abilities/magic_bolt3.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 39,
@@ -6271,7 +6271,7 @@
     ),
     (
         name: "Shadow Drain",
-        image: "images/build/abilities/shadow_drain.png",
+        image: "images/build/abilities/shadow_drain.ktx2",
         kind: Shadow,
         level: 16,
         mana_cost: 37,
@@ -6282,7 +6282,7 @@
     ),
     (
         name: "Beast Vortex",
-        image: "images/build/abilities/skill_100.png",
+        image: "images/build/abilities/skill_100.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 38,
@@ -6293,7 +6293,7 @@
     ),
     (
         name: "Unholyweapon",
-        image: "images/build/abilities/Skill_249_unholyweapon.png",
+        image: "images/build/abilities/Skill_249_unholyweapon.ktx2",
         kind: Holy,
         level: 16,
         mana_cost: 39,
@@ -6304,7 +6304,7 @@
     ),
     (
         name: "Shadowstrike Of The Dawn",
-        image: "images/build/abilities/skill_117.png",
+        image: "images/build/abilities/skill_117.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 37,
@@ -6315,7 +6315,7 @@
     ),
     (
         name: "Sun",
-        image: "images/build/abilities/Sun.png",
+        image: "images/build/abilities/Sun.ktx2",
         kind: Fire,
         level: 16,
         mana_cost: 38,
@@ -6326,7 +6326,7 @@
     ),
     (
         name: "Silent Cut Of The Storm",
-        image: "images/build/abilities/Skill_438.png",
+        image: "images/build/abilities/Skill_438.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 39,
@@ -6337,7 +6337,7 @@
     ),
     (
         name: "Headshot",
-        image: "images/build/abilities/headshot.png",
+        image: "images/build/abilities/headshot.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 37,
@@ -6348,7 +6348,7 @@
     ),
     (
         name: "Spirit Sword",
-        image: "images/build/abilities/spirit_sword.png",
+        image: "images/build/abilities/spirit_sword.ktx2",
         kind: Shadow,
         level: 16,
         mana_cost: 38,
@@ -6359,7 +6359,7 @@
     ),
     (
         name: "Rage Of The Moon",
-        image: "images/build/abilities/skill_188_rage.png",
+        image: "images/build/abilities/skill_188_rage.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 39,
@@ -6370,7 +6370,7 @@
     ),
     (
         name: "Noxious Wound Of The Void",
-        image: "images/build/abilities/Skill_491.png",
+        image: "images/build/abilities/Skill_491.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 37,
@@ -6381,7 +6381,7 @@
     ),
     (
         name: "Ambush Of The Void",
-        image: "images/build/abilities/skill_164.png",
+        image: "images/build/abilities/skill_164.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 38,
@@ -6392,7 +6392,7 @@
     ),
     (
         name: "Fatal Strike Of The Sea",
-        image: "images/build/abilities/skill_210.png",
+        image: "images/build/abilities/skill_210.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 39,
@@ -6403,7 +6403,7 @@
     ),
     (
         name: "Venomous Bite Of The Sea",
-        image: "images/build/abilities/Skill_370.png",
+        image: "images/build/abilities/Skill_370.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 37,
@@ -6414,7 +6414,7 @@
     ),
     (
         name: "Agile Dagger Of The Flame",
-        image: "images/build/abilities/Skill_401.png",
+        image: "images/build/abilities/Skill_401.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 38,
@@ -6425,7 +6425,7 @@
     ),
     (
         name: "Blaster",
-        image: "images/build/abilities/blaster.png",
+        image: "images/build/abilities/blaster.ktx2",
         kind: Fire,
         level: 16,
         mana_cost: 39,
@@ -6436,7 +6436,7 @@
     ),
     (
         name: "Swift Step Of The Grove",
-        image: "images/build/abilities/Skill_421.png",
+        image: "images/build/abilities/Skill_421.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 37,
@@ -6447,7 +6447,7 @@
     ),
     (
         name: "Magic Resistance",
-        image: "images/build/abilities/Magic_resistance.png",
+        image: "images/build/abilities/Magic_resistance.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 38,
@@ -6458,7 +6458,7 @@
     ),
     (
         name: "Quick Dash Of The Peak",
-        image: "images/build/abilities/Skill_356.png",
+        image: "images/build/abilities/Skill_356.ktx2",
         kind: Physical,
         level: 16,
         mana_cost: 39,
@@ -6469,7 +6469,7 @@
     ),
     (
         name: "Twoweapons",
-        image: "images/build/abilities/skill_53_twoweapons.png",
+        image: "images/build/abilities/skill_53_twoweapons.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 39,
@@ -6480,7 +6480,7 @@
     ),
     (
         name: "Wind Runner Of The Wild",
-        image: "images/build/abilities/Skill_285.png",
+        image: "images/build/abilities/Skill_285.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 40,
@@ -6491,7 +6491,7 @@
     ),
     (
         name: "Throwing Axe Of The Desert",
-        image: "images/build/abilities/Skill_350.png",
+        image: "images/build/abilities/Skill_350.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6502,7 +6502,7 @@
     ),
     (
         name: "Toxic",
-        image: "images/build/abilities/Skill_376_toxic.png",
+        image: "images/build/abilities/Skill_376_toxic.ktx2",
         kind: Nature,
         level: 17,
         mana_cost: 39,
@@ -6513,7 +6513,7 @@
     ),
     (
         name: "Overlord",
-        image: "images/build/abilities/Skill_444_overlord.png",
+        image: "images/build/abilities/Skill_444_overlord.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 40,
@@ -6524,7 +6524,7 @@
     ),
     (
         name: "Thirdeye",
-        image: "images/build/abilities/skill_4_thirdeye.png",
+        image: "images/build/abilities/skill_4_thirdeye.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6535,7 +6535,7 @@
     ),
     (
         name: "Heal Of The Vale",
-        image: "images/build/abilities/heal.png",
+        image: "images/build/abilities/heal.ktx2",
         kind: Holy,
         level: 17,
         mana_cost: 39,
@@ -6546,7 +6546,7 @@
     ),
     (
         name: "Fleet Footed Of The Vale",
-        image: "images/build/abilities/Skill_455.png",
+        image: "images/build/abilities/Skill_455.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 40,
@@ -6557,7 +6557,7 @@
     ),
     (
         name: "Galleon",
-        image: "images/build/abilities/galleon.png",
+        image: "images/build/abilities/galleon.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6568,7 +6568,7 @@
     ),
     (
         name: "Firearrows",
-        image: "images/build/abilities/skill_171_firearrows.png",
+        image: "images/build/abilities/skill_171_firearrows.ktx2",
         kind: Fire,
         level: 17,
         mana_cost: 39,
@@ -6579,7 +6579,7 @@
     ),
     (
         name: "Fast Step Of The Skies",
-        image: "images/build/abilities/skill_152.png",
+        image: "images/build/abilities/skill_152.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 40,
@@ -6590,7 +6590,7 @@
     ),
     (
         name: "Sidestep Of The Night",
-        image: "images/build/abilities/Skill_357.png",
+        image: "images/build/abilities/Skill_357.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6601,7 +6601,7 @@
     ),
     (
         name: "Gills",
-        image: "images/build/abilities/skill_108_gills.png",
+        image: "images/build/abilities/skill_108_gills.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 39,
@@ -6612,7 +6612,7 @@
     ),
     (
         name: "Blade",
-        image: "images/build/abilities/skill_11_blade.png",
+        image: "images/build/abilities/skill_11_blade.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 40,
@@ -6623,7 +6623,7 @@
     ),
     (
         name: "Hit Of The Sun",
-        image: "images/build/abilities/hit.png",
+        image: "images/build/abilities/hit.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6634,7 +6634,7 @@
     ),
     (
         name: "Brist Of The Moon",
-        image: "images/build/abilities/Skill_431_brist.png",
+        image: "images/build/abilities/Skill_431_brist.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 39,
@@ -6645,7 +6645,7 @@
     ),
     (
         name: "Heavy Blow",
-        image: "images/build/abilities/heavy_blow.png",
+        image: "images/build/abilities/heavy_blow.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 40,
@@ -6656,7 +6656,7 @@
     ),
     (
         name: "Shadow Guard",
-        image: "images/build/abilities/skill_488_shadowGuard.png",
+        image: "images/build/abilities/skill_488_shadowGuard.ktx2",
         kind: Shadow,
         level: 17,
         mana_cost: 41,
@@ -6667,7 +6667,7 @@
     ),
     (
         name: "Y Attack",
-        image: "images/build/abilities/Y_attack.png",
+        image: "images/build/abilities/Y_attack.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 39,
@@ -6678,7 +6678,7 @@
     ),
     (
         name: "Decimate Of The Flame",
-        image: "images/build/abilities/skill_50.png",
+        image: "images/build/abilities/skill_50.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 40,
@@ -6689,7 +6689,7 @@
     ),
     (
         name: "Deadinside",
-        image: "images/build/abilities/Skill_389_deadinside.png",
+        image: "images/build/abilities/Skill_389_deadinside.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6700,7 +6700,7 @@
     ),
     (
         name: "Shield Breaker Of The Shadow",
-        image: "images/build/abilities/skill_254.png",
+        image: "images/build/abilities/skill_254.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 39,
@@ -6711,7 +6711,7 @@
     ),
     (
         name: "Soul Devouring",
-        image: "images/build/abilities/soul_devouring.png",
+        image: "images/build/abilities/soul_devouring.ktx2",
         kind: Shadow,
         level: 17,
         mana_cost: 40,
@@ -6722,7 +6722,7 @@
     ),
     (
         name: "Shadow Stoune",
-        image: "images/build/abilities/shadow_stoune.png",
+        image: "images/build/abilities/shadow_stoune.ktx2",
         kind: Shadow,
         level: 17,
         mana_cost: 41,
@@ -6733,7 +6733,7 @@
     ),
     (
         name: "Big Lightning",
-        image: "images/build/abilities/Big_Lightning.png",
+        image: "images/build/abilities/Big_Lightning.ktx2",
         kind: Holy,
         level: 17,
         mana_cost: 39,
@@ -6744,7 +6744,7 @@
     ),
     (
         name: "Summon Dogs",
-        image: "images/build/abilities/summon_dogs.png",
+        image: "images/build/abilities/summon_dogs.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 40,
@@ -6755,7 +6755,7 @@
     ),
     (
         name: "Disarm",
-        image: "images/build/abilities/Skill_Disarm.png",
+        image: "images/build/abilities/Skill_Disarm.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6766,7 +6766,7 @@
     ),
     (
         name: "Wall Of The Desert",
-        image: "images/build/abilities/wall.png",
+        image: "images/build/abilities/wall.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 39,
@@ -6777,7 +6777,7 @@
     ),
     (
         name: "Manablast",
-        image: "images/build/abilities/skill_28Manablast.png",
+        image: "images/build/abilities/skill_28Manablast.ktx2",
         kind: Fire,
         level: 17,
         mana_cost: 40,
@@ -6788,7 +6788,7 @@
     ),
     (
         name: "Axedomination",
-        image: "images/build/abilities/skill_62_axedomination.png",
+        image: "images/build/abilities/skill_62_axedomination.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6799,7 +6799,7 @@
     ),
     (
         name: "Stalwart Defense Of The Abyss",
-        image: "images/build/abilities/skill_86.png",
+        image: "images/build/abilities/skill_86.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 39,
@@ -6810,7 +6810,7 @@
     ),
     (
         name: "Conversion",
-        image: "images/build/abilities/Skill_436_conversion.png",
+        image: "images/build/abilities/Skill_436_conversion.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 40,
@@ -6821,7 +6821,7 @@
     ),
     (
         name: "Fortress Stance Of The Forest",
-        image: "images/build/abilities/Skill_353.png",
+        image: "images/build/abilities/Skill_353.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6832,7 +6832,7 @@
     ),
     (
         name: "Critical Strike Of The Forest",
-        image: "images/build/abilities/Critical_strike2.png",
+        image: "images/build/abilities/Critical_strike2.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 39,
@@ -6843,7 +6843,7 @@
     ),
     (
         name: "Healing Of The Hearth",
-        image: "images/build/abilities/healing.png",
+        image: "images/build/abilities/healing.ktx2",
         kind: Holy,
         level: 17,
         mana_cost: 40,
@@ -6854,7 +6854,7 @@
     ),
     (
         name: "Minorattack",
-        image: "images/build/abilities/Skill_242_minorattack.png",
+        image: "images/build/abilities/Skill_242_minorattack.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 41,
@@ -6865,7 +6865,7 @@
     ),
     (
         name: "Focus",
-        image: "images/build/abilities/focus.png",
+        image: "images/build/abilities/focus.ktx2",
         kind: Physical,
         level: 17,
         mana_cost: 39,
@@ -6876,7 +6876,7 @@
     ),
     (
         name: "Endurance",
-        image: "images/build/abilities/Skill_endurance.png",
+        image: "images/build/abilities/Skill_endurance.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -6887,7 +6887,7 @@
     ),
     (
         name: "Unyielding Will Of The Storm",
-        image: "images/build/abilities/skill_128.png",
+        image: "images/build/abilities/skill_128.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -6898,7 +6898,7 @@
     ),
     (
         name: "Guardian Barrier Of The Sun",
-        image: "images/build/abilities/Skill_419.png",
+        image: "images/build/abilities/Skill_419.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 41,
@@ -6909,7 +6909,7 @@
     ),
     (
         name: "Fireball Of The Moon",
-        image: "images/build/abilities/fireball.png",
+        image: "images/build/abilities/fireball.ktx2",
         kind: Fire,
         level: 18,
         mana_cost: 42,
@@ -6920,7 +6920,7 @@
     ),
     (
         name: "Meditation",
-        image: "images/build/abilities/skill_2_meditation.png",
+        image: "images/build/abilities/skill_2_meditation.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -6931,7 +6931,7 @@
     ),
     (
         name: "Viper Venom Of The Void",
-        image: "images/build/abilities/skill_150.png",
+        image: "images/build/abilities/skill_150.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 41,
@@ -6942,7 +6942,7 @@
     ),
     (
         name: "Firelight",
-        image: "images/build/abilities/skill_6_firelight.png",
+        image: "images/build/abilities/skill_6_firelight.ktx2",
         kind: Fire,
         level: 18,
         mana_cost: 42,
@@ -6953,7 +6953,7 @@
     ),
     (
         name: "Backstab Of The Sea",
-        image: "images/build/abilities/skill_120.png",
+        image: "images/build/abilities/skill_120.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -6964,7 +6964,7 @@
     ),
     (
         name: "Ignore",
-        image: "images/build/abilities/skill_9_ignore.png",
+        image: "images/build/abilities/skill_9_ignore.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 41,
@@ -6975,7 +6975,7 @@
     ),
     (
         name: "Lethal Poison Of The Frost",
-        image: "images/build/abilities/skill_121.png",
+        image: "images/build/abilities/skill_121.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -6986,7 +6986,7 @@
     ),
     (
         name: "Shadowbolt",
-        image: "images/build/abilities/shadowbolt.png",
+        image: "images/build/abilities/shadowbolt.ktx2",
         kind: Shadow,
         level: 18,
         mana_cost: 43,
@@ -6997,7 +6997,7 @@
     ),
     (
         name: "Wave Of Evil Of The Grove",
-        image: "images/build/abilities/Wave_of_evil2.png",
+        image: "images/build/abilities/Wave_of_evil2.ktx2",
         kind: Shadow,
         level: 18,
         mana_cost: 41,
@@ -7008,7 +7008,7 @@
     ),
     (
         name: "Garrote Of The Peak",
-        image: "images/build/abilities/Skill_363.png",
+        image: "images/build/abilities/Skill_363.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -7019,7 +7019,7 @@
     ),
     (
         name: "Deadly Toxins Of The Deep",
-        image: "images/build/abilities/Skill_281.png",
+        image: "images/build/abilities/Skill_281.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -7030,7 +7030,7 @@
     ),
     (
         name: "Noxious Wound Of The Desert",
-        image: "images/build/abilities/Skill_275.png",
+        image: "images/build/abilities/Skill_275.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 41,
@@ -7041,7 +7041,7 @@
     ),
     (
         name: "Healingwave",
-        image: "images/build/abilities/skill_176_healingwave.png",
+        image: "images/build/abilities/skill_176_healingwave.ktx2",
         kind: Holy,
         level: 18,
         mana_cost: 42,
@@ -7052,7 +7052,7 @@
     ),
     (
         name: "Frost Arrow",
-        image: "images/build/abilities/frost_arrow.png",
+        image: "images/build/abilities/frost_arrow.ktx2",
         kind: Ice,
         level: 18,
         mana_cost: 43,
@@ -7063,7 +7063,7 @@
     ),
     (
         name: "Fire Wall",
-        image: "images/build/abilities/FireWall.png",
+        image: "images/build/abilities/FireWall.ktx2",
         kind: Fire,
         level: 18,
         mana_cost: 41,
@@ -7074,7 +7074,7 @@
     ),
     (
         name: "Absorb Of The Abyss",
-        image: "images/build/abilities/Skill_467_absorb.png",
+        image: "images/build/abilities/Skill_467_absorb.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -7085,7 +7085,7 @@
     ),
     (
         name: "Assassins Mark Of The Marsh",
-        image: "images/build/abilities/Skill_412.png",
+        image: "images/build/abilities/Skill_412.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -7096,7 +7096,7 @@
     ),
     (
         name: "Timestop",
-        image: "images/build/abilities/skill_115_timestop.png",
+        image: "images/build/abilities/skill_115_timestop.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 41,
@@ -7107,7 +7107,7 @@
     ),
     (
         name: "Y Warrior Ruthlessness",
-        image: "images/build/abilities/Y_WarriorRuthlessness.png",
+        image: "images/build/abilities/Y_WarriorRuthlessness.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -7118,7 +7118,7 @@
     ),
     (
         name: "Quick Dash Of The Skies",
-        image: "images/build/abilities/Skill_473.png",
+        image: "images/build/abilities/Skill_473.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -7129,7 +7129,7 @@
     ),
     (
         name: "Drunkenness",
-        image: "images/build/abilities/drunkenness.png",
+        image: "images/build/abilities/drunkenness.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 41,
@@ -7140,7 +7140,7 @@
     ),
     (
         name: "Weponbreak",
-        image: "images/build/abilities/skill_199_weponbreak.png",
+        image: "images/build/abilities/skill_199_weponbreak.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -7151,7 +7151,7 @@
     ),
     (
         name: "Throwing Axe Of The Storm",
-        image: "images/build/abilities/skill_66.png",
+        image: "images/build/abilities/skill_66.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -7162,7 +7162,7 @@
     ),
     (
         name: "Paralysis",
-        image: "images/build/abilities/Skill_387_paralysis.png",
+        image: "images/build/abilities/Skill_387_paralysis.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 41,
@@ -7173,7 +7173,7 @@
     ),
     (
         name: "Summon Skeleton Army",
-        image: "images/build/abilities/summon_skeleton_army.png",
+        image: "images/build/abilities/summon_skeleton_army.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -7184,7 +7184,7 @@
     ),
     (
         name: "Skirmish Dodge Of The Stars",
-        image: "images/build/abilities/Skill_311.png",
+        image: "images/build/abilities/Skill_311.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -7195,7 +7195,7 @@
     ),
     (
         name: "Sunrays",
-        image: "images/build/abilities/skill_159_sunrays.png",
+        image: "images/build/abilities/skill_159_sunrays.ktx2",
         kind: Fire,
         level: 18,
         mana_cost: 41,
@@ -7206,7 +7206,7 @@
     ),
     (
         name: "Fleet Footed Of The Void",
-        image: "images/build/abilities/Skill_355.png",
+        image: "images/build/abilities/Skill_355.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -7217,7 +7217,7 @@
     ),
     (
         name: "Vampire",
-        image: "images/build/abilities/vampire.png",
+        image: "images/build/abilities/vampire.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -7228,7 +7228,7 @@
     ),
     (
         name: "Torrential Geyser",
-        image: "images/build/abilities/skill_102.png",
+        image: "images/build/abilities/skill_102.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 41,
@@ -7239,7 +7239,7 @@
     ),
     (
         name: "Club Attack",
-        image: "images/build/abilities/club_attack.png",
+        image: "images/build/abilities/club_attack.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -7250,7 +7250,7 @@
     ),
     (
         name: "Sidestep Of The Shadow",
-        image: "images/build/abilities/Skill_442.png",
+        image: "images/build/abilities/Skill_442.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 43,
@@ -7261,7 +7261,7 @@
     ),
     (
         name: "Heavy Strike Of The Grove",
-        image: "images/build/abilities/skill_39.png",
+        image: "images/build/abilities/skill_39.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 41,
@@ -7272,7 +7272,7 @@
     ),
     (
         name: "Invisibility",
-        image: "images/build/abilities/skill_56_invisibility.png",
+        image: "images/build/abilities/skill_56_invisibility.ktx2",
         kind: Physical,
         level: 18,
         mana_cost: 42,
@@ -7283,7 +7283,7 @@
     ),
     (
         name: "Dispell",
-        image: "images/build/abilities/Skill_229_dispell.png",
+        image: "images/build/abilities/Skill_229_dispell.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 45,
@@ -7294,7 +7294,7 @@
     ),
     (
         name: "Holy Power",
-        image: "images/build/abilities/Holy_power.png",
+        image: "images/build/abilities/Holy_power.ktx2",
         kind: Holy,
         level: 19,
         mana_cost: 43,
@@ -7305,7 +7305,7 @@
     ),
     (
         name: "Critical Strike Of The Wild",
-        image: "images/build/abilities/Critical_strike3.png",
+        image: "images/build/abilities/Critical_strike3.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 44,
@@ -7316,7 +7316,7 @@
     ),
     (
         name: "Bow Shot Of The Desert",
-        image: "images/build/abilities/bow_shot1.png",
+        image: "images/build/abilities/bow_shot1.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 45,
@@ -7327,7 +7327,7 @@
     ),
     (
         name: "Overpower Of The Tundra",
-        image: "images/build/abilities/Skill_208.png",
+        image: "images/build/abilities/Skill_208.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 43,
@@ -7338,7 +7338,7 @@
     ),
     (
         name: "Decimate Of The Mist",
-        image: "images/build/abilities/Skill_283.png",
+        image: "images/build/abilities/Skill_283.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 44,
@@ -7349,7 +7349,7 @@
     ),
     (
         name: "Teleport",
-        image: "images/build/abilities/teleport.png",
+        image: "images/build/abilities/teleport.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 45,
@@ -7360,7 +7360,7 @@
     ),
     (
         name: "Axe Axe",
-        image: "images/build/abilities/Skill_AxeAxe.png",
+        image: "images/build/abilities/Skill_AxeAxe.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 43,
@@ -7371,7 +7371,7 @@
     ),
     (
         name: "Meteor",
-        image: "images/build/abilities/skill_5_meteor.png",
+        image: "images/build/abilities/skill_5_meteor.ktx2",
         kind: Fire,
         level: 19,
         mana_cost: 44,
@@ -7382,7 +7382,7 @@
     ),
     (
         name: "Unholyaura Of The Forest",
-        image: "images/build/abilities/skill_77_unholyaura.png",
+        image: "images/build/abilities/skill_77_unholyaura.ktx2",
         kind: Holy,
         level: 19,
         mana_cost: 45,
@@ -7393,7 +7393,7 @@
     ),
     (
         name: "Colbalch",
-        image: "images/build/abilities/Skill_499_colbalch.png",
+        image: "images/build/abilities/Skill_499_colbalch.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 43,
@@ -7404,7 +7404,7 @@
     ),
     (
         name: "Battle Cry Of The Dawn",
-        image: "images/build/abilities/Skill_430.png",
+        image: "images/build/abilities/Skill_430.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 44,
@@ -7415,7 +7415,7 @@
     ),
     (
         name: "Mortal Strike Of The Dawn",
-        image: "images/build/abilities/Skill_267.png",
+        image: "images/build/abilities/Skill_267.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 45,
@@ -7426,7 +7426,7 @@
     ),
     (
         name: "Sharp",
-        image: "images/build/abilities/Skill_440_sharp.png",
+        image: "images/build/abilities/Skill_440_sharp.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 43,
@@ -7437,7 +7437,7 @@
     ),
     (
         name: "Red Wave",
-        image: "images/build/abilities/red_wave.png",
+        image: "images/build/abilities/red_wave.ktx2",
         kind: Fire,
         level: 19,
         mana_cost: 44,
@@ -7448,7 +7448,7 @@
     ),
     (
         name: "Unbreakable Guard Of The Moon",
-        image: "images/build/abilities/skill_104.png",
+        image: "images/build/abilities/skill_104.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 45,
@@ -7459,7 +7459,7 @@
     ),
     (
         name: "Vortex Of The Moon",
-        image: "images/build/abilities/vortex.png",
+        image: "images/build/abilities/vortex.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 43,
@@ -7470,7 +7470,7 @@
     ),
     (
         name: "Holy Arrow",
-        image: "images/build/abilities/skill_174_holyArrow.png",
+        image: "images/build/abilities/skill_174_holyArrow.ktx2",
         kind: Holy,
         level: 19,
         mana_cost: 44,
@@ -7481,7 +7481,7 @@
     ),
     (
         name: "Chain",
-        image: "images/build/abilities/skill_27_chain.png",
+        image: "images/build/abilities/skill_27_chain.ktx2",
         kind: Shadow,
         level: 19,
         mana_cost: 45,
@@ -7492,7 +7492,7 @@
     ),
     (
         name: "Bloodlust",
-        image: "images/build/abilities/Bloodlust.png",
+        image: "images/build/abilities/Bloodlust.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 43,
@@ -7503,7 +7503,7 @@
     ),
     (
         name: "Sturdy Wall Of The Flame",
-        image: "images/build/abilities/Skill_475.png",
+        image: "images/build/abilities/Skill_475.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 44,
@@ -7514,7 +7514,7 @@
     ),
     (
         name: "Howl Of Terror",
-        image: "images/build/abilities/Howl_of_terror.png",
+        image: "images/build/abilities/Howl_of_terror.ktx2",
         kind: Shadow,
         level: 19,
         mana_cost: 45,
@@ -7525,7 +7525,7 @@
     ),
     (
         name: "Fell Skin",
-        image: "images/build/abilities/fell_skin.png",
+        image: "images/build/abilities/fell_skin.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 43,
@@ -7536,7 +7536,7 @@
     ),
     (
         name: "Defenders Oath Of The Shadow",
-        image: "images/build/abilities/skill_168.png",
+        image: "images/build/abilities/skill_168.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 44,
@@ -7547,7 +7547,7 @@
     ),
     (
         name: "Ill",
-        image: "images/build/abilities/skill_403_ill.png",
+        image: "images/build/abilities/skill_403_ill.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 45,
@@ -7558,7 +7558,7 @@
     ),
     (
         name: "Summon Army Of Death",
-        image: "images/build/abilities/summon_army_of_death.png",
+        image: "images/build/abilities/summon_army_of_death.ktx2",
         kind: Shadow,
         level: 19,
         mana_cost: 43,
@@ -7569,7 +7569,7 @@
     ),
     (
         name: "Daggermastery",
-        image: "images/build/abilities/Skill_287_daggermastery.png",
+        image: "images/build/abilities/Skill_287_daggermastery.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 44,
@@ -7580,7 +7580,7 @@
     ),
     (
         name: "Absorb Of The Wild",
-        image: "images/build/abilities/Skill_460_absorb.png",
+        image: "images/build/abilities/Skill_460_absorb.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 45,
@@ -7591,7 +7591,7 @@
     ),
     (
         name: "Cry Of The Desert",
-        image: "images/build/abilities/Skill_Cry.png",
+        image: "images/build/abilities/Skill_Cry.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 43,
@@ -7602,7 +7602,7 @@
     ),
     (
         name: "Sneak Attack Of The Tundra",
-        image: "images/build/abilities/Skill_309.png",
+        image: "images/build/abilities/Skill_309.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 44,
@@ -7613,7 +7613,7 @@
     ),
     (
         name: "Magic Runes",
-        image: "images/build/abilities/magic_runes.png",
+        image: "images/build/abilities/magic_runes.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 45,
@@ -7624,7 +7624,7 @@
     ),
     (
         name: "Venom Of The Abyss",
-        image: "images/build/abilities/venom2.png",
+        image: "images/build/abilities/venom2.ktx2",
         kind: Nature,
         level: 19,
         mana_cost: 43,
@@ -7635,7 +7635,7 @@
     ),
     (
         name: "Evade",
-        image: "images/build/abilities/Skill_Evade.png",
+        image: "images/build/abilities/Skill_Evade.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 44,
@@ -7646,7 +7646,7 @@
     ),
     (
         name: "Lightning",
-        image: "images/build/abilities/Lightning.png",
+        image: "images/build/abilities/Lightning.ktx2",
         kind: Holy,
         level: 19,
         mana_cost: 45,
@@ -7657,7 +7657,7 @@
     ),
     (
         name: "Summon Snake Army",
-        image: "images/build/abilities/Summon_snake_army.png",
+        image: "images/build/abilities/Summon_snake_army.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 43,
@@ -7668,7 +7668,7 @@
     ),
     (
         name: "Garrote Of The Skies",
-        image: "images/build/abilities/Skill_396.png",
+        image: "images/build/abilities/Skill_396.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 44,
@@ -7679,7 +7679,7 @@
     ),
     (
         name: "Alch",
-        image: "images/build/abilities/Skill_329_alch.png",
+        image: "images/build/abilities/Skill_329_alch.ktx2",
         kind: Physical,
         level: 19,
         mana_cost: 45,
@@ -7690,7 +7690,7 @@
     ),
     (
         name: "Noxious Wound Of The Dawn",
-        image: "images/build/abilities/Skill_261.png",
+        image: "images/build/abilities/Skill_261.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 45,
@@ -7701,7 +7701,7 @@
     ),
     (
         name: "Ice Nova",
-        image: "images/build/abilities/IceNova.png",
+        image: "images/build/abilities/IceNova.ktx2",
         kind: Ice,
         level: 20,
         mana_cost: 46,
@@ -7712,7 +7712,7 @@
     ),
     (
         name: "Naturewarrior",
-        image: "images/build/abilities/skill_148_naturewarrior.png",
+        image: "images/build/abilities/skill_148_naturewarrior.ktx2",
         kind: Nature,
         level: 20,
         mana_cost: 47,
@@ -7723,7 +7723,7 @@
     ),
     (
         name: "Fireblast",
-        image: "images/build/abilities/skill_182_fireblast.png",
+        image: "images/build/abilities/skill_182_fireblast.ktx2",
         kind: Fire,
         level: 20,
         mana_cost: 45,
@@ -7734,7 +7734,7 @@
     ),
     (
         name: "Venom Of The Moon",
-        image: "images/build/abilities/Skill_404_venom.png",
+        image: "images/build/abilities/Skill_404_venom.ktx2",
         kind: Nature,
         level: 20,
         mana_cost: 46,
@@ -7745,7 +7745,7 @@
     ),
     (
         name: "Sleep",
-        image: "images/build/abilities/Skill_393_sleep.png",
+        image: "images/build/abilities/Skill_393_sleep.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -7756,7 +7756,7 @@
     ),
     (
         name: "Critical Strike Of The Void",
-        image: "images/build/abilities/Critical_strike4.png",
+        image: "images/build/abilities/Critical_strike4.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 45,
@@ -7767,7 +7767,7 @@
     ),
     (
         name: "Sword Light",
-        image: "images/build/abilities/skill_162_swordLight.png",
+        image: "images/build/abilities/skill_162_swordLight.ktx2",
         kind: Holy,
         level: 20,
         mana_cost: 46,
@@ -7778,7 +7778,7 @@
     ),
     (
         name: "Quick Dash Of The Flame",
-        image: "images/build/abilities/Skill_265.png",
+        image: "images/build/abilities/Skill_265.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -7789,7 +7789,7 @@
     ),
     (
         name: "Shadowpower",
-        image: "images/build/abilities/Shadowpower.png",
+        image: "images/build/abilities/Shadowpower.ktx2",
         kind: Shadow,
         level: 20,
         mana_cost: 45,
@@ -7800,7 +7800,7 @@
     ),
     (
         name: "Death",
-        image: "images/build/abilities/Death.png",
+        image: "images/build/abilities/Death.ktx2",
         kind: Shadow,
         level: 20,
         mana_cost: 46,
@@ -7811,7 +7811,7 @@
     ),
     (
         name: "Discipline",
-        image: "images/build/abilities/Skill_243_discipline.png",
+        image: "images/build/abilities/Skill_243_discipline.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -7822,7 +7822,7 @@
     ),
     (
         name: "Bonebreaker",
-        image: "images/build/abilities/Skill_477_bonebreaker.png",
+        image: "images/build/abilities/Skill_477_bonebreaker.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 45,
@@ -7833,7 +7833,7 @@
     ),
     (
         name: "Track",
-        image: "images/build/abilities/Skill_416_track.png",
+        image: "images/build/abilities/Skill_416_track.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 46,
@@ -7844,7 +7844,7 @@
     ),
     (
         name: "Skirmish Dodge Of The Wild",
-        image: "images/build/abilities/Skill_472.png",
+        image: "images/build/abilities/Skill_472.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -7855,7 +7855,7 @@
     ),
     (
         name: "Acrobatic Leap Of The Wild",
-        image: "images/build/abilities/skill_155.png",
+        image: "images/build/abilities/skill_155.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 45,
@@ -7866,7 +7866,7 @@
     ),
     (
         name: "Dnk",
-        image: "images/build/abilities/Skill_496_dnk.png",
+        image: "images/build/abilities/Skill_496_dnk.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 46,
@@ -7877,7 +7877,7 @@
     ),
     (
         name: "Hammerfall",
-        image: "images/build/abilities/skill_451_hammerfall.png",
+        image: "images/build/abilities/skill_451_hammerfall.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -7888,7 +7888,7 @@
     ),
     (
         name: "Quick Reflexes Of The Mist",
-        image: "images/build/abilities/skill_113.png",
+        image: "images/build/abilities/skill_113.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 45,
@@ -7899,7 +7899,7 @@
     ),
     (
         name: "Fast Step Of The Marsh",
-        image: "images/build/abilities/Skill_338.png",
+        image: "images/build/abilities/Skill_338.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 46,
@@ -7910,7 +7910,7 @@
     ),
     (
         name: "Escape",
-        image: "images/build/abilities/Escape.png",
+        image: "images/build/abilities/Escape.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -7921,7 +7921,7 @@
     ),
     (
         name: "Shadow Of The Vale",
-        image: "images/build/abilities/shadow.png",
+        image: "images/build/abilities/shadow.ktx2",
         kind: Shadow,
         level: 20,
         mana_cost: 45,
@@ -7932,7 +7932,7 @@
     ),
     (
         name: "Bow Shot Of The Forest",
-        image: "images/build/abilities/bow_shot2.png",
+        image: "images/build/abilities/bow_shot2.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 46,
@@ -7943,7 +7943,7 @@
     ),
     (
         name: "Summon Snake",
-        image: "images/build/abilities/summon_snake.png",
+        image: "images/build/abilities/summon_snake.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -7954,7 +7954,7 @@
     ),
     (
         name: "Savage Rend Of The Dawn",
-        image: "images/build/abilities/Skill_384.png",
+        image: "images/build/abilities/Skill_384.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 45,
@@ -7965,7 +7965,7 @@
     ),
     (
         name: "Summon Golem",
-        image: "images/build/abilities/summon_golem.png",
+        image: "images/build/abilities/summon_golem.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 46,
@@ -7976,7 +7976,7 @@
     ),
     (
         name: "Critical Strike Of The Night",
-        image: "images/build/abilities/Critical_strike.png",
+        image: "images/build/abilities/Critical_strike.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -7987,7 +7987,7 @@
     ),
     (
         name: "Blink",
-        image: "images/build/abilities/Skill_409_blink.png",
+        image: "images/build/abilities/Skill_409_blink.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 45,
@@ -7998,7 +7998,7 @@
     ),
     (
         name: "Cleave",
-        image: "images/build/abilities/Skill_Cleave.png",
+        image: "images/build/abilities/Skill_Cleave.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 46,
@@ -8009,7 +8009,7 @@
     ),
     (
         name: "Whirlwind Of The Stars",
-        image: "images/build/abilities/Skill_334.png",
+        image: "images/build/abilities/Skill_334.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -8020,7 +8020,7 @@
     ),
     (
         name: "Sharpen",
-        image: "images/build/abilities/Skill_Sharpen.png",
+        image: "images/build/abilities/Skill_Sharpen.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 45,
@@ -8031,7 +8031,7 @@
     ),
     (
         name: "Eye",
-        image: "images/build/abilities/Skill_322_eye.png",
+        image: "images/build/abilities/Skill_322_eye.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 46,
@@ -8042,7 +8042,7 @@
     ),
     (
         name: "Concussive Blow Of The Sea",
-        image: "images/build/abilities/Skill_313.png",
+        image: "images/build/abilities/Skill_313.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,
@@ -8053,7 +8053,7 @@
     ),
     (
         name: "Laststand",
-        image: "images/build/abilities/Skill_364_laststand.png",
+        image: "images/build/abilities/Skill_364_laststand.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 45,
@@ -8064,7 +8064,7 @@
     ),
     (
         name: "Demonic Of The Flame",
-        image: "images/build/abilities/skill_20_Demonic.png",
+        image: "images/build/abilities/skill_20_Demonic.ktx2",
         kind: Shadow,
         level: 20,
         mana_cost: 46,
@@ -8075,7 +8075,7 @@
     ),
     (
         name: "Spear Hit",
-        image: "images/build/abilities/spear_hit.png",
+        image: "images/build/abilities/spear_hit.ktx2",
         kind: Physical,
         level: 20,
         mana_cost: 47,

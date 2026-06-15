@@ -5,6 +5,19 @@ edition = "2021"
 default-run = "arcana"
 authors = ["Mavs"]
 
+# The `build` binary name is reserved by Cargo, so we declare it explicitly.
+[[bin]]
+name = "build-assets"
+path = "src/bin/build.rs"
+
+# Feature flags for the build pipeline
+# process-assets: copy assets-src/ → assets/ and convert PNG → KTX2 (requires toktx)
+# generate-catalogs: regenerate inventory RON files when catalog_gen.rs / build images change
+[features]
+default = ["process-assets", "generate-catalogs"]
+process-assets = []
+generate-catalogs = []
+
 [dependencies]
 bevy = { version = "0.19.0-rc.3", default-features = false, features = [
     "bevy_asset",
@@ -21,6 +34,7 @@ bevy = { version = "0.19.0-rc.3", default-features = false, features = [
     "bevy_winit",
     "debug",
     "default_font",
+    "ktx2",
     "png",
     "serialize",
     "sprite_picking",
