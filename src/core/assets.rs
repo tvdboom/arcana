@@ -243,6 +243,9 @@ impl FromWorld for WorldAssets {
             ("action_simple_rest", assets.load("images/actions/simple_rest.ktx2")),
             ("action_common_lodging", assets.load("images/actions/common_lodging.ktx2")),
             ("action_grand_accommodation", assets.load("images/actions/grand_accomodation.ktx2")),
+            ("action_melee", assets.load("images/actions/melee.ktx2")),
+            ("action_range", assets.load("images/actions/range.ktx2")),
+            ("action_finesse", assets.load("images/actions/finesse.ktx2")),
         ]);
 
         for ability in all_abilities() {

@@ -8,7 +8,7 @@ authors = ["Mavs"]
 # The `build` binary name is reserved by Cargo, so we declare it explicitly.
 [[bin]]
 name = "build-assets"
-path = "src/bin/build.rs"
+path = "src/bin/build-assets.rs"
 
 # Feature flags for the build pipeline
 # process-assets: copy assets-src/ → assets/ and convert PNG → KTX2 (requires toktx)
@@ -46,6 +46,7 @@ bevy = { version = "0.19.0-rc.3", default-features = false, features = [
 bevy_kira_audio = "0.26.0-rc.1"
 gpu-allocator = "0.28.0"
 itertools = "0.14.0"
+indicatif = "0.18.4"
 rand = "0.10.1"
 regex = "1.12.4"
 ron = "0.12.1"
@@ -69,6 +70,9 @@ rfd = "0.17.2"
 # https://docs.rs/getrandom/latest/getrandom/#webassembly-support
 getrandom_v2 = { package = "getrandom", version = "0.2.17", features = ["js"] }
 getrandom_v4 = { package = "getrandom", version = "0.4.1", features = ["wasm_js"] }
+
+[build-dependencies]
+indicatif = "0.18.4"
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]
