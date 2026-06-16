@@ -308,12 +308,12 @@ pub fn handle_work_card_clicks(
 
         // Fixed costs calculations:
         let craft_percentage =
-            (5.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
+            (10.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
         let craft_cost =
             ((craft_percentage / 100.0) * player.max_mana() as f32 * slider_mult).max(1.0) as u32;
 
         let manual_percentage =
-            (7.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
+            (14.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
         let manual_cost = ((manual_percentage / 100.0) * player.max_health() as f32 * slider_mult)
             .max(1.0) as u32;
 
@@ -361,7 +361,7 @@ pub fn handle_work_card_clicks(
                 // Clerical Labor
                 let base = (1.0 + player.charisma_mod() as f32)
                     * (player.level as f32).powf(1.2)
-                    * 2.0
+                    * 4.0
                     * slider_mult;
                 let min_gold = (base * 0.8).max(1.0) as u32;
                 let max_gold = (base * 1.2).max(2.0) as u32;
@@ -385,7 +385,7 @@ pub fn handle_work_card_clicks(
                 // Craft Labor
                 let base = (1.0 + player.charisma_mod() as f32)
                     * (player.level as f32).powf(1.2)
-                    * 2.5
+                    * 5.0
                     * slider_mult;
                 let min_gold = (base * 0.8).max(1.0) as u32;
                 let max_gold = (base * 1.2).max(2.0) as u32;
@@ -412,7 +412,7 @@ pub fn handle_work_card_clicks(
                 // Manual Labor
                 let base = (1.0 + player.charisma_mod() as f32)
                     * (player.level as f32).powf(1.2)
-                    * 3.5
+                    * 7.0
                     * slider_mult;
                 let min_gold = (base * 0.8).max(1.0) as u32;
                 let max_gold = (base * 1.2).max(2.0) as u32;

@@ -117,6 +117,7 @@ impl FromWorld for WorldAssets {
             ("intelligence", assets.load("images/icons/intelligence.ktx2")),
             ("wisdom", assets.load("images/icons/wisdom.ktx2")),
             ("charisma", assets.load("images/icons/charisma.ktx2")),
+            ("training", assets.load("images/icons/training.ktx2")),
             ("assassin", assets.load("images/icons/assassin.ktx2")),
             // Background
             ("bg", assets.load("images/bg/bg.ktx2")),
@@ -127,7 +128,6 @@ impl FromWorld for WorldAssets {
             ("bg_study", assets.load("images/bg/study.ktx2")),
             ("bg_train", assets.load("images/bg/train.ktx2")),
             ("bg_rest", assets.load("images/bg/rest.ktx2")),
-            ("victory", assets.load("images/bg/victory.ktx2")),
             ("defeat", assets.load("images/bg/defeat.ktx2")),
             // UI
             ("border", assets.load("images/ui/border.ktx2")),

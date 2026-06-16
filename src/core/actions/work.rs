@@ -188,34 +188,27 @@ pub fn build_work_content_inner(
 
     // Card 1 Ranges
     let base_clerical =
-        (1.0 + player.charisma_mod() as f32) * (player.level as f32).powf(1.2) * 2.0 * slider_mult;
+        (1.0 + player.charisma_mod() as f32) * (player.level as f32).powf(1.2) * 5.0 * slider_mult;
     let min_clerical = (base_clerical * 0.8).max(1.0) as u32;
     let max_clerical = (base_clerical * 1.2).max(2.0) as u32;
 
     // Card 2 Ranges
     let base_craft =
-        (1.0 + player.charisma_mod() as f32) * (player.level as f32).powf(1.2) * 2.5 * slider_mult;
+        (1.0 + player.charisma_mod() as f32) * (player.level as f32).powf(1.2) * 8.0 * slider_mult;
     let min_craft = (base_craft * 0.8).max(1.0) as u32;
     let max_craft = (base_craft * 1.2).max(2.0) as u32;
 
     // Card 3 Ranges
     let base_manual =
-        (1.0 + player.charisma_mod() as f32) * (player.level as f32).powf(1.2) * 3.5 * slider_mult;
+        (1.0 + player.charisma_mod() as f32) * (player.level as f32).powf(1.2) * 12.0 * slider_mult;
     let min_manual = (base_manual * 0.8).max(1.0) as u32;
     let max_manual = (base_manual * 1.2).max(2.0) as u32;
 
     let ap_cost = slider_val + 1;
 
     // Fixed costs calculations:
-    let craft_percentage =
-        (5.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
-    let craft_cost =
-        ((craft_percentage / 100.0) * player.max_mana() as f32 * slider_mult).max(1.0) as u32;
-
-    let manual_percentage =
-        (7.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
-    let manual_cost =
-        ((manual_percentage / 100.0) * player.max_health() as f32 * slider_mult).max(1.0) as u32;
+    let craft_cost = 10 * player.level as u32;
+    let manual_cost = 10 * player.level as u32;
 
     // Top Row
     parent
@@ -271,35 +264,6 @@ pub fn build_work_content_inner(
                     ..default()
                 },))
                 .with_children(|parent| {
-                    // AP icon + text
-                    parent
-                        .spawn((
-                            Node {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                column_gap: Val::Px(6.),
-                                ..default()
-                            },
-                            Interaction::default(),
-                            Pickable::default(),
-                            crate::core::ui::playing::InfoTooltip::ActionPoints,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn((
-                                Node {
-                                    width: Val::Vw(2.4),
-                                    height: Val::Vw(2.4),
-                                    ..default()
-                                },
-                                ImageNode::new(assets.image("ap"))
-                                    .with_mode(NodeImageMode::Stretch),
-                            ));
-                            parent.spawn((
-                                add_text(player.ap.to_string(), "bold", 2.4, assets),
-                                TextColor(crate::core::constants::BUTTON_TEXT_COLOR),
-                            ));
-                        });
-
                     // Gold icon + text
                     parent
                         .spawn((
@@ -325,6 +289,35 @@ pub fn build_work_content_inner(
                             ));
                             parent.spawn((
                                 add_text(player.gold.to_string(), "bold", 2.4, assets),
+                                TextColor(crate::core::constants::BUTTON_TEXT_COLOR),
+                            ));
+                        });
+
+                    // AP icon + text
+                    parent
+                        .spawn((
+                            Node {
+                                flex_direction: FlexDirection::Row,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(6.),
+                                ..default()
+                            },
+                            Interaction::default(),
+                            Pickable::default(),
+                            crate::core::ui::playing::InfoTooltip::ActionPoints,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                Node {
+                                    width: Val::Vw(2.4),
+                                    height: Val::Vw(2.4),
+                                    ..default()
+                                },
+                                ImageNode::new(assets.image("ap"))
+                                    .with_mode(NodeImageMode::Stretch),
+                            ));
+                            parent.spawn((
+                                add_text(player.ap.to_string(), "bold", 2.4, assets),
                                 TextColor(crate::core::constants::BUTTON_TEXT_COLOR),
                             ));
                         });
@@ -359,6 +352,7 @@ pub fn build_work_content_inner(
                 "action_clerical_labor",
                 Some(ap_cost),
                 None,
+                None,
                 WorkCardMarker(0),
             );
             card_ents.push(c1);
@@ -378,6 +372,7 @@ pub fn build_work_content_inner(
                 "action_craft_labor",
                 Some(ap_cost),
                 Some((craft_cost, "mana", Color::srgb(40. / 255., 80. / 255., 185. / 255.))),
+                None,
                 WorkCardMarker(1),
             );
             card_ents.push(c2);
@@ -397,6 +392,7 @@ pub fn build_work_content_inner(
                 "action_manual_labor",
                 Some(ap_cost),
                 Some((manual_cost, "health", Color::srgb(170. / 255., 35. / 255., 35. / 255.))),
+                None,
                 WorkCardMarker(2),
             );
             card_ents.push(c3);

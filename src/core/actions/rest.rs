@@ -227,7 +227,10 @@ pub fn build_rest_content_inner(
         .with_children(|parent| {
             // Card 1: Rough Rest (Costs 1 AP)
             let title1 = localization.get("rough_rest", lang);
-            let desc1 = localization.get("rough_rest_desc", lang);
+            let max_pct = (60 + player.constitution_mod()).max(40);
+            let desc1 = localization
+                .get("rough_rest_desc", lang)
+                .replace("{max_pct}", &max_pct.to_string());
             let c1 = spawn_rest_card_ui(
                 parent,
                 assets,
@@ -257,7 +260,13 @@ pub fn build_rest_content_inner(
 
             // Card 3: Grand Accommodation (Costs 3 AP + 50 * level Gold)
             let title3 = localization.get("grand_accommodation", lang);
-            let desc3 = localization.get("grand_accommodation_desc", lang);
+            let con_mod = player.constitution_mod().max(0) as u32;
+            let min_bonus = 0;
+            let max_bonus = 100 * level * con_mod;
+            let desc3 = localization
+                .get("grand_accommodation_desc", lang)
+                .replace("{min_bonus}", &min_bonus.to_string())
+                .replace("{max_bonus}", &max_bonus.to_string());
             let c3 = spawn_rest_card_ui(
                 parent,
                 assets,
@@ -530,7 +539,7 @@ pub fn handle_rest_card_clicks(
         match marker.0 {
             0 => {
                 // Rough Rest: recovers between 40 and 60 + constitution modifier percent of total health and mana back (also to pet)
-                let pct_roll = rng.random_range(40..=60) + player.constitution_mod();
+                let pct_roll = rng.random_range(40..=(60 + player.constitution_mod()).max(40));
                 let pct = (pct_roll as f32 / 100.0).max(0.0).min(1.0);
 
                 let health_recovered = (max_hp as f32 * pct) as u32;
@@ -581,10 +590,9 @@ pub fn handle_rest_card_clicks(
                 );
             },
             2 => {
-                // Grand Accommodation: returns full health and mana back and also between 0-10 * 10 * player level * constitution modifier extra max health and max mana
-                let con_mod = player.constitution_mod().max(0) as u32;
-                let factor = rng.random_range(0..=10) as u32;
-                let bonus = factor * 10 * level * con_mod;
+                // Grand Accommodation: returns full health and mana back and also between
+                // 1-(10 * player level * constitution mod) extra max health and max mana
+                let bonus = 10 * rng.random_range(1..=(level as i32 + player.constitution_mod())) as u32;
 
                 player.bonus_max_health += bonus;
                 player.bonus_max_mana += bonus;

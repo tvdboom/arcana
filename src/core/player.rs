@@ -1,6 +1,7 @@
 use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::modifiers::Modifier;
 use crate::core::catalog::catalog::{get_equipment, get_perk};
+use crate::core::catalog::weapons::Category;
 use crate::core::classes::Class;
 use crate::core::constants::{NAMES, START_CHARACTERISTIC};
 use crate::core::pets::Pet;
@@ -104,6 +105,20 @@ pub enum Attribute {
     Charisma,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq)]
+pub struct Skill {
+    pub attack: u32,
+    pub defense: u32,
+    pub initiative: u32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq)]
+pub struct Training {
+    pub melee: Skill,
+    pub finesse: Skill,
+    pub range: Skill,
+}
+
 #[derive(Resource, Clone, Debug, Serialize, Deserialize)]
 pub struct Player {
     pub name: String,
@@ -137,6 +152,7 @@ pub struct Player {
     pub accessory2: Option<String>,
     pub inventory: Vec<String>,
     pub gold: u32,
+    pub training: Training,
 }
 
 impl Default for Player {
@@ -173,6 +189,7 @@ impl Default for Player {
             accessory2: None,
             inventory: vec![],
             gold: 100,
+            training: Training::default(),
         }
     }
 }
@@ -349,6 +366,65 @@ impl Player {
         .collect()
     }
 
+    pub fn has_equipped_melee(&self) -> bool {
+        self.equipped_equipment().iter().any(|eq| {
+            if let Equipment::Weapon(w) = eq {
+                w.category == Category::Melee
+            } else {
+                false
+            }
+        })
+    }
+
+    pub fn has_equipped_finesse(&self) -> bool {
+        self.equipped_equipment().iter().any(|eq| {
+            if let Equipment::Weapon(w) = eq {
+                w.category == Category::Finesse
+            } else {
+                false
+            }
+        })
+    }
+
+    pub fn has_equipped_range(&self) -> bool {
+        self.equipped_equipment().iter().any(|eq| {
+            if let Equipment::Weapon(w) = eq {
+                w.category == Category::Range
+            } else {
+                false
+            }
+        })
+    }
+
+    pub fn training_bonus_for_skill(&self, skill: &str) -> u32 {
+        let mut total = 0;
+        if self.has_equipped_melee() {
+            total += match skill {
+                "attack" => self.training.melee.attack,
+                "defense" => self.training.melee.defense,
+                "initiative" => self.training.melee.initiative,
+                _ => 0,
+            };
+        }
+        if self.has_equipped_finesse() {
+            total += match skill {
+                "attack" => self.training.finesse.attack,
+                "defense" => self.training.finesse.defense,
+                "initiative" => self.training.finesse.initiative,
+                _ => 0,
+            };
+        }
+        if self.has_equipped_range() {
+            total += match skill {
+                "attack" => self.training.range.attack,
+                "defense" => self.training.range.defense,
+                "initiative" => self.training.range.initiative,
+                _ => 0,
+            };
+        }
+        total
+    }
+
     pub fn max_health(&self) -> u32 {
         let base = 100 + 10 * self.constitution_mod();
         let class_mod = if self.class == Class::Warrior {
@@ -423,6 +499,7 @@ impl Player {
 
     pub fn attack(&self) -> u32 {
         (5 + self.strength_mod()
+            + self.training_bonus_for_skill("attack") as i32
             + self.equipped_equipment().iter().map(|w| w.attack()).sum::<i32>()
             + self
                 .perks
@@ -442,6 +519,7 @@ impl Player {
 
     pub fn defense(&self) -> u32 {
         (5 + self.constitution_mod()
+            + self.training_bonus_for_skill("defense") as i32
             + self.equipped_equipment().iter().map(|w| w.defense()).sum::<i32>()
             + self
                 .perks
@@ -461,6 +539,7 @@ impl Player {
 
     pub fn initiative(&self) -> u32 {
         (5 + self.dexterity_mod()
+            + self.training_bonus_for_skill("initiative") as i32
             + self.equipped_equipment().iter().map(|w| w.initiative()).sum::<i32>()
             + self
                 .perks

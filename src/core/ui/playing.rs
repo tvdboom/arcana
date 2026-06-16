@@ -231,6 +231,13 @@ fn combat_breakdown(
                     player.strength() as i32 - 10,
                 )
             ));
+            let training_bonus = player.training_bonus_for_skill("attack");
+            if training_bonus > 0 {
+                lines.push(format!(
+                    "[training] {}",
+                    signed_line(localization.get("general.training", lang), training_bonus as i32)
+                ));
+            }
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| weapon.attack()));
             lines.extend(perk_bonus_lines(player, localization, lang, stat));
             lines
@@ -243,6 +250,13 @@ fn combat_breakdown(
                     player.constitution() as i32 / 4,
                 )
             )];
+            let training_bonus = player.training_bonus_for_skill("defense");
+            if training_bonus > 0 {
+                lines.push(format!(
+                    "[training] {}",
+                    signed_line(localization.get("general.training", lang), training_bonus as i32)
+                ));
+            }
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| weapon.defense()));
             lines.extend(perk_bonus_lines(player, localization, lang, stat));
             lines
@@ -255,6 +269,13 @@ fn combat_breakdown(
                     player.dexterity() as i32 / 2,
                 )
             )];
+            let training_bonus = player.training_bonus_for_skill("initiative");
+            if training_bonus > 0 {
+                lines.push(format!(
+                    "[training] {}",
+                    signed_line(localization.get("general.training", lang), training_bonus as i32)
+                ));
+            }
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
                 weapon.initiative()
             }));

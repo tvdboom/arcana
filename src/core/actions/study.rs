@@ -186,10 +186,47 @@ pub fn build_study_content_inner(
     let ap_cost = slider_val + 1;
     let chance = 40 + player.intelligence_mod() * 5;
 
-    let min_lvl = (player.level as i32 - 2).max(1);
-    let max_lvl = (player.level as i32 + 2).min(20);
+    // Calculate learning breakdown by target level
+    let offset_probs: &[(i32, f32)] = match slider_val {
+        0 => &[(-2, 0.40), (-1, 0.30), (0, 0.20), (1, 0.08), (2, 0.02)],
+        1 => &[(-2, 0.15), (-1, 0.20), (0, 0.30), (1, 0.20), (2, 0.15)],
+        _ => &[(-2, 0.02), (-1, 0.08), (0, 0.20), (1, 0.30), (2, 0.40)],
+    };
 
-    let conditioning_count = slider_val + 1;
+    let mut level_probs = std::collections::BTreeMap::new();
+    for &(offset, prob) in offset_probs {
+        let target_level = (player.level as i32 + offset).clamp(1, 20) as u32;
+        *level_probs.entry(target_level).or_insert(0.0) += prob;
+    }
+
+    let mut breakdown_rows = Vec::new();
+    for (lvl, prob) in level_probs {
+        let learn_chance = (chance as f32 * prob).round() as u32;
+        breakdown_rows.push(format!(" - Level {}: {}%", lvl, learn_chance));
+    }
+    let breakdown = breakdown_rows.join("\n");
+
+    let (attr_single, attr_plural) = match lang {
+        Language::Dutch => ("attribuut", "attributen"),
+        Language::Spanish => ("atributo", "atributos"),
+        _ => ("attribute", "attributes"),
+    };
+
+    let cond_breakdown = match slider_val {
+        0 => format!(" - 1 {}: {}%", attr_single, chance),
+        1 => {
+            let p = (chance as f32 * 0.5).round() as u32;
+            format!(" - 1 {}: {}%\n - 2 {}: {}%", attr_single, p, attr_plural, p)
+        },
+        _ => {
+            let p1 = (chance as f32 * 0.2).round() as u32;
+            let p2 = (chance as f32 * 0.4).round() as u32;
+            format!(
+                " - 1 {}: {}%\n - 2 {}: {}%\n - 3 {}: {}%",
+                attr_single, p1, attr_plural, p2, attr_plural, p2
+            )
+        }
+    };
 
     // Top Row
     parent
@@ -282,9 +319,7 @@ pub fn build_study_content_inner(
             let title1 = localization.get("apprenticeship_title", lang);
             let desc1 = localization
                 .get("apprenticeship_desc", lang)
-                .replace("{chance}", &chance.to_string())
-                .replace("{min_lvl}", &min_lvl.to_string())
-                .replace("{max_lvl}", &max_lvl.to_string());
+                .replace("{breakdown}", &breakdown);
             let c1 = spawn_card_ui(
                 parent,
                 assets,
@@ -292,6 +327,7 @@ pub fn build_study_content_inner(
                 &desc1,
                 "action_apprenticeship",
                 Some(ap_cost),
+                None,
                 None,
                 StudyCardMarker(0),
             );
@@ -301,9 +337,7 @@ pub fn build_study_content_inner(
             let title2 = localization.get("mentorship_title", lang);
             let desc2 = localization
                 .get("mentorship_desc", lang)
-                .replace("{chance}", &chance.to_string())
-                .replace("{min_lvl}", &min_lvl.to_string())
-                .replace("{max_lvl}", &max_lvl.to_string());
+                .replace("{breakdown}", &breakdown);
             let c2 = spawn_card_ui(
                 parent,
                 assets,
@@ -311,6 +345,7 @@ pub fn build_study_content_inner(
                 &desc2,
                 "action_mentorship",
                 Some(ap_cost),
+                None,
                 None,
                 StudyCardMarker(1),
             );
@@ -320,8 +355,7 @@ pub fn build_study_content_inner(
             let title3 = localization.get("conditioning_title", lang);
             let desc3 = localization
                 .get("conditioning_desc", lang)
-                .replace("{chance}", &chance.to_string())
-                .replace("{count}", &conditioning_count.to_string());
+                .replace("{breakdown}", &cond_breakdown);
             let c3 = spawn_card_ui(
                 parent,
                 assets,
@@ -329,6 +363,7 @@ pub fn build_study_content_inner(
                 &desc3,
                 "action_conditioning",
                 Some(ap_cost),
+                None,
                 None,
                 StudyCardMarker(2),
             );

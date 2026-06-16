@@ -85,7 +85,7 @@ enum AssetTask {
 
 fn log_status(msg: &str) {
     if std::env::var("OUT_DIR").is_ok() {
-        println!("cargo:warning={}", msg);
+        println!("cargo:info={}", msg);
     } else {
         println!("{}", msg);
     }

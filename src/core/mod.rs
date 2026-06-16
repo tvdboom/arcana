@@ -90,6 +90,7 @@ impl Plugin for GamePlugin {
             .init_resource::<crate::core::actions::shop::ShopFilters>()
             .init_resource::<crate::core::actions::work::WorkSliderState>()
             .init_resource::<crate::core::actions::study::StudySliderState>()
+            .init_resource::<crate::core::actions::train::TrainSliderState>()
             .init_resource::<RightTab>();
 
         // Sets
@@ -279,6 +280,17 @@ impl Plugin for GamePlugin {
             .add_systems(
                 OnExit(GameState::Train),
                 (crate::core::ui::utils::cleanup_panel_ui, despawn::<TooltipNode>),
+            )
+            .add_systems(
+                Update,
+                (
+                    crate::core::actions::train::update_train_ui,
+                    tooltip_follow_cursor_system,
+                    tick_gold_toasts,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Train)),
             );
 
         #[cfg(not(target_arch = "wasm32"))]

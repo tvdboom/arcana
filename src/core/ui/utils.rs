@@ -356,6 +356,7 @@ pub fn spawn_card_ui<M: Component>(
     image_key: &str,
     ap_cost_opt: Option<u32>,
     secondary_cost_opt: Option<(u32, &'static str, Color)>,
+    gold_cost_opt: Option<u32>,
     marker: M,
 ) -> Entity {
     let mut border_entity = Entity::PLACEHOLDER;
@@ -426,7 +427,7 @@ pub fn spawn_card_ui<M: Component>(
                         });
                 });
 
-            if ap_cost_opt.is_some() || secondary_cost_opt.is_some() {
+            if ap_cost_opt.is_some() || secondary_cost_opt.is_some() || gold_cost_opt.is_some() {
                 parent
                     .spawn(Node {
                         position_type: PositionType::Absolute,
@@ -464,6 +465,36 @@ pub fn spawn_card_ui<M: Component>(
                                     parent.spawn((
                                         add_text(val.to_string(), "bold", 1.6, assets),
                                         TextColor(color),
+                                    ));
+                                });
+                        }
+
+                        if let Some(gold_cost) = gold_cost_opt {
+                            parent
+                                .spawn((
+                                    Node {
+                                        flex_direction: FlexDirection::Row,
+                                        align_items: AlignItems::Center,
+                                        column_gap: Val::Px(4.),
+                                        padding: UiRect::axes(Val::Px(8.), Val::Px(4.)),
+                                        border_radius: BorderRadius::all(Val::Px(6.)),
+                                        ..default()
+                                    },
+                                    BackgroundColor(Color::srgba(0., 0., 0., 0.85)),
+                                ))
+                                .with_children(|parent| {
+                                    parent.spawn((
+                                        Node {
+                                            width: Val::Px(20.),
+                                            height: Val::Px(20.),
+                                            ..default()
+                                        },
+                                        ImageNode::new(assets.image("gold"))
+                                            .with_mode(NodeImageMode::Stretch),
+                                    ));
+                                    parent.spawn((
+                                        add_text(gold_cost.to_string(), "bold", 1.6, assets),
+                                        TextColor(Color::srgb(1.0, 0.84, 0.0)),
                                     ));
                                 });
                         }
