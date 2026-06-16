@@ -22,6 +22,7 @@ pub use crate::core::ui::level_up::{manage_level_up_overlay, LevelUpPending};
 use crate::core::ui::modal::{spawn_modal, ActiveModal, ModalAction};
 pub use crate::core::ui::toast::ToastContainer;
 pub use crate::core::ui::tooltip::*;
+use crate::core::ui::scrollbar::{ScrollableContainer, ScrollbarTrack, ScrollbarThumb, on_scrollbar_thumb_drag};
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
 use bevy::window::SystemCursorIcon;
@@ -83,12 +84,6 @@ pub struct AbilitiesList;
 
 #[derive(Component)]
 pub struct PerksList;
-
-#[derive(Component)]
-pub struct RightScrollbarTrack;
-
-#[derive(Component)]
-pub struct RightScrollbarThumb;
 
 #[derive(Resource, Default, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum RightTab {
@@ -1211,106 +1206,6 @@ fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_health:
         });
 }
 
-#[derive(Component)]
-pub struct ScrollableContainer;
-
-pub fn scroll_system(
-    mut mouse_wheel_events: MessageReader<bevy::input::mouse::MouseWheel>,
-    mut query: Query<(&mut ScrollPosition, &ComputedNode), With<ScrollableContainer>>,
-) {
-    for event in mouse_wheel_events.read() {
-        for (mut scroll, computed) in &mut query {
-            // Scroll offset speed factor
-            scroll.y -= event.y * 30.0;
-            let max_scroll = (computed.content_size().y - computed.size().y).max(0.0);
-            scroll.y = scroll.y.clamp(0.0, max_scroll);
-        }
-    }
-}
-
-fn on_right_scrollbar_thumb_drag(
-    ev: On<Pointer<Drag>>,
-    mut scroll_q: Query<(&mut ScrollPosition, &ComputedNode), With<ScrollableContainer>>,
-    track_q: Query<&ComputedNode, With<RightScrollbarTrack>>,
-) {
-    let Ok((mut scroll, scroll_node)) = scroll_q.single_mut() else {
-        return;
-    };
-    let Ok(track_node) = track_q.single() else {
-        return;
-    };
-
-    let viewport_height = scroll_node.size().y;
-    let content_height = scroll_node.content_size().y;
-    let max_scroll = (content_height - viewport_height).max(0.0);
-    if max_scroll <= 0.0 || content_height <= 0.0 {
-        scroll.y = 0.0;
-        return;
-    }
-
-    let track_height = track_node.size().y;
-    if track_height <= 1.0 {
-        return;
-    }
-    let min_thumb_height = 32.0_f32.min(track_height);
-    let thumb_height =
-        (viewport_height / content_height * track_height).clamp(min_thumb_height, track_height);
-    let max_thumb_top = (track_height - thumb_height).max(1.0);
-    scroll.y = (scroll.y + ev.delta.y * max_scroll / max_thumb_top).clamp(0.0, max_scroll);
-}
-
-pub fn update_right_scrollbar_system(
-    mut scroll_q: Query<(&mut ScrollPosition, &ComputedNode), With<ScrollableContainer>>,
-    mut track_q: Query<
-        (&ComputedNode, &mut Visibility),
-        (With<RightScrollbarTrack>, Without<RightScrollbarThumb>, Without<ScrollableContainer>),
-    >,
-    mut thumb_q: Query<
-        &mut Node,
-        (With<RightScrollbarThumb>, Without<RightScrollbarTrack>, Without<ScrollableContainer>),
-    >,
-) {
-    let Ok((mut scroll, scroll_node)) = scroll_q.single_mut() else {
-        return;
-    };
-    let Ok((track_computed, mut track_visibility)) = track_q.single_mut() else {
-        return;
-    };
-    let Ok(mut thumb_node) = thumb_q.single_mut() else {
-        return;
-    };
-
-    let viewport_height = scroll_node.size().y;
-    let content_height = scroll_node.content_size().y;
-    let max_scroll = (content_height - viewport_height).max(0.0);
-
-    if max_scroll <= 1.0 || content_height <= viewport_height {
-        scroll.y = 0.0;
-        *track_visibility = Visibility::Hidden;
-        return;
-    }
-
-    *track_visibility = Visibility::Visible;
-    scroll.y = scroll.y.clamp(0.0, max_scroll);
-
-    let track_height = track_computed.size().y;
-    if track_height <= 1.0 {
-        *track_visibility = Visibility::Hidden;
-        return;
-    }
-    let min_thumb_height = 32.0_f32.min(track_height);
-    let thumb_height =
-        (viewport_height / content_height * track_height).clamp(min_thumb_height, track_height);
-    let max_thumb_top = (track_height - thumb_height).max(0.0);
-    let thumb_top = if max_scroll > 0.0 {
-        scroll.y / max_scroll * max_thumb_top
-    } else {
-        0.0
-    };
-
-    thumb_node.height = Val::Px(thumb_height);
-    thumb_node.top = Val::Px(thumb_top);
-}
 
 /// Shows/hides a tooltip when hovering over equipment slots.
 pub fn equip_slot_tooltip_system(
@@ -1765,7 +1660,7 @@ fn spawn_right_column(
             ));
 
             // Scrollable content area
-            parent
+            let mut container_cmd = parent
                 .spawn((
                     Node {
                         width: percent(100.),
@@ -1776,8 +1671,9 @@ fn spawn_right_column(
                     },
                     ScrollableContainer,
                     ScrollPosition::default(),
-                ))
-                .with_children(|parent| {
+                ));
+            let container_entity = container_cmd.id();
+            container_cmd.with_children(|parent| {
                     // Equipment wrapper (visible by default)
                     parent
                         .spawn((
@@ -1894,7 +1790,7 @@ fn spawn_right_column(
                     },
                     BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
                     Visibility::Hidden,
-                    RightScrollbarTrack,
+                    ScrollbarTrack { container: container_entity },
                 ))
                 .with_children(|parent| {
                     parent
@@ -1911,11 +1807,11 @@ fn spawn_right_column(
                             Button,
                             Interaction::default(),
                             Pickable::default(),
-                            RightScrollbarThumb,
+                            ScrollbarThumb { container: container_entity },
                         ))
                         .observe(cursor::<Over>(SystemCursorIcon::Pointer))
                         .observe(cursor::<Out>(SystemCursorIcon::Default))
-                        .observe(on_right_scrollbar_thumb_drag);
+                        .observe(on_scrollbar_thumb_drag);
                 });
         });
 }

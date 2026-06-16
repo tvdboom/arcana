@@ -21,6 +21,20 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use crate::core::ui::playing::name_with_level;
 use crate::utils::NameFromEnum;
+use crate::core::ui::scrollbar::{ScrollableContainer, ScrollbarTrack, ScrollbarThumb, on_scrollbar_thumb_drag};
+use crate::core::ui::dropdown::{
+    OpenDropdown,
+    spawn_dropdown_hand,
+    spawn_dropdown_type,
+    spawn_dropdown_category,
+    spawn_dropdown_kind,
+};
+
+#[derive(Component)]
+pub struct ShopScrollContainer;
+
+#[derive(Component)]
+pub struct ShopItemsScroll;
 
 #[derive(Resource, Clone, Serialize, Deserialize, Default, Debug)]
 pub struct ShopInventory {
@@ -158,10 +172,13 @@ pub fn update_shop_ui(
     player: Res<Player>,
     shop_inventory: Res<ShopInventory>,
     filters: Res<ShopFilters>,
+    open_dropdown: Res<OpenDropdown>,
     wrapper_q: Query<Entity, With<ShopContentWrapper>>,
     children_q: Query<&Children>,
+    scroll_q: Query<&ScrollPosition, With<ShopItemsScroll>>,
 ) {
-    if filters.is_changed() || shop_inventory.is_changed() {
+    if filters.is_changed() || shop_inventory.is_changed() || open_dropdown.is_changed() {
+        let current_scroll = scroll_q.iter().next().map_or(0.0, |s| s.0.y);
         if let Some(wrapper_entity) = wrapper_q.iter().next() {
             despawn_descendants_manual(&mut commands, wrapper_entity, &children_q);
             commands.entity(wrapper_entity).with_children(|parent| {
@@ -173,6 +190,8 @@ pub fn update_shop_ui(
                     &shop_inventory,
                     *filters,
                     player.gold,
+                    *open_dropdown,
+                    current_scroll,
                 );
             });
         }
@@ -193,7 +212,7 @@ pub fn build_shop_content(
             Node {
                 width: percent(100.),
                 height: percent(100.),
-                padding: UiRect::all(percent(5.)),
+                padding: UiRect::all(percent(4.)),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
                 justify_content: JustifyContent::SpaceBetween,
@@ -219,6 +238,8 @@ pub fn build_shop_content(
                         shop_inventory,
                         filters,
                         player_gold,
+                        OpenDropdown::None,
+                        0.0,
                     );
                 });
 
@@ -242,6 +263,8 @@ pub fn build_shop_content_inner(
     shop_inventory: &ShopInventory,
     filters: ShopFilters,
     player_gold: u32,
+    open_dropdown: OpenDropdown,
+    initial_scroll: f32,
 ) {
     parent
         .spawn(Node {
@@ -257,6 +280,11 @@ pub fn build_shop_content_inner(
                 .spawn(Node {
                     flex_direction: FlexDirection::Row,
                     column_gap: Val::Px(4.),
+                    margin: UiRect {
+                        left: Val::Px(15.),
+                        top: Val::Px(15.),
+                        ..default()
+                    },
                     ..default()
                 })
                 .with_children(|parent| {
@@ -269,12 +297,6 @@ pub fn build_shop_content_inner(
                         ShopTab::Accessories,
                         ShopTab::Consumables,
                     ] {
-                        let is_active = tab == filters.tab;
-                        let bg_color = if is_active {
-                            PRESSED_BUTTON_COLOR
-                        } else {
-                            Color::srgba_u8(20, 20, 35, 200)
-                        };
                         parent
                             .spawn((
                                 Node {
@@ -282,7 +304,7 @@ pub fn build_shop_content_inner(
                                     border: UiRect::all(Val::Px(1.)),
                                     ..default()
                                 },
-                                BackgroundColor(bg_color),
+                                BackgroundColor(NORMAL_BUTTON_COLOR),
                                 BorderColor::all(BUTTON_BORDER_COLOR),
                                 Button,
                                 Interaction::default(),
@@ -307,6 +329,11 @@ pub fn build_shop_content_inner(
                         flex_direction: FlexDirection::Row,
                         align_items: AlignItems::Center,
                         column_gap: Val::Px(6.),
+                        margin: UiRect {
+                            right: Val::Px(45.),
+                            top: Val::Px(15.),
+                            ..default()
+                        },
                         ..default()
                     },
                     Interaction::default(),
@@ -323,329 +350,195 @@ pub fn build_shop_content_inner(
                         ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
                     ));
                     parent.spawn((
-                        add_text(player_gold.to_string(), "bold", 2.4, assets),
+                        add_text(player_gold.to_string(), "bold", 3.0, assets),
                         TextColor(BUTTON_TEXT_COLOR),
                         ShopGoldLabel,
                     ));
                 });
         });
 
-    if filters.tab == ShopTab::Weapons {
-        parent
-            .spawn(Node {
-                width: percent(100.),
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(6.),
-                padding: UiRect::all(Val::Px(6.)),
-                margin: UiRect::bottom(Val::Px(10.)),
-                ..default()
-            })
-            .insert(BackgroundColor(Color::srgba_u8(10, 10, 20, 150)))
-            .insert(BorderColor::all(BUTTON_BORDER_COLOR))
-            .insert(Node {
-                border: UiRect::all(Val::Px(1.)),
-                ..default()
-            })
-            .with_children(|parent| {
-                parent
-                    .spawn(Node {
-                        width: percent(100.),
-                        flex_direction: FlexDirection::Row,
-                        column_gap: Val::Px(12.),
-                        ..default()
-                    })
-                    .with_children(|parent| {
-                        parent
-                            .spawn(Node {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                column_gap: Val::Px(4.),
-                                ..default()
-                            })
-                            .with_children(|parent| {
-                                parent.spawn(add_text("Hand: ", "bold", 1.4, assets));
-                                for (opt, label) in [
-                                    (None, "Both"),
-                                    (Some(Hand::OneHand), "1-Hand"),
-                                    (Some(Hand::TwoHand), "2-Hand"),
-                                ] {
-                                    let is_active = filters.weapon_hand == opt;
-                                    let bg_color = if is_active {
-                                        HOVERED_BUTTON_COLOR
-                                    } else {
-                                        Color::srgba_u8(10, 15, 30, 200)
-                                    };
-                                    parent
-                                        .spawn((
-                                            Node {
-                                                padding: UiRect::axes(Val::Px(6.), Val::Px(3.)),
-                                                border: UiRect::all(Val::Px(1.)),
-                                                ..default()
-                                            },
-                                            BackgroundColor(bg_color),
-                                            BorderColor::all(BUTTON_BORDER_COLOR),
-                                            Button,
-                                            Interaction::default(),
-                                            Pickable::default(),
-                                            ShopHandFilterButton(opt),
-                                        ))
-                                        .observe(handle_shop_hand_filter_click)
-                                        .with_children(|parent| {
-                                            parent.spawn((
-                                                add_text(label, "medium", 1.2, assets),
-                                                TextColor(BUTTON_TEXT_COLOR),
-                                            ));
-                                        });
-                                }
-                            });
-
-                        parent
-                            .spawn(Node {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                column_gap: Val::Px(4.),
-                                ..default()
-                            })
-                            .with_children(|parent| {
-                                parent.spawn(add_text("Type: ", "bold", 1.4, assets));
-                                for (opt, label) in [
-                                    (WeaponTypeFilter::All, "All"),
-                                    (WeaponTypeFilter::Weapons, "Weapons"),
-                                    (WeaponTypeFilter::Shields, "Shields"),
-                                    (WeaponTypeFilter::Books, "Books"),
-                                ] {
-                                    let is_active = filters.weapon_type == opt;
-                                    let bg_color = if is_active {
-                                        HOVERED_BUTTON_COLOR
-                                    } else {
-                                        Color::srgba_u8(10, 15, 30, 200)
-                                    };
-                                    parent
-                                        .spawn((
-                                            Node {
-                                                padding: UiRect::axes(Val::Px(6.), Val::Px(3.)),
-                                                border: UiRect::all(Val::Px(1.)),
-                                                ..default()
-                                            },
-                                            BackgroundColor(bg_color),
-                                            BorderColor::all(BUTTON_BORDER_COLOR),
-                                            Button,
-                                            Interaction::default(),
-                                            Pickable::default(),
-                                            ShopTypeFilterButton(opt),
-                                        ))
-                                        .observe(handle_shop_type_filter_click)
-                                        .with_children(|parent| {
-                                            parent.spawn((
-                                                add_text(label, "medium", 1.2, assets),
-                                                TextColor(BUTTON_TEXT_COLOR),
-                                            ));
-                                        });
-                                }
-                            });
-                    });
-
-                parent
-                    .spawn(Node {
-                        width: percent(100.),
-                        flex_direction: FlexDirection::Row,
-                        column_gap: Val::Px(12.),
-                        ..default()
-                    })
-                    .with_children(|parent| {
-                        parent
-                            .spawn(Node {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                column_gap: Val::Px(4.),
-                                ..default()
-                            })
-                            .with_children(|parent| {
-                                parent.spawn(add_text("Category: ", "bold", 1.4, assets));
-                                for (opt, label) in [
-                                    (None, "All"),
-                                    (Some(Category::Melee), "Melee"),
-                                    (Some(Category::Finesse), "Finesse"),
-                                    (Some(Category::Range), "Range"),
-                                    (Some(Category::Magical), "Magical"),
-                                ] {
-                                    let is_active = filters.weapon_category == opt;
-                                    let bg_color = if is_active {
-                                        HOVERED_BUTTON_COLOR
-                                    } else {
-                                        Color::srgba_u8(10, 15, 30, 200)
-                                    };
-                                    parent
-                                        .spawn((
-                                            Node {
-                                                padding: UiRect::axes(Val::Px(6.), Val::Px(3.)),
-                                                border: UiRect::all(Val::Px(1.)),
-                                                ..default()
-                                            },
-                                            BackgroundColor(bg_color),
-                                            BorderColor::all(BUTTON_BORDER_COLOR),
-                                            Button,
-                                            Interaction::default(),
-                                            Pickable::default(),
-                                            ShopCategoryFilterButton(opt),
-                                        ))
-                                        .observe(handle_shop_category_filter_click)
-                                        .with_children(|parent| {
-                                            parent.spawn((
-                                                add_text(label, "medium", 1.2, assets),
-                                                TextColor(BUTTON_TEXT_COLOR),
-                                            ));
-                                        });
-                                }
-                            });
-
-                        parent
-                            .spawn(Node {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                column_gap: Val::Px(4.),
-                                ..default()
-                            })
-                            .with_children(|parent| {
-                                parent.spawn(add_text("Kind: ", "bold", 1.4, assets));
-                                for (opt, label) in [
-                                    (None, "All"),
-                                    (Some(Kind::Physical), "Physical"),
-                                    (Some(Kind::Fire), "Fire"),
-                                    (Some(Kind::Ice), "Ice"),
-                                    (Some(Kind::Nature), "Nature"),
-                                    (Some(Kind::Holy), "Holy"),
-                                    (Some(Kind::Shadow), "Shadow"),
-                                ] {
-                                    let is_active = filters.kind == opt;
-                                    let bg_color = if is_active {
-                                        HOVERED_BUTTON_COLOR
-                                    } else {
-                                        Color::srgba_u8(10, 15, 30, 200)
-                                    };
-                                    parent
-                                        .spawn((
-                                            Node {
-                                                padding: UiRect::axes(Val::Px(6.), Val::Px(3.)),
-                                                border: UiRect::all(Val::Px(1.)),
-                                                ..default()
-                                            },
-                                            BackgroundColor(bg_color),
-                                            BorderColor::all(BUTTON_BORDER_COLOR),
-                                            Button,
-                                            Interaction::default(),
-                                            Pickable::default(),
-                                            ShopKindFilterButton(opt),
-                                        ))
-                                        .observe(handle_shop_kind_filter_click)
-                                        .with_children(|parent| {
-                                            parent.spawn((
-                                                add_text(label, "medium", 1.2, assets),
-                                                TextColor(BUTTON_TEXT_COLOR),
-                                            ));
-                                        });
-                                }
-                            });
-                    });
-            });
-    }
-
-    parent
-        .spawn(Node {
+    parent.spawn((
+        Node {
             width: percent(100.),
-            height: percent(100.),
-            flex_direction: FlexDirection::Row,
-            flex_wrap: FlexWrap::Wrap,
-            column_gap: Val::Px(10.),
-            row_gap: Val::Px(10.),
-            overflow: Overflow::clip(),
+            height: Val::Px(1.),
+            margin: UiRect {
+                top: Val::Px(10.),
+                bottom: Val::Px(18.),
+                ..default()
+            },
             ..default()
-        })
-        .with_children(|parent| {
-            let mut empty = true;
-            for item_key in &shop_inventory.items {
-                if let Some(equipment) = get_equipment(item_key) {
-                    let matches_tab = match filters.tab {
-                        ShopTab::Weapons => matches!(equipment, Equipment::Weapon(_)),
-                        ShopTab::Helmets => match &equipment {
-                            Equipment::Wearable(w) => w.slot == WearableSlot::Helmet,
-                            _ => false,
-                        },
-                        ShopTab::Chestplates => match &equipment {
-                            Equipment::Wearable(w) => w.slot == WearableSlot::Chestplate,
-                            _ => false,
-                        },
-                        ShopTab::Boots => match &equipment {
-                            Equipment::Wearable(w) => w.slot == WearableSlot::Boots,
-                            _ => false,
-                        },
-                        ShopTab::Gloves => match &equipment {
-                            Equipment::Wearable(w) => w.slot == WearableSlot::Gloves,
-                            _ => false,
-                        },
-                        ShopTab::Accessories => match &equipment {
-                            Equipment::Wearable(w) => w.slot == WearableSlot::Accessory,
-                            _ => false,
-                        },
-                        ShopTab::Consumables => matches!(equipment, Equipment::Consumable(_)),
-                    };
-                    if !matches_tab {
-                        continue;
-                    }
+        },
+        BackgroundColor(BUTTON_BORDER_COLOR),
+    ));
 
-                    if filters.tab == ShopTab::Weapons {
-                        if let Equipment::Weapon(ref w) = equipment {
-                            if let Some(hand) = filters.weapon_hand {
-                                if w.hand != hand {
-                                    continue;
-                                }
-                            }
-                            match filters.weapon_type {
-                                WeaponTypeFilter::Weapons => {
-                                    if w.category == Category::Shield
-                                        || w.category == Category::Book
-                                    {
-                                        continue;
+    let mut container_entity = Entity::PLACEHOLDER;
+    parent
+        .spawn((
+            Node {
+                width: percent(100.),
+                flex_grow: 1.0,
+                height: percent(70.),
+                flex_direction: FlexDirection::Row,
+                position_type: PositionType::Relative,
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            ShopScrollContainer,
+        ))
+        .with_children(|parent| {
+            let mut container_cmd = parent
+                .spawn((
+                    Node {
+                        width: percent(85.),
+                        height: percent(100.),
+                        flex_direction: FlexDirection::Column,
+                        row_gap: Val::Px(12.),
+                        padding: UiRect::all(Val::Px(15.)),
+                        overflow: Overflow::scroll_y(),
+                        ..default()
+                    },
+                    ScrollableContainer,
+                    ScrollPosition(Vec2::new(0., initial_scroll)),
+                    ShopItemsScroll,
+                    bevy::ui::RelativeCursorPosition::default(),
+                ));
+            container_entity = container_cmd.id();
+            container_cmd.with_children(|parent| {
+                    let mut matching: Vec<Equipment> = Vec::new();
+                    for item_key in &shop_inventory.items {
+                        if let Some(equipment) = get_equipment(item_key) {
+                            let matches_tab = match filters.tab {
+                                ShopTab::Weapons => match &equipment {
+                                    Equipment::Weapon(w) => {
+                                        let matches_hand = filters.weapon_hand.map_or(true, |h| w.hand == h);
+                                        let matches_type = match filters.weapon_type {
+                                            WeaponTypeFilter::All => true,
+                                            WeaponTypeFilter::Weapons => w.category != Category::Shield && w.category != Category::Book,
+                                            WeaponTypeFilter::Shields => w.category == Category::Shield,
+                                            WeaponTypeFilter::Books => w.category == Category::Book,
+                                        };
+                                        let matches_category = filters.weapon_category.map_or(true, |c| w.category == c);
+                                        let matches_kind = filters.kind.map_or(true, |k| w.kind == k);
+                                        matches_hand && matches_type && matches_category && matches_kind
                                     }
+                                    _ => false,
                                 },
-                                WeaponTypeFilter::Shields => {
-                                    if w.category != Category::Shield {
-                                        continue;
-                                    }
+                                ShopTab::Helmets => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Helmet,
+                                    _ => false,
                                 },
-                                WeaponTypeFilter::Books => {
-                                    if w.category != Category::Book {
-                                        continue;
-                                    }
+                                ShopTab::Chestplates => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Chestplate,
+                                    _ => false,
                                 },
-                                WeaponTypeFilter::All => {},
+                                ShopTab::Boots => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Boots,
+                                    _ => false,
+                                },
+                                ShopTab::Gloves => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Gloves,
+                                    _ => false,
+                                },
+                                ShopTab::Accessories => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Accessory,
+                                    _ => false,
+                                },
+                                ShopTab::Consumables => matches!(equipment, Equipment::Consumable(_)),
+                            };
+                            if matches_tab {
+                                matching.push(equipment);
                             }
-                            if let Some(category) = filters.weapon_category {
-                                if w.category != category {
-                                    continue;
-                                }
-                            }
-                            if let Some(kind) = filters.kind {
-                                if w.kind != kind {
-                                    continue;
-                                }
-                            }
-                        } else {
-                            continue;
                         }
                     }
 
-                    empty = false;
-                    spawn_shop_item_card(parent, assets, localization, lang, &equipment);
-                }
-            }
+                    matching.sort_by(|a, b| b.price().cmp(&a.price()));
 
-            if empty {
-                parent.spawn((
-                    add_text("No items fit these conditions.", "bold", 2.0, assets),
-                    TextColor(Color::WHITE),
-                ));
-            }
+                    for chunk in matching.chunks(4) {
+                        parent
+                            .spawn(Node {
+                                width: percent(100.),
+                                flex_direction: FlexDirection::Row,
+                                flex_shrink: 0.,
+                                align_items: AlignItems::FlexStart,
+                                column_gap: percent(1.5),
+                                overflow: Overflow::clip(),
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                for equipment in chunk {
+                                    spawn_shop_item_card(parent, assets, localization, lang, equipment);
+                                }
+                            });
+                    }
+
+                    if matching.is_empty() {
+                        parent.spawn((
+                            add_text("No items available.", "bold", 2.0, assets),
+                            TextColor(Color::WHITE),
+                        ));
+                    }
+                });
+
+            // Sidebar for weapon filters
+            parent
+                .spawn(Node {
+                    width: percent(11.),
+                    height: percent(100.),
+                    margin: UiRect {
+                        left: Val::Px(5.),
+                        right: Val::Px(10.),
+                        ..default()
+                    },
+                    flex_direction: FlexDirection::Column,
+                    row_gap: Val::Px(12.),
+                    align_items: AlignItems::Stretch,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    if filters.tab == ShopTab::Weapons {
+                        spawn_dropdown_type(parent, assets, filters.weapon_type, open_dropdown);
+                        spawn_dropdown_kind(parent, assets, filters.kind, open_dropdown);
+                        spawn_dropdown_category(parent, assets, filters.weapon_category, open_dropdown);
+                        spawn_dropdown_hand(parent, assets, filters.weapon_hand, open_dropdown);
+                    }
+                });
+
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        width: Val::Px(10.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(0.),
+                        right: Val::Px(0.),
+                        border_radius: BorderRadius::all(Val::Px(5.)),
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
+                    Visibility::Hidden,
+                    ScrollbarTrack { container: container_entity },
+                ))
+                .with_children(|parent| {
+                    parent
+                        .spawn((
+                            Node {
+                                position_type: PositionType::Absolute,
+                                width: percent(100.),
+                                height: Val::Px(32.),
+                                top: Val::Px(0.),
+                                border_radius: BorderRadius::all(Val::Px(5.)),
+                                ..default()
+                            },
+                            BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
+                            Button,
+                            Interaction::default(),
+                            Pickable::default(),
+                            ScrollbarThumb { container: container_entity },
+                        ))
+                        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                        .observe(cursor::<Out>(SystemCursorIcon::Default))
+                        .observe(on_scrollbar_thumb_drag);
+                });
         });
 }
 
@@ -677,16 +570,16 @@ fn spawn_shop_item_card(
     parent
         .spawn((
             Node {
-                width: Val::Px(160.),
-                height: Val::Px(160.),
+                width: percent(23.0),
+                aspect_ratio: Some(1.0),
                 flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::SpaceBetween,
+                align_items: AlignItems::Stretch,
+                justify_content: JustifyContent::FlexEnd,
                 border: UiRect::all(Val::Px(1.5)),
-                padding: UiRect::all(Val::Px(4.)),
+                overflow: Overflow::clip(),
                 ..default()
             },
-            BackgroundColor(Color::srgba_u8(10, 15, 30, 240)),
+            BackgroundColor(NORMAL_BUTTON_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
             Interaction::default(),
             Button,
@@ -698,23 +591,36 @@ fn spawn_shop_item_card(
             ShopItemTooltip(name_str.clone()),
         ))
         .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-        .observe(recolor::<Out>(Color::srgba_u8(10, 15, 30, 240)))
+        .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
         .observe(cursor::<Over>(SystemCursorIcon::Pointer))
         .observe(cursor::<Out>(SystemCursorIcon::Default))
         .observe(handle_shop_item_card_click)
         .with_children(|parent| {
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    width: percent(100.),
+                    height: percent(100.),
+                    ..default()
+                },
+                ImageNode::new(assets.image(format!("build_{}", item.name())))
+                    .with_mode(NodeImageMode::Stretch),
+            ));
+
             parent
                 .spawn(Node {
                     width: percent(100.),
+                    height: Val::Px(34.),
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::SpaceBetween,
                     align_items: AlignItems::Center,
-                    padding: UiRect::horizontal(Val::Px(2.)),
+                    padding: UiRect::horizontal(Val::Px(4.)),
                     ..default()
                 })
+                .insert(BackgroundColor(Color::srgba_u8(0, 0, 0, 180)))
                 .with_children(|parent| {
                     parent
-                        .spawn((add_text(name, "bold", 1.3, assets), TextColor(BUTTON_TEXT_COLOR)));
+                        .spawn((add_text(name, "bold", 1.5, assets), TextColor(BUTTON_TEXT_COLOR)));
 
                     parent
                         .spawn(Node {
@@ -726,49 +632,24 @@ fn spawn_shop_item_card(
                         .with_children(|parent| {
                             parent.spawn((
                                 Node {
-                                    width: Val::Px(14.),
-                                    height: Val::Px(14.),
+                                    width: Val::Px(16.),
+                                    height: Val::Px(16.),
                                     ..default()
                                 },
                                 ImageNode::new(assets.image("gold"))
                                     .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
-                                add_text(format!("{}", item.price()), "bold", 1.3, assets),
+                                add_text(format!("{}", item.price()), "bold", 1.5, assets),
                                 TextColor(BUTTON_TEXT_COLOR),
                             ));
                         });
                 });
-
-            parent.spawn((
-                Node {
-                    width: Val::Px(100.),
-                    height: Val::Px(100.),
-                    border: UiRect::all(Val::Px(1.)),
-                    margin: UiRect::bottom(Val::Px(4.)),
-                    ..default()
-                },
-                BorderColor::all(BUTTON_BORDER_COLOR),
-                ImageNode::new(assets.image(format!("build_{}", item.name())))
-                    .with_mode(NodeImageMode::Stretch),
-            ));
         });
 }
 
 #[derive(Component, Clone, Copy)]
 pub struct ShopTabButton(pub ShopTab);
-
-#[derive(Component, Clone, Copy)]
-pub struct ShopHandFilterButton(pub Option<Hand>);
-
-#[derive(Component, Clone, Copy)]
-pub struct ShopTypeFilterButton(pub WeaponTypeFilter);
-
-#[derive(Component, Clone, Copy)]
-pub struct ShopCategoryFilterButton(pub Option<Category>);
-
-#[derive(Component, Clone, Copy)]
-pub struct ShopKindFilterButton(pub Option<Kind>);
 
 pub fn handle_shop_tab_click(
     event: On<Pointer<Click>>,
@@ -778,55 +659,7 @@ pub fn handle_shop_tab_click(
 ) {
     if let Ok(btn) = btn_q.get(event.entity) {
         filters.tab = btn.0;
-        play_audio_msg.write(PlayAudioMsg::new("click"));
-    }
-}
-
-pub fn handle_shop_hand_filter_click(
-    event: On<Pointer<Click>>,
-    mut filters: ResMut<ShopFilters>,
-    btn_q: Query<&ShopHandFilterButton>,
-    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-) {
-    if let Ok(btn) = btn_q.get(event.entity) {
-        filters.weapon_hand = btn.0;
-        play_audio_msg.write(PlayAudioMsg::new("click"));
-    }
-}
-
-pub fn handle_shop_type_filter_click(
-    event: On<Pointer<Click>>,
-    mut filters: ResMut<ShopFilters>,
-    btn_q: Query<&ShopTypeFilterButton>,
-    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-) {
-    if let Ok(btn) = btn_q.get(event.entity) {
-        filters.weapon_type = btn.0;
-        play_audio_msg.write(PlayAudioMsg::new("click"));
-    }
-}
-
-pub fn handle_shop_category_filter_click(
-    event: On<Pointer<Click>>,
-    mut filters: ResMut<ShopFilters>,
-    btn_q: Query<&ShopCategoryFilterButton>,
-    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-) {
-    if let Ok(btn) = btn_q.get(event.entity) {
-        filters.weapon_category = btn.0;
-        play_audio_msg.write(PlayAudioMsg::new("click"));
-    }
-}
-
-pub fn handle_shop_kind_filter_click(
-    event: On<Pointer<Click>>,
-    mut filters: ResMut<ShopFilters>,
-    btn_q: Query<&ShopKindFilterButton>,
-    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-) {
-    if let Ok(btn) = btn_q.get(event.entity) {
-        filters.kind = btn.0;
-        play_audio_msg.write(PlayAudioMsg::new("click"));
+        play_audio_msg.write(PlayAudioMsg::new("button"));
     }
 }
 
@@ -839,38 +672,40 @@ pub fn handle_shop_item_card_click(
     card_q: Query<&ShopItemCard>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
-    if let Ok(card) = card_q.get(event.entity) {
-        let buy_price = card.price;
-        if player.gold < buy_price {
-            play_audio_msg.write(PlayAudioMsg::new("error"));
-            if let Some(toast) = toast_container_q.iter().next() {
-                spawn_toast(
-                    &mut commands,
-                    &assets,
-                    "Not enough gold!".to_string(),
-                    Color::srgba(0.20, 0.05, 0.05, 0.93),
-                    Color::srgb(0.85, 0.20, 0.20),
-                    Color::srgb(1.0, 0.80, 0.80),
-                    toast,
-                );
-            }
-            return;
-        }
+    let Ok(card) = card_q.get(event.entity) else {
+        return;
+    };
 
-        player.gold -= buy_price;
-        play_audio_msg.write(PlayAudioMsg::new("buy"));
-
-        if event.button == PointerButton::Primary {
-            player.inventory.push(card.key.clone());
-            let is_consumable = get_equipment(&card.key)
-                .map(|eq| matches!(eq, Equipment::Consumable(_)))
-                .unwrap_or(false);
-            if !is_consumable {
-                crate::core::ui::playing::equip_item(&mut player, &card.key);
-            }
-        } else {
-            player.inventory.push(card.key.clone());
+    let buy_price = card.price;
+    if player.gold < buy_price {
+        play_audio_msg.write(PlayAudioMsg::new("error"));
+        if let Some(toast) = toast_container_q.iter().next() {
+            spawn_toast(
+                &mut commands,
+                &assets,
+                "Not enough gold!".to_string(),
+                Color::srgba(0.20, 0.05, 0.05, 0.93),
+                Color::srgb(0.85, 0.20, 0.20),
+                Color::srgb(1.0, 0.80, 0.80),
+                toast,
+            );
         }
+        return;
+    }
+
+    player.gold -= buy_price;
+    play_audio_msg.write(PlayAudioMsg::new("buy"));
+
+    if event.button == PointerButton::Primary {
+        player.inventory.push(card.key.clone());
+        let is_consumable = get_equipment(&card.key)
+            .map(|eq| matches!(eq, Equipment::Consumable(_)))
+            .unwrap_or(false);
+        if !is_consumable {
+            crate::core::ui::playing::equip_item(&mut player, &card.key);
+        }
+    } else {
+        player.inventory.push(card.key.clone());
     }
 }
 
@@ -891,38 +726,78 @@ pub fn shop_tooltip_system(
     localization: Res<Localization>,
     settings: Res<Settings>,
     windows: Query<&Window>,
-    hover_q: Query<(&Interaction, &ShopItemTooltip), Changed<Interaction>>,
+    card_q: Query<(&Interaction, &ShopItemTooltip)>,
+    changed_card_q: Query<(), (With<ShopItemTooltip>, Changed<Interaction>)>,
     tooltip_node_q: Query<Entity, With<TooltipNode>>,
 ) {
-    for (interaction, tooltip) in &hover_q {
+    if changed_card_q.is_empty() {
+        return;
+    }
+
+    let mut hovered_item = None;
+    for (interaction, tooltip) in &card_q {
         if *interaction == Interaction::Hovered {
-            for entity in &tooltip_node_q {
-                commands.entity(entity).try_despawn();
-            }
-            if let Some(equipment) = get_equipment(&tooltip.0) {
-                let lang = settings.language;
-                let title = name_with_level(
-                    equipment.name(),
-                    equipment.to_lowername().as_str(),
-                    equipment.level() as u8,
-                    &localization,
-                    lang,
-                );
-                let lines = equipment.full_description(lang, &localization);
-                spawn_item_tooltip(
-                    &mut commands,
-                    &assets,
-                    title,
-                    lines,
-                    &windows,
-                    Some(equipment.price()),
-                    Some(equipment.name().to_string()),
-                );
-            }
-        } else if *interaction == Interaction::None {
-            for entity in &tooltip_node_q {
-                commands.entity(entity).try_despawn();
+            hovered_item = Some(tooltip.0.clone());
+            break;
+        }
+    }
+
+    for entity in &tooltip_node_q {
+        commands.entity(entity).try_despawn();
+    }
+
+    if let Some(item_key) = hovered_item {
+        if let Some(equipment) = get_equipment(&item_key) {
+            let lang = settings.language;
+            let title = name_with_level(
+                equipment.name(),
+                equipment.to_lowername().as_str(),
+                equipment.level() as u8,
+                &localization,
+                lang,
+            );
+            let lines = equipment.full_description(lang, &localization);
+            spawn_item_tooltip(
+                &mut commands,
+                &assets,
+                title,
+                lines,
+                &windows,
+                Some(equipment.price()),
+                Some(equipment.name().to_string()),
+            );
+        }
+    }
+}
+
+pub fn shop_tab_button_system(
+    filters: Res<ShopFilters>,
+    mut tab_btn_q: Query<(Entity, &ShopTabButton, &Interaction, &mut BackgroundColor)>,
+    children_q: Query<&Children>,
+    mut text_color_q: Query<&mut TextColor>,
+) {
+    for (entity, btn, interaction, mut bg) in &mut tab_btn_q {
+        let active = btn.0 == filters.tab;
+        *bg = match (active, interaction) {
+            (_, Interaction::Pressed) => BackgroundColor(Color::srgba_u8(30, 30, 50, 240)),
+            (true, Interaction::Hovered) => BackgroundColor(NORMAL_BUTTON_COLOR),
+            (false, Interaction::Hovered) => BackgroundColor(BUTTON_TEXT_COLOR),
+            (true, Interaction::None) => BackgroundColor(NORMAL_BUTTON_COLOR),
+            (false, Interaction::None) => BackgroundColor(Color::srgba_u8(12, 12, 18, 240)),
+        };
+
+        if let Ok(children) = children_q.get(entity) {
+            for child in children.iter() {
+                if let Ok(mut txt_col) = text_color_q.get_mut(child) {
+                    txt_col.0 = match (active, interaction) {
+                        (_, Interaction::Pressed) => Color::srgba(1.0, 1.0, 1.0, 0.4),
+                        (true, _) => BUTTON_TEXT_COLOR,
+                        (false, Interaction::Hovered) => Color::BLACK,
+                        (false, Interaction::None) => Color::srgba(1.0, 1.0, 1.0, 0.4),
+                    };
+                }
             }
         }
     }
 }
+

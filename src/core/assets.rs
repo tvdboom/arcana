@@ -1,8 +1,21 @@
-use crate::core::catalog::catalog::{all_abilities, all_perks, all_weapons, all_wearables};
+use crate::core::catalog::catalog::{all_abilities, all_consumables, all_perks, all_weapons, all_wearables};
 use bevy::asset::AssetServer;
+use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
 use std::collections::HashMap;
+
+/// Forces linear (smooth) filtering for an image, overriding the global
+/// `ImagePlugin::default_nearest()` setting. Used for painted/photographic art
+/// (item icons, action images) that would otherwise look pixelated when scaled.
+fn linear_sampler(settings: &mut ImageLoaderSettings) {
+    settings.sampler = ImageSampler::linear();
+}
+
+/// Loads an image with linear filtering (see [`linear_sampler`]).
+fn load_linear(assets: &AssetServer, path: impl Into<bevy::asset::AssetPath<'static>>) -> Handle<Image> {
+    assets.load_builder().with_settings(linear_sampler).load(path)
+}
 
 #[derive(Resource)]
 pub struct WorldAssets {
@@ -73,15 +86,15 @@ impl FromWorld for WorldAssets {
             ("attack", assets.load("images/icons/attack.ktx2")),
             ("initiative", assets.load("images/icons/initiative.ktx2")),
             ("gold", assets.load("images/icons/gold.ktx2")),
-            ("action_hunt", assets.load("images/icons/action_hunt.ktx2")),
-            ("action_shop", assets.load("images/icons/action_shop.ktx2")),
-            ("action_quest", assets.load("images/icons/action_quest.ktx2")),
-            ("action_train", assets.load("images/icons/action_train.ktx2")),
-            ("action_craft", assets.load("images/icons/action_craft.ktx2")),
-            ("action_work", assets.load("images/icons/action_work.ktx2")),
-            ("action_rest", assets.load("images/icons/action_rest.ktx2")),
-            ("action_study", assets.load("images/icons/action_study.ktx2")),
-            ("action_duel", assets.load("images/icons/action_duel.ktx2")),
+            ("action_hunt", load_linear(assets, "images/icons/action_hunt.ktx2")),
+            ("action_shop", load_linear(assets, "images/icons/action_shop.ktx2")),
+            ("action_quest", load_linear(assets, "images/icons/action_quest.ktx2")),
+            ("action_train", load_linear(assets, "images/icons/action_train.ktx2")),
+            ("action_craft", load_linear(assets, "images/icons/action_craft.ktx2")),
+            ("action_work", load_linear(assets, "images/icons/action_work.ktx2")),
+            ("action_rest", load_linear(assets, "images/icons/action_rest.ktx2")),
+            ("action_study", load_linear(assets, "images/icons/action_study.ktx2")),
+            ("action_duel", load_linear(assets, "images/icons/action_duel.ktx2")),
             ("ap", assets.load("images/icons/ap.ktx2")),
             ("equipped", assets.load("images/icons/equipped.ktx2")),
             ("base", assets.load("images/icons/base.ktx2")),
@@ -234,35 +247,39 @@ impl FromWorld for WorldAssets {
             ("unicorn", assets.load("images/pets/unicorn.ktx2")),
             ("vulture", assets.load("images/pets/vulture.ktx2")),
             // Actions
-            ("action_clerical_labor", assets.load("images/actions/clerical_labor.ktx2")),
-            ("action_craft_labor", assets.load("images/actions/craft_labor.ktx2")),
-            ("action_manual_labor", assets.load("images/actions/manual_labor.ktx2")),
-            ("action_apprenticeship", assets.load("images/actions/apprenticeship.ktx2")),
-            ("action_mentorship", assets.load("images/actions/mentorship.ktx2")),
-            ("action_conditioning", assets.load("images/actions/conditioning.ktx2")),
-            ("action_simple_rest", assets.load("images/actions/simple_rest.ktx2")),
-            ("action_common_lodging", assets.load("images/actions/common_lodging.ktx2")),
-            ("action_grand_accommodation", assets.load("images/actions/grand_accomodation.ktx2")),
-            ("action_melee", assets.load("images/actions/melee.ktx2")),
-            ("action_range", assets.load("images/actions/range.ktx2")),
-            ("action_finesse", assets.load("images/actions/finesse.ktx2")),
+            ("action_clerical_labor", load_linear(assets, "images/actions/clerical_labor.ktx2")),
+            ("action_craft_labor", load_linear(assets, "images/actions/craft_labor.ktx2")),
+            ("action_manual_labor", load_linear(assets, "images/actions/manual_labor.ktx2")),
+            ("action_apprenticeship", load_linear(assets, "images/actions/apprenticeship.ktx2")),
+            ("action_mentorship", load_linear(assets, "images/actions/mentorship.ktx2")),
+            ("action_conditioning", load_linear(assets, "images/actions/conditioning.ktx2")),
+            ("action_simple_rest", load_linear(assets, "images/actions/simple_rest.ktx2")),
+            ("action_common_lodging", load_linear(assets, "images/actions/common_lodging.ktx2")),
+            ("action_grand_accommodation", load_linear(assets, "images/actions/grand_accomodation.ktx2")),
+            ("action_melee", load_linear(assets, "images/actions/melee.ktx2")),
+            ("action_range", load_linear(assets, "images/actions/range.ktx2")),
+            ("action_finesse", load_linear(assets, "images/actions/finesse.ktx2")),
         ]);
 
         for ability in all_abilities() {
             let key: &'static str = Box::leak(format!("build_{}", ability.name).into_boxed_str());
-            images.insert(key, assets.load(ability.image.clone()));
+            images.insert(key, load_linear(assets, ability.image.clone()));
         }
         for perk in all_perks() {
             let key: &'static str = Box::leak(format!("build_{}", perk.name).into_boxed_str());
-            images.insert(key, assets.load(perk.image.clone()));
+            images.insert(key, load_linear(assets, perk.image.clone()));
         }
         for weapon in all_weapons() {
             let key: &'static str = Box::leak(format!("build_{}", weapon.name).into_boxed_str());
-            images.insert(key, assets.load(weapon.image.clone()));
+            images.insert(key, load_linear(assets, weapon.image.clone()));
         }
         for wearable in all_wearables() {
             let key: &'static str = Box::leak(format!("build_{}", wearable.name).into_boxed_str());
-            images.insert(key, assets.load(wearable.image.clone()));
+            images.insert(key, load_linear(assets, wearable.image.clone()));
+        }
+        for consumable in all_consumables() {
+            let key: &'static str = Box::leak(format!("build_{}", consumable.name).into_boxed_str());
+            images.insert(key, load_linear(assets, consumable.image.clone()));
         }
 
         Self {

@@ -93,5 +93,8 @@ mod tests {
 
         let arm = all_wearables();
         assert!(!arm.is_empty(), "Wearable catalog is empty");
+
+        let con = all_consumables();
+        assert!(!con.is_empty(), "Consumable catalog is empty");
     }
 }
