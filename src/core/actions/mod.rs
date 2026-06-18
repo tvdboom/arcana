@@ -18,7 +18,7 @@ use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;
 use crate::core::player::{Attribute, Player};
 use crate::core::settings::Settings;
-use crate::core::states::GameState;
+use crate::core::states::{is_panel_state, GameState};
 use crate::core::ui::level_up::LevelUpPending;
 use crate::core::ui::toast::{spawn_toast, ToastContainer};
 use crate::utils::{capitalize_words, NameFromEnum};
@@ -177,9 +177,7 @@ pub fn trigger_level_up(
 
 pub fn handle_playing_action_clicks(
     event: On<Pointer<Click>>,
-    mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    mut level_up: ResMut<LevelUpPending>,
     action_btn_q: Query<&ActionButton, Without<DisabledButton>>,
     _game_state: Res<State<GameState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
@@ -196,6 +194,10 @@ pub fn handle_playing_action_clicks(
             (Action::Study, GameState::Study) => true,
             (Action::Train, GameState::Train) => true,
             (Action::Rest, GameState::Rest) => true,
+            (Action::Craft, GameState::Craft) => true,
+            (Action::Hunt, GameState::Hunt) => true,
+            (Action::Quest, GameState::Quest) => true,
+            (Action::Duel, GameState::Duel) => true,
             _ => false,
         };
 
@@ -205,10 +207,8 @@ pub fn handle_playing_action_clicks(
             return;
         }
 
-        // Close any open panel if clicking a non-panel action
-        if *current_state != GameState::Playing
-            && matches!(action, Action::Hunt | Action::Craft | Action::Quest | Action::Duel)
-        {
+        // Close any open panel before switching to another one.
+        if *current_state != GameState::Playing && is_panel_state(*current_state) {
             next_game_state.set(GameState::Playing);
         }
 
@@ -234,7 +234,7 @@ pub fn handle_playing_action_clicks(
                 play_audio_msg.write(PlayAudioMsg::new("button"));
             },
             Action::Hunt => {
-                hunt::handle_hunt(&mut player);
+                next_game_state.set(GameState::Hunt);
                 play_audio_msg.write(PlayAudioMsg::new("button"));
             },
             Action::Craft => {
@@ -242,28 +242,13 @@ pub fn handle_playing_action_clicks(
                 play_audio_msg.write(PlayAudioMsg::new("button"));
             },
             Action::Quest => {
-                quest::handle_quest(&mut player);
+                next_game_state.set(GameState::Quest);
                 play_audio_msg.write(PlayAudioMsg::new("button"));
             },
             Action::Duel => {
-                duel::handle_duel(&mut player);
+                next_game_state.set(GameState::Duel);
                 play_audio_msg.write(PlayAudioMsg::new("button"));
             },
-        }
-
-        // Deduct action points for standard non-panel actions
-        if matches!(action, Action::Hunt | Action::Quest) {
-            let cost = action.ap_cost();
-            if player.ap <= cost {
-                trigger_level_up(
-                    &mut player,
-                    &mut level_up,
-                    &mut play_audio_msg,
-                    &mut next_game_state,
-                );
-            } else {
-                player.ap -= cost;
-            }
         }
     }
 }

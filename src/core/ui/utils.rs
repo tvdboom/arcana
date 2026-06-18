@@ -2,7 +2,7 @@ use crate::core::assets::WorldAssets;
 use crate::core::localization::Localization;
 use crate::core::menu::utils::add_text;
 use crate::core::settings::Language;
-use crate::core::states::GameState;
+use crate::core::states::{is_panel_state, GameState};
 use crate::core::utils::cursor;
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
@@ -70,10 +70,7 @@ pub fn global_click_listener(
     action_btn_q: Query<&crate::core::actions::ActionButton>,
 ) {
     let current_state = state.get();
-    if !matches!(
-        current_state,
-        GameState::Shop | GameState::Work | GameState::Study | GameState::Rest | GameState::Train | GameState::Craft
-    ) {
+    if !is_panel_state(*current_state) {
         return;
     }
 

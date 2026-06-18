@@ -29,7 +29,7 @@ use crate::core::menu::systems::*;
 use crate::core::persistence::*;
 use crate::core::player::Player;
 use crate::core::settings::Settings;
-use crate::core::states::{AppState, GameState};
+use crate::core::states::{is_panel_state, AppState, GameState};
 use crate::core::systems::*;
 use crate::core::ui::creation::*;
 use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpOverlayCmp};
@@ -42,6 +42,9 @@ use bevy::time::common_conditions::on_timer;
 use std::time::Duration;
 use strum::IntoEnumIterator;
 use crate::core::actions::rest::{setup_rest_ui, update_rest_ui};
+use crate::core::actions::hunt::setup_hunt_ui;
+use crate::core::actions::quest::setup_quest_ui;
+use crate::core::actions::duel::setup_duel_ui;
 use crate::core::actions::shop::*;
 use crate::core::actions::study::{setup_study_ui, update_study_ui, StudySliderState};
 use crate::core::actions::train::{setup_train_ui, update_train_ui, TrainSliderState};
@@ -134,14 +137,7 @@ impl Plugin for GamePlugin {
                 .add_systems(OnExit(state), despawn::<MenuCmp>);
         }
         for state in GameState::iter() {
-            if !matches!(
-                state,
-                GameState::Shop
-                    | GameState::Work
-                    | GameState::Study
-                    | GameState::Train
-                    | GameState::Rest
-            ) {
+            if !is_panel_state(state) {
                 app.add_systems(OnEnter(state), reset_cursor);
             }
         }
@@ -321,6 +317,25 @@ impl Plugin for GamePlugin {
                     equip_slot_tooltip_system,
                 )
                     .run_if(in_state(GameState::Craft)),
+            );
+        app
+            // Hunt Systems
+            .add_systems(OnEnter(GameState::Hunt), setup_hunt_ui)
+            .add_systems(
+                OnExit(GameState::Hunt),
+                (cleanup_panel_ui, despawn::<TooltipNode>),
+            )
+            // Quest Systems
+            .add_systems(OnEnter(GameState::Quest), setup_quest_ui)
+            .add_systems(
+                OnExit(GameState::Quest),
+                (cleanup_panel_ui, despawn::<TooltipNode>),
+            )
+            // Duel Systems
+            .add_systems(OnEnter(GameState::Duel), setup_duel_ui)
+            .add_systems(
+                OnExit(GameState::Duel),
+                (cleanup_panel_ui, despawn::<TooltipNode>),
             );
 
         #[cfg(not(target_arch = "wasm32"))]

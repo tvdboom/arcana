@@ -48,9 +48,9 @@ Examples and corresponding description:
 
 
 
-## Build
-Build is the umbrella term for perks, abilities and gear. They are the items/components a
-player has in their inventory.
+## Catalog
+The catalog contains perks, abilities and items. They are the components a player has
+in their inventory.
 
 
 ### Perks
@@ -138,6 +138,17 @@ Wearables are all non-weapon equipment (helmet, chestplate, gloves, boots, acces
 Wearables always have one or more have modifiers and/or effects (never zero). Modifiers apply
 when the wearable is equipped, while effects apply when hit by an enemy's basic attack.
 
+#### General remarks
+Same logic as for perks and abilities applies to modifiers and effects of equipment: the higher
+the level, the stronger the modifiers and effects, as well as the more modifiers and effects.
+The strength of equipment is determined by its modifiers and effects, as well as its other stats
+(attack, attack speed, crit chance) for weapons.
+
+Abilities, perks and equipment all have a level field. Levels go from 1 to 20. The higher the
+level, the stronger the item. The strength of an item is determined by its stats as well as the
+modifiers and effects it has, which are also stronger at higher levels. Lower level items usually
+have fewer modifiers and effects, while higher level items have more.
+
 
 
 ### Consumables
@@ -150,13 +161,8 @@ and max health and removes negative effects.
 
 
 
-### General remarks
-Same logic as for perks and abilities applies to modifiers and effects of equipment: the higher
-the level, the stronger the modifiers and effects, as well as the more modifiers and effects.
-The strength of equipment is determined by its modifiers and effects, as well as its other stats
-(attack, attack speed, crit chance) for weapons.
-
-Abilities, perks and equipment all have a level field. Levels go from 1 to 20. The higher the
-level, the stronger the item. The strength of an item is determined by its stats as well as the
-modifiers and effects it has, which are also stronger at higher levels. Lower level items usually
-have fewer modifiers and effects, while higher level items have more.
+### Artifacts
+Artifacts are special items that can't be quipped and are not used in combat. They can be gained
+through the work, hunt or quest actions, as well as bought in the shop. They can be sold for
+gold or used in the craft action to craft equipment or consumables. Artifacts belong to a kind,
+like weapons, which determine which items can be crafted from it.

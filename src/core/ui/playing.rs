@@ -3137,7 +3137,9 @@ pub fn update_action_buttons(
     )>,
 ) {
     for (entity, action_btn, mut bg, mut border, mut img, disabled) in &mut btn_q {
-        if player.ap >= action_btn.0.ap_cost() {
+        if matches!(action_btn.0, Action::Hunt | Action::Quest | Action::Duel)
+            || player.ap >= action_btn.0.ap_cost()
+        {
             if disabled.is_some() {
                 commands.entity(entity).remove::<DisabledButton>();
                 bg.0 = NORMAL_BUTTON_COLOR;

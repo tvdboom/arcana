@@ -31,4 +31,22 @@ pub enum GameState {
     Train,
     Rest,
     Craft,
+    Hunt,
+    Quest,
+    Duel,
+}
+
+pub fn is_panel_state(state: GameState) -> bool {
+    matches!(
+        state,
+        GameState::Shop
+            | GameState::Work
+            | GameState::Study
+            | GameState::Train
+            | GameState::Rest
+            | GameState::Craft
+            | GameState::Hunt
+            | GameState::Quest
+            | GameState::Duel
+    )
 }

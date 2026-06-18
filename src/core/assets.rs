@@ -138,11 +138,14 @@ impl FromWorld for WorldAssets {
             ("bg2", assets.load("images/bg/bg2.ktx2")),
             ("basebg", assets.load("images/bg/base.ktx2")),
             ("bg_shop", assets.load("images/bg/shop.ktx2")),
-            ("bg_work", assets.load("images/bg/work.ktx2")),
-            ("bg_study", assets.load("images/bg/study.ktx2")),
-            ("bg_train", assets.load("images/bg/train.ktx2")),
             ("bg_rest", assets.load("images/bg/rest.ktx2")),
+            ("bg_study", assets.load("images/bg/study.ktx2")),
+            ("bg_work", assets.load("images/bg/work.ktx2")),
+            ("bg_train", assets.load("images/bg/train.ktx2")),
             ("bg_craft", assets.load("images/bg/craft.ktx2")),
+            ("bg_hunt", assets.load("images/bg/hunt.ktx2")),
+            ("bg_quest", assets.load("images/bg/quest.ktx2")),
+            ("bg_duel", assets.load("images/bg/duel.ktx2")),
             ("defeat", assets.load("images/bg/defeat.ktx2")),
             // UI
             ("border", assets.load("images/ui/border.ktx2")),
@@ -261,6 +264,12 @@ impl FromWorld for WorldAssets {
             ("action_melee", load_linear(assets, "images/actions/melee.ktx2")),
             ("action_range", load_linear(assets, "images/actions/range.ktx2")),
             ("action_finesse", load_linear(assets, "images/actions/finesse.ktx2")),
+            ("action_easy_hunt", load_linear(assets, "images/actions/easy_hunt.ktx2")),
+            ("action_wild_hunt", load_linear(assets, "images/actions/wild_hunt.ktx2")),
+            ("action_deadly_hunt", load_linear(assets, "images/actions/deadly_hunt.ktx2")),
+            ("action_errand", load_linear(assets, "images/actions/errand.ktx2")),
+            ("action_expedition", load_linear(assets, "images/actions/expedition.ktx2")),
+            ("action_odyssey", load_linear(assets, "images/actions/odyssey.ktx2")),
         ]);
 
         for ability in all_abilities() {
