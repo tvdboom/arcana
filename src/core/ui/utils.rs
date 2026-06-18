@@ -72,7 +72,7 @@ pub fn global_click_listener(
     let current_state = state.get();
     if !matches!(
         current_state,
-        GameState::Shop | GameState::Work | GameState::Study | GameState::Rest | GameState::Train
+        GameState::Shop | GameState::Work | GameState::Study | GameState::Rest | GameState::Train | GameState::Craft
     ) {
         return;
     }

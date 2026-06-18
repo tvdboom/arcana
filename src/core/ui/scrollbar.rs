@@ -15,14 +15,16 @@ pub struct ScrollbarThumb {
 
 pub fn scroll_system(
     mut mouse_wheel_events: MessageReader<bevy::input::mouse::MouseWheel>,
-    mut query: Query<(&mut ScrollPosition, &ComputedNode), With<ScrollableContainer>>,
+    mut query: Query<(&mut ScrollPosition, &ComputedNode, &Interaction), With<ScrollableContainer>>,
 ) {
     for event in mouse_wheel_events.read() {
-        for (mut scroll, computed) in &mut query {
-            // Scroll offset speed factor
-            scroll.y -= event.y * 200.0;
-            let max_scroll = (computed.content_size().y - computed.size().y).max(0.0);
-            scroll.y = scroll.y.clamp(0.0, max_scroll);
+        for (mut scroll, computed, interaction) in &mut query {
+            if *interaction != Interaction::None {
+                // Scroll offset speed factor
+                scroll.y -= event.y * 200.0;
+                let max_scroll = (computed.content_size().y - computed.size().y).max(0.0);
+                scroll.y = scroll.y.clamp(0.0, max_scroll);
+            }
         }
     }
 }

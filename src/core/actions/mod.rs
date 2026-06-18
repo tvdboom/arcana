@@ -238,7 +238,7 @@ pub fn handle_playing_action_clicks(
                 play_audio_msg.write(PlayAudioMsg::new("button"));
             },
             Action::Craft => {
-                craft::handle_craft(&mut player);
+                next_game_state.set(GameState::Craft);
                 play_audio_msg.write(PlayAudioMsg::new("button"));
             },
             Action::Quest => {
@@ -252,7 +252,7 @@ pub fn handle_playing_action_clicks(
         }
 
         // Deduct action points for standard non-panel actions
-        if matches!(action, Action::Hunt | Action::Craft | Action::Quest) {
+        if matches!(action, Action::Hunt | Action::Quest) {
             let cost = action.ap_cost();
             if player.ap <= cost {
                 trigger_level_up(
@@ -367,19 +367,74 @@ pub fn handle_work_card_clicks(
                 let max_gold = (base * 1.2).max(2.0) as u32;
                 let gold_earned = rng.random_range(min_gold..=max_gold);
 
-                player.gold += gold_earned;
+                let award_artifact = rng.random_bool(0.5);
+                if award_artifact {
+                    let matching_artifacts: Vec<_> = crate::core::catalog::catalog::all_artifacts()
+                        .iter()
+                        .filter(|art| {
+                            let name_lower = art.name.to_lowercase();
+                            name_lower.contains("scroll")
+                                || name_lower.contains("writing")
+                                || name_lower.contains("paper")
+                                || name_lower.contains("book")
+                                || name_lower.contains("bible")
+                                || name_lower.contains("page")
+                        })
+                        .collect();
 
-                spawn_toast(
-                    &mut commands,
-                    &assets,
-                    localization
-                        .get("toast_gold_earned", lang)
-                        .replace("{gold}", &gold_earned.to_string()),
-                    Color::srgba(0.08, 0.16, 0.12, 0.93),
-                    Color::srgb(0.25, 0.75, 0.50),
-                    Color::srgb(0.60, 1.0, 0.75),
-                    toast,
-                );
+                    if !matching_artifacts.is_empty() {
+                        let mut closest_artifacts = Vec::new();
+                        let mut min_diff = i32::MAX;
+                        for art in &matching_artifacts {
+                            let diff = (art.price as i32 - gold_earned as i32).abs();
+                            if diff < min_diff {
+                                min_diff = diff;
+                                closest_artifacts.clear();
+                                closest_artifacts.push(*art);
+                            } else if diff == min_diff {
+                                closest_artifacts.push(*art);
+                            }
+                        }
+                        let chosen = closest_artifacts[rng.random_range(0..closest_artifacts.len())];
+                        player.inventory.push(chosen.name.clone());
+
+                        spawn_toast(
+                            &mut commands,
+                            &assets,
+                            format!("Clerical labor done! Earned artifact: {}", chosen.name),
+                            Color::srgba(0.08, 0.16, 0.12, 0.93),
+                            Color::srgb(0.25, 0.75, 0.50),
+                            Color::srgb(0.60, 1.0, 0.75),
+                            toast,
+                        );
+                    } else {
+                        player.gold += gold_earned;
+                        spawn_toast(
+                            &mut commands,
+                            &assets,
+                            localization
+                                .get("toast_gold_earned", lang)
+                                .replace("{gold}", &gold_earned.to_string()),
+                            Color::srgba(0.08, 0.16, 0.12, 0.93),
+                            Color::srgb(0.25, 0.75, 0.50),
+                            Color::srgb(0.60, 1.0, 0.75),
+                            toast,
+                        );
+                    }
+                } else {
+                    player.gold += gold_earned;
+                    spawn_toast(
+                        &mut commands,
+                        &assets,
+                        localization
+                            .get("toast_gold_earned", lang)
+                            .replace("{gold}", &gold_earned.to_string()),
+                        Color::srgba(0.08, 0.16, 0.12, 0.93),
+                        Color::srgb(0.25, 0.75, 0.50),
+                        Color::srgb(0.60, 1.0, 0.75),
+                        toast,
+                    );
+                }
             },
             1 => {
                 // Craft Labor
@@ -391,22 +446,91 @@ pub fn handle_work_card_clicks(
                 let max_gold = (base * 1.2).max(2.0) as u32;
                 let gold_earned = rng.random_range(min_gold..=max_gold);
 
-                player.gold += gold_earned;
                 let next_mana = player.mana().saturating_sub(craft_cost);
                 player.set_mana(next_mana);
 
-                spawn_toast(
-                    &mut commands,
-                    &assets,
-                    localization
-                        .get("earned_gold_lost_mana", lang)
-                        .replace("{gold}", &gold_earned.to_string())
-                        .replace("{mana}", &craft_cost.to_string()),
-                    Color::srgba(0.08, 0.16, 0.12, 0.93),
-                    Color::srgb(0.25, 0.75, 0.50),
-                    Color::srgb(0.60, 1.0, 0.75),
-                    toast,
-                );
+                let award_artifact = rng.random_bool(0.5);
+                if award_artifact {
+                    let matching_artifacts: Vec<_> = crate::core::catalog::catalog::all_artifacts()
+                        .iter()
+                        .filter(|art| {
+                            let name_lower = art.name.to_lowercase();
+                            name_lower.contains("blacksmith")
+                                || name_lower.contains("patch")
+                                || name_lower.contains("horseshoe")
+                                || name_lower.contains("knife")
+                                || name_lower.contains("rod")
+                                || name_lower.contains("hook")
+                                || name_lower.contains("coat")
+                                || name_lower.contains("leather")
+                                || name_lower.contains("skin")
+                                || name_lower.contains("shell")
+                                || name_lower.contains("key")
+                                || name_lower.contains("candlestick")
+                                || name_lower.contains("torch")
+                                || name_lower.contains("ingot")
+                                || name_lower.contains("bar")
+                                || name_lower.contains("needle")
+                                || name_lower.contains("thread")
+                                || name_lower.contains("cloth")
+                        })
+                        .collect();
+
+                    if !matching_artifacts.is_empty() {
+                        let mut closest_artifacts = Vec::new();
+                        let mut min_diff = i32::MAX;
+                        for art in &matching_artifacts {
+                            let diff = (art.price as i32 - gold_earned as i32).abs();
+                            if diff < min_diff {
+                                min_diff = diff;
+                                closest_artifacts.clear();
+                                closest_artifacts.push(*art);
+                            } else if diff == min_diff {
+                                closest_artifacts.push(*art);
+                            }
+                        }
+                        let chosen = closest_artifacts[rng.random_range(0..closest_artifacts.len())];
+                        player.inventory.push(chosen.name.clone());
+
+                        spawn_toast(
+                            &mut commands,
+                            &assets,
+                            format!("Craft labor done! Earned artifact: {} (-{} Mana)", chosen.name, craft_cost),
+                            Color::srgba(0.08, 0.16, 0.12, 0.93),
+                            Color::srgb(0.25, 0.75, 0.50),
+                            Color::srgb(0.60, 1.0, 0.75),
+                            toast,
+                        );
+                    } else {
+                        player.gold += gold_earned;
+                        spawn_toast(
+                            &mut commands,
+                            &assets,
+                            localization
+                                .get("earned_gold_lost_mana", lang)
+                                .replace("{gold}", &gold_earned.to_string())
+                                .replace("{mana}", &craft_cost.to_string()),
+                            Color::srgba(0.08, 0.16, 0.12, 0.93),
+                            Color::srgb(0.25, 0.75, 0.50),
+                            Color::srgb(0.60, 1.0, 0.75),
+                            toast,
+                        );
+                    }
+                } else {
+                    player.gold += gold_earned;
+                    spawn_toast(
+                        &mut commands,
+                        &assets,
+                        localization
+                            .get("earned_gold_lost_mana", lang)
+                            .replace("{gold}", &gold_earned.to_string())
+                            .replace("{mana}", &craft_cost.to_string()),
+                        Color::srgba(0.08, 0.16, 0.12, 0.93),
+                        Color::srgb(0.25, 0.75, 0.50),
+                        Color::srgb(0.60, 1.0, 0.75),
+                        toast,
+                    );
+                }
             },
             2 => {
                 // Manual Labor
@@ -418,22 +542,83 @@ pub fn handle_work_card_clicks(
                 let max_gold = (base * 1.2).max(2.0) as u32;
                 let gold_earned = rng.random_range(min_gold..=max_gold);
 
-                player.gold += gold_earned;
                 let next_health = player.health().saturating_sub(manual_cost).max(1);
                 player.set_health(next_health);
 
-                spawn_toast(
-                    &mut commands,
-                    &assets,
-                    localization
-                        .get("earned_gold_lost_health", lang)
-                        .replace("{gold}", &gold_earned.to_string())
-                        .replace("{health}", &manual_cost.to_string()),
-                    Color::srgba(0.08, 0.16, 0.12, 0.93),
-                    Color::srgb(0.25, 0.75, 0.50),
-                    Color::srgb(0.60, 1.0, 0.75),
-                    toast,
-                );
+                let award_artifact = rng.random_bool(0.5);
+                if award_artifact {
+                    let matching_artifacts: Vec<_> = crate::core::catalog::catalog::all_artifacts()
+                        .iter()
+                        .filter(|art| {
+                            let name_lower = art.name.to_lowercase();
+                            name_lower.contains("ore")
+                                || name_lower.contains("stone")
+                                || name_lower.contains("stoune")
+                                || name_lower.contains("crystal")
+                                || name_lower.contains("diamond")
+                                || name_lower.contains("brilliant")
+                                || name_lower.contains("pearl")
+                                || name_lower.contains("pyrite")
+                                || name_lower.contains("coal")
+                                || name_lower.contains("clay")
+                        })
+                        .collect();
+
+                    if !matching_artifacts.is_empty() {
+                        let mut closest_artifacts = Vec::new();
+                        let mut min_diff = i32::MAX;
+                        for art in &matching_artifacts {
+                            let diff = (art.price as i32 - gold_earned as i32).abs();
+                            if diff < min_diff {
+                                min_diff = diff;
+                                closest_artifacts.clear();
+                                closest_artifacts.push(*art);
+                            } else if diff == min_diff {
+                                closest_artifacts.push(*art);
+                            }
+                        }
+                        let chosen = closest_artifacts[rng.random_range(0..closest_artifacts.len())];
+                        player.inventory.push(chosen.name.clone());
+
+                        spawn_toast(
+                            &mut commands,
+                            &assets,
+                            format!("Manual labor done! Earned artifact: {} (-{} HP)", chosen.name, manual_cost),
+                            Color::srgba(0.08, 0.16, 0.12, 0.93),
+                            Color::srgb(0.25, 0.75, 0.50),
+                            Color::srgb(0.60, 1.0, 0.75),
+                            toast,
+                        );
+                    } else {
+                        player.gold += gold_earned;
+                        spawn_toast(
+                            &mut commands,
+                            &assets,
+                            localization
+                                .get("earned_gold_lost_health", lang)
+                                .replace("{gold}", &gold_earned.to_string())
+                                .replace("{health}", &manual_cost.to_string()),
+                            Color::srgba(0.08, 0.16, 0.12, 0.93),
+                            Color::srgb(0.25, 0.75, 0.50),
+                            Color::srgb(0.60, 1.0, 0.75),
+                            toast,
+                        );
+                    }
+                } else {
+                    player.gold += gold_earned;
+                    spawn_toast(
+                        &mut commands,
+                        &assets,
+                        localization
+                            .get("earned_gold_lost_health", lang)
+                            .replace("{gold}", &gold_earned.to_string())
+                            .replace("{health}", &manual_cost.to_string()),
+                        Color::srgba(0.08, 0.16, 0.12, 0.93),
+                        Color::srgb(0.25, 0.75, 0.50),
+                        Color::srgb(0.60, 1.0, 0.75),
+                        toast,
+                    );
+                }
             },
             _ => {},
         }

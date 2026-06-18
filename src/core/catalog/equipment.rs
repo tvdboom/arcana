@@ -1,3 +1,4 @@
+use crate::core::catalog::artifacts::Artifact;
 use crate::core::catalog::modifiers::Modifier;
 use crate::core::catalog::weapons::Weapon;
 use crate::core::catalog::wearables::Wearable;
@@ -7,7 +8,7 @@ use crate::core::settings::Language;
 use serde::Deserialize;
 use strum_macros::Display;
 
-#[derive(Debug, Clone, Copy, Display, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, Display, Hash, PartialEq, Eq, Deserialize)]
 pub enum Kind {
     Physical,
     Fire,
@@ -28,6 +29,7 @@ pub enum Equipment {
     Wearable(Wearable),
     Weapon(Weapon),
     Consumable(Consumable),
+    Artifact(Artifact),
 }
 
 impl Equipment {
@@ -36,6 +38,7 @@ impl Equipment {
             Equipment::Wearable(a) => a.description(language, localization),
             Equipment::Weapon(w) => w.description(language, localization),
             Equipment::Consumable(c) => c.description(language, localization),
+            Equipment::Artifact(r) => r.description(language, localization),
         }
     }
 
@@ -44,6 +47,16 @@ impl Equipment {
             Equipment::Wearable(a) => a.full_description(language, localization),
             Equipment::Weapon(w) => w.full_description(language, localization),
             Equipment::Consumable(c) => c.full_description(language, localization),
+            Equipment::Artifact(r) => r.full_description(language, localization),
+        }
+    }
+
+    pub fn kind(&self) -> Kind {
+        match self {
+            Equipment::Weapon(w) => w.kind,
+            Equipment::Wearable(a) => a.kind,
+            Equipment::Consumable(_) => Kind::Physical,
+            Equipment::Artifact(r) => r.kind,
         }
     }
 
@@ -52,6 +65,7 @@ impl Equipment {
             Equipment::Wearable(a) => &a.name,
             Equipment::Weapon(w) => &w.name,
             Equipment::Consumable(c) => &c.name,
+            Equipment::Artifact(r) => &r.name,
         }
     }
 
@@ -60,6 +74,7 @@ impl Equipment {
             Equipment::Wearable(a) => a.level,
             Equipment::Weapon(w) => w.level,
             Equipment::Consumable(c) => c.level,
+            Equipment::Artifact(r) => r.level,
         }
     }
 
@@ -68,6 +83,7 @@ impl Equipment {
             Equipment::Wearable(a) => a.price,
             Equipment::Weapon(w) => w.price,
             Equipment::Consumable(c) => c.price,
+            Equipment::Artifact(r) => r.price,
         }
     }
 
@@ -76,6 +92,7 @@ impl Equipment {
             Equipment::Wearable(a) => (a.price as f32 * (0.5 + 0.01 * modifier as f32)) as u32,
             Equipment::Weapon(w) => (w.price as f32 * (0.5 + 0.01 * modifier as f32)) as u32,
             Equipment::Consumable(c) => (c.price as f32 * (0.5 + 0.01 * modifier as f32)) as u32,
+            Equipment::Artifact(r) => (r.price as f32 * (0.5 + 0.01 * modifier as f32)) as u32,
         }
     }
 
@@ -124,6 +141,7 @@ impl Equipment {
             Equipment::Wearable(a) => &a.modifiers,
             Equipment::Weapon(w) => &w.modifiers,
             Equipment::Consumable(_) => &[],
+            Equipment::Artifact(_) => &[],
         }
     }
 }

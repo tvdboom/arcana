@@ -46,6 +46,7 @@ use crate::core::actions::shop::*;
 use crate::core::actions::study::{setup_study_ui, update_study_ui, StudySliderState};
 use crate::core::actions::train::{setup_train_ui, update_train_ui, TrainSliderState};
 use crate::core::actions::work::{setup_work_ui, update_work_ui, WorkSliderState};
+use crate::core::actions::craft::{setup_craft_ui, update_craft_ui};
 use crate::core::ui::dropdown::{shop_close_dropdown_on_outside_click, OpenDropdown};
 use crate::core::ui::scrollbar::{scroll_system, update_scrollbar_system};
 use crate::core::ui::utils::cleanup_panel_ui;
@@ -96,9 +97,11 @@ impl Plugin for GamePlugin {
             .init_resource::<ShopInventory>()
             .init_resource::<OpenDropdown>()
             .init_resource::<ShopFilters>()
+            .init_resource::<ShopTabClickGuard>()
             .init_resource::<WorkSliderState>()
             .init_resource::<StudySliderState>()
             .init_resource::<TrainSliderState>()
+            .init_resource::<crate::core::actions::craft::CraftSeed>()
             .init_resource::<RightTab>();
 
         // Sets
@@ -301,6 +304,23 @@ impl Plugin for GamePlugin {
                     equip_slot_tooltip_system,
                 )
                     .run_if(in_state(GameState::Train)),
+            )
+            // Craft Systems
+            .add_systems(OnEnter(GameState::Craft), setup_craft_ui)
+            .add_systems(
+                OnExit(GameState::Craft),
+                (cleanup_panel_ui, despawn::<TooltipNode>),
+            )
+            .add_systems(
+                Update,
+                (
+                    update_craft_ui,
+                    tooltip_follow_cursor_system,
+                    tick_gold_toasts,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Craft)),
             );
 
         #[cfg(not(target_arch = "wasm32"))]

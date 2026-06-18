@@ -30,4 +30,5 @@ pub enum GameState {
     Study,
     Train,
     Rest,
+    Craft,
 }

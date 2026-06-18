@@ -51,6 +51,7 @@ pub enum ShopTab {
     Gloves,
     Accessories,
     Consumables,
+    Artifacts,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -69,6 +70,11 @@ pub struct ShopFilters {
     pub weapon_type: WeaponTypeFilter,
     pub weapon_category: Option<Category>,
     pub kind: Option<Kind>,
+}
+
+#[derive(Resource, Debug, Clone, Copy, Default)]
+pub struct ShopTabClickGuard {
+    pub suppress_next_item_click: bool,
 }
 
 #[derive(Component)]
@@ -120,6 +126,9 @@ pub fn generate_deterministic_shop(player_name: &str, player_level: u32) -> Vec<
 
     let mut items = Vec::new();
     for eq in all_equipment() {
+        if matches!(eq, Equipment::Artifact(_)) {
+            continue;
+        }
         if eq.level() >= 1 && eq.level() <= player_level {
             if rng.random_bool(0.5) {
                 items.push(eq.name().to_string());
@@ -159,6 +168,7 @@ pub fn setup_shop_ui(
                 &shop_inventory,
                 ShopFilters::default(),
                 player.gold,
+                player.level as u32,
             );
         });
     }
@@ -190,6 +200,7 @@ pub fn update_shop_ui(
                     &shop_inventory,
                     *filters,
                     player.gold,
+                    player.level as u32,
                     *open_dropdown,
                     current_scroll,
                 );
@@ -206,6 +217,7 @@ pub fn build_shop_content(
     shop_inventory: &ShopInventory,
     filters: ShopFilters,
     player_gold: u32,
+    player_level: u32,
 ) {
     parent
         .spawn((
@@ -238,6 +250,7 @@ pub fn build_shop_content(
                         shop_inventory,
                         filters,
                         player_gold,
+                        player_level,
                         OpenDropdown::None,
                         0.0,
                     );
@@ -263,6 +276,7 @@ pub fn build_shop_content_inner(
     shop_inventory: &ShopInventory,
     filters: ShopFilters,
     player_gold: u32,
+    player_level: u32,
     open_dropdown: OpenDropdown,
     initial_scroll: f32,
 ) {
@@ -296,6 +310,7 @@ pub fn build_shop_content_inner(
                         ShopTab::Gloves,
                         ShopTab::Accessories,
                         ShopTab::Consumables,
+                        ShopTab::Artifacts,
                     ] {
                         parent
                             .spawn((
@@ -378,6 +393,7 @@ pub fn build_shop_content_inner(
                 width: percent(100.),
                 flex_grow: 1.0,
                 height: percent(70.),
+                min_height: Val::Px(0.),
                 flex_direction: FlexDirection::Row,
                 position_type: PositionType::Relative,
                 overflow: Overflow::clip(),
@@ -391,6 +407,7 @@ pub fn build_shop_content_inner(
                     Node {
                         width: percent(85.),
                         height: percent(100.),
+                        min_height: Val::Px(0.),
                         flex_direction: FlexDirection::Column,
                         row_gap: Val::Px(12.),
                         padding: UiRect::all(Val::Px(15.)),
@@ -400,53 +417,68 @@ pub fn build_shop_content_inner(
                     ScrollableContainer,
                     ScrollPosition(Vec2::new(0., initial_scroll)),
                     ShopItemsScroll,
+                    Interaction::default(),
                     bevy::ui::RelativeCursorPosition::default(),
                 ));
             container_entity = container_cmd.id();
             container_cmd.with_children(|parent| {
                     let mut matching: Vec<Equipment> = Vec::new();
-                    for item_key in &shop_inventory.items {
-                        if let Some(equipment) = get_equipment(item_key) {
-                            let matches_tab = match filters.tab {
-                                ShopTab::Weapons => match &equipment {
-                                    Equipment::Weapon(w) => {
-                                        let matches_hand = filters.weapon_hand.map_or(true, |h| w.hand == h);
-                                        let matches_type = match filters.weapon_type {
-                                            WeaponTypeFilter::All => true,
-                                            WeaponTypeFilter::Weapons => w.category != Category::Shield && w.category != Category::Book,
-                                            WeaponTypeFilter::Shields => w.category == Category::Shield,
-                                            WeaponTypeFilter::Books => w.category == Category::Book,
-                                        };
-                                        let matches_category = filters.weapon_category.map_or(true, |c| w.category == c);
-                                        let matches_kind = filters.kind.map_or(true, |k| w.kind == k);
-                                        matches_hand && matches_type && matches_category && matches_kind
-                                    }
-                                    _ => false,
-                                },
-                                ShopTab::Helmets => match &equipment {
-                                    Equipment::Wearable(w) => w.slot == WearableSlot::Helmet,
-                                    _ => false,
-                                },
-                                ShopTab::Chestplates => match &equipment {
-                                    Equipment::Wearable(w) => w.slot == WearableSlot::Chestplate,
-                                    _ => false,
-                                },
-                                ShopTab::Boots => match &equipment {
-                                    Equipment::Wearable(w) => w.slot == WearableSlot::Boots,
-                                    _ => false,
-                                },
-                                ShopTab::Gloves => match &equipment {
-                                    Equipment::Wearable(w) => w.slot == WearableSlot::Gloves,
-                                    _ => false,
-                                },
-                                ShopTab::Accessories => match &equipment {
-                                    Equipment::Wearable(w) => w.slot == WearableSlot::Accessory,
-                                    _ => false,
-                                },
-                                ShopTab::Consumables => matches!(equipment, Equipment::Consumable(_)),
-                            };
-                            if matches_tab {
-                                matching.push(equipment);
+                    if filters.tab == ShopTab::Artifacts {
+                        let mut seen = std::collections::HashSet::new();
+                        for artifact in crate::core::catalog::catalog::all_artifacts() {
+                            if artifact.level <= player_level
+                                && filters.kind.map_or(true, |k| artifact.kind == k)
+                            {
+                                if seen.insert(artifact.name.clone()) {
+                                    matching.push(Equipment::Artifact(artifact.clone()));
+                                }
+                            }
+                        }
+                    } else {
+                        for item_key in &shop_inventory.items {
+                            if let Some(equipment) = get_equipment(item_key) {
+                                let matches_tab = match filters.tab {
+                                    ShopTab::Weapons => match &equipment {
+                                        Equipment::Weapon(w) => {
+                                            let matches_hand = filters.weapon_hand.map_or(true, |h| w.hand == h);
+                                            let matches_type = match filters.weapon_type {
+                                                WeaponTypeFilter::All => true,
+                                                WeaponTypeFilter::Weapons => w.category != Category::Shield && w.category != Category::Book,
+                                                WeaponTypeFilter::Shields => w.category == Category::Shield,
+                                                WeaponTypeFilter::Books => w.category == Category::Book,
+                                            };
+                                            let matches_category = filters.weapon_category.map_or(true, |c| w.category == c);
+                                            let matches_kind = filters.kind.map_or(true, |k| w.kind == k);
+                                            matches_hand && matches_type && matches_category && matches_kind
+                                        }
+                                        _ => false,
+                                    },
+                                    ShopTab::Helmets => match &equipment {
+                                        Equipment::Wearable(w) => w.slot == WearableSlot::Helmet,
+                                        _ => false,
+                                    },
+                                    ShopTab::Chestplates => match &equipment {
+                                        Equipment::Wearable(w) => w.slot == WearableSlot::Chestplate,
+                                        _ => false,
+                                    },
+                                    ShopTab::Boots => match &equipment {
+                                        Equipment::Wearable(w) => w.slot == WearableSlot::Boots,
+                                        _ => false,
+                                    },
+                                    ShopTab::Gloves => match &equipment {
+                                        Equipment::Wearable(w) => w.slot == WearableSlot::Gloves,
+                                        _ => false,
+                                    },
+                                    ShopTab::Accessories => match &equipment {
+                                        Equipment::Wearable(w) => w.slot == WearableSlot::Accessory,
+                                        _ => false,
+                                    },
+                                    ShopTab::Consumables => matches!(equipment, Equipment::Consumable(_)),
+                                    ShopTab::Artifacts => false,
+                                };
+                                if matches_tab {
+                                    matching.push(equipment);
+                                }
                             }
                         }
                     }
@@ -500,6 +532,8 @@ pub fn build_shop_content_inner(
                         spawn_dropdown_kind(parent, assets, filters.kind, open_dropdown);
                         spawn_dropdown_category(parent, assets, filters.weapon_category, open_dropdown);
                         spawn_dropdown_hand(parent, assets, filters.weapon_hand, open_dropdown);
+                    } else if filters.tab == ShopTab::Artifacts {
+                        spawn_dropdown_kind(parent, assets, filters.kind, open_dropdown);
                     }
                 });
 
@@ -654,11 +688,20 @@ pub struct ShopTabButton(pub ShopTab);
 pub fn handle_shop_tab_click(
     event: On<Pointer<Click>>,
     mut filters: ResMut<ShopFilters>,
+    mut tab_click_guard: ResMut<ShopTabClickGuard>,
     btn_q: Query<&ShopTabButton>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     if let Ok(btn) = btn_q.get(event.entity) {
+        let clicking_current_tab = filters.tab == btn.0;
+        if filters.tab != btn.0 {
+            filters.kind = None;
+            filters.weapon_type = WeaponTypeFilter::All;
+            filters.weapon_category = None;
+            filters.weapon_hand = None;
+        }
         filters.tab = btn.0;
+        tab_click_guard.suppress_next_item_click = clicking_current_tab;
         play_audio_msg.write(PlayAudioMsg::new("button"));
     }
 }
@@ -668,10 +711,26 @@ pub fn handle_shop_item_card_click(
     mut commands: Commands,
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
+    mut tab_click_guard: ResMut<ShopTabClickGuard>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     card_q: Query<&ShopItemCard>,
+    scroll_q: Query<&bevy::ui::RelativeCursorPosition, With<ShopItemsScroll>>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
+    if tab_click_guard.suppress_next_item_click {
+        tab_click_guard.suppress_next_item_click = false;
+        return;
+    }
+
+    // Reject clicks whose cursor isn't actually over the visible (non-clipped)
+    // scroll viewport. Scrolled-out cards can remain pickable at screen positions
+    // outside the container (e.g. over the tabs), which would otherwise buy them.
+    if let Some(rel) = scroll_q.iter().next() {
+        if !rel.cursor_over() {
+            return;
+        }
+    }
+
     let Ok(card) = card_q.get(event.entity) else {
         return;
     };
@@ -698,10 +757,10 @@ pub fn handle_shop_item_card_click(
 
     if event.button == PointerButton::Primary {
         player.inventory.push(card.key.clone());
-        let is_consumable = get_equipment(&card.key)
-            .map(|eq| matches!(eq, Equipment::Consumable(_)))
+        let auto_equip = get_equipment(&card.key)
+            .map(|eq| !matches!(eq, Equipment::Consumable(_) | Equipment::Artifact(_)))
             .unwrap_or(false);
-        if !is_consumable {
+        if auto_equip {
             crate::core::ui::playing::equip_item(&mut player, &card.key);
         }
     } else {
@@ -800,4 +859,3 @@ pub fn shop_tab_button_system(
         }
     }
 }
-

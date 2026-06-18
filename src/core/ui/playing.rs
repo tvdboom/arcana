@@ -9,7 +9,7 @@ use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::modifiers::Modifier;
 use crate::core::catalog::weapons::{Category, Hand};
 use crate::core::catalog::wearables::WearableSlot;
-use crate::core::catalog::catalog::{get_ability, get_equipment, get_perk};
+use crate::core::catalog::catalog::{get_ability, get_equipment, get_perk, get_artifact};
 use crate::core::classes::Class;
 use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
@@ -18,6 +18,8 @@ use crate::core::menu::utils::{add_root_node, add_text, recolor, spawn_rich_text
 use crate::core::player::{Attribute, Player};
 use crate::core::settings::{Language, Settings};
 use crate::core::ui::creation::SelectionItem;
+use crate::core::actions::craft::CraftSeed;
+use crate::core::states::GameState;
 pub use crate::core::ui::level_up::{manage_level_up_overlay, LevelUpPending};
 use crate::core::ui::modal::{spawn_modal, ActiveModal, ModalAction};
 pub use crate::core::ui::toast::ToastContainer;
@@ -26,6 +28,7 @@ use crate::core::ui::scrollbar::{ScrollableContainer, ScrollbarTrack, ScrollbarT
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
 use bevy::window::SystemCursorIcon;
+use crate::core::catalog::effects::Effect;
 
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
@@ -92,6 +95,7 @@ pub enum RightTab {
     Consumables,
     Abilities,
     Perks,
+    Artifacts,
 }
 
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
@@ -105,6 +109,10 @@ pub struct ConsumablesListWrapper;
 pub struct AbilitiesListWrapper;
 #[derive(Component)]
 pub struct PerksListWrapper;
+#[derive(Component)]
+pub struct ArtifactsListWrapper;
+#[derive(Component)]
+pub struct ArtifactsList;
 
 /// The equipment image-slots overlaid on the character portrait.
 #[derive(Component, Clone, Copy, PartialEq, Eq, Debug)]
@@ -199,6 +207,7 @@ fn weapon_bonus_lines(
                 Equipment::Weapon(_) => "weapon",
                 Equipment::Wearable(_) => "wearable",
                 Equipment::Consumable(_) => "consumable",
+                Equipment::Artifact(_) => "artifact",
             };
             let key = format!("{}.{}", prefix, weapon.name().replace(" ", "_").to_lowercase());
             let raw_name =
@@ -940,35 +949,73 @@ fn spawn_stats_column(
                         TextColor(BUTTON_TEXT_COLOR),
                         StatLabel(PlayingStat::ClassLine),
                     ));
-                    parent
-                        .spawn((
-                            Node {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                column_gap: Val::Px(4.),
-                                ..default()
-                            },
-                            Interaction::default(),
-                            Pickable::default(),
-                            InfoTooltip::ActionPoints,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn((
+                    parent.spawn(Node {
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(16.),
+                        ..default()
+                    }).with_children(|parent| {
+                        // Gold icon + text
+                        parent
+                            .spawn((
                                 Node {
-                                    width: ICON_STAT,
-                                    height: ICON_STAT,
-                                    flex_shrink: 0.,
+                                    flex_direction: FlexDirection::Row,
+                                    align_items: AlignItems::Center,
+                                    column_gap: Val::Px(4.),
                                     ..default()
                                 },
-                                ImageNode::new(assets.image("ap"))
-                                    .with_mode(NodeImageMode::Stretch),
-                            ));
-                            parent.spawn((
-                                add_text(format!("{}", player.ap), "bold", 2.4, assets),
-                                TextColor(Color::WHITE),
-                                StatLabel(PlayingStat::ActionPoints),
-                            ));
-                        });
+                                Interaction::default(),
+                                Pickable::default(),
+                                InfoTooltip::Gold,
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn((
+                                    Node {
+                                        width: ICON_STAT,
+                                        height: ICON_STAT,
+                                        ..default()
+                                    },
+                                    ImageNode::new(assets.image("gold"))
+                                        .with_mode(NodeImageMode::Stretch),
+                                ));
+                                parent.spawn((
+                                    add_text("", "bold", 2.4, assets),
+                                    TextColor(BUTTON_TEXT_COLOR),
+                                    StatLabel(PlayingStat::Money),
+                                ));
+                            });
+
+                        // AP icon + text
+                        parent
+                            .spawn((
+                                Node {
+                                    flex_direction: FlexDirection::Row,
+                                    align_items: AlignItems::Center,
+                                    column_gap: Val::Px(4.),
+                                    ..default()
+                                },
+                                Interaction::default(),
+                                Pickable::default(),
+                                InfoTooltip::ActionPoints,
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn((
+                                    Node {
+                                        width: ICON_STAT,
+                                        height: ICON_STAT,
+                                        flex_shrink: 0.,
+                                        ..default()
+                                    },
+                                    ImageNode::new(assets.image("ap"))
+                                        .with_mode(NodeImageMode::Stretch),
+                                ));
+                                parent.spawn((
+                                    add_text(format!("{}", player.ap), "bold", 2.4, assets),
+                                    TextColor(Color::WHITE),
+                                    StatLabel(PlayingStat::ActionPoints),
+                                ));
+                            });
+                    });
                 });
 
             // Health bar
@@ -1267,6 +1314,7 @@ pub fn equip_slot_tooltip_system(
                     Equipment::Weapon(_) => "weapon",
                     Equipment::Wearable(_) => "wearable",
                     Equipment::Consumable(_) => "consumable",
+                    Equipment::Artifact(_) => "artifact",
                 };
                 let name = name_with_level(
                     weapon.name(),
@@ -1334,7 +1382,7 @@ pub fn right_column_tooltip_system(
                     RightColumnTooltip::Ability(_) => *right_tab == RightTab::Abilities,
                     RightColumnTooltip::Perk(_) => *right_tab == RightTab::Perks,
                     RightColumnTooltip::Equipment(_) => {
-                        *right_tab == RightTab::Equipment || *right_tab == RightTab::Consumables
+                        *right_tab == RightTab::Equipment || *right_tab == RightTab::Consumables || *right_tab == RightTab::Artifacts
                     },
                 }
             };
@@ -1395,6 +1443,7 @@ pub fn right_column_tooltip_system(
                         Equipment::Weapon(_) => "weapon",
                         Equipment::Wearable(_) => "wearable",
                         Equipment::Consumable(_) => "consumable",
+                        Equipment::Artifact(_) => "artifact",
                     };
                     let title = name_with_level(
                         equipment.name(),
@@ -1573,6 +1622,7 @@ fn spawn_right_column(
                             for (tab, key) in [
                                 (RightTab::Equipment, "general.equipment"),
                                 (RightTab::Consumables, "general.consumables"),
+                                (RightTab::Artifacts, "general.artifacts"),
                                 (RightTab::Abilities, "general.abilities"),
                                 (RightTab::Perks, "general.perks"),
                             ] {
@@ -1612,36 +1662,6 @@ fn spawn_right_column(
                                     });
                             }
                         });
-
-                    // Right: gold icon + amount
-                    parent
-                        .spawn((
-                            Node {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                column_gap: Val::Px(6.),
-                                ..default()
-                            },
-                            Interaction::default(),
-                            Pickable::default(),
-                            InfoTooltip::Gold,
-                        ))
-                        .with_children(|parent| {
-                            parent.spawn((
-                                Node {
-                                    width: ICON_STAT,
-                                    height: ICON_STAT,
-                                    ..default()
-                                },
-                                ImageNode::new(assets.image("gold"))
-                                    .with_mode(NodeImageMode::Stretch),
-                            ));
-                            parent.spawn((
-                                add_text("", "bold", 2.4, assets),
-                                TextColor(BUTTON_TEXT_COLOR),
-                                StatLabel(PlayingStat::Money),
-                            ));
-                        });
                 });
 
             // Separator between tabs and content list
@@ -1671,6 +1691,7 @@ fn spawn_right_column(
                     },
                     ScrollableContainer,
                     ScrollPosition::default(),
+                    Interaction::default(),
                 ));
             let container_entity = container_cmd.id();
             container_cmd.with_children(|parent| {
@@ -1775,6 +1796,31 @@ fn spawn_right_column(
                                 PerksList,
                             ));
                         });
+
+                    // Artifacts wrapper (hidden by default)
+                    parent
+                        .spawn((
+                            Node {
+                                width: percent(100.),
+                                flex_direction: FlexDirection::Column,
+                                flex_shrink: 0.,
+                                display: Display::None,
+                                ..default()
+                            },
+                            ArtifactsListWrapper,
+                            Visibility::Hidden,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                Node {
+                                    width: percent(100.),
+                                    flex_direction: FlexDirection::Column,
+                                    flex_shrink: 0.,
+                                    ..default()
+                                },
+                                ArtifactsList,
+                            ));
+                        });
                 });
 
             parent
@@ -1822,6 +1868,7 @@ pub struct RebuildPlayingListsQueries<'w, 's> {
     pub consumable_q: Query<'w, 's, Entity, With<ConsumablesList>>,
     pub abil_q: Query<'w, 's, Entity, With<AbilitiesList>>,
     pub perk_q: Query<'w, 's, Entity, With<PerksList>>,
+    pub artifact_q: Query<'w, 's, Entity, With<ArtifactsList>>,
     pub slot_q: Query<'w, 's, (&'static EquipSlot, &'static mut ImageNode)>,
     pub slot_vis_q: Query<'w, 's, (&'static EquipSlot, &'static mut Visibility)>,
     pub children_q: Query<'w, 's, &'static Children>,
@@ -1834,6 +1881,7 @@ pub struct RebuildPlayingListsQueries<'w, 's> {
             Without<ConsumablesListWrapper>,
             Without<AbilitiesListWrapper>,
             Without<PerksListWrapper>,
+            Without<ArtifactsListWrapper>,
             Without<EquipSlot>,
             Without<RightTabBtn>,
         ),
@@ -1847,6 +1895,7 @@ pub struct RebuildPlayingListsQueries<'w, 's> {
             Without<EquipmentListWrapper>,
             Without<AbilitiesListWrapper>,
             Without<PerksListWrapper>,
+            Without<ArtifactsListWrapper>,
             Without<EquipSlot>,
             Without<RightTabBtn>,
         ),
@@ -1860,6 +1909,7 @@ pub struct RebuildPlayingListsQueries<'w, 's> {
             Without<EquipmentListWrapper>,
             Without<ConsumablesListWrapper>,
             Without<PerksListWrapper>,
+            Without<ArtifactsListWrapper>,
             Without<EquipSlot>,
             Without<RightTabBtn>,
         ),
@@ -1873,6 +1923,21 @@ pub struct RebuildPlayingListsQueries<'w, 's> {
             Without<EquipmentListWrapper>,
             Without<ConsumablesListWrapper>,
             Without<AbilitiesListWrapper>,
+            Without<ArtifactsListWrapper>,
+            Without<EquipSlot>,
+            Without<RightTabBtn>,
+        ),
+    >,
+    pub artifact_wrap_q: Query<
+        'w,
+        's,
+        (&'static mut Node, &'static mut Visibility),
+        (
+            With<ArtifactsListWrapper>,
+            Without<EquipmentListWrapper>,
+            Without<ConsumablesListWrapper>,
+            Without<AbilitiesListWrapper>,
+            Without<PerksListWrapper>,
             Without<EquipSlot>,
             Without<RightTabBtn>,
         ),
@@ -1893,6 +1958,7 @@ pub struct RebuildPlayingListsQueries<'w, 's> {
             Without<ConsumablesListWrapper>,
             Without<AbilitiesListWrapper>,
             Without<PerksListWrapper>,
+            Without<ArtifactsListWrapper>,
             Without<EquipSlot>,
         ),
     >,
@@ -1990,7 +2056,7 @@ pub fn rebuild_playing_lists(
             let mut equipped_items: Vec<Equipment> = equipped_slots
                 .iter()
                 .filter_map(|(slot_val, _)| slot_val.as_deref().and_then(get_equipment))
-                .filter(|eq| !matches!(eq, Equipment::Consumable(_)))
+                .filter(|eq| !matches!(eq, Equipment::Consumable(_) | Equipment::Artifact(_)))
                 .collect();
             equipped_items.sort_by(|a, b| a.level().cmp(&b.level()).then(a.name().cmp(b.name())));
             for weapon in &equipped_items {
@@ -1999,6 +2065,7 @@ pub fn rebuild_playing_lists(
                     Equipment::Weapon(_) => "weapon",
                     Equipment::Wearable(_) => "wearable",
                     Equipment::Consumable(_) => "consumable",
+                    Equipment::Artifact(_) => "artifact",
                 };
                 spawn_equipment_card(
                     parent,
@@ -2025,7 +2092,7 @@ pub fn rebuild_playing_lists(
                 .inventory
                 .iter()
                 .filter_map(|key| get_equipment(key))
-                .filter(|eq| !matches!(eq, Equipment::Consumable(_)))
+                .filter(|eq| !matches!(eq, Equipment::Consumable(_) | Equipment::Artifact(_)))
                 .collect();
             inventory_items.sort_by(|a, b| a.level().cmp(&b.level()).then(a.name().cmp(b.name())));
             for weapon in &inventory_items {
@@ -2034,6 +2101,7 @@ pub fn rebuild_playing_lists(
                     Equipment::Weapon(_) => "weapon",
                     Equipment::Wearable(_) => "wearable",
                     Equipment::Consumable(_) => "consumable",
+                    Equipment::Artifact(_) => "artifact",
                 };
                 spawn_equipment_card(
                     parent,
@@ -2105,6 +2173,76 @@ pub fn rebuild_playing_lists(
                     name_with_level(
                         weapon.name(),
                         "consumable",
+                        weapon.level() as u8,
+                        &localization,
+                        lang,
+                    )
+                };
+                spawn_equipment_card(
+                    parent,
+                    &assets,
+                    weapon.name(),
+                    display_name,
+                    vec![weapon.description(lang, &localization)],
+                    EquipmentCard {
+                        key: weapon.name().to_string(),
+                        is_equipped: false,
+                        price: weapon.sell_price(player.charisma_mod()),
+                    },
+                );
+            }
+
+            if empty {
+                parent.spawn((
+                    add_text(localization.get("general.none", lang), "medium", 1.6, &assets),
+                    TextColor(Color::WHITE),
+                ));
+            }
+        });
+    }
+
+    // Artifacts list.
+    if let Some(entity) = queries.artifact_q.iter().next() {
+        clear(&mut commands, entity, &queries.children_q);
+        commands.entity(entity).with_children(|parent| {
+            let mut empty = true;
+            let mut artifacts_map = std::collections::HashMap::new();
+            for key in &player.inventory {
+                if let Some(eq) = get_equipment(key) {
+                    if let Equipment::Artifact(_) = eq {
+                        *artifacts_map.entry(key.clone()).or_insert(0) += 1;
+                    }
+                }
+            }
+
+            let mut sorted_artifacts_keys: Vec<String> =
+                artifacts_map.keys().cloned().collect();
+            sorted_artifacts_keys.sort_by(|a, b| {
+                let eq_a = get_equipment(a).unwrap();
+                let eq_b = get_equipment(b).unwrap();
+                eq_a.level().cmp(&eq_b.level()).then(eq_a.name().cmp(eq_b.name()))
+            });
+
+            for key in &sorted_artifacts_keys {
+                empty = false;
+                let weapon = get_equipment(key).unwrap();
+                let count = artifacts_map.get(key).unwrap();
+                let display_name = if *count > 1 {
+                    format!(
+                        "{} (x{})",
+                        name_with_level(
+                            weapon.name(),
+                            "artifact",
+                            weapon.level() as u8,
+                            &localization,
+                            lang,
+                        ),
+                        count
+                    )
+                } else {
+                    name_with_level(
+                        weapon.name(),
+                        "artifact",
                         weapon.level() as u8,
                         &localization,
                         lang,
@@ -2223,6 +2361,15 @@ pub fn rebuild_playing_lists(
     }
     if let Ok((mut node, mut vis)) = queries.perk_wrap_q.single_mut() {
         if *right_tab == RightTab::Perks {
+            *vis = Visibility::Inherited;
+            node.display = Display::Flex;
+        } else {
+            *vis = Visibility::Hidden;
+            node.display = Display::None;
+        }
+    }
+    if let Ok((mut node, mut vis)) = queries.artifact_wrap_q.single_mut() {
+        if *right_tab == RightTab::Artifacts {
             *vis = Visibility::Inherited;
             node.display = Display::Flex;
         } else {
@@ -2496,19 +2643,19 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
             Equipment::Consumable(c) => {
                 for effect in &c.effects {
                     match effect {
-                        crate::core::catalog::effects::Effect::Heal {
+                        Effect::Heal {
                             heal_pct,
                         } => {
                             let max_hp = player.max_health();
                             let heal_amount = (max_hp * heal_pct) / 100;
                             player.set_health(player.health() + heal_amount);
                         },
-                        crate::core::catalog::effects::Effect::InstantMana {
+                        Effect::InstantMana {
                             amount,
                         } => {
                             player.set_mana(player.mana() + amount);
                         },
-                        crate::core::catalog::effects::Effect::StatBoost {
+                        Effect::StatBoost {
                             attribute,
                             amount,
                             ..
@@ -2608,6 +2755,10 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                     }
                 }
             },
+            Equipment::Artifact(_) => {
+                // Cannot be equipped, put it back in inventory and return None
+                player.inventory.push(key.to_string());
+            }
         }
     }
     player.update_health_mana(old_hp, old_mp);
@@ -2704,6 +2855,7 @@ pub fn reward_equipment(player: &mut Player, key: String) {
                     !is_lh_two_hand && (player.weapon_lh.is_none() || player.weapon_rh.is_none())
                 }
             },
+            Equipment::Artifact(_) => false,
         };
 
         if is_empty {
@@ -2723,12 +2875,35 @@ pub fn handle_equipment_card_click(
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     right_tab: Res<RightTab>,
+    mut craft_seed: ResMut<CraftSeed>,
+    mut next_game_state: ResMut<NextState<GameState>>,
     card_q: Query<&EquipmentCard>,
 ) {
-    if *right_tab != RightTab::Equipment && *right_tab != RightTab::Consumables {
+    if *right_tab != RightTab::Equipment && *right_tab != RightTab::Consumables && *right_tab != RightTab::Artifacts {
         return;
     }
     if let Ok(card) = card_q.get(event.entity) {
+        if *right_tab == RightTab::Artifacts {
+            // Right-click sells the artifact.
+            if event.button == PointerButton::Secondary {
+                let sell_price = card.price;
+                let lang = settings.language;
+                let action = ModalAction::SellItem {
+                    key: card.key.clone(),
+                    price: sell_price,
+                    is_equipped: card.is_equipped,
+                    slot: None,
+                };
+                spawn_modal(&mut commands, &assets, &localization, lang, action, &mut play_audio_msg);
+                return;
+            }
+            // Left-click opens the craft panel with this artifact on the bench.
+            craft_seed.artifacts = vec![card.key.clone()];
+            play_audio_msg.write(PlayAudioMsg::new("button"));
+            next_game_state.set(GameState::Craft);
+            return;
+        }
+
         // Right-click: sell item for full price with confirmation modal
         if event.button == PointerButton::Secondary {
             let sell_price = card.price;
@@ -2755,10 +2930,10 @@ pub fn handle_equipment_card_click(
                     let mut has_mana = false;
                     for effect in &c.effects {
                         match effect {
-                            crate::core::catalog::effects::Effect::Heal {
+                            Effect::Heal {
                                 ..
                             } => has_heal = true,
-                            crate::core::catalog::effects::Effect::InstantMana {
+                            Effect::InstantMana {
                                 ..
                             } => has_mana = true,
                             _ => {},
@@ -2853,6 +3028,7 @@ pub fn spawn_equipment_card(
 ) {
     let is_equipped = card.is_equipped;
     let price = card.price;
+    let card_key = card.key.clone();
     let tooltip = RightColumnTooltip::Equipment(card.key.clone());
     parent
         .spawn((
@@ -2936,8 +3112,13 @@ pub fn spawn_equipment_card(
                     parent
                         .spawn((add_text(name, "bold", 2.3, assets), TextColor(BUTTON_TEXT_COLOR)));
 
-                    for line in lines {
-                        spawn_rich_text_row(parent, assets, line, 2.0, "medium", Color::WHITE);
+                    if let Some(artifact) = get_artifact(&card_key) {
+                        let k = artifact.kind;
+                        spawn_rich_text_row(parent, assets, format!("[{}] {}", k.to_string().to_lowercase(), k), 2.0, "medium", Color::WHITE);
+                    } else {
+                        for line in lines {
+                            spawn_rich_text_row(parent, assets, line, 2.0, "medium", Color::WHITE);
+                        }
                     }
                 });
         });

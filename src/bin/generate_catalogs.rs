@@ -1,4 +1,4 @@
-/// Catalog generation logic: reads PNG image lists from assets-src/images/build/
+/// Catalog generation logic: reads PNG image lists from assets-src/images/catalog/
 /// and writes inventory RON files to assets/inventory/.
 ///
 /// This file is used in two ways:
@@ -454,6 +454,102 @@ fn img_name(filename: &str, img_ext: &str) -> String {
     format!("{}.{}", Path::new(filename).file_stem().unwrap().to_str().unwrap(), img_ext)
 }
 
+fn classify_artifact_kind(name: &str) -> &'static str {
+    let name_lower = name.to_lowercase();
+    if name_lower.contains("frost")
+        || name_lower.contains("ice")
+        || name_lower.contains("raindrop")
+        || name_lower.contains("snow")
+        || name_lower.contains("whitebear")
+        || name_lower.contains("cold")
+        || name_lower.contains("water")
+    {
+        "Ice"
+    } else if name_lower.contains("fire")
+        || name_lower.contains("fiercloth")
+        || name_lower.contains("torch")
+        || name_lower.contains("dragon")
+        || name_lower.contains("sunflower")
+        || name_lower.contains("coal")
+        || name_lower.contains("barbecue")
+    {
+        "Fire"
+    } else if name_lower.contains("shadow")
+        || name_lower.contains("bone")
+        || name_lower.contains("scull")
+        || name_lower.contains("skull")
+        || name_lower.contains("remains")
+        || name_lower.contains("ghost")
+        || name_lower.contains("ectoplasm")
+        || name_lower.contains("death")
+        || name_lower.contains("demon")
+        || name_lower.contains("skeleton")
+        || name_lower.contains("zombie")
+        || name_lower.contains("goblin")
+        || name_lower.contains("spider")
+    {
+        "Shadow"
+    } else if name_lower.contains("holy")
+        || name_lower.contains("cross")
+        || name_lower.contains("scroll")
+        || name_lower.contains("healing")
+        || name_lower.contains("order")
+        || name_lower.contains("light")
+        || name_lower.contains("angel")
+        || name_lower.contains("temple")
+        || name_lower.contains("sacred")
+        || name_lower.contains("bible")
+        || name_lower.contains("shrine")
+        || name_lower.contains("rosary")
+    {
+        "Holy"
+    } else if name_lower.contains("herb")
+        || name_lower.contains("flower")
+        || name_lower.contains("leaf")
+        || name_lower.contains("leaves")
+        || name_lower.contains("mushroom")
+        || name_lower.contains("plant")
+        || name_lower.contains("moss")
+        || name_lower.contains("seaweed")
+        || name_lower.contains("root")
+        || name_lower.contains("seed")
+        || name_lower.contains("grass")
+        || name_lower.contains("wood")
+        || name_lower.contains("branch")
+        || name_lower.contains("bark")
+        || name_lower.contains("twig")
+        || name_lower.contains("sprout")
+        || name_lower.contains("dill")
+        || name_lower.contains("rucola")
+        || name_lower.contains("basilicum")
+        || name_lower.contains("parsley")
+        || name_lower.contains("rose")
+        || name_lower.contains("tulip")
+        || name_lower.contains("asparag")
+        || name_lower.contains("cactus")
+        || name_lower.contains("crystal")
+        || name_lower.contains("ore")
+        || name_lower.contains("ingot")
+        || name_lower.contains("gold")
+        || name_lower.contains("silver")
+        || name_lower.contains("copper")
+        || name_lower.contains("runestone")
+        || name_lower.contains("stoune")
+    {
+        "Nature"
+    } else {
+        "Physical"
+    }
+}
+
+fn deterministic_shuffle<T>(items: &mut [T], mut seed: u64) {
+    for i in (1..items.len()).rev() {
+        seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        let j = (seed % (i as u64 + 1)) as usize;
+        items.swap(i, j);
+    }
+}
+
 /// Generate all inventory RON catalogs.
 /// - `src_images`:    path to `assets-src/images`
 /// - `out_inventory`: path to output directory (e.g. `assets/inventory`)
@@ -462,7 +558,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     fs::create_dir_all(out_inventory).unwrap();
 
     // ── 1. ABILITIES ─────────────────────────────────────────────────────────
-    let abilities_dir = format!("{}/build/abilities", src_images);
+    let abilities_dir = format!("{}/catalog/abilities", src_images);
     let mut abilities_files: Vec<(String, f64)> = list_png_files(&abilities_dir)
         .into_iter()
         .map(|f| {
@@ -472,16 +568,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         .collect();
     abilities_files.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
-    // Deterministic shuffle
-    let mut shuffled = abilities_files.clone();
-    let n = shuffled.len();
-    let mut seed: u64 = 42;
-    for i in (1..n).rev() {
-        seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
-        let j = (seed % (i as u64 + 1)) as usize;
-        shuffled.swap(i, j);
-    }
-    abilities_files = shuffled;
+    deterministic_shuffle(&mut abilities_files, 42);
 
     let total_abs = abilities_files.len();
     let chunk_size_abs = total_abs as f64 / 20.0;
@@ -674,7 +761,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         }
 
         abilities_ron.push_str(&format!(
-            "    (\n        name: \"{name}\",\n        image: \"images/build/abilities/{img}\",\n        kind: {kind},\n        level: {level},\n        mana_cost: {mana_cost},\n        cooldown: {cooldown:.1},\n        on_self: {on_self},\n        is_aoe: {is_aoe},\n        effects: [{effects}],\n    ),\n",
+            "    (\n        name: \"{name}\",\n        image: \"images/catalog/abilities/{img}\",\n        kind: {kind},\n        level: {level},\n        mana_cost: {mana_cost},\n        cooldown: {cooldown:.1},\n        on_self: {on_self},\n        is_aoe: {is_aoe},\n        effects: [{effects}],\n    ),\n",
             name = name,
             img = img_name(filename, img_ext),
             kind = kind,
@@ -694,7 +781,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     println!("Generated {} abilities in abilities.ron", total_abs);
 
     // ── 2. PERKS ─────────────────────────────────────────────────────────────
-    let perks_dir = format!("{}/build/perks", src_images);
+    let perks_dir = format!("{}/catalog/perks", src_images);
     let mut perks_files: Vec<(String, f64)> = list_png_files(&perks_dir)
         .into_iter()
         .map(|f| {
@@ -872,7 +959,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         }
 
         perks_ron.push_str(&format!(
-            "    (\n        name: \"{name}\",\n        image: \"images/build/perks/{img}\",\n        level: {level},\n        modifiers: [{mods}],\n    ),\n",
+            "    (\n        name: \"{name}\",\n        image: \"images/catalog/perks/{img}\",\n        level: {level},\n        modifiers: [{mods}],\n    ),\n",
             name = name, img = img_name(filename, img_ext), level = level, mods = modifiers.join(", "),
         ));
     }
@@ -883,8 +970,96 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         .unwrap();
     println!("Generated {} perks in perks.ron", total_pks);
 
-    // ── 3. WEAPONS ───────────────────────────────────────────────────────────
-    let weapons_dir = format!("{}/build/equipment/weapon", src_images);
+    // ── 3. ARTIFACTS ─────────────────────────────────────────────────────────
+    let artifacts_dir = format!("{}/catalog/artifacts", src_images);
+    let mut artifacts_files = list_png_files(&artifacts_dir);
+    artifacts_files.sort();
+    deterministic_shuffle(&mut artifacts_files, 4242);
+
+    let total_arts = artifacts_files.len();
+    let mut artifacts_ron = String::from("[\n");
+
+    for (idx, filename) in artifacts_files.iter().enumerate() {
+        let level = if total_arts > 1 {
+            ((idx as f64 / (total_arts - 1) as f64) * 19.0) as u32 + 1
+        } else {
+            1
+        };
+
+        let stem = Path::new(filename).file_stem().and_then(|s| s.to_str()).unwrap_or(filename);
+        let mut clean_stem = stem;
+        for prefix in &["Herbalism_", "Jewelry_", "Mining_", "skinning_", "Res_", "Loot_", "Cooking_"] {
+            if clean_stem.to_lowercase().starts_with(&prefix.to_lowercase()) {
+                clean_stem = &clean_stem[prefix.len()..];
+            }
+        }
+        let mut cleaned = clean_name(clean_stem);
+        if cleaned.is_empty() {
+            cleaned = "Artifact".to_string();
+        }
+
+        if cleaned == "Ironoreodds" {
+            cleaned = "Iron Ore".to_string();
+        } else if cleaned == "Goldore" {
+            cleaned = "Gold Ore".to_string();
+        } else if cleaned == "Silverore" {
+            cleaned = "Silver Ore".to_string();
+        } else if cleaned == "Nativecopper" {
+            cleaned = "Copper Ore".to_string();
+        } else if cleaned == "Cobaltore" {
+            cleaned = "Cobalt Ore".to_string();
+        } else if cleaned == "Manamushroom" {
+            cleaned = "Mana Mushroom".to_string();
+        } else if cleaned == "Demonmushroom" {
+            cleaned = "Demon Mushroom".to_string();
+        } else if cleaned == "Greencrystal" {
+            cleaned = "Green Crystal".to_string();
+        } else if cleaned == "Redcrystal" {
+            cleaned = "Red Crystal".to_string();
+        } else if cleaned == "Bluecrystal" {
+            cleaned = "Blue Crystal".to_string();
+        } else if cleaned == "Eye" {
+            cleaned = "Monster Eye".to_string();
+        } else if cleaned == "Goo" {
+            cleaned = "Ectoplasm Goo".to_string();
+        } else if cleaned == "Shell" {
+            cleaned = "Ocean Shell".to_string();
+        } else if cleaned == "Sting" {
+            cleaned = "Poisonous Sting".to_string();
+        } else if cleaned == "Bark" {
+            cleaned = "Tree Bark".to_string();
+        } else if cleaned == "Bone" {
+            cleaned = "Ancient Bone".to_string();
+        } else if cleaned == "Spiderteeth" {
+            cleaned = "Spider Teeth".to_string();
+        } else if cleaned == "Horn" {
+            cleaned = "Animal Horn".to_string();
+        } else if cleaned == "Fur" {
+            cleaned = "Animal Fur".to_string();
+        } else if cleaned == "Piece Of Coal" {
+            cleaned = "Coal".to_string();
+        }
+
+        let name = capitalize_words(&cleaned);
+        let img = img_name(filename, img_ext);
+        let price = 1 + level * level * 2 + (idx % 2) as u32;
+        let kind = classify_artifact_kind(&name);
+
+        artifacts_ron.push_str(&format!(
+            "    (\n        name: \"{name}\",\n        image: \"images/catalog/artifacts/{img}\",\n        kind: {kind},\n        level: {level},\n        price: {price},\n    ),\n",
+            name = name, img = img, kind = kind, level = level, price = price
+        ));
+
+    }
+    artifacts_ron.push_str("]\n");
+    File::create(format!("{out_inventory}/artifacts.ron"))
+        .unwrap()
+        .write_all(artifacts_ron.as_bytes())
+        .unwrap();
+    println!("Generated {} artifacts in artifacts.ron", total_arts);
+
+    // ── 4. WEAPONS ───────────────────────────────────────────────────────────
+    let weapons_dir = format!("{}/catalog/equipment/weapon", src_images);
     let mut weapons_files: Vec<(String, f64)> = list_png_files(&weapons_dir)
         .into_iter()
         .filter(|f| {
@@ -1129,7 +1304,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         }
 
         weapons_ron.push_str(&format!(
-            "    (\n        name: \"{name}\",\n        image: \"images/build/equipment/weapon/{img}\",\n        kind: {kind},\n        category: {category},\n        hand: {hand},\n        level: {level},\n        price: {price},\n        attack: {attack},\n        attack_speed: {speed:.2},\n        crit_chance: {crit:.2},\n        modifiers: [{mods}],\n        effects: [{effects}],\n    ),\n",
+            "    (\n        name: \"{name}\",\n        image: \"images/catalog/equipment/weapon/{img}\",\n        kind: {kind},\n        category: {category},\n        hand: {hand},\n        level: {level},\n        price: {price},\n        attack: {attack},\n        attack_speed: {speed:.2},\n        crit_chance: {crit:.2},\n        modifiers: [{mods}],\n        effects: [{effects}],\n    ),\n",
             name = name, img = img_name(filename, img_ext), kind = kind, category = category, hand = hand,
             level = level, price = price, attack = attack, speed = speed, crit = crit,
             mods = modifiers.join(", "), effects = effects.join(", "),
@@ -1152,7 +1327,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     ];
     let mut armor_files: Vec<(String, f64, String, String)> = Vec::new();
     for (folder, slot) in &armor_folders {
-        for f in list_png_files(&format!("{}/build/equipment/{}", src_images, folder)) {
+        for f in list_png_files(&format!("{}/catalog/equipment/{}", src_images, folder)) {
             let s = get_image_score(&f);
             armor_files.push((f, s, folder.to_string(), slot.to_string()));
         }
@@ -1275,7 +1450,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         }
 
         armor_ron.push_str(&format!(
-            "    (\n        name: \"{name}\",\n        image: \"images/build/equipment/{folder}/{img}\",\n        kind: {kind},\n        price: {price},\n        slot: {slot},\n        modifiers: [{mods}],\n        effects: [{effects}],\n        level: {level},\n    ),\n",
+            "    (\n        name: \"{name}\",\n        image: \"images/catalog/equipment/{folder}/{img}\",\n        kind: {kind},\n        price: {price},\n        slot: {slot},\n        modifiers: [{mods}],\n        effects: [{effects}],\n        level: {level},\n    ),\n",
             name = name, folder = folder, img = img_name(filename, img_ext), kind = kind,
             price = price, slot = slot, mods = modifiers.join(", "), effects = effects.join(", "), level = level,
         ));
@@ -1288,7 +1463,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     println!("Generated {} wearables in wearables.ron", total_arm);
 
     // ── 5. CONSUMABLES ───────────────────────────────────────────────────────
-    let consumables_dir = format!("{}/build/consumable", src_images);
+    let consumables_dir = format!("{}/catalog/consumable", src_images);
     let mut consumables_files = list_png_files(&consumables_dir);
     consumables_files.sort();
 
@@ -1356,7 +1531,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         }
 
         consumables_ron.push_str(&format!(
-            "    (\n        name: \"{name}\",\n        image: \"images/build/consumable/{img}\",\n        level: {level},\n        price: {price},\n        effects: [{effects}],\n    ),\n",
+            "    (\n        name: \"{name}\",\n        image: \"images/catalog/consumable/{img}\",\n        level: {level},\n        price: {price},\n        effects: [{effects}],\n        craft: [],\n    ),\n",
             name = name, img = img_name(filename, img_ext), level = level, price = price, effects = effects.join(", "),
         ));
     }

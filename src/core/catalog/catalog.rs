@@ -1,4 +1,5 @@
 use crate::core::catalog::abilities::Ability;
+use crate::core::catalog::artifacts::Artifact;
 use crate::core::catalog::consumables::Consumable;
 use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::perks::Perk;
@@ -12,6 +13,7 @@ static WEAPONS: OnceLock<Vec<Weapon>> = OnceLock::new();
 static WEARABLE: OnceLock<Vec<Wearable>> = OnceLock::new();
 static CONSUMABLES: OnceLock<Vec<Consumable>> = OnceLock::new();
 static EQUIPMENT: OnceLock<Vec<Equipment>> = OnceLock::new();
+static ARTIFACTS: OnceLock<Vec<Artifact>> = OnceLock::new();
 
 pub fn all_abilities() -> &'static [Ability] {
     ABILITIES.get_or_init(|| {
@@ -48,6 +50,13 @@ pub fn all_consumables() -> &'static [Consumable] {
     })
 }
 
+pub fn all_artifacts() -> &'static [Artifact] {
+    ARTIFACTS.get_or_init(|| {
+        let ron_str = include_str!("../../../assets/inventory/artifacts.ron");
+        ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse artifacts.ron: {}", e))
+    })
+}
+
 pub fn all_equipment() -> &'static [Equipment] {
     EQUIPMENT.get_or_init(|| {
         let mut items = Vec::new();
@@ -60,6 +69,9 @@ pub fn all_equipment() -> &'static [Equipment] {
         for consumable in all_consumables() {
             items.push(Equipment::Consumable(consumable.clone()));
         }
+        for artifact in all_artifacts() {
+            items.push(Equipment::Artifact(artifact.clone()));
+        }
         items
     })
 }
@@ -70,6 +82,10 @@ pub fn get_ability(name: &str) -> Option<Ability> {
 
 pub fn get_perk(name: &str) -> Option<Perk> {
     all_perks().iter().find(|p| p.name == name).cloned()
+}
+
+pub fn get_artifact(name: &str) -> Option<Artifact> {
+    all_artifacts().iter().find(|a| a.name == name).cloned()
 }
 
 pub fn get_equipment(name: &str) -> Option<Equipment> {
@@ -96,5 +112,8 @@ mod tests {
 
         let con = all_consumables();
         assert!(!con.is_empty(), "Consumable catalog is empty");
+
+        let art = all_artifacts();
+        assert!(!art.is_empty(), "Artifact catalog is empty");
     }
 }

@@ -1,4 +1,5 @@
 pub mod abilities;
+pub mod artifacts;
 pub mod consumables;
 pub mod effects;
 pub mod equipment;

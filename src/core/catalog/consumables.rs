@@ -21,6 +21,9 @@ pub struct Consumable {
 
     /// Optional passive effect triggered when struck by an enemy
     pub effects: Vec<Effect>,
+
+    /// List of artifact names required to craft this consumable
+    pub craft: Vec<String>,
 }
 
 impl Consumable {

@@ -1,4 +1,4 @@
-use crate::core::catalog::catalog::{all_abilities, all_consumables, all_perks, all_weapons, all_wearables};
+use crate::core::catalog::catalog::*;
 use bevy::asset::AssetServer;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
@@ -69,6 +69,7 @@ impl FromWorld for WorldAssets {
             ("work", assets.load("audio/work.ogg")),
             ("study", assets.load("audio/study.ogg")),
             ("train", assets.load("audio/train.ogg")),
+            ("craft", assets.load("audio/craft.ogg")),
             ("poof", assets.load("audio/poof.ogg")),
         ]);
 
@@ -141,6 +142,7 @@ impl FromWorld for WorldAssets {
             ("bg_study", assets.load("images/bg/study.ktx2")),
             ("bg_train", assets.load("images/bg/train.ktx2")),
             ("bg_rest", assets.load("images/bg/rest.ktx2")),
+            ("bg_craft", assets.load("images/bg/craft.ktx2")),
             ("defeat", assets.load("images/bg/defeat.ktx2")),
             // UI
             ("border", assets.load("images/ui/border.ktx2")),
@@ -280,6 +282,10 @@ impl FromWorld for WorldAssets {
         for consumable in all_consumables() {
             let key: &'static str = Box::leak(format!("build_{}", consumable.name).into_boxed_str());
             images.insert(key, load_linear(assets, consumable.image.clone()));
+        }
+        for artifact in all_artifacts() {
+            let key: &'static str = Box::leak(format!("build_{}", artifact.name).into_boxed_str());
+            images.insert(key, load_linear(assets, artifact.image.clone()));
         }
 
         Self {
