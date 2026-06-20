@@ -39,6 +39,10 @@ pub struct ShopItemsScroll;
 #[derive(Resource, Clone, Serialize, Deserialize, Default, Debug)]
 pub struct ShopInventory {
     pub items: Vec<String>,
+    #[serde(default)]
+    pub allowed_weapons: Vec<String>,
+    #[serde(default)]
+    pub allowed_artifacts: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -118,6 +122,7 @@ impl DeterministicRng {
     }
 }
 
+#[allow(dead_code)]
 pub fn generate_deterministic_shop(player_name: &str, player_level: u32) -> Vec<String> {
     let mut hasher = DefaultHasher::new();
     player_name.hash(&mut hasher);
@@ -155,7 +160,53 @@ pub fn setup_shop_ui(
         node.display = Display::None;
     }
 
-    shop_inventory.items = generate_deterministic_shop(&player.name, player.level as u32);
+    let player_level = player.level as u32;
+
+    if shop_inventory.allowed_weapons.is_empty() {
+        let mut hasher = DefaultHasher::new();
+        player.name.hash(&mut hasher);
+        let seed = hasher.finish();
+        let mut rng = DeterministicRng::new(seed);
+
+        let mut allowed = Vec::new();
+        for eq in all_equipment() {
+            if matches!(eq, Equipment::Artifact(_)) {
+                continue;
+            }
+            if rng.random_bool(0.5) {
+                allowed.push(eq.name().to_string());
+            }
+        }
+        shop_inventory.allowed_weapons = allowed;
+    }
+
+    if shop_inventory.allowed_artifacts.is_empty() {
+        let mut hasher = DefaultHasher::new();
+        player.name.hash(&mut hasher);
+        "artifacts".hash(&mut hasher);
+        let seed = hasher.finish();
+        let mut rng = DeterministicRng::new(seed);
+
+        let mut allowed = Vec::new();
+        for art in crate::core::catalog::catalog::all_artifacts() {
+            if rng.random_bool(0.5) {
+                allowed.push(art.name.clone());
+            }
+        }
+        shop_inventory.allowed_artifacts = allowed;
+    }
+
+    shop_inventory.items = shop_inventory.allowed_weapons
+        .iter()
+        .filter_map(|name| {
+            if let Some(eq) = get_equipment(name) {
+                if eq.level() >= 1 && eq.level() <= player_level {
+                    return Some(name.clone());
+                }
+            }
+            None
+        })
+        .collect();
 
     if let Some(container_entity) = columns_container_q.iter().next() {
         let panel_entity = spawn_panel_base(&mut commands, &assets, container_entity, "bg_shop");
@@ -428,6 +479,7 @@ pub fn build_shop_content_inner(
                         for artifact in crate::core::catalog::catalog::all_artifacts() {
                             if artifact.level <= player_level
                                 && filters.kind.map_or(true, |k| artifact.kind == k)
+                                && shop_inventory.allowed_artifacts.contains(&artifact.name)
                             {
                                 if seen.insert(artifact.name.clone()) {
                                     matching.push(Equipment::Artifact(artifact.clone()));

@@ -12,12 +12,13 @@ use bincode::config::standard;
 use bincode::serde::{decode_from_slice, encode_to_vec};
 use rfd::FileDialog;
 use serde::{Deserialize, Serialize};
+use crate::core::actions::shop::ShopInventory;
 
 #[derive(Serialize, Deserialize)]
 pub struct SaveAll {
     pub settings: Settings,
     pub player: Player,
-    pub shop_inventory: crate::core::actions::shop::ShopInventory,
+    pub shop_inventory: ShopInventory,
 }
 
 #[derive(Message)]
@@ -75,7 +76,7 @@ pub fn save_game(
     mut save_game_msg: MessageReader<SaveCharacterMsg>,
     settings: Res<Settings>,
     player: Res<Player>,
-    shop_inventory: Res<crate::core::actions::shop::ShopInventory>,
+    shop_inventory: Res<ShopInventory>,
 ) {
     for msg in save_game_msg.read() {
         let file_path = if msg.0 {

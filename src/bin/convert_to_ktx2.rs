@@ -46,7 +46,7 @@ fn collect_files(dir: &Path) -> Vec<PathBuf> {
 
 fn convert_single(src: &Path, dst: &Path) {
     // toktx is part of KTX-Software: https://github.com/KhronosGroup/KTX-Software/releases
-    // Install locally:  make install-ktx
+    // Install locally:  just install-ktx
     //
     // Uses zstd supercompression (--zcmp 18) which only requires the `ktx2` + `zstd_rust`
     // Bevy features (no C++ `basis-universal` dependency).
@@ -69,7 +69,7 @@ fn convert_single(src: &Path, dst: &Path) {
             panic!(
                 "Failed to run `toktx`. Please install KTX-Software:\n  \
                  https://github.com/KhronosGroup/KTX-Software/releases\n  \
-                 or run: make install-ktx"
+                 or run: just install-ktx"
             )
         });
 

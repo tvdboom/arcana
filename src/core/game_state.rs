@@ -14,7 +14,7 @@ use crate::core::ui::playing::RightTab;
 /// This allows systems to query a single `GameState` struct instead of listing many individual resources.
 #[derive(SystemParam)]
 #[allow(dead_code)]
-pub struct GameState<'w, 's> {
+pub struct GameState<'w> {
     pub level_up_pending: ResMut<'w, LevelUpPending>,
     pub active_modal: ResMut<'w, ActiveModal>,
     pub shop_inventory: ResMut<'w, ShopInventory>,
@@ -24,5 +24,4 @@ pub struct GameState<'w, 's> {
     pub study_slider_state: ResMut<'w, StudySliderState>,
     pub train_slider_state: ResMut<'w, TrainSliderState>,
     pub right_tab: ResMut<'w, RightTab>,
-    pub _unused: Query<'w, 's, ()>,
 }

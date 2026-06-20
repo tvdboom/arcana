@@ -2823,49 +2823,6 @@ pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
     res
 }
 
-pub fn reward_equipment(player: &mut Player, key: String) {
-    if let Some(equipment) = get_equipment(&key) {
-        let is_empty = match equipment {
-            Equipment::Consumable(_) => false,
-            Equipment::Wearable(w) => match w.slot {
-                WearableSlot::Helmet => player.helmet.is_none(),
-                WearableSlot::Chestplate => player.armor.is_none(),
-                WearableSlot::Boots => player.boots.is_none(),
-                WearableSlot::Gloves => player.gloves.is_none(),
-                WearableSlot::Accessory => {
-                    player.accessory.is_none() || player.accessory2.is_none()
-                },
-            },
-            Equipment::Weapon(w) => {
-                let is_lh_two_hand = player
-                    .weapon_lh
-                    .as_deref()
-                    .and_then(|k| get_equipment(k))
-                    .map(|eq| match eq {
-                        Equipment::Weapon(lh_w) => lh_w.hand == Hand::TwoHand,
-                        _ => false,
-                    })
-                    .unwrap_or(false);
-
-                if w.hand == Hand::TwoHand {
-                    player.weapon_lh.is_none() && player.weapon_rh.is_none()
-                } else if matches!(w.category, Category::Shield | Category::Book) {
-                    player.weapon_rh.is_none() && !is_lh_two_hand
-                } else {
-                    !is_lh_two_hand && (player.weapon_lh.is_none() || player.weapon_rh.is_none())
-                }
-            },
-            Equipment::Artifact(_) => false,
-        };
-
-        if is_empty {
-            equip_item(player, &key);
-        } else {
-            player.inventory.push(key);
-        }
-    }
-}
-
 pub fn handle_equipment_card_click(
     event: On<Pointer<Click>>,
     mut commands: Commands,

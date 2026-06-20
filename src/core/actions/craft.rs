@@ -22,7 +22,7 @@ use crate::core::constants::*;
 use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use crate::core::ui::playing::{equip_item, name_with_level, InfoTooltip};
 
 #[derive(Resource, Default, Clone, Debug)]
@@ -1028,6 +1028,24 @@ pub fn build_craft_content_inner(
                         }
                     }
 
+                    let wisdom_mod = player.wisdom_mod();
+                    let percentage = (100.0 - wisdom_mod as f32).max(1.0);
+                    let max_allowed_gold_cost = (total_selected_price as f32 * percentage / 100.0) as u32;
+
+                    let selected_set: HashSet<String> =
+                        item_selection.items.iter().cloned().collect();
+
+                    let mut combined_gold_cost = 0;
+                    for item in all_equipment() {
+                        if selected_set.contains(item.name()) {
+                            let base_gold_cost = (item.price() as f32 * 0.15) as u32;
+                            let gold_cost = (base_gold_cost as f32 * (1.0 - 0.01 * wisdom_mod as f32)).max(1.0) as u32;
+                            combined_gold_cost += gold_cost;
+                        }
+                    }
+
+                    let remaining_gold_cost = max_allowed_gold_cost.saturating_sub(combined_gold_cost);
+
                     let mut possible_items = Vec::new();
 
                     for item in all_equipment() {
@@ -1038,8 +1056,6 @@ pub fn build_craft_content_inner(
                             continue;
                         }
 
-                        let wisdom_mod = player.wisdom_mod();
-                        let percentage = (100.0 - wisdom_mod as f32).max(1.0);
                         let required_total_price = (item.price() as f32 * percentage / 100.0) as u32;
 
                         let item_kind = item.kind();
@@ -1053,11 +1069,14 @@ pub fn build_craft_content_inner(
                             let base_gold_cost = (item.price() as f32 * 0.15) as u32;
                             let gold_cost = (base_gold_cost as f32 * (1.0 - 0.01 * wisdom_mod as f32)).max(1.0) as u32;
 
-                            possible_items.push((item.clone(), required_total_price, gold_cost, mana_cost));
+                            let is_selected = selected_set.contains(item.name());
+                            if is_selected || gold_cost <= remaining_gold_cost {
+                                possible_items.push((item.clone(), required_total_price, gold_cost, mana_cost));
+                            }
                         }
                     }
 
-                    let selected_set: std::collections::HashSet<String> =
+                    let selected_set: HashSet<String> =
                         item_selection.items.iter().cloned().collect();
                     possible_items.sort_by(|a, b| {
                         let sa = selected_set.contains(a.0.name());
@@ -1210,8 +1229,9 @@ pub fn build_craft_content_inner(
                     .filter_map(|n| get_equipment(n))
                     .map(|eq| (eq.price() / 10).max(1))
                     .sum();
+                let ap_cost = if item_selection.items.is_empty() { 1 } else { (item_selection.items.len() as u32 + 1) / 2 };
                 let can_craft_all =
-                    !item_selection.items.is_empty() && player.ap >= 1 && player.mana() >= total_mana;
+                    !item_selection.items.is_empty() && player.ap >= ap_cost && player.mana() >= total_mana;
 
                 parent
                     .spawn(Node {
@@ -1262,8 +1282,8 @@ pub fn build_craft_content_inner(
                                 ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
-                                add_text("1", "bold", 1.4, assets),
-                                TextColor(if player.ap >= 1 {
+                                add_text(ap_cost.to_string(), "bold", 1.4, assets),
+                                TextColor(if player.ap >= ap_cost {
                                     Color::WHITE
                                 } else {
                                     Color::srgb(0.85, 0.2, 0.2)
@@ -1358,6 +1378,8 @@ pub fn handle_middle_artifact_click(
 
 pub fn handle_craft_item_select(
     event: On<Pointer<Click>>,
+    player: Res<Player>,
+    selection: Res<CraftSelection>,
     mut item_selection: ResMut<CraftItemSelection>,
     btn_q: Query<&CraftItemBtn>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
@@ -1365,10 +1387,41 @@ pub fn handle_craft_item_select(
     if let Ok(btn) = btn_q.get(event.entity) {
         if let Some(pos) = item_selection.items.iter().position(|x| x == &btn.item_name) {
             item_selection.items.remove(pos);
+            play_audio_msg.write(PlayAudioMsg::new("click"));
         } else {
-            item_selection.items.push(btn.item_name.clone());
+            // Check if adding this item would exceed the budget!
+            if let Some(item) = get_equipment(&btn.item_name) {
+                let wisdom_mod = player.wisdom_mod();
+                
+                // Calculate current combined gold cost
+                let mut combined_gold_cost = 0;
+                for sel_name in &item_selection.items {
+                    if let Some(sel_item) = get_equipment(sel_name) {
+                        combined_gold_cost += sel_item.price();
+                    }
+                }
+                
+                // Add the new item's gold cost
+                let new_gold_cost = item.price();
+                
+                // Calculate total budget
+                let mut total_selected_price = 0;
+                for art_name in &selection.selected {
+                    if let Some(art) = get_artifact(art_name) {
+                        total_selected_price += art.price;
+                    }
+                }
+                let percentage = (100.0 - wisdom_mod as f32).max(1.0);
+                let max_allowed_gold_cost = (total_selected_price as f32 * percentage / 100.0) as u32;
+                
+                if combined_gold_cost + new_gold_cost <= max_allowed_gold_cost {
+                    item_selection.items.push(btn.item_name.clone());
+                    play_audio_msg.write(PlayAudioMsg::new("click"));
+                } else {
+                    play_audio_msg.write(PlayAudioMsg::new("error"));
+                }
+            }
         }
-        play_audio_msg.write(PlayAudioMsg::new("click"));
     }
 }
 
@@ -1389,6 +1442,28 @@ pub fn handle_craft_all_click(
         return;
     }
 
+    let wisdom_mod = player.wisdom_mod();
+    let mut total_selected_price = 0;
+    for art_name in &selection.selected {
+        if let Some(art) = get_artifact(art_name) {
+            total_selected_price += art.price;
+        }
+    }
+    let percentage = (100.0 - wisdom_mod as f32).max(1.0);
+    let max_allowed_gold_cost = (total_selected_price as f32 * percentage / 100.0) as u32;
+
+    let mut combined_gold_cost = 0;
+    for sel_name in &item_selection.items {
+        if let Some(sel_item) = get_equipment(sel_name) {
+            combined_gold_cost += sel_item.price();
+        }
+    }
+
+    if combined_gold_cost > max_allowed_gold_cost {
+        play_audio_msg.write(PlayAudioMsg::new("error"));
+        return;
+    }
+
     let total_mana: u32 = item_selection
         .items
         .iter()
@@ -1396,7 +1471,9 @@ pub fn handle_craft_all_click(
         .map(|eq| (eq.price() / 10).max(1))
         .sum();
 
-    if player.ap < 1 || player.mana() < total_mana {
+    let ap_cost = ((item_selection.items.len() as u32) + 1) / 2;
+
+    if player.ap < ap_cost || player.mana() < total_mana {
         play_audio_msg.write(PlayAudioMsg::new("error"));
         return;
     }
@@ -1443,10 +1520,10 @@ pub fn handle_craft_all_click(
         );
     }
 
-    if player.ap <= 1 {
+    if player.ap <= ap_cost {
         trigger_level_up(&mut player, &mut level_up, &mut play_audio_msg, &mut next_game_state);
     } else {
-        player.ap -= 1;
+        player.ap -= ap_cost;
     }
 
     player.as_mut();

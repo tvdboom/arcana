@@ -16,21 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4.3.1
 
+      - uses: extractions/setup-just@v4
+
       - uses: hecrj/setup-rust-action@v2
         with:
           rust-version: stable
 
       - name: Install KTX-Software (toktx)
-        shell: pwsh
-        run: |
-          $url = "https://github.com/KhronosGroup/KTX-Software/releases/download/v$env:KTX_VERSION/KTX-Software-$env:KTX_VERSION-Windows-x64.exe"
-          Invoke-WebRequest -Uri $url -OutFile ktx-installer.exe
-          Start-Process -FilePath ktx-installer.exe -ArgumentList "/S" -Wait
-          # Add to PATH for subsequent steps
-          echo "C:\Program Files\KTX-Software\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        run: install-ktx
 
       - name: Build release exe
-        run: make build-release
+        run: just build-release
 
       - name: Copy files to output folder
         shell: bash
@@ -84,17 +80,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4.3.1
 
+      - uses: extractions/setup-just@v4
+
       - uses: hecrj/setup-rust-action@v2.0.1
         with:
           rust-version: stable
 
       - name: Install KTX-Software (toktx)
-        run: |
-          curl -fsSL "https://github.com/KhronosGroup/KTX-Software/releases/download/v${KTX_VERSION}/KTX-Software-${KTX_VERSION}-Linux-x86_64.deb" -o ktx.deb
-          sudo dpkg -i ktx.deb
+        run: just install-ktx
 
       - name: Build WASM
-        run: make build-wasm
+        run: just build-wasm
 
       - name: Copy assets
         run: cp -r $GITHUB_WORKSPACE/assets/ docs/assets
