@@ -195,22 +195,20 @@ pub fn build_study_content_inner(
 
     let mut level_probs = std::collections::BTreeMap::new();
     for &(offset, prob) in offset_probs {
-        let target_level = (player.level as i32 + offset).clamp(1, 20) as u32;
+        let target_level = (player.level() as i32 + offset).clamp(1, 20) as u32;
         *level_probs.entry(target_level).or_insert(0.0) += prob;
     }
 
     let mut breakdown_rows = Vec::new();
+    let level_lang = localization.get("general.level", lang);
     for (lvl, prob) in level_probs {
         let learn_chance = (chance as f32 * prob).round() as u32;
-        breakdown_rows.push(format!(" - Level {}: {}%", lvl, learn_chance));
+        breakdown_rows.push(format!(" • {level_lang} {lvl}: {learn_chance}%"));
     }
     let breakdown = breakdown_rows.join("\n");
 
-    let (attr_single, attr_plural) = match lang {
-        Language::Dutch => ("attribuut", "attributen"),
-        Language::Spanish => ("atributo", "atributos"),
-        _ => ("attribute", "attributes"),
-    };
+    let attr_single = localization.get("general.attribute_singular", lang);
+    let attr_plural = localization.get("general.attribute_plural", lang);
 
     let cond_breakdown = match slider_val {
         0 => format!(" - 1 {}: {}%", attr_single, chance),
@@ -225,7 +223,7 @@ pub fn build_study_content_inner(
                 " - 1 {}: {}%\n - 2 {}: {}%\n - 3 {}: {}%",
                 attr_single, p1, attr_plural, p2, attr_plural, p2
             )
-        }
+        },
     };
 
     // Top Row
@@ -317,9 +315,8 @@ pub fn build_study_content_inner(
         .with_children(|parent| {
             // Card 1: Apprenticeship
             let title1 = localization.get("apprenticeship_title", lang);
-            let desc1 = localization
-                .get("apprenticeship_desc", lang)
-                .replace("{breakdown}", &breakdown);
+            let desc1 =
+                localization.get("apprenticeship_desc", lang).replace("{breakdown}", &breakdown);
             let c1 = spawn_card_ui(
                 parent,
                 assets,
@@ -335,9 +332,8 @@ pub fn build_study_content_inner(
 
             // Card 2: Mentorship
             let title2 = localization.get("mentorship_title", lang);
-            let desc2 = localization
-                .get("mentorship_desc", lang)
-                .replace("{breakdown}", &breakdown);
+            let desc2 =
+                localization.get("mentorship_desc", lang).replace("{breakdown}", &breakdown);
             let c2 = spawn_card_ui(
                 parent,
                 assets,
@@ -353,9 +349,8 @@ pub fn build_study_content_inner(
 
             // Card 3: Conditioning
             let title3 = localization.get("conditioning_title", lang);
-            let desc3 = localization
-                .get("conditioning_desc", lang)
-                .replace("{breakdown}", &cond_breakdown);
+            let desc3 =
+                localization.get("conditioning_desc", lang).replace("{breakdown}", &cond_breakdown);
             let c3 = spawn_card_ui(
                 parent,
                 assets,

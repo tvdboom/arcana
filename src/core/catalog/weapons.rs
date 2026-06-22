@@ -4,9 +4,9 @@ use crate::core::catalog::modifiers::Modifier;
 use crate::core::localization::Localization;
 use crate::core::settings::Language;
 use crate::utils::NameFromEnum;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Category {
     Finesse,
     Magical,
@@ -16,13 +16,13 @@ pub enum Category {
     Book,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Hand {
     OneHand,
     TwoHand,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Weapon {
     /// Name of the weapon (matches the English name)
     /// Lowercase with space -> underscore matches the language key for name

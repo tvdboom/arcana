@@ -13,7 +13,10 @@ fn linear_sampler(settings: &mut ImageLoaderSettings) {
 }
 
 /// Loads an image with linear filtering (see [`linear_sampler`]).
-fn load_linear(assets: &AssetServer, path: impl Into<bevy::asset::AssetPath<'static>>) -> Handle<Image> {
+fn load_linear(
+    assets: &AssetServer,
+    path: impl Into<bevy::asset::AssetPath<'static>>,
+) -> Handle<Image> {
     assets.load_builder().with_settings(linear_sampler).load(path)
 }
 
@@ -70,6 +73,8 @@ impl FromWorld for WorldAssets {
             ("study", assets.load("audio/study.ogg")),
             ("train", assets.load("audio/train.ogg")),
             ("craft", assets.load("audio/craft.ogg")),
+            ("hunt", assets.load("audio/hunt.ogg")),
+            ("quest", assets.load("audio/quest.ogg")),
             ("poof", assets.load("audio/poof.ogg")),
         ]);
 
@@ -231,26 +236,26 @@ impl FromWorld for WorldAssets {
             ("mage_white_dwarf_woman", assets.load("images/classes/mage_white_dwarf_woman.ktx2")),
             ("mage_white_orc_man", assets.load("images/classes/mage_white_orc_man.ktx2")),
             ("mage_white_orc_woman", assets.load("images/classes/mage_white_orc_woman.ktx2")),
-            // Pets
-            ("wolf", assets.load("images/pets/wolf.ktx2")),
-            ("snake", assets.load("images/pets/snake.ktx2")),
-            ("eagle", assets.load("images/pets/eagle.ktx2")),
-            ("bear", assets.load("images/pets/bear.ktx2")),
-            ("bat", assets.load("images/pets/bat.ktx2")),
-            ("crocodile", assets.load("images/pets/crocodile.ktx2")),
-            ("griffin", assets.load("images/pets/griffin.ktx2")),
-            ("hyena", assets.load("images/pets/hyena.ktx2")),
-            ("infernal can", assets.load("images/pets/infernal can.ktx2")),
-            ("lizard", assets.load("images/pets/lizard.ktx2")),
-            ("manticore", assets.load("images/pets/manticore.ktx2")),
-            ("pegasus", assets.load("images/pets/pegasus.ktx2")),
-            ("puma", assets.load("images/pets/puma.ktx2")),
-            ("rat", assets.load("images/pets/rat.ktx2")),
-            ("spider", assets.load("images/pets/spider.ktx2")),
-            ("three headed dog", assets.load("images/pets/three headed dog.ktx2")),
-            ("tiger", assets.load("images/pets/tiger.ktx2")),
-            ("unicorn", assets.load("images/pets/unicorn.ktx2")),
-            ("vulture", assets.load("images/pets/vulture.ktx2")),
+            // Monsters
+            ("wolf", assets.load("images/monsters/wolf.ktx2")),
+            ("snake", assets.load("images/monsters/snake.ktx2")),
+            ("eagle", assets.load("images/monsters/eagle.ktx2")),
+            ("bear", assets.load("images/monsters/bear.ktx2")),
+            ("bat", assets.load("images/monsters/bat.ktx2")),
+            ("crocodile", assets.load("images/monsters/crocodile.ktx2")),
+            ("griffin", assets.load("images/monsters/griffin.ktx2")),
+            ("hell hound", assets.load("images/monsters/hell hound.ktx2")),
+            ("hyena", assets.load("images/monsters/hyena.ktx2")),
+            ("lizard", assets.load("images/monsters/lizard.ktx2")),
+            ("manticore", assets.load("images/monsters/manticore.ktx2")),
+            ("pegasus", assets.load("images/monsters/pegasus.ktx2")),
+            ("puma", assets.load("images/monsters/puma.ktx2")),
+            ("rat", assets.load("images/monsters/rat.ktx2")),
+            ("spider", assets.load("images/monsters/spider.ktx2")),
+            ("three headed dog", assets.load("images/monsters/three headed dog.ktx2")),
+            ("tiger", assets.load("images/monsters/tiger.ktx2")),
+            ("unicorn", assets.load("images/monsters/unicorn.ktx2")),
+            ("vulture", assets.load("images/monsters/vulture.ktx2")),
             // Actions
             ("action_clerical_labor", load_linear(assets, "images/actions/clerical_labor.ktx2")),
             ("action_craft_labor", load_linear(assets, "images/actions/craft_labor.ktx2")),
@@ -260,7 +265,10 @@ impl FromWorld for WorldAssets {
             ("action_conditioning", load_linear(assets, "images/actions/conditioning.ktx2")),
             ("action_simple_rest", load_linear(assets, "images/actions/simple_rest.ktx2")),
             ("action_common_lodging", load_linear(assets, "images/actions/common_lodging.ktx2")),
-            ("action_grand_accommodation", load_linear(assets, "images/actions/grand_accomodation.ktx2")),
+            (
+                "action_grand_accommodation",
+                load_linear(assets, "images/actions/grand_accomodation.ktx2"),
+            ),
             ("action_melee", load_linear(assets, "images/actions/melee.ktx2")),
             ("action_range", load_linear(assets, "images/actions/range.ktx2")),
             ("action_finesse", load_linear(assets, "images/actions/finesse.ktx2")),
@@ -289,7 +297,8 @@ impl FromWorld for WorldAssets {
             images.insert(key, load_linear(assets, wearable.image.clone()));
         }
         for consumable in all_consumables() {
-            let key: &'static str = Box::leak(format!("build_{}", consumable.name).into_boxed_str());
+            let key: &'static str =
+                Box::leak(format!("build_{}", consumable.name).into_boxed_str());
             images.insert(key, load_linear(assets, consumable.image.clone()));
         }
         for artifact in all_artifacts() {

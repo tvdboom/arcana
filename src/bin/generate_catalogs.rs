@@ -692,7 +692,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
 
         let mana_cost = 5 + level * 2 + (idx % 3) as u32;
         let cooldown = (10.0 - level as f32 * 0.3 + (idx % 5) as f32 * 0.2).max(1.0);
-        let is_aoe = (level % 4 == 0)
+        let is_aoe = level.is_multiple_of(4)
             || ["wave", "rain", "blizzard", "storm", "aoe", "clones", "explode"]
                 .iter()
                 .any(|x| lower.contains(x));
@@ -988,7 +988,9 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
 
         let stem = Path::new(filename).file_stem().and_then(|s| s.to_str()).unwrap_or(filename);
         let mut clean_stem = stem;
-        for prefix in &["Herbalism_", "Jewelry_", "Mining_", "skinning_", "Res_", "Loot_", "Cooking_"] {
+        for prefix in
+            &["Herbalism_", "Jewelry_", "Mining_", "skinning_", "Res_", "Loot_", "Cooking_"]
+        {
             if clean_stem.to_lowercase().starts_with(&prefix.to_lowercase()) {
                 clean_stem = &clean_stem[prefix.len()..];
             }
@@ -1049,7 +1051,6 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             "    (\n        name: \"{name}\",\n        image: \"images/catalog/artifacts/{img}\",\n        kind: {kind},\n        level: {level},\n        price: {price},\n    ),\n",
             name = name, img = img, kind = kind, level = level, price = price
         ));
-
     }
     artifacts_ron.push_str("]\n");
     File::create(format!("{out_inventory}/artifacts.ron"))

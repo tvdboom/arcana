@@ -1,13 +1,13 @@
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 
-use crate::core::ui::level_up::LevelUpPending;
-use crate::core::ui::modal::ActiveModal;
-use crate::core::actions::shop::{ShopInventory, ShopFilters};
-use crate::core::ui::dropdown::OpenDropdown;
-use crate::core::actions::work::WorkSliderState;
+use crate::core::actions::shop::{ShopFilters, ShopInventory};
 use crate::core::actions::study::StudySliderState;
 use crate::core::actions::train::TrainSliderState;
+use crate::core::actions::work::WorkSliderState;
+use crate::core::ui::dropdown::OpenDropdown;
+use crate::core::ui::level_up::LevelUpPending;
+use crate::core::ui::modal::ActiveModal;
 use crate::core::ui::playing::RightTab;
 
 /// A bundled system parameter that provides access to all UI-related game state resources.

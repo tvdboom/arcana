@@ -68,8 +68,7 @@ pub fn spawn_tooltip(
     let mut wrapped_lines = Vec::new();
     for line in &content.lines {
         for sub_line in line.split('\n') {
-            if sub_line.starts_with("• ") {
-                let rest = &sub_line["• ".len()..];
+            if let Some(rest) = sub_line.strip_prefix("• ") {
                 let wrapped = wrap_tooltip_line(rest, max_chars_per_line.saturating_sub(3));
                 for (i, wl) in wrapped.iter().enumerate() {
                     if i == 0 {

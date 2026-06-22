@@ -1,14 +1,14 @@
 use crate::core::catalog::artifacts::Artifact;
+use crate::core::catalog::consumables::Consumable;
 use crate::core::catalog::modifiers::Modifier;
 use crate::core::catalog::weapons::Weapon;
 use crate::core::catalog::wearables::Wearable;
-use crate::core::catalog::consumables::Consumable;
 use crate::core::localization::Localization;
 use crate::core::settings::Language;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use strum_macros::Display;
 
-#[derive(Debug, Clone, Copy, Display, Hash, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, Display, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Kind {
     Physical,
     Fire,

@@ -1,6 +1,6 @@
+use crate::core::catalog::equipment::Kind;
 use crate::core::localization::Localization;
 use crate::core::settings::Language;
-use crate::core::catalog::equipment::Kind;
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
@@ -17,7 +17,11 @@ impl Artifact {
         format!("{}", self.kind)
     }
 
-    pub fn full_description(&self, _language: Language, _localization: &Localization) -> Vec<String> {
+    pub fn full_description(
+        &self,
+        _language: Language,
+        _localization: &Localization,
+    ) -> Vec<String> {
         vec![format!("[{}] {}", self.kind.to_string().to_lowercase(), self.kind)]
     }
 }

@@ -4,9 +4,10 @@ use crate::core::localization::Localization;
 use crate::core::player::Attribute;
 use crate::core::settings::Language;
 use crate::utils::NameFromEnum;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[allow(clippy::enum_variant_names)]
 pub enum Modifier {
     /// Attributes
     AttributeModifier(Attribute, i32),

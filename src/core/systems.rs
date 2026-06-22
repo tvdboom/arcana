@@ -1,7 +1,6 @@
 use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::{Ajah, Class};
 use crate::core::menu::systems::StartNewCharacterMsg;
-use crate::core::pets::PetKind;
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
 use crate::core::ui::creation::SelectionItem;
@@ -41,7 +40,8 @@ pub fn check_keys_menu(
                 | GameState::Work
                 | GameState::Study
                 | GameState::Train
-                | GameState::Rest => {
+                | GameState::Rest
+                | GameState::Precombat => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_game_state.set(GameState::Playing);
                 },
@@ -138,7 +138,7 @@ pub fn check_keys_menu(
                         },
                         Class::Druid => {
                             let kind =
-                                player.pet.as_ref().map(|p| p.kind).unwrap_or(PetKind::default());
+                                player.pet.as_ref().map(|p| p.kind).unwrap_or_default();
                             kind.on_select(&mut player, &mut next_game_state);
                         },
                         _ => {

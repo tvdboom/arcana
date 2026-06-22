@@ -187,28 +187,34 @@ pub fn build_work_content_inner(
     let slider_mult = [1.0, 2.5, 4.0][slider_val as usize];
 
     // Card 1 Ranges
-    let base_clerical =
-        (1.0 + player.charisma_mod() as f32) * (player.level as f32).powf(1.2) * 5.0 * slider_mult;
+    let base_clerical = (1.0 + player.charisma_mod() as f32)
+        * (player.level() as f32).powf(1.2)
+        * 5.0
+        * slider_mult;
     let min_clerical = (base_clerical * 0.8).max(1.0) as u32;
     let max_clerical = (base_clerical * 1.2).max(2.0) as u32;
 
     // Card 2 Ranges
-    let base_craft =
-        (1.0 + player.charisma_mod() as f32) * (player.level as f32).powf(1.2) * 8.0 * slider_mult;
+    let base_craft = (1.0 + player.charisma_mod() as f32)
+        * (player.level() as f32).powf(1.2)
+        * 8.0
+        * slider_mult;
     let min_craft = (base_craft * 0.8).max(1.0) as u32;
     let max_craft = (base_craft * 1.2).max(2.0) as u32;
 
     // Card 3 Ranges
-    let base_manual =
-        (1.0 + player.charisma_mod() as f32) * (player.level as f32).powf(1.2) * 12.0 * slider_mult;
+    let base_manual = (1.0 + player.charisma_mod() as f32)
+        * (player.level() as f32).powf(1.2)
+        * 12.0
+        * slider_mult;
     let min_manual = (base_manual * 0.8).max(1.0) as u32;
     let max_manual = (base_manual * 1.2).max(2.0) as u32;
 
     let ap_cost = slider_val + 1;
 
     // Fixed costs calculations:
-    let craft_cost = 10 * player.level as u32;
-    let manual_cost = 10 * player.level as u32;
+    let craft_cost = 10 * player.level();
+    let manual_cost = 10 * player.level();
 
     // Top Row
     parent

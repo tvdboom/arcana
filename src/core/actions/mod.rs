@@ -11,8 +11,8 @@ pub mod work;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::abilities::Ability;
-use crate::core::catalog::equipment::Kind;
 use crate::core::catalog::catalog::{all_abilities, all_perks};
+use crate::core::catalog::equipment::Kind;
 use crate::core::classes::Class;
 use crate::core::localization::Localization;
 use crate::core::menu::buttons::DisabledButton;
@@ -71,8 +71,6 @@ pub fn trigger_level_up(
 ) {
     next_game_state.set(GameState::Playing);
     let mut rng = rng();
-    player.level += 1;
-    player.ap = 10;
     player.bonus_max_health += 10;
     player.bonus_max_mana += 10;
 
@@ -84,9 +82,7 @@ pub fn trigger_level_up(
     let mut ability_choices = Vec::new();
     let ability_pool: Vec<_> = all_abilities()
         .iter()
-        .filter(|ab| {
-            ab.level == player.level as u32 && !player.abilities.contains(&ab.name.to_string())
-        })
+        .filter(|ab| ab.level == player.level() && !player.abilities.contains(&ab.name.to_string()))
         .collect();
 
     let mut weighted_pool: Vec<(&Ability, f64)> = ability_pool
@@ -137,9 +133,7 @@ pub fn trigger_level_up(
     let mut perk_choices = Vec::new();
     let mut perk_pool: Vec<_> = all_perks()
         .iter()
-        .filter(|pk| {
-            pk.level == player.level as u32 && !player.perks.contains(&pk.name.to_string())
-        })
+        .filter(|pk| pk.level == player.level() && !player.perks.contains(&pk.name.to_string()))
         .collect();
     for _ in 0..3 {
         if perk_pool.is_empty() {
@@ -163,7 +157,7 @@ pub fn trigger_level_up(
 
     *level_up = LevelUpPending {
         active: true,
-        new_level: player.level,
+        new_level: player.level(),
         points_remaining: 2,
         attr_gains: [0; 6],
         ability_choices,
@@ -173,6 +167,22 @@ pub fn trigger_level_up(
     };
 
     play_audio_msg.write(PlayAudioMsg::new("levelup").volume(-10.));
+}
+
+// Reusable XP gain helper that triggers level up
+pub fn gain_xp(
+    player: &mut Player,
+    amount: u32,
+    level_up: &mut LevelUpPending,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+    next_game_state: &mut NextState<GameState>,
+) {
+    let old_level = player.level();
+    player.xp += amount;
+    let new_level = player.level();
+    if new_level > old_level {
+        trigger_level_up(player, level_up, play_audio_msg, next_game_state);
+    }
 }
 
 pub fn handle_playing_action_clicks(
@@ -188,18 +198,18 @@ pub fn handle_playing_action_clicks(
         let current_state = _game_state.get();
 
         // Toggle behavior: if clicking the button of the action that is currently open, close it.
-        let is_currently_open = match (action, current_state) {
-            (Action::Shop, GameState::Shop) => true,
-            (Action::Work, GameState::Work) => true,
-            (Action::Study, GameState::Study) => true,
-            (Action::Train, GameState::Train) => true,
-            (Action::Rest, GameState::Rest) => true,
-            (Action::Craft, GameState::Craft) => true,
-            (Action::Hunt, GameState::Hunt) => true,
-            (Action::Quest, GameState::Quest) => true,
-            (Action::Duel, GameState::Duel) => true,
-            _ => false,
-        };
+        let is_currently_open = matches!(
+            (action, current_state),
+            (Action::Shop, GameState::Shop)
+                | (Action::Work, GameState::Work)
+                | (Action::Study, GameState::Study)
+                | (Action::Train, GameState::Train)
+                | (Action::Rest, GameState::Rest)
+                | (Action::Craft, GameState::Craft)
+                | (Action::Hunt, GameState::Hunt)
+                | (Action::Quest, GameState::Quest)
+                | (Action::Duel, GameState::Duel)
+        );
 
         if is_currently_open {
             next_game_state.set(GameState::Playing);
@@ -260,13 +270,11 @@ pub fn handle_work_card_clicks(
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    mut level_up: ResMut<LevelUpPending>,
     card_q: Query<&work::WorkCardMarker>,
     slider_state: Res<work::WorkSliderState>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
     localization: Res<Localization>,
     settings: Res<Settings>,
-    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     if let Ok(marker) = card_q.get(event.entity) {
         let slider_val = slider_state.0;
@@ -275,30 +283,16 @@ pub fn handle_work_card_clicks(
         let lang = settings.language;
         let toast = toast_container_q.single().unwrap();
 
-        if player.ap < ap_cost {
-            play_audio_msg.write(PlayAudioMsg::new("error"));
-            spawn_toast(
-                &mut commands,
-                &assets,
-                localization.get("not_enough_ap", lang),
-                Color::srgba(0.20, 0.05, 0.05, 0.93),
-                Color::srgb(0.85, 0.20, 0.20),
-                Color::srgb(1.0, 0.80, 0.80),
-                toast,
-            );
-            return;
-        }
-
         let slider_mult = [1.0, 2.5, 4.0][slider_val as usize];
 
         // Fixed costs calculations:
         let craft_percentage =
-            (10.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
+            (10.0 + player.level() as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
         let craft_cost =
             ((craft_percentage / 100.0) * player.max_mana() as f32 * slider_mult).max(1.0) as u32;
 
         let manual_percentage =
-            (14.0 + player.level as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
+            (14.0 + player.level() as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
         let manual_cost = ((manual_percentage / 100.0) * player.max_health() as f32 * slider_mult)
             .max(1.0) as u32;
 
@@ -321,8 +315,8 @@ pub fn handle_work_card_clicks(
                     return;
                 }
             },
-            2 => {
-                if player.health() <= manual_cost {
+            2
+                if player.health() <= manual_cost => {
                     play_audio_msg.write(PlayAudioMsg::new("error"));
                     spawn_toast(
                         &mut commands,
@@ -334,8 +328,7 @@ pub fn handle_work_card_clicks(
                         toast,
                     );
                     return;
-                }
-            },
+                },
             _ => {},
         }
 
@@ -345,7 +338,7 @@ pub fn handle_work_card_clicks(
             0 => {
                 // Clerical Labor
                 let base = (1.0 + player.charisma_mod() as f32)
-                    * (player.level as f32).powf(1.2)
+                    * (player.level() as f32).powf(1.2)
                     * 4.0
                     * slider_mult;
                 let min_gold = (base * 0.8).max(1.0) as u32;
@@ -380,7 +373,8 @@ pub fn handle_work_card_clicks(
                                 closest_artifacts.push(*art);
                             }
                         }
-                        let chosen = closest_artifacts[rng.random_range(0..closest_artifacts.len())];
+                        let chosen =
+                            closest_artifacts[rng.random_range(0..closest_artifacts.len())];
                         player.inventory.push(chosen.name.clone());
 
                         spawn_toast(
@@ -424,7 +418,7 @@ pub fn handle_work_card_clicks(
             1 => {
                 // Craft Labor
                 let base = (1.0 + player.charisma_mod() as f32)
-                    * (player.level as f32).powf(1.2)
+                    * (player.level() as f32).powf(1.2)
                     * 5.0
                     * slider_mult;
                 let min_gold = (base * 0.8).max(1.0) as u32;
@@ -474,13 +468,17 @@ pub fn handle_work_card_clicks(
                                 closest_artifacts.push(*art);
                             }
                         }
-                        let chosen = closest_artifacts[rng.random_range(0..closest_artifacts.len())];
+                        let chosen =
+                            closest_artifacts[rng.random_range(0..closest_artifacts.len())];
                         player.inventory.push(chosen.name.clone());
 
                         spawn_toast(
                             &mut commands,
                             &assets,
-                            format!("Craft labor done! Earned artifact: {} (-{} Mana)", chosen.name, craft_cost),
+                            format!(
+                                "Craft labor done! Earned artifact: {} (-{} Mana)",
+                                chosen.name, craft_cost
+                            ),
                             Color::srgba(0.08, 0.16, 0.12, 0.93),
                             Color::srgb(0.25, 0.75, 0.50),
                             Color::srgb(0.60, 1.0, 0.75),
@@ -520,7 +518,7 @@ pub fn handle_work_card_clicks(
             2 => {
                 // Manual Labor
                 let base = (1.0 + player.charisma_mod() as f32)
-                    * (player.level as f32).powf(1.2)
+                    * (player.level() as f32).powf(1.2)
                     * 7.0
                     * slider_mult;
                 let min_gold = (base * 0.8).max(1.0) as u32;
@@ -562,13 +560,17 @@ pub fn handle_work_card_clicks(
                                 closest_artifacts.push(*art);
                             }
                         }
-                        let chosen = closest_artifacts[rng.random_range(0..closest_artifacts.len())];
+                        let chosen =
+                            closest_artifacts[rng.random_range(0..closest_artifacts.len())];
                         player.inventory.push(chosen.name.clone());
 
                         spawn_toast(
                             &mut commands,
                             &assets,
-                            format!("Manual labor done! Earned artifact: {} (-{} HP)", chosen.name, manual_cost),
+                            format!(
+                                "Manual labor done! Earned artifact: {} (-{} HP)",
+                                chosen.name, manual_cost
+                            ),
                             Color::srgba(0.08, 0.16, 0.12, 0.93),
                             Color::srgb(0.25, 0.75, 0.50),
                             Color::srgb(0.60, 1.0, 0.75),
@@ -610,11 +612,7 @@ pub fn handle_work_card_clicks(
 
         play_audio_msg.write(PlayAudioMsg::new("work"));
 
-        if player.ap <= ap_cost {
-            trigger_level_up(&mut player, &mut level_up, &mut play_audio_msg, &mut next_game_state);
-        } else {
-            player.ap -= ap_cost;
-        }
+        player.ap += ap_cost;
     }
 }
 
@@ -625,13 +623,11 @@ pub fn handle_study_card_clicks(
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    mut level_up: ResMut<LevelUpPending>,
     card_q: Query<&study::StudyCardMarker>,
     slider_state: Res<study::StudySliderState>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
     localization: Res<Localization>,
     settings: Res<Settings>,
-    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     if let Ok(marker) = card_q.get(event.entity) {
         let slider_val = slider_state.0;
@@ -639,20 +635,6 @@ pub fn handle_study_card_clicks(
 
         let lang = settings.language;
         let toast = toast_container_q.single().unwrap();
-
-        if player.ap < ap_cost {
-            play_audio_msg.write(PlayAudioMsg::new("error"));
-            spawn_toast(
-                &mut commands,
-                &assets,
-                localization.get("not_enough_ap", lang),
-                Color::srgba(0.20, 0.05, 0.05, 0.93),
-                Color::srgb(0.85, 0.20, 0.20),
-                Color::srgb(1.0, 0.80, 0.80),
-                toast,
-            );
-            return;
-        }
 
         let mut rng = rng();
         let chance = 40 + player.intelligence_mod() * 5;
@@ -707,7 +689,7 @@ pub fn handle_study_card_clicks(
             _ => 0,
         };
 
-        let target_level = (player.level as i32 + offset).clamp(1, 20) as u32;
+        let target_level = (player.level() as i32 + offset).clamp(1, 20) as u32;
 
         match marker.0 {
             0 => {
@@ -741,7 +723,7 @@ pub fn handle_study_card_clicks(
                         let candidates_any: Vec<_> = all_abilities()
                             .iter()
                             .filter(|ab| {
-                                let diff = (ab.level as i32 - player.level as i32).abs();
+                                let diff = (ab.level as i32 - player.level() as i32).abs();
                                 diff <= 2 && !player.abilities.contains(&ab.name.to_string())
                             })
                             .collect();
@@ -814,7 +796,7 @@ pub fn handle_study_card_clicks(
                         let candidates_any: Vec<_> = all_perks()
                             .iter()
                             .filter(|pk| {
-                                let diff = (pk.level as i32 - player.level as i32).abs();
+                                let diff = (pk.level as i32 - player.level() as i32).abs();
                                 diff <= 2 && !player.perks.contains(&pk.name.to_string())
                             })
                             .collect();
@@ -887,7 +869,7 @@ pub fn handle_study_card_clicks(
                         _ => 1,
                     };
 
-                    let mut attrs = vec![
+                    let mut attrs = [
                         Attribute::Strength,
                         Attribute::Dexterity,
                         Attribute::Constitution,
@@ -898,12 +880,11 @@ pub fn handle_study_card_clicks(
                     attrs.shuffle(&mut rng);
 
                     let mut increased = Vec::new();
-                    for i in 0..(count as usize).min(attrs.len()) {
-                        let attr = attrs[i];
+                    for attr in attrs.iter().take((count as usize).min(attrs.len())) {
                         let attr_name =
-                            localization.get(&format!("attribute.{}", attr.to_lowername()), lang);
+                            localization.get(format!("attribute.{}", attr.to_lowername()), lang);
                         increased.push(attr_name);
-                        match attr {
+                        match *attr {
                             Attribute::Strength => player.strength += 1,
                             Attribute::Dexterity => player.dexterity += 1,
                             Attribute::Constitution => player.constitution += 1,
@@ -943,10 +924,6 @@ pub fn handle_study_card_clicks(
 
         play_audio_msg.write(PlayAudioMsg::new("study"));
 
-        if player.ap <= ap_cost {
-            trigger_level_up(&mut player, &mut level_up, &mut play_audio_msg, &mut next_game_state);
-        } else {
-            player.ap -= ap_cost;
-        }
+        player.ap += ap_cost;
     }
 }

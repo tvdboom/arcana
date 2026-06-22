@@ -8,7 +8,6 @@
 ///
 /// The root `build.rs` Cargo build script includes these same implementation
 /// files so that `cargo build` also runs everything automatically.
-
 #[allow(dead_code)]
 mod convert_to_ktx2 {
     include!("convert_to_ktx2.rs");

@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
 use serde::{Deserialize, Serialize};
 
+use crate::core::actions::shop::{ShopFilters, WeaponTypeFilter};
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::equipment::Kind;
@@ -9,7 +10,6 @@ use crate::core::catalog::weapons::{Category, Hand};
 use crate::core::constants::*;
 use crate::core::menu::utils::{add_text, recolor};
 use crate::core::utils::cursor;
-use crate::core::actions::shop::{ShopFilters, WeaponTypeFilter};
 
 #[derive(Resource, Default, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum OpenDropdown {
@@ -140,7 +140,11 @@ pub fn spawn_dropdown_hand(
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    BackgroundColor(if is_open { HOVERED_BUTTON_COLOR } else { NORMAL_BUTTON_COLOR }),
+                    BackgroundColor(if is_open {
+                        HOVERED_BUTTON_COLOR
+                    } else {
+                        NORMAL_BUTTON_COLOR
+                    }),
                     BorderColor::all(BUTTON_BORDER_COLOR),
                     Button,
                     Interaction::default(),
@@ -246,7 +250,11 @@ pub fn spawn_dropdown_type(
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    BackgroundColor(if is_open { HOVERED_BUTTON_COLOR } else { NORMAL_BUTTON_COLOR }),
+                    BackgroundColor(if is_open {
+                        HOVERED_BUTTON_COLOR
+                    } else {
+                        NORMAL_BUTTON_COLOR
+                    }),
                     BorderColor::all(BUTTON_BORDER_COLOR),
                     Button,
                     Interaction::default(),
@@ -356,7 +364,11 @@ pub fn spawn_dropdown_category(
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    BackgroundColor(if is_open { HOVERED_BUTTON_COLOR } else { NORMAL_BUTTON_COLOR }),
+                    BackgroundColor(if is_open {
+                        HOVERED_BUTTON_COLOR
+                    } else {
+                        NORMAL_BUTTON_COLOR
+                    }),
                     BorderColor::all(BUTTON_BORDER_COLOR),
                     Button,
                     Interaction::default(),
@@ -469,7 +481,11 @@ pub fn spawn_dropdown_kind(
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    BackgroundColor(if is_open { HOVERED_BUTTON_COLOR } else { NORMAL_BUTTON_COLOR }),
+                    BackgroundColor(if is_open {
+                        HOVERED_BUTTON_COLOR
+                    } else {
+                        NORMAL_BUTTON_COLOR
+                    }),
                     BorderColor::all(BUTTON_BORDER_COLOR),
                     Button,
                     Interaction::default(),
@@ -549,7 +565,16 @@ pub fn spawn_dropdown_kind(
 pub fn shop_close_dropdown_on_outside_click(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     mut open_dropdown: ResMut<OpenDropdown>,
-    dropdown_elements_q: Query<&Interaction, Or<(With<ShopDropdownButton>, With<ShopDropdownOptionHand>, With<ShopDropdownOptionType>, With<ShopDropdownOptionCategory>, With<ShopDropdownOptionKind>)>>,
+    dropdown_elements_q: Query<
+        &Interaction,
+        Or<(
+            With<ShopDropdownButton>,
+            With<ShopDropdownOptionHand>,
+            With<ShopDropdownOptionType>,
+            With<ShopDropdownOptionCategory>,
+            With<ShopDropdownOptionKind>,
+        )>,
+    >,
 ) {
     if *open_dropdown == OpenDropdown::None {
         return;

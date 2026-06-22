@@ -1,29 +1,28 @@
-
-
-use crate::core::RightColumnTooltip;
 use crate::core::assets::WorldAssets;
+use crate::core::audio::PlayAudioMsg;
+use crate::core::catalog::catalog::{all_equipment, get_artifact, get_equipment};
+use crate::core::catalog::equipment::{Equipment, Kind};
+use crate::core::catalog::weapons::{Category, Hand};
+use crate::core::catalog::wearables::WearableSlot;
+use crate::core::constants::*;
 use crate::core::localization::Localization;
 use crate::core::menu::utils::{add_text, recolor};
 use crate::core::player::Player;
 use crate::core::settings::{Language, Settings};
-use crate::core::ui::utils::*;
-use crate::core::ui::toast::{spawn_toast, ToastContainer};
-use crate::core::ui::scrollbar::{ScrollableContainer, ScrollbarTrack, ScrollbarThumb, on_scrollbar_thumb_drag};
-use crate::core::ui::level_up::LevelUpPending;
 use crate::core::states::GameState;
-use crate::core::actions::trigger_level_up;
-use crate::core::catalog::catalog::{all_equipment, get_equipment, get_artifact};
-use crate::core::catalog::equipment::{Equipment, Kind};
-use crate::core::catalog::wearables::WearableSlot;
-use crate::core::catalog::weapons::{Category, Hand};
-use crate::core::audio::PlayAudioMsg;
+use crate::core::ui::level_up::LevelUpPending;
+use crate::core::ui::playing::{equip_item, name_with_level, InfoTooltip};
+use crate::core::ui::scrollbar::{
+    on_scrollbar_thumb_drag, ScrollableContainer, ScrollbarThumb, ScrollbarTrack,
+};
+use crate::core::ui::toast::{spawn_toast, ToastContainer};
+use crate::core::ui::utils::*;
 use crate::core::utils::cursor;
-use crate::core::constants::*;
+use crate::core::RightColumnTooltip;
 use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
 use std::collections::{HashMap, HashSet};
-use crate::core::ui::playing::{equip_item, name_with_level, InfoTooltip};
 
 #[derive(Resource, Default, Clone, Debug)]
 pub struct CraftSelection {
@@ -208,20 +207,20 @@ pub fn build_craft_content(
                     );
                 });
 
-            parent.spawn((
-                Node {
+            parent
+                .spawn((Node {
                     width: Val::Percent(100.),
                     height: Val::Px(30.),
                     margin: UiRect::top(Val::Px(5.)),
                     justify_content: JustifyContent::Center,
                     ..default()
-                },
-            )).with_children(|parent| {
-                parent.spawn((
-                    add_text("Click outside the panel to go back", "medium", 1.4, assets),
-                    TextColor(Color::srgba_u8(180, 180, 180, 200)),
-                ));
-            });
+                },))
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text("Click outside the panel to go back", "medium", 1.4, assets),
+                        TextColor(Color::srgba_u8(180, 180, 180, 200)),
+                    ));
+                });
         });
 }
 
@@ -262,90 +261,98 @@ pub fn build_craft_content_inner(
             ));
 
             // Right: Resources Display (Mana + Gold + AP)
-            parent.spawn(Node {
-                position_type: PositionType::Absolute,
-                right: Val::Px(30.),
-                flex_direction: FlexDirection::Row,
-                align_items: AlignItems::Center,
-                column_gap: Val::Px(15.),
-                ..default()
-            }).with_children(|parent| {
-                // Mana icon + text (Only total mana, no cost/total)
-                parent.spawn(Node {
+            parent
+                .spawn(Node {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(30.),
                     flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(6.),
                     align_items: AlignItems::Center,
+                    column_gap: Val::Px(15.),
                     ..default()
-                }).with_children(|parent| {
-                    parent.spawn((
-                        Node {
-                            width: Val::Vw(2.4),
-                            height: Val::Vw(2.4),
+                })
+                .with_children(|parent| {
+                    // Mana icon + text (Only total mana, no cost/total)
+                    parent
+                        .spawn(Node {
+                            flex_direction: FlexDirection::Row,
+                            column_gap: Val::Px(6.),
+                            align_items: AlignItems::Center,
                             ..default()
-                        },
-                        ImageNode::new(assets.image("mana"))
-                            .with_mode(NodeImageMode::Stretch),
-                    ));
-                    parent.spawn((
-                        add_text(player.mana().to_string(), "bold", 2.4, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
-                });
+                        })
+                        .with_children(|parent| {
+                            parent.spawn((
+                                Node {
+                                    width: Val::Vw(2.4),
+                                    height: Val::Vw(2.4),
+                                    ..default()
+                                },
+                                ImageNode::new(assets.image("mana"))
+                                    .with_mode(NodeImageMode::Stretch),
+                            ));
+                            parent.spawn((
+                                add_text(player.mana().to_string(), "bold", 2.4, assets),
+                                TextColor(BUTTON_TEXT_COLOR),
+                            ));
+                        });
 
-                // Gold icon + text
-                parent.spawn((
-                    Node {
-                        flex_direction: FlexDirection::Row,
-                        align_items: AlignItems::Center,
-                        column_gap: Val::Px(6.),
-                        ..default()
-                    },
-                    Interaction::default(),
-                    Pickable::default(),
-                    InfoTooltip::Gold,
-                )).with_children(|parent| {
-                    parent.spawn((
-                        Node {
-                            width: Val::Vw(2.4),
-                            height: Val::Vw(2.4),
-                            ..default()
-                        },
-                        ImageNode::new(assets.image("gold"))
-                            .with_mode(NodeImageMode::Stretch),
-                    ));
-                    parent.spawn((
-                        add_text(player.gold.to_string(), "bold", 2.4, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
-                });
+                    // Gold icon + text
+                    parent
+                        .spawn((
+                            Node {
+                                flex_direction: FlexDirection::Row,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(6.),
+                                ..default()
+                            },
+                            Interaction::default(),
+                            Pickable::default(),
+                            InfoTooltip::Gold,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                Node {
+                                    width: Val::Vw(2.4),
+                                    height: Val::Vw(2.4),
+                                    ..default()
+                                },
+                                ImageNode::new(assets.image("gold"))
+                                    .with_mode(NodeImageMode::Stretch),
+                            ));
+                            parent.spawn((
+                                add_text(player.gold.to_string(), "bold", 2.4, assets),
+                                TextColor(BUTTON_TEXT_COLOR),
+                            ));
+                        });
 
-                // AP icon + text
-                parent.spawn((
-                    Node {
-                        flex_direction: FlexDirection::Row,
-                        align_items: AlignItems::Center,
-                        column_gap: Val::Px(6.),
-                        ..default()
-                    },
-                    Interaction::default(),
-                    Pickable::default(),
-                    InfoTooltip::ActionPoints,
-                )).with_children(|parent| {
-                    parent.spawn((
-                        Node {
-                            width: Val::Vw(2.4),
-                            height: Val::Vw(2.4),
-                            ..default()
-                        },
-                        ImageNode::new(assets.image("ap"))
-                            .with_mode(NodeImageMode::Stretch),
-                    ));
-                    parent.spawn((
-                        add_text(player.ap.to_string(), "bold", 2.4, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
+                    // AP icon + text
+                    parent
+                        .spawn((
+                            Node {
+                                flex_direction: FlexDirection::Row,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(6.),
+                                ..default()
+                            },
+                            Interaction::default(),
+                            Pickable::default(),
+                            InfoTooltip::ActionPoints,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                Node {
+                                    width: Val::Vw(2.4),
+                                    height: Val::Vw(2.4),
+                                    ..default()
+                                },
+                                ImageNode::new(assets.image("ap"))
+                                    .with_mode(NodeImageMode::Stretch),
+                            ));
+                            parent.spawn((
+                                add_text(player.ap.to_string(), "bold", 2.4, assets),
+                                TextColor(BUTTON_TEXT_COLOR),
+                            ));
+                        });
                 });
-            });
         });
 
     // 2. Main Three-Column Layout
@@ -376,19 +383,20 @@ pub fn build_craft_content_inner(
                 BorderColor::all(BUTTON_BORDER_COLOR),
             ));
             col1_cmd.with_children(|parent| {
-                parent.spawn(Node {
-                    width: Val::Percent(100.),
-                    padding: UiRect::all(Val::Px(8.)),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                })
-                .insert(BackgroundColor(Color::srgba_u8(20, 20, 35, 255)))
-                .with_children(|parent| {
-                    parent.spawn((
-                        add_text("OWNED ARTIFACTS", "bold", 1.8, assets),
-                        TextColor(Color::srgb(0.9, 0.9, 1.0)),
-                    ));
-                });
+                parent
+                    .spawn(Node {
+                        width: Val::Percent(100.),
+                        padding: UiRect::all(Val::Px(8.)),
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    })
+                    .insert(BackgroundColor(Color::srgba_u8(20, 20, 35, 255)))
+                    .with_children(|parent| {
+                        parent.spawn((
+                            add_text("OWNED ARTIFACTS", "bold", 1.8, assets),
+                            TextColor(Color::srgb(0.9, 0.9, 1.0)),
+                        ));
+                    });
 
                 let mut container_cmd = parent.spawn((
                     Node {
@@ -415,10 +423,8 @@ pub fn build_craft_content_inner(
                 container_cmd.with_children(|parent| {
                     let mut player_arts = Vec::new();
                     for key in &player.inventory {
-                        if let Some(eq) = get_equipment(key) {
-                            if let Equipment::Artifact(_) = eq {
-                                player_arts.push(key.clone());
-                            }
+                        if let Some(Equipment::Artifact(_)) = get_equipment(key) {
+                            player_arts.push(key.clone());
                         }
                     }
                     for sel in &selection.selected {
@@ -457,139 +463,169 @@ pub fn build_craft_content_inner(
                                 key.clone()
                             };
 
-                            parent.spawn((
-                                Node {
-                                    width: Val::Percent(100.),
-                                    flex_direction: FlexDirection::Row,
-                                    align_items: AlignItems::Center,
-                                    column_gap: Val::Px(8.),
-                                    padding: UiRect::all(Val::Px(6.)),
-                                    border: UiRect::all(Val::Px(1.)),
-                                    border_radius: BorderRadius::all(Val::Px(4.)),
-                                    position_type: PositionType::Relative,
-                                    ..default()
-                                },
-                                BackgroundColor(BAR_BG_COLOR),
-                                BorderColor::all(BUTTON_BORDER_COLOR),
-                                Button,
-                                Interaction::default(),
-                                Pickable::default(),
-                                LeftArtifactBtn { name: key.clone() },
-                            ))
-                            .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                            .observe(recolor::<Out>(BAR_BG_COLOR))
-                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                            .observe(cursor::<Out>(SystemCursorIcon::Default))
-                            .observe(handle_left_artifact_click)
-                            .with_children(|parent| {
-                                parent.spawn((
+                            parent
+                                .spawn((
                                     Node {
-                                        width: Val::Px(35.),
-                                        height: Val::Px(35.),
-                                        border_radius: BorderRadius::all(Val::Px(3.)),
-                                        ..default()
-                                    },
-                                    ImageNode::new(assets.image(format!("build_{}", art_eq.name()))),
-                                ));
-
-                                parent.spawn(Node {
-                                    flex_direction: FlexDirection::Column,
-                                    row_gap: Val::Px(2.),
-                                    ..default()
-                                })
-                                .with_children(|parent| {
-                                    parent.spawn((
-                                        add_text(label, "bold", 1.6, assets),
-                                        TextColor(Color::WHITE),
-                                    ));
-
-                                    parent.spawn(Node {
+                                        width: Val::Percent(100.),
                                         flex_direction: FlexDirection::Row,
                                         align_items: AlignItems::Center,
-                                        column_gap: Val::Px(6.),
+                                        column_gap: Val::Px(8.),
+                                        padding: UiRect::all(Val::Px(6.)),
+                                        border: UiRect::all(Val::Px(1.)),
+                                        border_radius: BorderRadius::all(Val::Px(4.)),
+                                        position_type: PositionType::Relative,
                                         ..default()
-                                    }).with_children(|parent| {
-                                        // Kind icon
-                                        parent.spawn((
-                                            Node {
-                                                width: Val::Px(16.),
-                                                height: Val::Px(16.),
-                                                ..default()
-                                            },
-                                            ImageNode::new(assets.image(k.to_string().to_lowercase()))
-                                                .with_mode(NodeImageMode::Stretch),
-                                        ));
-                                        // Kind name
-                                        parent.spawn((
-                                            add_text(k.to_string(), "medium", 1.3, assets),
-                                            TextColor(Color::srgba(0.8, 0.8, 0.8, 1.0)),
-                                        ));
-                                    });
-                                });
-
-                                // Gold icon + price in the top-right corner
-                                parent.spawn(Node {
-                                    position_type: PositionType::Absolute,
-                                    right: Val::Px(6.),
-                                    top: Val::Px(6.),
-                                    flex_direction: FlexDirection::Row,
-                                    align_items: AlignItems::Center,
-                                    column_gap: Val::Px(4.),
-                                    ..default()
-                                }).with_children(|parent| {
+                                    },
+                                    BackgroundColor(BAR_BG_COLOR),
+                                    BorderColor::all(BUTTON_BORDER_COLOR),
+                                    Button,
+                                    Interaction::default(),
+                                    Pickable::default(),
+                                    LeftArtifactBtn {
+                                        name: key.clone(),
+                                    },
+                                ))
+                                .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                                .observe(recolor::<Out>(BAR_BG_COLOR))
+                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                .observe(handle_left_artifact_click)
+                                .with_children(|parent| {
                                     parent.spawn((
                                         Node {
-                                            width: Val::Px(16.),
-                                            height: Val::Px(16.),
+                                            width: Val::Px(35.),
+                                            height: Val::Px(35.),
+                                            border_radius: BorderRadius::all(Val::Px(3.)),
                                             ..default()
                                         },
-                                        ImageNode::new(assets.image("gold")),
+                                        ImageNode::new(
+                                            assets.image(format!("build_{}", art_eq.name())),
+                                        ),
                                     ));
-                                    parent.spawn((
-                                        add_text(art.price.to_string(), "medium", 1.3, assets),
-                                        TextColor(Color::srgb(1.0, 0.84, 0.0)),
-                                    ));
+
+                                    parent
+                                        .spawn(Node {
+                                            flex_direction: FlexDirection::Column,
+                                            row_gap: Val::Px(2.),
+                                            ..default()
+                                        })
+                                        .with_children(|parent| {
+                                            parent.spawn((
+                                                add_text(label, "bold", 1.6, assets),
+                                                TextColor(Color::WHITE),
+                                            ));
+
+                                            parent
+                                                .spawn(Node {
+                                                    flex_direction: FlexDirection::Row,
+                                                    align_items: AlignItems::Center,
+                                                    column_gap: Val::Px(6.),
+                                                    ..default()
+                                                })
+                                                .with_children(|parent| {
+                                                    // Kind icon
+                                                    parent.spawn((
+                                                        Node {
+                                                            width: Val::Px(16.),
+                                                            height: Val::Px(16.),
+                                                            ..default()
+                                                        },
+                                                        ImageNode::new(
+                                                            assets.image(
+                                                                k.to_string().to_lowercase(),
+                                                            ),
+                                                        )
+                                                        .with_mode(NodeImageMode::Stretch),
+                                                    ));
+                                                    // Kind name
+                                                    parent.spawn((
+                                                        add_text(
+                                                            k.to_string(),
+                                                            "medium",
+                                                            1.3,
+                                                            assets,
+                                                        ),
+                                                        TextColor(Color::srgba(0.8, 0.8, 0.8, 1.0)),
+                                                    ));
+                                                });
+                                        });
+
+                                    // Gold icon + price in the top-right corner
+                                    parent
+                                        .spawn(Node {
+                                            position_type: PositionType::Absolute,
+                                            right: Val::Px(6.),
+                                            top: Val::Px(6.),
+                                            flex_direction: FlexDirection::Row,
+                                            align_items: AlignItems::Center,
+                                            column_gap: Val::Px(4.),
+                                            ..default()
+                                        })
+                                        .with_children(|parent| {
+                                            parent.spawn((
+                                                Node {
+                                                    width: Val::Px(16.),
+                                                    height: Val::Px(16.),
+                                                    ..default()
+                                                },
+                                                ImageNode::new(assets.image("gold")),
+                                            ));
+                                            parent.spawn((
+                                                add_text(
+                                                    art.price.to_string(),
+                                                    "medium",
+                                                    1.3,
+                                                    assets,
+                                                ),
+                                                TextColor(Color::srgb(1.0, 0.84, 0.0)),
+                                            ));
+                                        });
                                 });
-                            });
                         }
                     }
                 });
 
                 // Spawn scrollbar for Owned Artifacts
-                parent.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        width: Val::Px(10.),
-                        top: Val::Px(45.),
-                        bottom: Val::Px(5.),
-                        right: Val::Px(3.),
-                        border_radius: BorderRadius::all(Val::Px(5.)),
-                        ..default()
-                    },
-                    BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
-                    Visibility::Hidden,
-                    ScrollbarTrack { container: container_entity },
-                ))
-                .with_children(|parent| {
-                    parent.spawn((
+                parent
+                    .spawn((
                         Node {
                             position_type: PositionType::Absolute,
-                            width: Val::Percent(100.),
-                            height: Val::Px(32.),
-                            top: Val::Px(0.),
+                            width: Val::Px(10.),
+                            top: Val::Px(45.),
+                            bottom: Val::Px(5.),
+                            right: Val::Px(3.),
                             border_radius: BorderRadius::all(Val::Px(5.)),
                             ..default()
                         },
-                        BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
-                        Button,
-                        Interaction::default(),
-                        Pickable::default(),
-                        ScrollbarThumb { container: container_entity },
+                        BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
+                        Visibility::Hidden,
+                        ScrollbarTrack {
+                            container: container_entity,
+                        },
                     ))
-                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                    .observe(cursor::<Out>(SystemCursorIcon::Default))
-                    .observe(on_scrollbar_thumb_drag);
-                });
+                    .with_children(|parent| {
+                        parent
+                            .spawn((
+                                Node {
+                                    position_type: PositionType::Absolute,
+                                    width: Val::Percent(100.),
+                                    height: Val::Px(32.),
+                                    top: Val::Px(0.),
+                                    border_radius: BorderRadius::all(Val::Px(5.)),
+                                    ..default()
+                                },
+                                BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
+                                Button,
+                                Interaction::default(),
+                                Pickable::default(),
+                                ScrollbarThumb {
+                                    container: container_entity,
+                                },
+                            ))
+                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                            .observe(cursor::<Out>(SystemCursorIcon::Default))
+                            .observe(on_scrollbar_thumb_drag);
+                    });
             });
 
             // --- MIDDLE COLUMN: Selected Artifacts & Kind Distribution ---
@@ -615,351 +651,408 @@ pub fn build_craft_content_inner(
                     .map(|a| a.price)
                     .sum();
 
-                parent.spawn(Node {
-                    width: Val::Percent(100.),
-                    padding: UiRect::all(Val::Px(8.)),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    position_type: PositionType::Relative,
-                    ..default()
-                })
-                .insert(BackgroundColor(Color::srgba_u8(20, 20, 35, 255)))
-                .with_children(|parent| {
-                    parent.spawn((
-                        add_text("CRAFTING BENCH", "bold", 1.8, assets),
-                        TextColor(Color::srgb(0.9, 0.9, 1.0)),
-                    ));
-                    // Total gold cost of the bench at the right corner of the title space
-                    parent.spawn(Node {
-                        position_type: PositionType::Absolute,
-                        right: Val::Px(10.),
-                        flex_direction: FlexDirection::Row,
+                parent
+                    .spawn(Node {
+                        width: Val::Percent(100.),
+                        padding: UiRect::all(Val::Px(8.)),
+                        justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
-                        column_gap: Val::Px(6.),
+                        position_type: PositionType::Relative,
                         ..default()
-                    }).with_children(|parent| {
+                    })
+                    .insert(BackgroundColor(Color::srgba_u8(20, 20, 35, 255)))
+                    .with_children(|parent| {
                         parent.spawn((
-                            Node {
-                                width: Val::Px(20.),
-                                height: Val::Px(20.),
+                            add_text("CRAFTING BENCH", "bold", 1.8, assets),
+                            TextColor(Color::srgb(0.9, 0.9, 1.0)),
+                        ));
+                        // Total gold cost of the bench at the right corner of the title space
+                        parent
+                            .spawn(Node {
+                                position_type: PositionType::Absolute,
+                                right: Val::Px(10.),
+                                flex_direction: FlexDirection::Row,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(6.),
                                 ..default()
-                            },
-                            ImageNode::new(assets.image("gold")),
-                        ));
-                        parent.spawn((
-                            add_text(total_selected_price.to_string(), "bold", 1.8, assets),
-                            TextColor(Color::srgb(1.0, 0.84, 0.0)),
-                        ));
+                            })
+                            .with_children(|parent| {
+                                parent.spawn((
+                                    Node {
+                                        width: Val::Px(20.),
+                                        height: Val::Px(20.),
+                                        ..default()
+                                    },
+                                    ImageNode::new(assets.image("gold")),
+                                ));
+                                parent.spawn((
+                                    add_text(total_selected_price.to_string(), "bold", 1.8, assets),
+                                    TextColor(Color::srgb(1.0, 0.84, 0.0)),
+                                ));
+                            });
                     });
-                });
 
-                parent.spawn((
-                    Node {
+                parent
+                    .spawn((Node {
                         width: Val::Percent(100.),
                         height: Val::Percent(45.),
                         min_height: Val::Px(0.),
                         position_type: PositionType::Relative,
                         overflow: Overflow::clip(),
                         ..default()
-                    },
-                )).with_children(|parent| {
-                let mut container_cmd = parent.spawn((
-                    Node {
-                        width: Val::Percent(100.),
-                        height: Val::Percent(100.),
-                        flex_direction: FlexDirection::Column,
-                        padding: UiRect {
-                            left: Val::Px(10.),
-                            right: Val::Px(20.),
-                            top: Val::Px(10.),
-                            bottom: Val::Px(10.),
-                        },
-                        row_gap: Val::Px(6.),
-                        overflow: Overflow::scroll_y(),
-                        ..default()
-                    },
-                    ScrollableContainer,
-                    ScrollPosition(Vec2::new(0., bench_scroll)),
-                    BenchScrollMarker,
-                    Interaction::default(),
-                ));
-                let container_entity = container_cmd.id();
-                container_cmd.with_children(|parent| {
-                    let mut mid_map = HashMap::new();
-                    for key in &selection.selected {
-                        *mid_map.entry(key.clone()).or_insert(0) += 1;
-                    }
+                    },))
+                    .with_children(|parent| {
+                        let mut container_cmd = parent.spawn((
+                            Node {
+                                width: Val::Percent(100.),
+                                height: Val::Percent(100.),
+                                flex_direction: FlexDirection::Column,
+                                padding: UiRect {
+                                    left: Val::Px(10.),
+                                    right: Val::Px(20.),
+                                    top: Val::Px(10.),
+                                    bottom: Val::Px(10.),
+                                },
+                                row_gap: Val::Px(6.),
+                                overflow: Overflow::scroll_y(),
+                                ..default()
+                            },
+                            ScrollableContainer,
+                            ScrollPosition(Vec2::new(0., bench_scroll)),
+                            BenchScrollMarker,
+                            Interaction::default(),
+                        ));
+                        let container_entity = container_cmd.id();
+                        container_cmd.with_children(|parent| {
+                            let mut mid_map = HashMap::new();
+                            for key in &selection.selected {
+                                *mid_map.entry(key.clone()).or_insert(0) += 1;
+                            }
 
-                    let mut mid_keys: Vec<String> = mid_map.keys().cloned().collect();
-                    mid_keys.sort_by(|a, b| {
-                        let pa = get_artifact(a).map(|x| x.price).unwrap_or(0);
-                        let pb = get_artifact(b).map(|x| x.price).unwrap_or(0);
-                        pb.cmp(&pa).then(a.cmp(b))
+                            let mut mid_keys: Vec<String> = mid_map.keys().cloned().collect();
+                            mid_keys.sort_by(|a, b| {
+                                let pa = get_artifact(a).map(|x| x.price).unwrap_or(0);
+                                let pb = get_artifact(b).map(|x| x.price).unwrap_or(0);
+                                pb.cmp(&pa).then(a.cmp(b))
+                            });
+
+                            if mid_keys.is_empty() {
+                                parent.spawn((
+                                    add_text(
+                                        "Click owned artifacts to craft",
+                                        "medium",
+                                        1.5,
+                                        assets,
+                                    ),
+                                    TextColor(Color::srgba_u8(150, 150, 150, 200)),
+                                ));
+                            } else {
+                                for key in mid_keys {
+                                    let art_eq = get_equipment(&key).unwrap();
+                                    let count = mid_map.get(&key).unwrap();
+                                    let art = get_artifact(&key).unwrap();
+                                    let k = art.kind;
+
+                                    let label = if *count > 1 {
+                                        format!("{} (x{})", key, count)
+                                    } else {
+                                        key.clone()
+                                    };
+
+                                    parent
+                                        .spawn((
+                                            Node {
+                                                width: Val::Percent(100.),
+                                                flex_direction: FlexDirection::Row,
+                                                align_items: AlignItems::Center,
+                                                column_gap: Val::Px(8.),
+                                                padding: UiRect::all(Val::Px(4.)),
+                                                border: UiRect::all(Val::Px(1.)),
+                                                border_radius: BorderRadius::all(Val::Px(3.)),
+                                                position_type: PositionType::Relative,
+                                                ..default()
+                                            },
+                                            BackgroundColor(Color::srgba_u8(20, 20, 40, 255)),
+                                            BorderColor::all(Color::srgb(0.35, 0.55, 0.85)),
+                                            Button,
+                                            Interaction::default(),
+                                            Pickable::default(),
+                                            MiddleArtifactBtn {
+                                                name: key.clone(),
+                                            },
+                                        ))
+                                        .observe(recolor::<Over>(Color::srgba_u8(35, 45, 75, 255)))
+                                        .observe(recolor::<Out>(Color::srgba_u8(20, 20, 40, 255)))
+                                        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                        .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                        .observe(handle_middle_artifact_click)
+                                        .with_children(|parent| {
+                                            parent.spawn((
+                                                Node {
+                                                    width: Val::Px(28.),
+                                                    height: Val::Px(28.),
+                                                    border_radius: BorderRadius::all(Val::Px(3.)),
+                                                    ..default()
+                                                },
+                                                ImageNode::new(
+                                                    assets
+                                                        .image(format!("build_{}", art_eq.name())),
+                                                ),
+                                            ));
+
+                                            parent
+                                                .spawn(Node {
+                                                    flex_direction: FlexDirection::Column,
+                                                    ..default()
+                                                })
+                                                .with_children(|parent| {
+                                                    parent.spawn((
+                                                        add_text(label, "bold", 1.5, assets),
+                                                        TextColor(Color::WHITE),
+                                                    ));
+                                                    parent
+                                                        .spawn(Node {
+                                                            flex_direction: FlexDirection::Row,
+                                                            align_items: AlignItems::Center,
+                                                            column_gap: Val::Px(6.),
+                                                            ..default()
+                                                        })
+                                                        .with_children(|parent| {
+                                                            // Kind icon
+                                                            parent.spawn((
+                                                                Node {
+                                                                    width: Val::Px(16.),
+                                                                    height: Val::Px(16.),
+                                                                    ..default()
+                                                                },
+                                                                ImageNode::new(assets.image(
+                                                                    k.to_string().to_lowercase(),
+                                                                ))
+                                                                .with_mode(NodeImageMode::Stretch),
+                                                            ));
+                                                            // Kind name
+                                                            parent.spawn((
+                                                                add_text(
+                                                                    k.to_string(),
+                                                                    "medium",
+                                                                    1.3,
+                                                                    assets,
+                                                                ),
+                                                                TextColor(Color::srgba(
+                                                                    0.8, 0.8, 0.8, 1.0,
+                                                                )),
+                                                            ));
+                                                        });
+                                                });
+
+                                            // Gold icon + price in the top-right corner
+                                            parent
+                                                .spawn(Node {
+                                                    position_type: PositionType::Absolute,
+                                                    right: Val::Px(6.),
+                                                    top: Val::Px(4.),
+                                                    flex_direction: FlexDirection::Row,
+                                                    align_items: AlignItems::Center,
+                                                    column_gap: Val::Px(4.),
+                                                    ..default()
+                                                })
+                                                .with_children(|parent| {
+                                                    parent.spawn((
+                                                        Node {
+                                                            width: Val::Px(16.),
+                                                            height: Val::Px(16.),
+                                                            ..default()
+                                                        },
+                                                        ImageNode::new(assets.image("gold")),
+                                                    ));
+                                                    parent.spawn((
+                                                        add_text(
+                                                            art.price.to_string(),
+                                                            "medium",
+                                                            1.3,
+                                                            assets,
+                                                        ),
+                                                        TextColor(Color::srgb(1.0, 0.84, 0.0)),
+                                                    ));
+                                                });
+                                        });
+                                }
+                            }
+                        });
+
+                        // Spawn scrollbar for Bench list
+                        parent
+                            .spawn((
+                                Node {
+                                    position_type: PositionType::Absolute,
+                                    width: Val::Px(10.),
+                                    top: Val::Px(0.),
+                                    bottom: Val::Px(0.),
+                                    right: Val::Px(3.),
+                                    border_radius: BorderRadius::all(Val::Px(5.)),
+                                    ..default()
+                                },
+                                BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
+                                Visibility::Hidden,
+                                ScrollbarTrack {
+                                    container: container_entity,
+                                },
+                            ))
+                            .with_children(|parent| {
+                                parent
+                                    .spawn((
+                                        Node {
+                                            position_type: PositionType::Absolute,
+                                            width: Val::Percent(100.),
+                                            height: Val::Px(32.),
+                                            top: Val::Px(0.),
+                                            border_radius: BorderRadius::all(Val::Px(5.)),
+                                            ..default()
+                                        },
+                                        BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
+                                        Button,
+                                        Interaction::default(),
+                                        Pickable::default(),
+                                        ScrollbarThumb {
+                                            container: container_entity,
+                                        },
+                                    ))
+                                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                    .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                    .observe(on_scrollbar_thumb_drag);
+                            });
                     });
 
-                    if mid_keys.is_empty() {
-                        parent.spawn((
-                            add_text("Click owned artifacts to craft", "medium", 1.5, assets),
-                            TextColor(Color::srgba_u8(150, 150, 150, 200)),
-                        ));
-                    } else {
-                        for key in mid_keys {
-                            let art_eq = get_equipment(&key).unwrap();
-                            let count = mid_map.get(&key).unwrap();
-                            let art = get_artifact(&key).unwrap();
-                            let k = art.kind;
+                parent
+                    .spawn(Node {
+                        width: Val::Percent(100.),
+                        height: Val::Px(1.),
+                        ..default()
+                    })
+                    .insert(BackgroundColor(BUTTON_BORDER_COLOR));
 
-                            let label = if *count > 1 {
-                                format!("{} (x{})", key, count)
+                parent
+                    .spawn(Node {
+                        width: Val::Percent(100.),
+                        flex_grow: 1.0,
+                        flex_direction: FlexDirection::Column,
+                        padding: UiRect::all(Val::Px(10.)),
+                        row_gap: Val::Px(6.),
+                        position_type: PositionType::Relative,
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        let mut total_selected_price = 0;
+                        let mut selected_by_kind = HashMap::new();
+                        for art_name in &selection.selected {
+                            if let Some(art) = get_artifact(art_name) {
+                                let k = art.kind;
+                                let p = art.price;
+                                total_selected_price += p;
+                                *selected_by_kind.entry(k).or_insert(0) += p;
+                            }
+                        }
+
+                        let all_kinds = [
+                            Kind::Physical,
+                            Kind::Fire,
+                            Kind::Ice,
+                            Kind::Nature,
+                            Kind::Holy,
+                            Kind::Shadow,
+                        ];
+
+                        let kind_colors = |k: Kind| match k {
+                            Kind::Physical => Color::srgb(0.7, 0.7, 0.7),
+                            Kind::Fire => Color::srgb(0.9, 0.3, 0.1),
+                            Kind::Ice => Color::srgb(0.3, 0.7, 1.0),
+                            Kind::Nature => Color::srgb(0.2, 0.8, 0.3),
+                            Kind::Holy => Color::srgb(1.0, 0.85, 0.2),
+                            Kind::Shadow => Color::srgb(0.5, 0.2, 0.8),
+                        };
+
+                        for k in all_kinds {
+                            let k_price = selected_by_kind.get(&k).unwrap_or(&0);
+                            let pct = if total_selected_price > 0 {
+                                (*k_price as f32 / total_selected_price as f32) * 100.0
                             } else {
-                                key.clone()
+                                0.0
                             };
 
-                            parent.spawn((
-                                Node {
+                            parent
+                                .spawn(Node {
                                     width: Val::Percent(100.),
                                     flex_direction: FlexDirection::Row,
                                     align_items: AlignItems::Center,
-                                    column_gap: Val::Px(8.),
-                                    padding: UiRect::all(Val::Px(4.)),
-                                    border: UiRect::all(Val::Px(1.)),
-                                    border_radius: BorderRadius::all(Val::Px(3.)),
-                                    position_type: PositionType::Relative,
-                                    ..default()
-                                },
-                                BackgroundColor(Color::srgba_u8(20, 20, 40, 255)),
-                                BorderColor::all(Color::srgb(0.35, 0.55, 0.85)),
-                                Button,
-                                Interaction::default(),
-                                Pickable::default(),
-                                MiddleArtifactBtn { name: key.clone() },
-                            ))
-                            .observe(recolor::<Over>(Color::srgba_u8(35, 45, 75, 255)))
-                            .observe(recolor::<Out>(Color::srgba_u8(20, 20, 40, 255)))
-                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                            .observe(cursor::<Out>(SystemCursorIcon::Default))
-                            .observe(handle_middle_artifact_click)
-                            .with_children(|parent| {
-                                parent.spawn((
-                                    Node {
-                                        width: Val::Px(28.),
-                                        height: Val::Px(28.),
-                                        border_radius: BorderRadius::all(Val::Px(3.)),
-                                        ..default()
-                                    },
-                                    ImageNode::new(assets.image(format!("build_{}", art_eq.name()))),
-                                ));
-
-                                parent.spawn(Node {
-                                    flex_direction: FlexDirection::Column,
-                                    ..default()
-                                }).with_children(|parent| {
-                                    parent.spawn((
-                                        add_text(label, "bold", 1.5, assets),
-                                        TextColor(Color::WHITE),
-                                    ));
-                                    parent.spawn(Node {
-                                        flex_direction: FlexDirection::Row,
-                                        align_items: AlignItems::Center,
-                                        column_gap: Val::Px(6.),
-                                        ..default()
-                                    }).with_children(|parent| {
-                                        // Kind icon
-                                        parent.spawn((
-                                            Node {
-                                                width: Val::Px(16.),
-                                                height: Val::Px(16.),
-                                                ..default()
-                                            },
-                                            ImageNode::new(assets.image(k.to_string().to_lowercase()))
-                                                .with_mode(NodeImageMode::Stretch),
-                                        ));
-                                        // Kind name
-                                        parent.spawn((
-                                            add_text(k.to_string(), "medium", 1.3, assets),
-                                            TextColor(Color::srgba(0.8, 0.8, 0.8, 1.0)),
-                                        ));
-                                    });
-                                });
-
-                                // Gold icon + price in the top-right corner
-                                parent.spawn(Node {
-                                    position_type: PositionType::Absolute,
-                                    right: Val::Px(6.),
-                                    top: Val::Px(4.),
-                                    flex_direction: FlexDirection::Row,
-                                    align_items: AlignItems::Center,
-                                    column_gap: Val::Px(4.),
-                                    ..default()
-                                }).with_children(|parent| {
-                                    parent.spawn((
-                                        Node {
-                                            width: Val::Px(16.),
-                                            height: Val::Px(16.),
-                                            ..default()
-                                        },
-                                        ImageNode::new(assets.image("gold")),
-                                    ));
-                                    parent.spawn((
-                                        add_text(art.price.to_string(), "medium", 1.3, assets),
-                                        TextColor(Color::srgb(1.0, 0.84, 0.0)),
-                                    ));
-                                });
-                            });
-                        }
-                    }
-                });
-
-                // Spawn scrollbar for Bench list
-                parent.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        width: Val::Px(10.),
-                        top: Val::Px(0.),
-                        bottom: Val::Px(0.),
-                        right: Val::Px(3.),
-                        border_radius: BorderRadius::all(Val::Px(5.)),
-                        ..default()
-                    },
-                    BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
-                    Visibility::Hidden,
-                    ScrollbarTrack { container: container_entity },
-                ))
-                .with_children(|parent| {
-                    parent.spawn((
-                        Node {
-                            position_type: PositionType::Absolute,
-                            width: Val::Percent(100.),
-                            height: Val::Px(32.),
-                            top: Val::Px(0.),
-                            border_radius: BorderRadius::all(Val::Px(5.)),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
-                        Button,
-                        Interaction::default(),
-                        Pickable::default(),
-                        ScrollbarThumb { container: container_entity },
-                    ))
-                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                    .observe(cursor::<Out>(SystemCursorIcon::Default))
-                    .observe(on_scrollbar_thumb_drag);
-                });
-                });
-
-                parent.spawn(Node {
-                    width: Val::Percent(100.),
-                    height: Val::Px(1.),
-                    ..default()
-                })
-                .insert(BackgroundColor(BUTTON_BORDER_COLOR));
-
-                parent.spawn(Node {
-                    width: Val::Percent(100.),
-                    flex_grow: 1.0,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(10.)),
-                    row_gap: Val::Px(6.),
-                    position_type: PositionType::Relative,
-                    ..default()
-                })
-                .with_children(|parent| {
-                    let mut total_selected_price = 0;
-                    let mut selected_by_kind = HashMap::new();
-                    for art_name in &selection.selected {
-                        if let Some(art) = get_artifact(art_name) {
-                            let k = art.kind;
-                            let p = art.price;
-                            total_selected_price += p;
-                            *selected_by_kind.entry(k).or_insert(0) += p;
-                        }
-                    }
-
-                    let all_kinds = [
-                        Kind::Physical,
-                        Kind::Fire,
-                        Kind::Ice,
-                        Kind::Nature,
-                        Kind::Holy,
-                        Kind::Shadow,
-                    ];
-
-                    let kind_colors = |k: Kind| match k {
-                        Kind::Physical => Color::srgb(0.7, 0.7, 0.7),
-                        Kind::Fire => Color::srgb(0.9, 0.3, 0.1),
-                        Kind::Ice => Color::srgb(0.3, 0.7, 1.0),
-                        Kind::Nature => Color::srgb(0.2, 0.8, 0.3),
-                        Kind::Holy => Color::srgb(1.0, 0.85, 0.2),
-                        Kind::Shadow => Color::srgb(0.5, 0.2, 0.8),
-                    };
-
-                    for k in all_kinds {
-                        let k_price = selected_by_kind.get(&k).unwrap_or(&0);
-                        let pct = if total_selected_price > 0 {
-                            (*k_price as f32 / total_selected_price as f32) * 100.0
-                        } else {
-                            0.0
-                        };
-
-                        parent.spawn(Node {
-                            width: Val::Percent(100.),
-                            flex_direction: FlexDirection::Row,
-                            align_items: AlignItems::Center,
-                            justify_content: JustifyContent::SpaceBetween,
-                            ..default()
-                        }).with_children(|parent| {
-                            parent.spawn(Node {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                column_gap: Val::Px(6.),
-                                width: Val::Percent(40.),
-                                ..default()
-                            }).with_children(|parent| {
-                                parent.spawn((
-                                    Node {
-                                        width: Val::Px(24.),
-                                        height: Val::Px(24.),
-                                        ..default()
-                                    },
-                                    ImageNode::new(assets.image(k.to_string().to_lowercase()))
-                                        .with_mode(NodeImageMode::Stretch),
-                                ));
-                                parent.spawn((
-                                    add_text(k.to_string(), "bold", 1.6, assets),
-                                    TextColor(Color::WHITE),
-                                ));
-                            });
-
-                            parent.spawn(Node {
-                                width: Val::Percent(45.),
-                                height: Val::Px(16.),
-                                border_radius: BorderRadius::all(Val::Px(4.)),
-                                overflow: Overflow::clip(),
-                                ..default()
-                            })
-                            .insert(BackgroundColor(Color::srgba_u8(30, 30, 40, 255)))
-                            .with_children(|parent| {
-                                parent.spawn(Node {
-                                    width: Val::Percent(pct),
-                                    height: Val::Percent(100.),
+                                    justify_content: JustifyContent::SpaceBetween,
                                     ..default()
                                 })
-                                .insert(BackgroundColor(kind_colors(k)));
-                            });
+                                .with_children(|parent| {
+                                    parent
+                                        .spawn(Node {
+                                            flex_direction: FlexDirection::Row,
+                                            align_items: AlignItems::Center,
+                                            column_gap: Val::Px(6.),
+                                            width: Val::Percent(40.),
+                                            ..default()
+                                        })
+                                        .with_children(|parent| {
+                                            parent.spawn((
+                                                Node {
+                                                    width: Val::Px(24.),
+                                                    height: Val::Px(24.),
+                                                    ..default()
+                                                },
+                                                ImageNode::new(
+                                                    assets.image(k.to_string().to_lowercase()),
+                                                )
+                                                .with_mode(NodeImageMode::Stretch),
+                                            ));
+                                            parent.spawn((
+                                                add_text(k.to_string(), "bold", 1.6, assets),
+                                                TextColor(Color::WHITE),
+                                            ));
+                                        });
 
-                            parent.spawn(Node {
-                                width: Val::Percent(15.),
-                                justify_content: JustifyContent::FlexEnd,
-                                ..default()
-                                }).with_children(|parent| {
-                                parent.spawn((
-                                    add_text(format!("{:.0}%", pct), "medium", 1.5, assets),
-                                    TextColor(Color::WHITE),
-                                ));
-                            });
-                        });
-                    }
-                });
+                                    parent
+                                        .spawn(Node {
+                                            width: Val::Percent(45.),
+                                            height: Val::Px(16.),
+                                            border_radius: BorderRadius::all(Val::Px(4.)),
+                                            overflow: Overflow::clip(),
+                                            ..default()
+                                        })
+                                        .insert(BackgroundColor(Color::srgba_u8(30, 30, 40, 255)))
+                                        .with_children(|parent| {
+                                            parent
+                                                .spawn(Node {
+                                                    width: Val::Percent(pct),
+                                                    height: Val::Percent(100.),
+                                                    ..default()
+                                                })
+                                                .insert(BackgroundColor(kind_colors(k)));
+                                        });
+
+                                    parent
+                                        .spawn(Node {
+                                            width: Val::Percent(15.),
+                                            justify_content: JustifyContent::FlexEnd,
+                                            ..default()
+                                        })
+                                        .with_children(|parent| {
+                                            parent.spawn((
+                                                add_text(
+                                                    format!("{:.0}%", pct),
+                                                    "medium",
+                                                    1.5,
+                                                    assets,
+                                                ),
+                                                TextColor(Color::WHITE),
+                                            ));
+                                        });
+                                });
+                        }
+                    });
             });
 
             // --- RIGHT COLUMN: Possible Craftable Items ---
@@ -978,19 +1071,20 @@ pub fn build_craft_content_inner(
                 BorderColor::all(BUTTON_BORDER_COLOR),
             ));
             col3_cmd.with_children(|parent| {
-                parent.spawn(Node {
-                    width: Val::Percent(100.),
-                    padding: UiRect::all(Val::Px(8.)),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                })
-                .insert(BackgroundColor(Color::srgba_u8(20, 20, 35, 255)))
-                .with_children(|parent| {
-                    parent.spawn((
-                        add_text("POSSIBLE RECIPES", "bold", 1.8, assets),
-                        TextColor(Color::srgb(0.9, 0.9, 1.0)),
-                    ));
-                });
+                parent
+                    .spawn(Node {
+                        width: Val::Percent(100.),
+                        padding: UiRect::all(Val::Px(8.)),
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    })
+                    .insert(BackgroundColor(Color::srgba_u8(20, 20, 35, 255)))
+                    .with_children(|parent| {
+                        parent.spawn((
+                            add_text("POSSIBLE RECIPES", "bold", 1.8, assets),
+                            TextColor(Color::srgb(0.9, 0.9, 1.0)),
+                        ));
+                    });
 
                 let mut container_cmd = parent.spawn((
                     Node {
@@ -1030,7 +1124,8 @@ pub fn build_craft_content_inner(
 
                     let wisdom_mod = player.wisdom_mod();
                     let percentage = (100.0 - wisdom_mod as f32).max(1.0);
-                    let max_allowed_gold_cost = (total_selected_price as f32 * percentage / 100.0) as u32;
+                    let max_allowed_gold_cost =
+                        (total_selected_price as f32 * percentage / 100.0) as u32;
 
                     let selected_set: HashSet<String> =
                         item_selection.items.iter().cloned().collect();
@@ -1039,12 +1134,15 @@ pub fn build_craft_content_inner(
                     for item in all_equipment() {
                         if selected_set.contains(item.name()) {
                             let base_gold_cost = (item.price() as f32 * 0.15) as u32;
-                            let gold_cost = (base_gold_cost as f32 * (1.0 - 0.01 * wisdom_mod as f32)).max(1.0) as u32;
+                            let gold_cost = (base_gold_cost as f32
+                                * (1.0 - 0.01 * wisdom_mod as f32))
+                                .max(1.0) as u32;
                             combined_gold_cost += gold_cost;
                         }
                     }
 
-                    let remaining_gold_cost = max_allowed_gold_cost.saturating_sub(combined_gold_cost);
+                    let remaining_gold_cost =
+                        max_allowed_gold_cost.saturating_sub(combined_gold_cost);
 
                     let mut possible_items = Vec::new();
 
@@ -1052,11 +1150,12 @@ pub fn build_craft_content_inner(
                         if matches!(item, Equipment::Artifact(_)) {
                             continue;
                         }
-                        if item.level() > player.level as u32 {
+                        if item.level() > player.level() {
                             continue;
                         }
 
-                        let required_total_price = (item.price() as f32 * percentage / 100.0) as u32;
+                        let required_total_price =
+                            (item.price() as f32 * percentage / 100.0) as u32;
 
                         let item_kind = item.kind();
                         let satisfies_total = total_selected_price >= required_total_price;
@@ -1067,11 +1166,18 @@ pub fn build_craft_content_inner(
                         if satisfies_total && satisfies_kind {
                             let mana_cost = (item.price() / 10).max(1);
                             let base_gold_cost = (item.price() as f32 * 0.15) as u32;
-                            let gold_cost = (base_gold_cost as f32 * (1.0 - 0.01 * wisdom_mod as f32)).max(1.0) as u32;
+                            let gold_cost = (base_gold_cost as f32
+                                * (1.0 - 0.01 * wisdom_mod as f32))
+                                .max(1.0) as u32;
 
                             let is_selected = selected_set.contains(item.name());
                             if is_selected || gold_cost <= remaining_gold_cost {
-                                possible_items.push((item.clone(), required_total_price, gold_cost, mana_cost));
+                                possible_items.push((
+                                    item.clone(),
+                                    required_total_price,
+                                    gold_cost,
+                                    mana_cost,
+                                ));
                             }
                         }
                     }
@@ -1086,7 +1192,12 @@ pub fn build_craft_content_inner(
 
                     if possible_items.is_empty() {
                         parent.spawn((
-                            add_text("Select more artifacts to unlock recipes", "medium", 1.5, assets),
+                            add_text(
+                                "Select more artifacts to unlock recipes",
+                                "medium",
+                                1.5,
+                                assets,
+                            ),
                             TextColor(Color::srgba_u8(180, 180, 180, 200)),
                         ));
                     } else {
@@ -1109,7 +1220,11 @@ pub fn build_craft_content_inner(
                                     flex_direction: FlexDirection::Row,
                                     align_items: AlignItems::Center,
                                     padding: UiRect::all(Val::Px(8.)),
-                                    border: UiRect::all(Val::Px(if is_selected { 2. } else { 1. })),
+                                    border: UiRect::all(Val::Px(if is_selected {
+                                        2.
+                                    } else {
+                                        1.
+                                    })),
                                     border_radius: BorderRadius::all(Val::Px(4.)),
                                     position_type: PositionType::Relative,
                                     flex_shrink: 0.,
@@ -1121,7 +1236,9 @@ pub fn build_craft_content_inner(
                                 Interaction::default(),
                                 Pickable::default(),
                                 RightColumnTooltip::Equipment(item.name().to_string()),
-                                CraftItemBtn { item_name: item.name().to_string() },
+                                CraftItemBtn {
+                                    item_name: item.name().to_string(),
+                                },
                             ));
                             box_cmd
                                 .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
@@ -1140,87 +1257,97 @@ pub fn build_craft_content_inner(
                                     ImageNode::new(assets.image(format!("build_{}", item.name()))),
                                 ));
 
-                                parent.spawn(Node {
-                                    flex_direction: FlexDirection::Column,
-                                    margin: UiRect::left(Val::Px(8.)),
-                                    ..default()
-                                }).with_children(|parent| {
-                                    let display_name = name_with_level(
-                                        item.name(),
-                                        item.to_lowername().as_str(),
-                                        item.level() as u8,
-                                        localization,
-                                        lang,
-                                    );
-                                    parent.spawn((
-                                        add_text(display_name, "bold", 1.6, assets),
-                                        TextColor(Color::WHITE),
-                                    ));
-                                });
+                                parent
+                                    .spawn(Node {
+                                        flex_direction: FlexDirection::Column,
+                                        margin: UiRect::left(Val::Px(8.)),
+                                        ..default()
+                                    })
+                                    .with_children(|parent| {
+                                        let display_name = name_with_level(
+                                            item.name(),
+                                            item.to_lowername().as_str(),
+                                            item.level() as u8,
+                                            localization,
+                                            lang,
+                                        );
+                                        parent.spawn((
+                                            add_text(display_name, "bold", 1.6, assets),
+                                            TextColor(Color::WHITE),
+                                        ));
+                                    });
 
                                 // Price in the top right with icon (like the normal tab page)
-                                parent.spawn(Node {
-                                    position_type: PositionType::Absolute,
-                                    right: Val::Px(6.),
-                                    top: Val::Px(6.),
-                                    flex_direction: FlexDirection::Row,
-                                    align_items: AlignItems::Center,
-                                    column_gap: Val::Px(4.),
-                                    ..default()
-                                }).with_children(|parent| {
-                                    parent.spawn((
-                                        Node {
-                                            width: Val::Px(16.),
-                                            height: Val::Px(16.),
-                                            ..default()
-                                        },
-                                        ImageNode::new(assets.image("gold")),
-                                    ));
-                                    parent.spawn((
-                                        add_text(item.price().to_string(), "bold", 1.5, assets),
-                                        TextColor(Color::srgb(1.0, 0.84, 0.0)),
-                                    ));
-                                });
+                                parent
+                                    .spawn(Node {
+                                        position_type: PositionType::Absolute,
+                                        right: Val::Px(6.),
+                                        top: Val::Px(6.),
+                                        flex_direction: FlexDirection::Row,
+                                        align_items: AlignItems::Center,
+                                        column_gap: Val::Px(4.),
+                                        ..default()
+                                    })
+                                    .with_children(|parent| {
+                                        parent.spawn((
+                                            Node {
+                                                width: Val::Px(16.),
+                                                height: Val::Px(16.),
+                                                ..default()
+                                            },
+                                            ImageNode::new(assets.image("gold")),
+                                        ));
+                                        parent.spawn((
+                                            add_text(item.price().to_string(), "bold", 1.5, assets),
+                                            TextColor(Color::srgb(1.0, 0.84, 0.0)),
+                                        ));
+                                    });
                             });
                         }
                     }
                 });
 
                 // Spawn scrollbar
-                parent.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        width: Val::Px(10.),
-                        top: Val::Px(45.),
-                        bottom: Val::Px(55.),
-                        right: Val::Px(3.),
-                        border_radius: BorderRadius::all(Val::Px(5.)),
-                        ..default()
-                    },
-                    BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
-                    Visibility::Hidden,
-                    ScrollbarTrack { container: container_entity },
-                ))
-                .with_children(|parent| {
-                    parent.spawn((
+                parent
+                    .spawn((
                         Node {
                             position_type: PositionType::Absolute,
-                            width: Val::Percent(100.),
-                            height: Val::Px(32.),
-                            top: Val::Px(0.),
+                            width: Val::Px(10.),
+                            top: Val::Px(45.),
+                            bottom: Val::Px(55.),
+                            right: Val::Px(3.),
                             border_radius: BorderRadius::all(Val::Px(5.)),
                             ..default()
                         },
-                        BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
-                        Button,
-                        Interaction::default(),
-                        Pickable::default(),
-                        ScrollbarThumb { container: container_entity },
+                        BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
+                        Visibility::Hidden,
+                        ScrollbarTrack {
+                            container: container_entity,
+                        },
                     ))
-                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                    .observe(cursor::<Out>(SystemCursorIcon::Default))
-                    .observe(on_scrollbar_thumb_drag);
-                });
+                    .with_children(|parent| {
+                        parent
+                            .spawn((
+                                Node {
+                                    position_type: PositionType::Absolute,
+                                    width: Val::Percent(100.),
+                                    height: Val::Px(32.),
+                                    top: Val::Px(0.),
+                                    border_radius: BorderRadius::all(Val::Px(5.)),
+                                    ..default()
+                                },
+                                BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
+                                Button,
+                                Interaction::default(),
+                                Pickable::default(),
+                                ScrollbarThumb {
+                                    container: container_entity,
+                                },
+                            ))
+                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                            .observe(cursor::<Out>(SystemCursorIcon::Default))
+                            .observe(on_scrollbar_thumb_drag);
+                    });
 
                 // Footer: craft-all button (bottom-right corner)
                 let total_mana: u32 = item_selection
@@ -1229,9 +1356,12 @@ pub fn build_craft_content_inner(
                     .filter_map(|n| get_equipment(n))
                     .map(|eq| (eq.price() / 10).max(1))
                     .sum();
-                let ap_cost = if item_selection.items.is_empty() { 1 } else { (item_selection.items.len() as u32 + 1) / 2 };
-                let can_craft_all =
-                    !item_selection.items.is_empty() && player.ap >= ap_cost && player.mana() >= total_mana;
+                let ap_cost = if item_selection.items.is_empty() {
+                    1
+                } else {
+                    (item_selection.items.len() as u32).div_ceil(2)
+                };
+                let can_craft_all = !item_selection.items.is_empty() && player.mana() >= total_mana;
 
                 parent
                     .spawn(Node {
@@ -1278,21 +1408,27 @@ pub fn build_craft_content_inner(
                         btn_cmd.with_children(|parent| {
                             // AP icon + cost
                             parent.spawn((
-                                Node { width: Val::Px(18.), height: Val::Px(18.), ..default() },
-                                ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
+                                Node {
+                                    width: Val::Px(18.),
+                                    height: Val::Px(18.),
+                                    ..default()
+                                },
+                                ImageNode::new(assets.image("ap"))
+                                    .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
                                 add_text(ap_cost.to_string(), "bold", 1.4, assets),
-                                TextColor(if player.ap >= ap_cost {
-                                    Color::WHITE
-                                } else {
-                                    Color::srgb(0.85, 0.2, 0.2)
-                                }),
+                                TextColor(Color::WHITE),
                             ));
                             // Mana icon + total cost
                             parent.spawn((
-                                Node { width: Val::Px(18.), height: Val::Px(18.), ..default() },
-                                ImageNode::new(assets.image("mana")).with_mode(NodeImageMode::Stretch),
+                                Node {
+                                    width: Val::Px(18.),
+                                    height: Val::Px(18.),
+                                    ..default()
+                                },
+                                ImageNode::new(assets.image("mana"))
+                                    .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
                                 add_text(total_mana.to_string(), "bold", 1.4, assets),
@@ -1303,7 +1439,10 @@ pub fn build_craft_content_inner(
                                 }),
                             ));
 
-                            parent.spawn(Node { width: Val::Px(4.), ..default() });
+                            parent.spawn(Node {
+                                width: Val::Px(4.),
+                                ..default()
+                            });
 
                             parent.spawn((
                                 add_text("CRAFT", "bold", 1.5, assets),
@@ -1331,7 +1470,7 @@ fn has_empty_slot_for(player: &Player, equipment: &Equipment) -> bool {
             let is_lh_two_hand = player
                 .weapon_lh
                 .as_deref()
-                .and_then(|k| get_equipment(k))
+                .and_then(get_equipment)
                 .map(|eq| match eq {
                     Equipment::Weapon(lh_w) => lh_w.hand == Hand::TwoHand,
                     _ => false,
@@ -1392,7 +1531,7 @@ pub fn handle_craft_item_select(
             // Check if adding this item would exceed the budget!
             if let Some(item) = get_equipment(&btn.item_name) {
                 let wisdom_mod = player.wisdom_mod();
-                
+
                 // Calculate current combined gold cost
                 let mut combined_gold_cost = 0;
                 for sel_name in &item_selection.items {
@@ -1400,10 +1539,10 @@ pub fn handle_craft_item_select(
                         combined_gold_cost += sel_item.price();
                     }
                 }
-                
+
                 // Add the new item's gold cost
                 let new_gold_cost = item.price();
-                
+
                 // Calculate total budget
                 let mut total_selected_price = 0;
                 for art_name in &selection.selected {
@@ -1412,8 +1551,9 @@ pub fn handle_craft_item_select(
                     }
                 }
                 let percentage = (100.0 - wisdom_mod as f32).max(1.0);
-                let max_allowed_gold_cost = (total_selected_price as f32 * percentage / 100.0) as u32;
-                
+                let max_allowed_gold_cost =
+                    (total_selected_price as f32 * percentage / 100.0) as u32;
+
                 if combined_gold_cost + new_gold_cost <= max_allowed_gold_cost {
                     item_selection.items.push(btn.item_name.clone());
                     play_audio_msg.write(PlayAudioMsg::new("click"));
@@ -1434,8 +1574,8 @@ pub fn handle_craft_all_click(
     toast_container_q: Query<Entity, With<ToastContainer>>,
     mut commands: Commands,
     assets: Res<WorldAssets>,
-    mut level_up: ResMut<LevelUpPending>,
-    mut next_game_state: ResMut<NextState<GameState>>,
+    _level_up: ResMut<LevelUpPending>,
+    _next_game_state: ResMut<NextState<GameState>>,
 ) {
     if item_selection.items.is_empty() {
         play_audio_msg.write(PlayAudioMsg::new("error"));
@@ -1471,9 +1611,9 @@ pub fn handle_craft_all_click(
         .map(|eq| (eq.price() / 10).max(1))
         .sum();
 
-    let ap_cost = ((item_selection.items.len() as u32) + 1) / 2;
+    let ap_cost = (item_selection.items.len() as u32).div_ceil(2);
 
-    if player.ap < ap_cost || player.mana() < total_mana {
+    if player.mana() < total_mana {
         play_audio_msg.write(PlayAudioMsg::new("error"));
         return;
     }
@@ -1488,7 +1628,7 @@ pub fn handle_craft_all_click(
         }
     }
     selection.selected.clear();
-    
+
     let crafted: Vec<String> = item_selection.items.clone();
     for item_name in &crafted {
         if let Some(item_eq) = get_equipment(item_name) {
@@ -1520,11 +1660,7 @@ pub fn handle_craft_all_click(
         );
     }
 
-    if player.ap <= ap_cost {
-        trigger_level_up(&mut player, &mut level_up, &mut play_audio_msg, &mut next_game_state);
-    } else {
-        player.ap -= ap_cost;
-    }
+    player.ap += ap_cost;
 
     player.as_mut();
 }

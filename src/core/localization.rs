@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::core::classes::{Ajah, Class};
-use crate::core::pets::PetKind;
+use crate::core::monsters::Monster;
 use crate::core::player::Attribute;
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
@@ -82,8 +82,8 @@ fn map_localization_key(key: &str) -> String {
         "eagle",
         "bat",
         "crocodile",
+        "hell hound",
         "hyena",
-        "infernal can",
         "lizard",
         "pegasus",
         "rat",
@@ -155,7 +155,7 @@ pub struct LocalizedAjahDesc(pub Ajah);
 
 /// Marks a text entity with the pet description so it can be updated on language change.
 #[derive(Component)]
-pub struct LocalizedPetDesc(pub PetKind);
+pub struct LocalizedPetDesc(pub Monster);
 
 pub fn format_race_description(
     race: Race,
@@ -163,14 +163,14 @@ pub fn format_race_description(
     localization: &Localization,
 ) -> String {
     let race_key = race.to_lowername();
-    let desc = localization.get(&format!("race.{}_desc", race_key), language);
+    let desc = localization.get(format!("race.{}_desc", race_key), language);
 
     let mut modifier_strs = Vec::new();
     for attr in Attribute::iter() {
         let val = race.characteristic_mod(attr);
         if val != 0 {
             let attr_name =
-                localization.get(&format!("attribute.{}", attr.to_lowername()), language);
+                localization.get(format!("attribute.{}", attr.to_lowername()), language);
             modifier_strs.push(format!("  {val:+} {attr_name}"));
         }
     }
@@ -187,7 +187,7 @@ pub fn format_class_description(
     language: Language,
     localization: &Localization,
 ) -> String {
-    let desc = localization.get(&format!("class.{}_desc", class.to_lowername()), language);
+    let desc = localization.get(format!("class.{}_desc", class.to_lowername()), language);
 
     let physical_label = localization.get("general.physical", language);
     let magical_label = localization.get("general.magical", language);
@@ -224,7 +224,7 @@ pub fn format_ajah_description(
     language: Language,
     localization: &Localization,
 ) -> String {
-    let desc = localization.get(&format!("ajah.{}_desc", ajah.to_lowername()), language);
+    let desc = localization.get(format!("ajah.{}_desc", ajah.to_lowername()), language);
 
     let ability_label = localization.get("general.ability", language);
     let damage_label = localization.get("general.damage", language);
@@ -235,12 +235,12 @@ pub fn format_ajah_description(
 }
 
 pub fn format_pet_description(
-    pet: PetKind,
+    pet: Monster,
     language: Language,
     localization: &Localization,
 ) -> String {
     let pet_key = pet.to_lowername();
-    localization.get(&format!("pet.{}_desc", pet_key), language)
+    localization.get(format!("pet.{}_desc", pet_key), language)
 }
 
 /// Updates all LocalizedText and LocalizedRaceDesc entities whenever the Settings resource changes.

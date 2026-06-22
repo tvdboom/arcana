@@ -1,16 +1,17 @@
 pub mod actions;
 mod assets;
 mod audio;
-mod catalog;
 mod camera;
+mod catalog;
 pub mod classes;
+mod combat;
 mod constants;
 pub mod game_state;
 pub mod localization;
 mod menu;
+mod monsters;
 #[cfg(not(target_arch = "wasm32"))]
 mod persistence;
-mod pets;
 mod player;
 mod races;
 mod settings;
@@ -19,6 +20,16 @@ mod systems;
 mod ui;
 mod utils;
 
+use crate::core::actions::craft::{setup_craft_ui, update_craft_ui};
+use crate::core::actions::duel::setup_duel_ui;
+use crate::core::actions::hunt::{setup_hunt_ui, update_hunt_ui};
+use crate::core::combat::precombat::*;
+use crate::core::actions::quest::setup_quest_ui;
+use crate::core::actions::rest::{setup_rest_ui, update_rest_ui};
+use crate::core::actions::shop::*;
+use crate::core::actions::study::{setup_study_ui, update_study_ui, StudySliderState};
+use crate::core::actions::train::{setup_train_ui, update_train_ui, TrainSliderState};
+use crate::core::actions::work::{setup_work_ui, update_work_ui, WorkSliderState};
 use crate::core::assets::WorldAssets;
 use crate::core::audio::*;
 use crate::core::camera::*;
@@ -32,27 +43,18 @@ use crate::core::settings::Settings;
 use crate::core::states::{is_panel_state, AppState, GameState};
 use crate::core::systems::*;
 use crate::core::ui::creation::*;
+use crate::core::ui::dropdown::{shop_close_dropdown_on_outside_click, OpenDropdown};
 use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpOverlayCmp};
 use crate::core::ui::modal::{modal_input_system, ActiveModal};
 use crate::core::ui::playing::*;
+use crate::core::ui::scrollbar::{scroll_system, update_scrollbar_system};
 use crate::core::ui::toast::{tick_gold_toasts, GoldToast};
+use crate::core::ui::utils::cleanup_panel_ui;
 use crate::core::utils::{despawn, reset_cursor};
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
 use std::time::Duration;
 use strum::IntoEnumIterator;
-use crate::core::actions::rest::{setup_rest_ui, update_rest_ui};
-use crate::core::actions::hunt::setup_hunt_ui;
-use crate::core::actions::quest::setup_quest_ui;
-use crate::core::actions::duel::setup_duel_ui;
-use crate::core::actions::shop::*;
-use crate::core::actions::study::{setup_study_ui, update_study_ui, StudySliderState};
-use crate::core::actions::train::{setup_train_ui, update_train_ui, TrainSliderState};
-use crate::core::actions::work::{setup_work_ui, update_work_ui, WorkSliderState};
-use crate::core::actions::craft::{setup_craft_ui, update_craft_ui};
-use crate::core::ui::dropdown::{shop_close_dropdown_on_outside_click, OpenDropdown};
-use crate::core::ui::scrollbar::{scroll_system, update_scrollbar_system};
-use crate::core::ui::utils::cleanup_panel_ui;
 
 pub struct GamePlugin;
 
@@ -105,6 +107,7 @@ impl Plugin for GamePlugin {
             .init_resource::<StudySliderState>()
             .init_resource::<TrainSliderState>()
             .init_resource::<crate::core::actions::craft::CraftSeed>()
+            .init_resource::<PrecombatLoadout>()
             .init_resource::<RightTab>();
 
         // Sets
@@ -214,10 +217,7 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::Settings), despawn::<MenuCmp>)
             // Shop Systems
             .add_systems(OnEnter(GameState::Shop), setup_shop_ui)
-            .add_systems(
-                OnExit(GameState::Shop),
-                (cleanup_panel_ui, despawn::<TooltipNode>),
-            )
+            .add_systems(OnExit(GameState::Shop), (cleanup_panel_ui, despawn::<TooltipNode>))
             .add_systems(
                 Update,
                 (
@@ -235,10 +235,7 @@ impl Plugin for GamePlugin {
             )
             // Work Systems
             .add_systems(OnEnter(GameState::Work), setup_work_ui)
-            .add_systems(
-                OnExit(GameState::Work),
-                (cleanup_panel_ui, despawn::<TooltipNode>),
-            )
+            .add_systems(OnExit(GameState::Work), (cleanup_panel_ui, despawn::<TooltipNode>))
             .add_systems(
                 Update,
                 (
@@ -252,10 +249,7 @@ impl Plugin for GamePlugin {
             )
             // Study Systems
             .add_systems(OnEnter(GameState::Study), setup_study_ui)
-            .add_systems(
-                OnExit(GameState::Study),
-                (cleanup_panel_ui, despawn::<TooltipNode>),
-            )
+            .add_systems(OnExit(GameState::Study), (cleanup_panel_ui, despawn::<TooltipNode>))
             .add_systems(
                 Update,
                 (
@@ -269,10 +263,7 @@ impl Plugin for GamePlugin {
             )
             // Rest Systems
             .add_systems(OnEnter(GameState::Rest), setup_rest_ui)
-            .add_systems(
-                OnExit(GameState::Rest),
-                (cleanup_panel_ui, despawn::<TooltipNode>),
-            )
+            .add_systems(OnExit(GameState::Rest), (cleanup_panel_ui, despawn::<TooltipNode>))
             .add_systems(
                 Update,
                 (
@@ -286,10 +277,7 @@ impl Plugin for GamePlugin {
             )
             // Train Systems
             .add_systems(OnEnter(GameState::Train), setup_train_ui)
-            .add_systems(
-                OnExit(GameState::Train),
-                (cleanup_panel_ui, despawn::<TooltipNode>),
-            )
+            .add_systems(OnExit(GameState::Train), (cleanup_panel_ui, despawn::<TooltipNode>))
             .add_systems(
                 Update,
                 (
@@ -303,10 +291,7 @@ impl Plugin for GamePlugin {
             )
             // Craft Systems
             .add_systems(OnEnter(GameState::Craft), setup_craft_ui)
-            .add_systems(
-                OnExit(GameState::Craft),
-                (cleanup_panel_ui, despawn::<TooltipNode>),
-            )
+            .add_systems(OnExit(GameState::Craft), (cleanup_panel_ui, despawn::<TooltipNode>))
             .add_systems(
                 Update,
                 (
@@ -321,22 +306,32 @@ impl Plugin for GamePlugin {
         app
             // Hunt Systems
             .add_systems(OnEnter(GameState::Hunt), setup_hunt_ui)
+            .add_systems(OnExit(GameState::Hunt), (cleanup_panel_ui, despawn::<TooltipNode>))
             .add_systems(
-                OnExit(GameState::Hunt),
-                (cleanup_panel_ui, despawn::<TooltipNode>),
+                Update,
+                (
+                    update_hunt_ui,
+                    tooltip_follow_cursor_system,
+                    tick_gold_toasts,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Hunt)),
+            )
+            // Precombat Systems
+            .add_systems(OnEnter(GameState::Precombat), setup_precombat_ui)
+            .add_systems(OnExit(GameState::Precombat), despawn::<PrecombatCmp>)
+            .add_systems(
+                Update,
+                (update_precombat_ui, tooltip_follow_cursor_system)
+                    .run_if(in_state(GameState::Precombat)),
             )
             // Quest Systems
             .add_systems(OnEnter(GameState::Quest), setup_quest_ui)
-            .add_systems(
-                OnExit(GameState::Quest),
-                (cleanup_panel_ui, despawn::<TooltipNode>),
-            )
+            .add_systems(OnExit(GameState::Quest), (cleanup_panel_ui, despawn::<TooltipNode>))
             // Duel Systems
             .add_systems(OnEnter(GameState::Duel), setup_duel_ui)
-            .add_systems(
-                OnExit(GameState::Duel),
-                (cleanup_panel_ui, despawn::<TooltipNode>),
-            );
+            .add_systems(OnExit(GameState::Duel), (cleanup_panel_ui, despawn::<TooltipNode>));
 
         #[cfg(not(target_arch = "wasm32"))]
         app

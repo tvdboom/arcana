@@ -1,4 +1,3 @@
-use crate::core::actions::trigger_level_up;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::localization::Localization;
@@ -118,7 +117,7 @@ pub fn build_rest_content_inner(
 ) -> Vec<Entity> {
     let mut card_ents = Vec::new();
 
-    let level = player.level as u32;
+    let level = player.level();
     let common_gold = 10 * level;
     let grand_gold = 50 * level;
 
@@ -260,12 +259,10 @@ pub fn build_rest_content_inner(
 
             // Card 3: Grand Accommodation (Costs 3 AP + 50 * level Gold)
             let title3 = localization.get("grand_accommodation", lang);
-            let con_mod = player.constitution_mod().max(0) as u32;
-            let min_bonus = 0;
-            let max_bonus = 100 * level * con_mod;
+            let max_bonus = 10 * (level as i32 + player.constitution_mod()).max(10);
             let desc3 = localization
                 .get("grand_accommodation_desc", lang)
-                .replace("{min_bonus}", &min_bonus.to_string())
+                .replace("{min_bonus}", &0.to_string())
                 .replace("{max_bonus}", &max_bonus.to_string());
             let c3 = spawn_rest_card_ui(
                 parent,
@@ -470,18 +467,18 @@ pub fn handle_rest_card_clicks(
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    mut level_up: ResMut<LevelUpPending>,
+    _level_up: ResMut<LevelUpPending>,
     card_q: Query<&RestCardMarker>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
     localization: Res<Localization>,
     settings: Res<Settings>,
-    mut next_game_state: ResMut<NextState<GameState>>,
+    _next_game_state: ResMut<NextState<GameState>>,
 ) {
     if let Ok(marker) = card_q.get(event.entity) {
         let lang = settings.language;
         let toast = toast_container_q.single().unwrap();
 
-        let level = player.level as u32;
+        let level = player.level();
         let ap_cost = match marker.0 {
             0 => 1,
             1 => 2,
@@ -494,20 +491,6 @@ pub fn handle_rest_card_clicks(
             2 => 50 * level,
             _ => 0,
         };
-
-        if player.ap < ap_cost {
-            play_audio_msg.write(PlayAudioMsg::new("error"));
-            spawn_toast(
-                &mut commands,
-                &assets,
-                localization.get("not_enough_ap", lang),
-                Color::srgba(0.20, 0.05, 0.05, 0.93),
-                Color::srgb(0.85, 0.20, 0.20),
-                Color::srgb(1.0, 0.80, 0.80),
-                toast,
-            );
-            return;
-        }
 
         if player.gold < gold_cost {
             play_audio_msg.write(PlayAudioMsg::new("error"));
@@ -525,12 +508,7 @@ pub fn handle_rest_card_clicks(
 
         // Spend resources
         player.gold -= gold_cost;
-        let triggers_level_up = player.ap <= ap_cost;
-        if triggers_level_up {
-            trigger_level_up(&mut player, &mut level_up, &mut play_audio_msg, &mut next_game_state);
-        } else {
-            player.ap -= ap_cost;
-        }
+        player.ap += ap_cost;
 
         let mut rng = rng();
         let max_hp = player.max_health();
@@ -540,7 +518,7 @@ pub fn handle_rest_card_clicks(
             0 => {
                 // Rough Rest: recovers between 40 and 60 + constitution modifier percent of total health and mana back (also to pet)
                 let pct_roll = rng.random_range(40..=(60 + player.constitution_mod()).max(40));
-                let pct = (pct_roll as f32 / 100.0).max(0.0).min(1.0);
+                let pct = (pct_roll as f32 / 100.0).clamp(0.0, 1.0);
 
                 let health_recovered = (max_hp as f32 * pct) as u32;
                 let mana_recovered = (max_mp as f32 * pct) as u32;
@@ -592,7 +570,8 @@ pub fn handle_rest_card_clicks(
             2 => {
                 // Grand Accommodation: returns full health and mana back and also between
                 // 1-(10 * player level * constitution mod) extra max health and max mana
-                let bonus = 10 * rng.random_range(1..=(level as i32 + player.constitution_mod())) as u32;
+                let bonus =
+                    10 * rng.random_range(1..=(level as i32 + player.constitution_mod())) as u32;
 
                 player.bonus_max_health += bonus;
                 player.bonus_max_mana += bonus;

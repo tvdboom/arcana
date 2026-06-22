@@ -2,10 +2,10 @@ use crate::core::localization::Localization;
 use crate::core::player::Attribute;
 use crate::core::settings::Language;
 use crate::utils::NameFromEnum;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use strum_macros::Display;
 
-#[derive(Debug, Clone, Display, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Display, PartialEq, Serialize, Deserialize)]
 pub enum Effect {
     /// Enrages your pet, boosting its stats.
     BeastFrenzy {

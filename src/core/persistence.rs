@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io;
 use std::io::{Read, Write};
 
+use crate::core::actions::shop::ShopInventory;
 use crate::core::audio::ChangeAudioMsg;
 use crate::core::player::Player;
 use crate::core::settings::Settings;
@@ -12,7 +13,6 @@ use bincode::config::standard;
 use bincode::serde::{decode_from_slice, encode_to_vec};
 use rfd::FileDialog;
 use serde::{Deserialize, Serialize};
-use crate::core::actions::shop::ShopInventory;
 
 #[derive(Serialize, Deserialize)]
 pub struct SaveAll {

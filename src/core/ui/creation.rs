@@ -4,15 +4,15 @@ use strum::IntoEnumIterator;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
+use crate::core::catalog::catalog::{all_abilities, all_perks, all_weapons};
 use crate::core::catalog::equipment::Kind;
 use crate::core::catalog::weapons::Category;
-use crate::core::catalog::catalog::{all_abilities, all_perks, all_weapons};
 use crate::core::classes::{Ajah, Class};
 use crate::core::constants::*;
 use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
-use crate::core::pets::{Pet, PetKind};
+use crate::core::monsters::{Monster, MonsterStats};
 use crate::core::player::{AgeStage, Attribute, Player, Sex};
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
@@ -185,12 +185,11 @@ pub fn handle_name_input(
                 player.name.pop();
                 changed = true;
             },
-            Key::Space => {
-                if player.name.len() < 16 {
+            Key::Space
+                if player.name.len() < 16 => {
                     player.name.push(' ');
                     changed = true;
-                }
-            },
+                },
             _ => {},
         }
     }
@@ -226,12 +225,11 @@ pub fn handle_pet_name_input(
                     pet.name.pop();
                     changed = true;
                 },
-                Key::Space => {
-                    if pet.name.len() < 16 {
+                Key::Space
+                    if pet.name.len() < 16 => {
                         pet.name.push(' ');
                         changed = true;
-                    }
-                },
+                    },
                 _ => {},
             }
         }
@@ -931,7 +929,7 @@ pub fn setup_character_creation(
                                 .with_children(|parent| {
                                     for attr in Attribute::iter() {
                                         let translated_attr_name = localization.get(
-                                            &format!("attribute.{}", attr.to_lowername()),
+                                            format!("attribute.{}", attr.to_lowername()),
                                             lang,
                                         );
                                         let val = creation_attribute_value(&player, attr) as i32;
@@ -1438,7 +1436,7 @@ impl SelectionItem for Ajah {
     }
 }
 
-impl SelectionItem for PetKind {
+impl SelectionItem for Monster {
     type DescComponent = LocalizedPetDesc;
 
     fn get_description(&self, lang: Language, localization: &Localization) -> String {
@@ -1455,12 +1453,12 @@ impl SelectionItem for PetKind {
         } else {
             PET_NAMES.choose(&mut rng()).copied().unwrap().to_string()
         };
-        player.pet = Some(Pet::new(pet_name, *self));
+        player.pet = Some(MonsterStats::new(pet_name, *self));
         next_game_state.set(GameState::Playing);
     }
 
     fn items() -> Vec<Self> {
-        vec![PetKind::Rat, PetKind::Snake, PetKind::Wolf, PetKind::Vulture]
+        vec![Monster::Rat, Monster::Owl, Monster::Wolf, Monster::Weasel]
     }
 }
 
@@ -1742,9 +1740,9 @@ pub fn setup_subclass_selection(
             if player.pet.is_none() {
                 let pet_name =
                     PET_NAMES.choose(&mut rand::rng()).copied().unwrap_or("Ash").to_string();
-                player.pet = Some(Pet::new(pet_name, PetKind::Wolf));
+                player.pet = Some(MonsterStats::new(pet_name, Monster::Wolf));
             }
-            setup_selection_screen::<PetKind>(
+            setup_selection_screen::<Monster>(
                 commands,
                 settings,
                 assets,

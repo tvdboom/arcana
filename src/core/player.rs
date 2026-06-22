@@ -1,10 +1,10 @@
+use crate::core::catalog::catalog::{get_equipment, get_perk};
 use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::modifiers::Modifier;
-use crate::core::catalog::catalog::{get_equipment, get_perk};
 use crate::core::catalog::weapons::Category;
 use crate::core::classes::Class;
 use crate::core::constants::{NAMES, START_CHARACTERISTIC};
-use crate::core::pets::Pet;
+use crate::core::monsters::MonsterStats;
 use crate::core::races::Race;
 use bevy::prelude::*;
 use rand::prelude::IndexedRandom;
@@ -127,7 +127,7 @@ pub struct Player {
     pub class: Class,
     pub stage: AgeStage,
     pub age: u32,
-    pub level: u8,
+    pub xp: u32,
     pub ap: u32,
     pub missing_health: u32,
     pub missing_mana: u32,
@@ -141,7 +141,7 @@ pub struct Player {
     pub charisma: u32,
     pub abilities: Vec<String>,
     pub perks: Vec<String>,
-    pub pet: Option<Pet>,
+    pub pet: Option<MonsterStats>,
     pub helmet: Option<String>,
     pub armor: Option<String>,
     pub gloves: Option<String>,
@@ -164,7 +164,7 @@ impl Default for Player {
             class: Class::default(),
             stage: AgeStage::default(),
             age: 0,
-            level: 1,
+            xp: 10,
             ap: 10,
             missing_health: 0,
             missing_mana: 0,
@@ -195,6 +195,10 @@ impl Default for Player {
 }
 
 impl Player {
+    pub fn level(&self) -> u32 {
+        self.xp / 10
+    }
+
     pub fn health(&self) -> u32 {
         self.max_health().saturating_sub(self.missing_health)
     }

@@ -6,10 +6,10 @@ use crate::core::player::Player;
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
 use crate::core::ui::level_up::LevelUpPending;
+use crate::core::ui::playing::{InfoTooltip, PlayingStat};
 use crate::core::ui::toast::{spawn_toast, ToastContainer};
 use crate::core::ui::utils::*;
 use bevy::prelude::*;
-use crate::core::ui::playing::{InfoTooltip, PlayingStat};
 
 #[derive(Resource, Default, Clone, Copy, PartialEq, Eq)]
 pub struct TrainSliderState(pub u32); // 0 = Offense, 1 = Defense, 2 = Tactical
@@ -189,8 +189,8 @@ pub fn build_train_content_inner(
     let mut card_ents = Vec::new();
 
     let ap_cost = 1;
-    let hp_cost = 10 * player.level as u32;
-    let mp_cost = 10 * player.level as u32;
+    let hp_cost = 10 * player.level();
+    let mp_cost = 10 * player.level();
 
     let skill_key = match slider_val {
         0 => "general.attack",
@@ -280,8 +280,14 @@ pub fn build_train_content_inner(
                     // Item 1: Active Stat
                     let (stat_icon, stat_val, stat_tooltip) = match slider_val {
                         0 => ("attack", player.attack(), InfoTooltip::Combat(PlayingStat::Attack)),
-                        1 => ("defense", player.defense(), InfoTooltip::Combat(PlayingStat::Defense)),
-                        _ => ("initiative", player.initiative(), InfoTooltip::Combat(PlayingStat::Initiative)),
+                        1 => {
+                            ("defense", player.defense(), InfoTooltip::Combat(PlayingStat::Defense))
+                        },
+                        _ => (
+                            "initiative",
+                            player.initiative(),
+                            InfoTooltip::Combat(PlayingStat::Initiative),
+                        ),
                     };
                     parent
                         .spawn((
@@ -302,7 +308,8 @@ pub fn build_train_content_inner(
                                     height: Val::Vw(2.4),
                                     ..default()
                                 },
-                                ImageNode::new(assets.image(stat_icon)).with_mode(NodeImageMode::Stretch),
+                                ImageNode::new(assets.image(stat_icon))
+                                    .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
                                 add_text(stat_val.to_string(), "bold", 2.4, assets),
@@ -330,7 +337,8 @@ pub fn build_train_content_inner(
                                     height: Val::Vw(2.4),
                                     ..default()
                                 },
-                                ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                                ImageNode::new(assets.image("gold"))
+                                    .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
                                 add_text(player.gold.to_string(), "bold", 2.4, assets),
@@ -358,7 +366,8 @@ pub fn build_train_content_inner(
                                     height: Val::Vw(2.4),
                                     ..default()
                                 },
-                                ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
+                                ImageNode::new(assets.image("ap"))
+                                    .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
                                 add_text(player.ap.to_string(), "bold", 2.4, assets),
@@ -525,34 +534,19 @@ pub fn handle_train_card_clicks(
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    mut level_up: ResMut<LevelUpPending>,
+    _level_up: ResMut<LevelUpPending>,
     card_q: Query<&TrainCardMarker>,
     slider_state: Res<TrainSliderState>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
     localization: Res<Localization>,
     settings: Res<Settings>,
-    mut next_game_state: ResMut<NextState<GameState>>,
+    _next_game_state: ResMut<NextState<GameState>>,
 ) {
     if let Ok(marker) = card_q.get(event.entity) {
         let slider_val = slider_state.0;
         let ap_cost = 1;
         let lang = settings.language;
         let toast = toast_container_q.single().unwrap();
-
-        // 1. Check AP
-        if player.ap < ap_cost {
-            play_audio_msg.write(PlayAudioMsg::new("error"));
-            spawn_toast(
-                &mut commands,
-                &assets,
-                localization.get("not_enough_ap", lang),
-                Color::srgba(0.20, 0.05, 0.05, 0.93),
-                Color::srgb(0.85, 0.20, 0.20),
-                Color::srgb(1.0, 0.80, 0.80),
-                toast,
-            );
-            return;
-        }
 
         // Get current bonus
         let current_bonus = match marker.0 {
@@ -594,8 +588,8 @@ pub fn handle_train_card_clicks(
         }
 
         // 3. Check health or mana cost
-        let hp_cost = 10 * player.level as u32;
-        let mp_cost = 10 * player.level as u32;
+        let hp_cost = 10 * player.level();
+        let mp_cost = 10 * player.level();
 
         match marker.0 {
             0 | 1 => {
@@ -634,7 +628,7 @@ pub fn handle_train_card_clicks(
                 let next_mp = player.mana() - mp_cost;
                 player.set_mana(next_mp);
             },
-            _ => {}
+            _ => {},
         }
 
         // 4. Pay gold cost
@@ -646,21 +640,21 @@ pub fn handle_train_card_clicks(
                 0 => player.training.melee.attack += 1,
                 1 => player.training.melee.defense += 1,
                 2 => player.training.melee.initiative += 1,
-                _ => {}
+                _ => {},
             },
             1 => match slider_val {
                 0 => player.training.finesse.attack += 1,
                 1 => player.training.finesse.defense += 1,
                 2 => player.training.finesse.initiative += 1,
-                _ => {}
+                _ => {},
             },
             2 => match slider_val {
                 0 => player.training.range.attack += 1,
                 1 => player.training.range.defense += 1,
                 2 => player.training.range.initiative += 1,
-                _ => {}
+                _ => {},
             },
-            _ => {}
+            _ => {},
         }
 
         // 6. Play sound
@@ -696,17 +690,7 @@ pub fn handle_train_card_clicks(
             toast,
         );
 
-        // 8. AP Cost and Level Up trigger
-        if player.ap <= ap_cost {
-            crate::core::actions::trigger_level_up(
-                &mut player,
-                &mut level_up,
-                &mut play_audio_msg,
-                &mut next_game_state,
-            );
-        } else {
-            player.ap -= ap_cost;
-        }
+        // 8. AP Cost
+        player.ap += ap_cost;
     }
 }
-

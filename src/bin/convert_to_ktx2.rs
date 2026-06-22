@@ -1,3 +1,4 @@
+use indicatif::{ProgressBar, ProgressStyle};
 /// Asset-processing logic: copy assets-src/ → assets/, converting PNG → KTX2.
 /// This file is used in two ways:
 ///   1. As the `convert_to_ktx2` binary  (`cargo run --bin convert_to_ktx2`)
@@ -6,7 +7,6 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::SystemTime;
-use indicatif::{ProgressBar, ProgressStyle};
 
 fn mtime(path: &Path) -> Option<SystemTime> {
     fs::metadata(path).ok().and_then(|m| m.modified().ok())
@@ -79,8 +79,14 @@ fn convert_single(src: &Path, dst: &Path) {
 }
 
 enum AssetTask {
-    Convert { src: PathBuf, dst: PathBuf },
-    Copy { src: PathBuf, dst: PathBuf },
+    Convert {
+        src: PathBuf,
+        dst: PathBuf,
+    },
+    Copy {
+        src: PathBuf,
+        dst: PathBuf,
+    },
 }
 
 fn log_status(msg: &str) {
@@ -105,12 +111,18 @@ pub fn run(src_root: &str, dst_root: &str) {
         if ext == "png" {
             let dst_path = dst_root.join(relative).with_extension("ktx2");
             if needs_update(&src_path, &dst_path) {
-                tasks.push(AssetTask::Convert { src: src_path, dst: dst_path });
+                tasks.push(AssetTask::Convert {
+                    src: src_path,
+                    dst: dst_path,
+                });
             }
         } else {
             let dst_path = dst_root.join(relative);
             if needs_update(&src_path, &dst_path) {
-                tasks.push(AssetTask::Copy { src: src_path, dst: dst_path });
+                tasks.push(AssetTask::Copy {
+                    src: src_path,
+                    dst: dst_path,
+                });
             }
         }
     }
@@ -133,19 +145,24 @@ pub fn run(src_root: &str, dst_root: &str) {
 
     for task in tasks.into_iter() {
         match task {
-            AssetTask::Convert { src, dst } => {
+            AssetTask::Convert {
+                src,
+                dst,
+            } => {
                 let name = src.strip_prefix(src_root).unwrap_or(&src).to_string_lossy();
                 pb.set_message(format!("Converting: {}", name));
                 fs::create_dir_all(dst.parent().unwrap()).unwrap();
                 convert_single(&src, &dst);
-            }
-            AssetTask::Copy { src, dst } => {
+            },
+            AssetTask::Copy {
+                src,
+                dst,
+            } => {
                 let name = src.strip_prefix(src_root).unwrap_or(&src).to_string_lossy();
                 pb.set_message(format!("Copying: {}", name));
                 fs::create_dir_all(dst.parent().unwrap()).unwrap();
-                fs::copy(&src, &dst)
-                    .unwrap_or_else(|e| panic!("copy {:?} -> {:?}: {e}", src, dst));
-            }
+                fs::copy(&src, &dst).unwrap_or_else(|e| panic!("copy {:?} -> {:?}: {e}", src, dst));
+            },
         }
         pb.inc(1);
     }
@@ -166,7 +183,10 @@ pub fn copy_only(src_root: &str, dst_root: &str) {
         }
         let dst_path = dst_root.join(relative);
         if needs_update(&src_path, &dst_path) {
-            tasks.push(AssetTask::Copy { src: src_path, dst: dst_path });
+            tasks.push(AssetTask::Copy {
+                src: src_path,
+                dst: dst_path,
+            });
         }
     }
 
@@ -187,15 +207,15 @@ pub fn copy_only(src_root: &str, dst_root: &str) {
     );
 
     for task in tasks.into_iter() {
-        match task {
-            AssetTask::Copy { src, dst } => {
-                let name = src.strip_prefix(src_root).unwrap_or(&src).to_string_lossy();
-                pb.set_message(format!("Copying: {}", name));
-                fs::create_dir_all(dst.parent().unwrap()).unwrap();
-                fs::copy(&src, &dst)
-                    .unwrap_or_else(|e| panic!("copy {:?} -> {:?}: {e}", src, dst));
-            }
-            _ => {}
+        if let AssetTask::Copy {
+            src,
+            dst,
+        } = task
+        {
+            let name = src.strip_prefix(src_root).unwrap_or(&src).to_string_lossy();
+            pb.set_message(format!("Copying: {}", name));
+            fs::create_dir_all(dst.parent().unwrap()).unwrap();
+            fs::copy(&src, &dst).unwrap_or_else(|e| panic!("copy {:?} -> {:?}: {e}", src, dst));
         }
         pb.inc(1);
     }

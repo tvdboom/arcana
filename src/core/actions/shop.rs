@@ -1,34 +1,33 @@
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
+use crate::core::catalog::catalog::{all_equipment, get_equipment};
 use crate::core::catalog::equipment::{Equipment, Kind};
 use crate::core::catalog::weapons::{Category, Hand};
 use crate::core::catalog::wearables::WearableSlot;
-use crate::core::catalog::catalog::{all_equipment, get_equipment};
 use crate::core::constants::*;
 use crate::core::localization::Localization;
 use crate::core::menu::utils::{add_text, recolor};
 use crate::core::player::Player;
 use crate::core::settings::{Language, Settings};
+use crate::core::ui::dropdown::{
+    spawn_dropdown_category, spawn_dropdown_hand, spawn_dropdown_kind, spawn_dropdown_type,
+    OpenDropdown,
+};
+use crate::core::ui::playing::name_with_level;
+use crate::core::ui::scrollbar::{
+    on_scrollbar_thumb_drag, ScrollableContainer, ScrollbarThumb, ScrollbarTrack,
+};
 use crate::core::ui::toast::{spawn_toast, ToastContainer};
 use crate::core::ui::tooltip::{spawn_item_tooltip, TooltipNode};
 use crate::core::ui::utils::*;
 use crate::core::utils::cursor;
+use crate::utils::NameFromEnum;
 use bevy::picking::pointer::PointerButton;
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use crate::core::ui::playing::name_with_level;
-use crate::utils::NameFromEnum;
-use crate::core::ui::scrollbar::{ScrollableContainer, ScrollbarTrack, ScrollbarThumb, on_scrollbar_thumb_drag};
-use crate::core::ui::dropdown::{
-    OpenDropdown,
-    spawn_dropdown_hand,
-    spawn_dropdown_type,
-    spawn_dropdown_category,
-    spawn_dropdown_kind,
-};
 
 #[derive(Component)]
 pub struct ShopScrollContainer;
@@ -134,11 +133,10 @@ pub fn generate_deterministic_shop(player_name: &str, player_level: u32) -> Vec<
         if matches!(eq, Equipment::Artifact(_)) {
             continue;
         }
-        if eq.level() >= 1 && eq.level() <= player_level {
-            if rng.random_bool(0.5) {
+        if eq.level() >= 1 && eq.level() <= player_level
+            && rng.random_bool(0.5) {
                 items.push(eq.name().to_string());
             }
-        }
     }
     items
 }
@@ -160,7 +158,7 @@ pub fn setup_shop_ui(
         node.display = Display::None;
     }
 
-    let player_level = player.level as u32;
+    let player_level = player.level();
 
     if shop_inventory.allowed_weapons.is_empty() {
         let mut hasher = DefaultHasher::new();
@@ -196,7 +194,8 @@ pub fn setup_shop_ui(
         shop_inventory.allowed_artifacts = allowed;
     }
 
-    shop_inventory.items = shop_inventory.allowed_weapons
+    shop_inventory.items = shop_inventory
+        .allowed_weapons
         .iter()
         .filter_map(|name| {
             if let Some(eq) = get_equipment(name) {
@@ -219,7 +218,7 @@ pub fn setup_shop_ui(
                 &shop_inventory,
                 ShopFilters::default(),
                 player.gold,
-                player.level as u32,
+                player.level(),
             );
         });
     }
@@ -251,7 +250,7 @@ pub fn update_shop_ui(
                     &shop_inventory,
                     *filters,
                     player.gold,
-                    player.level as u32,
+                    player.level(),
                     *open_dropdown,
                     current_scroll,
                 );
@@ -453,115 +452,126 @@ pub fn build_shop_content_inner(
             ShopScrollContainer,
         ))
         .with_children(|parent| {
-            let mut container_cmd = parent
-                .spawn((
-                    Node {
-                        width: percent(85.),
-                        height: percent(100.),
-                        min_height: Val::Px(0.),
-                        flex_direction: FlexDirection::Column,
-                        row_gap: Val::Px(12.),
-                        padding: UiRect::all(Val::Px(15.)),
-                        overflow: Overflow::scroll_y(),
-                        ..default()
-                    },
-                    ScrollableContainer,
-                    ScrollPosition(Vec2::new(0., initial_scroll)),
-                    ShopItemsScroll,
-                    Interaction::default(),
-                    bevy::ui::RelativeCursorPosition::default(),
-                ));
+            let mut container_cmd = parent.spawn((
+                Node {
+                    width: percent(85.),
+                    height: percent(100.),
+                    min_height: Val::Px(0.),
+                    flex_direction: FlexDirection::Column,
+                    row_gap: Val::Px(12.),
+                    padding: UiRect::all(Val::Px(15.)),
+                    overflow: Overflow::scroll_y(),
+                    ..default()
+                },
+                ScrollableContainer,
+                ScrollPosition(Vec2::new(0., initial_scroll)),
+                ShopItemsScroll,
+                Interaction::default(),
+                bevy::ui::RelativeCursorPosition::default(),
+            ));
             container_entity = container_cmd.id();
             container_cmd.with_children(|parent| {
-                    let mut matching: Vec<Equipment> = Vec::new();
-                    if filters.tab == ShopTab::Artifacts {
-                        let mut seen = std::collections::HashSet::new();
-                        for artifact in crate::core::catalog::catalog::all_artifacts() {
-                            if artifact.level <= player_level
-                                && filters.kind.map_or(true, |k| artifact.kind == k)
-                                && shop_inventory.allowed_artifacts.contains(&artifact.name)
-                            {
-                                if seen.insert(artifact.name.clone()) {
-                                    matching.push(Equipment::Artifact(artifact.clone()));
-                                }
+                let mut matching: Vec<Equipment> = Vec::new();
+                if filters.tab == ShopTab::Artifacts {
+                    let mut seen = std::collections::HashSet::new();
+                    for artifact in crate::core::catalog::catalog::all_artifacts() {
+                        if artifact.level <= player_level
+                            && filters.kind.is_none_or(|k| artifact.kind == k)
+                            && shop_inventory.allowed_artifacts.contains(&artifact.name)
+                            && seen.insert(artifact.name.clone()) {
+                                matching.push(Equipment::Artifact(artifact.clone()));
+                            }
+                    }
+                } else {
+                    for item_key in &shop_inventory.items {
+                        if let Some(equipment) = get_equipment(item_key) {
+                            let matches_tab = match filters.tab {
+                                ShopTab::Weapons => match &equipment {
+                                    Equipment::Weapon(w) => {
+                                        let matches_hand =
+                                            filters.weapon_hand.is_none_or(|h| w.hand == h);
+                                        let matches_type = match filters.weapon_type {
+                                            WeaponTypeFilter::All => true,
+                                            WeaponTypeFilter::Weapons => {
+                                                w.category != Category::Shield
+                                                    && w.category != Category::Book
+                                            },
+                                            WeaponTypeFilter::Shields => {
+                                                w.category == Category::Shield
+                                            },
+                                            WeaponTypeFilter::Books => w.category == Category::Book,
+                                        };
+                                        let matches_category = filters
+                                            .weapon_category
+                                            .is_none_or(|c| w.category == c);
+                                        let matches_kind =
+                                            filters.kind.is_none_or(|k| w.kind == k);
+                                        matches_hand
+                                            && matches_type
+                                            && matches_category
+                                            && matches_kind
+                                    },
+                                    _ => false,
+                                },
+                                ShopTab::Helmets => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Helmet,
+                                    _ => false,
+                                },
+                                ShopTab::Chestplates => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Chestplate,
+                                    _ => false,
+                                },
+                                ShopTab::Boots => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Boots,
+                                    _ => false,
+                                },
+                                ShopTab::Gloves => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Gloves,
+                                    _ => false,
+                                },
+                                ShopTab::Accessories => match &equipment {
+                                    Equipment::Wearable(w) => w.slot == WearableSlot::Accessory,
+                                    _ => false,
+                                },
+                                ShopTab::Consumables => {
+                                    matches!(equipment, Equipment::Consumable(_))
+                                },
+                                ShopTab::Artifacts => false,
+                            };
+                            if matches_tab {
+                                matching.push(equipment);
                             }
                         }
-                    } else {
-                        for item_key in &shop_inventory.items {
-                            if let Some(equipment) = get_equipment(item_key) {
-                                let matches_tab = match filters.tab {
-                                    ShopTab::Weapons => match &equipment {
-                                        Equipment::Weapon(w) => {
-                                            let matches_hand = filters.weapon_hand.map_or(true, |h| w.hand == h);
-                                            let matches_type = match filters.weapon_type {
-                                                WeaponTypeFilter::All => true,
-                                                WeaponTypeFilter::Weapons => w.category != Category::Shield && w.category != Category::Book,
-                                                WeaponTypeFilter::Shields => w.category == Category::Shield,
-                                                WeaponTypeFilter::Books => w.category == Category::Book,
-                                            };
-                                            let matches_category = filters.weapon_category.map_or(true, |c| w.category == c);
-                                            let matches_kind = filters.kind.map_or(true, |k| w.kind == k);
-                                            matches_hand && matches_type && matches_category && matches_kind
-                                        }
-                                        _ => false,
-                                    },
-                                    ShopTab::Helmets => match &equipment {
-                                        Equipment::Wearable(w) => w.slot == WearableSlot::Helmet,
-                                        _ => false,
-                                    },
-                                    ShopTab::Chestplates => match &equipment {
-                                        Equipment::Wearable(w) => w.slot == WearableSlot::Chestplate,
-                                        _ => false,
-                                    },
-                                    ShopTab::Boots => match &equipment {
-                                        Equipment::Wearable(w) => w.slot == WearableSlot::Boots,
-                                        _ => false,
-                                    },
-                                    ShopTab::Gloves => match &equipment {
-                                        Equipment::Wearable(w) => w.slot == WearableSlot::Gloves,
-                                        _ => false,
-                                    },
-                                    ShopTab::Accessories => match &equipment {
-                                        Equipment::Wearable(w) => w.slot == WearableSlot::Accessory,
-                                        _ => false,
-                                    },
-                                    ShopTab::Consumables => matches!(equipment, Equipment::Consumable(_)),
-                                    ShopTab::Artifacts => false,
-                                };
-                                if matches_tab {
-                                    matching.push(equipment);
-                                }
+                    }
+                }
+
+                matching.sort_by_key(|b| std::cmp::Reverse(b.price()));
+
+                for chunk in matching.chunks(4) {
+                    parent
+                        .spawn(Node {
+                            width: percent(100.),
+                            flex_direction: FlexDirection::Row,
+                            flex_shrink: 0.,
+                            align_items: AlignItems::FlexStart,
+                            column_gap: percent(1.5),
+                            overflow: Overflow::clip(),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            for equipment in chunk {
+                                spawn_shop_item_card(parent, assets, localization, lang, equipment);
                             }
-                        }
-                    }
+                        });
+                }
 
-                    matching.sort_by(|a, b| b.price().cmp(&a.price()));
-
-                    for chunk in matching.chunks(4) {
-                        parent
-                            .spawn(Node {
-                                width: percent(100.),
-                                flex_direction: FlexDirection::Row,
-                                flex_shrink: 0.,
-                                align_items: AlignItems::FlexStart,
-                                column_gap: percent(1.5),
-                                overflow: Overflow::clip(),
-                                ..default()
-                            })
-                            .with_children(|parent| {
-                                for equipment in chunk {
-                                    spawn_shop_item_card(parent, assets, localization, lang, equipment);
-                                }
-                            });
-                    }
-
-                    if matching.is_empty() {
-                        parent.spawn((
-                            add_text("No items available.", "bold", 2.0, assets),
-                            TextColor(Color::WHITE),
-                        ));
-                    }
-                });
+                if matching.is_empty() {
+                    parent.spawn((
+                        add_text("No items available.", "bold", 2.0, assets),
+                        TextColor(Color::WHITE),
+                    ));
+                }
+            });
 
             // Sidebar for weapon filters
             parent
@@ -582,7 +592,12 @@ pub fn build_shop_content_inner(
                     if filters.tab == ShopTab::Weapons {
                         spawn_dropdown_type(parent, assets, filters.weapon_type, open_dropdown);
                         spawn_dropdown_kind(parent, assets, filters.kind, open_dropdown);
-                        spawn_dropdown_category(parent, assets, filters.weapon_category, open_dropdown);
+                        spawn_dropdown_category(
+                            parent,
+                            assets,
+                            filters.weapon_category,
+                            open_dropdown,
+                        );
                         spawn_dropdown_hand(parent, assets, filters.weapon_hand, open_dropdown);
                     } else if filters.tab == ShopTab::Artifacts {
                         spawn_dropdown_kind(parent, assets, filters.kind, open_dropdown);
@@ -602,7 +617,9 @@ pub fn build_shop_content_inner(
                     },
                     BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
                     Visibility::Hidden,
-                    ScrollbarTrack { container: container_entity },
+                    ScrollbarTrack {
+                        container: container_entity,
+                    },
                 ))
                 .with_children(|parent| {
                     parent
@@ -619,7 +636,9 @@ pub fn build_shop_content_inner(
                             Button,
                             Interaction::default(),
                             Pickable::default(),
-                            ScrollbarThumb { container: container_entity },
+                            ScrollbarThumb {
+                                container: container_entity,
+                            },
                         ))
                         .observe(cursor::<Over>(SystemCursorIcon::Pointer))
                         .observe(cursor::<Out>(SystemCursorIcon::Default))

@@ -17,7 +17,7 @@ use crate::utils::{capitalize_words, NameFromEnum};
 #[derive(Resource, Default)]
 pub struct LevelUpPending {
     pub active: bool,
-    pub new_level: u8,
+    pub new_level: u32,
     pub points_remaining: u8,
     pub attr_gains: [i8; 6],
     pub ability_choices: Vec<String>,
@@ -468,7 +468,7 @@ fn spawn_level_up_overlay(
                                                 (
                                                     Attribute::Strength,
                                                     localization.get(
-                                                        &format!(
+                                                        format!(
                                                             "attribute.{}",
                                                             Attribute::Strength.to_lowername()
                                                         ),
@@ -480,7 +480,7 @@ fn spawn_level_up_overlay(
                                                 (
                                                     Attribute::Dexterity,
                                                     localization.get(
-                                                        &format!(
+                                                        format!(
                                                             "attribute.{}",
                                                             Attribute::Dexterity.to_lowername()
                                                         ),
@@ -492,7 +492,7 @@ fn spawn_level_up_overlay(
                                                 (
                                                     Attribute::Constitution,
                                                     localization.get(
-                                                        &format!(
+                                                        format!(
                                                             "attribute.{}",
                                                             Attribute::Constitution.to_lowername()
                                                         ),
@@ -504,7 +504,7 @@ fn spawn_level_up_overlay(
                                                 (
                                                     Attribute::Intelligence,
                                                     localization.get(
-                                                        &format!(
+                                                        format!(
                                                             "attribute.{}",
                                                             Attribute::Intelligence.to_lowername()
                                                         ),
@@ -516,7 +516,7 @@ fn spawn_level_up_overlay(
                                                 (
                                                     Attribute::Wisdom,
                                                     localization.get(
-                                                        &format!(
+                                                        format!(
                                                             "attribute.{}",
                                                             Attribute::Wisdom.to_lowername()
                                                         ),
@@ -528,7 +528,7 @@ fn spawn_level_up_overlay(
                                                 (
                                                     Attribute::Charisma,
                                                     localization.get(
-                                                        &format!(
+                                                        format!(
                                                             "attribute.{}",
                                                             Attribute::Charisma.to_lowername()
                                                         ),
@@ -1011,11 +1011,11 @@ fn spawn_choice_card(
                     // Description
                     let desc_text = if is_ability {
                         get_ability(name)
-                            .map(|ab| ab.description(lang, &localization))
+                            .map(|ab| ab.description(lang, localization))
                             .unwrap_or_default()
                     } else {
                         get_perk(name)
-                            .map(|pk| pk.description(lang, &localization))
+                            .map(|pk| pk.description(lang, localization))
                             .unwrap_or_default()
                     };
 

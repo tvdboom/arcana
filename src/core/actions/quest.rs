@@ -118,35 +118,14 @@ fn build_quest_content(
                 })
                 .with_children(|parent| {
                     let title1 = localization.get("errand_title", lang);
-                    spawn_quest_card(
-                        parent,
-                        assets,
-                        &title1,
-                        "action_errand",
-                        1,
-                        false,
-                        false,
-                    );
+                    let desc1 = localization.get("general.errand_desc", lang);
+                    spawn_quest_card(parent, assets, &title1, &desc1, "action_errand", 1);
                     let title2 = localization.get("expedition_title", lang);
-                    spawn_quest_card(
-                        parent,
-                        assets,
-                        &title2,
-                        "action_expedition",
-                        2,
-                        true,
-                        false,
-                    );
+                    let desc2 = localization.get("general.expedition_desc", lang);
+                    spawn_quest_card(parent, assets, &title2, &desc2, "action_expedition", 2);
                     let title3 = localization.get("odyssey_title", lang);
-                    spawn_quest_card(
-                        parent,
-                        assets,
-                        &title3,
-                        "action_odyssey",
-                        3,
-                        true,
-                        true,
-                    );
+                    let desc3 = localization.get("general.odyssey_desc", lang);
+                    spawn_quest_card(parent, assets, &title3, &desc3, "action_odyssey", 3);
                 });
         });
 }
@@ -155,20 +134,22 @@ fn spawn_quest_card(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
     title: &str,
+    description: &str,
     image_key: &str,
     ap_cost: u32,
-    show_mana: bool,
-    show_health: bool,
 ) {
     parent
-        .spawn((Node {
-            width: percent(30.),
-            height: percent(98.),
-            position_type: PositionType::Relative,
-            margin: UiRect::horizontal(percent(1.)),
-            top: percent(-2.),
-            ..default()
-        }, BackgroundColor(crate::core::constants::NORMAL_BUTTON_COLOR)))
+        .spawn((
+            Node {
+                width: percent(30.),
+                height: percent(98.),
+                position_type: PositionType::Relative,
+                margin: UiRect::horizontal(percent(1.)),
+                top: percent(-2.),
+                ..default()
+            },
+            BackgroundColor(crate::core::constants::NORMAL_BUTTON_COLOR),
+        ))
         .with_children(|parent| {
             parent
                 .spawn(Node {
@@ -200,8 +181,7 @@ fn spawn_quest_card(
                                 justify_content: JustifyContent::FlexStart,
                                 ..default()
                             },
-                            ImageNode::new(assets.image("stone"))
-                                .with_mode(NodeImageMode::Stretch),
+                            ImageNode::new(assets.image("stone")).with_mode(NodeImageMode::Stretch),
                         ))
                         .with_children(|parent| {
                             parent.spawn((
@@ -211,6 +191,15 @@ fn spawn_quest_card(
                                 },
                                 add_text(title, "bold", 2.2, assets),
                                 TextColor(crate::core::constants::BUTTON_TEXT_COLOR),
+                            ));
+                            parent.spawn((
+                                Node {
+                                    width: percent(85.),
+                                    margin: UiRect::horizontal(percent(7.5)),
+                                    ..default()
+                                },
+                                add_text(description, "medium", 1.8, assets),
+                                TextColor(Color::WHITE),
                             ));
                         });
                 });
@@ -226,12 +215,6 @@ fn spawn_quest_card(
                     ..default()
                 })
                 .with_children(|parent| {
-                    if show_mana {
-                        spawn_cost_badge(parent, assets, "mana", "?");
-                    }
-                    if show_health {
-                        spawn_cost_badge(parent, assets, "health", "?");
-                    }
                     spawn_cost_badge(parent, assets, "ap", &ap_cost.to_string());
                 });
 
@@ -252,8 +235,12 @@ fn spawn_quest_card(
                 ))
                 .observe(crate::core::menu::utils::reimage::<Over>(assets.image("border_hover")))
                 .observe(crate::core::menu::utils::reimage::<Out>(assets.image("border")))
-                .observe(crate::core::utils::cursor::<Over>(bevy::window::SystemCursorIcon::Pointer))
-                .observe(crate::core::utils::cursor::<Out>(bevy::window::SystemCursorIcon::Default));
+                .observe(crate::core::utils::cursor::<Over>(
+                    bevy::window::SystemCursorIcon::Pointer,
+                ))
+                .observe(crate::core::utils::cursor::<Out>(
+                    bevy::window::SystemCursorIcon::Default,
+                ));
         });
 }
 
