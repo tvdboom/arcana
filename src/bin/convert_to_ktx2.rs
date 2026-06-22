@@ -109,12 +109,25 @@ pub fn run(src_root: &str, dst_root: &str) {
         let ext = src_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
 
         if ext == "png" {
-            let dst_path = dst_root.join(relative).with_extension("ktx2");
+            // Keep favicon.png as .png since the Windows window-icon loader needs it as PNG.
+            let is_favicon = relative.to_string_lossy().contains("favicon.png");
+            let dst_path = if is_favicon {
+                dst_root.join(relative)
+            } else {
+                dst_root.join(relative).with_extension("ktx2")
+            };
             if needs_update(&src_path, &dst_path) {
-                tasks.push(AssetTask::Convert {
-                    src: src_path,
-                    dst: dst_path,
-                });
+                if is_favicon {
+                    tasks.push(AssetTask::Copy {
+                        src: src_path,
+                        dst: dst_path,
+                    });
+                } else {
+                    tasks.push(AssetTask::Convert {
+                        src: src_path,
+                        dst: dst_path,
+                    });
+                }
             }
         } else {
             let dst_path = dst_root.join(relative);
@@ -178,7 +191,7 @@ pub fn copy_only(src_root: &str, dst_root: &str) {
     for src_path in collect_files(src_root) {
         let relative = src_path.strip_prefix(src_root).expect("strip prefix");
         let ext = src_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
-        if ext == "png" {
+        if ext == "png" && !relative.to_string_lossy().contains("favicon.png") {
             continue;
         }
         let dst_path = dst_root.join(relative);

@@ -179,12 +179,12 @@ pub fn handle_confirm_over(
 
     if confirm_ready {
         if let Ok(mut bg) = btn_q.get_mut(event.entity) {
-            bg.0 = BUTTON_TEXT_COLOR;
+            bg.0 = HOVERED_BUTTON_COLOR;
         }
         if let Ok(children) = children_q.get(event.entity) {
             for child in children.iter() {
                 if let Ok(mut txt_col) = text_color_q.get_mut(child) {
-                    txt_col.0 = Color::BLACK;
+                    txt_col.0 = BUTTON_TEXT_COLOR;
                 }
             }
         }
@@ -235,12 +235,12 @@ pub fn handle_confirm_press(
 
     if confirm_ready {
         if let Ok(mut bg) = btn_q.get_mut(event.entity) {
-            bg.0 = Color::srgba_u8(30, 30, 50, 240);
+            bg.0 = PRESSED_BUTTON_COLOR;
         }
         if let Ok(children) = children_q.get(event.entity) {
             for child in children.iter() {
                 if let Ok(mut txt_col) = text_color_q.get_mut(child) {
-                    txt_col.0 = Color::srgba(1.0, 1.0, 1.0, 0.4);
+                    txt_col.0 = BUTTON_TEXT_COLOR;
                 }
             }
         }
@@ -260,12 +260,12 @@ pub fn handle_confirm_release(
 
     if confirm_ready {
         if let Ok(mut bg) = btn_q.get_mut(event.entity) {
-            bg.0 = BUTTON_TEXT_COLOR;
+            bg.0 = HOVERED_BUTTON_COLOR;
         }
         if let Ok(children) = children_q.get(event.entity) {
             for child in children.iter() {
                 if let Ok(mut txt_col) = text_color_q.get_mut(child) {
-                    txt_col.0 = Color::BLACK;
+                    txt_col.0 = BUTTON_TEXT_COLOR;
                 }
             }
         }
@@ -861,7 +861,6 @@ fn spawn_level_up_overlay(
                             ..default()
                         })
                         .with_children(|parent| {
-                            // Tab button style for confirm button
                             let bg_color = if confirm_ready {
                                 NORMAL_BUTTON_COLOR
                             } else {
@@ -887,23 +886,22 @@ fn spawn_level_up_overlay(
                             }
                             c_btn
                                 .observe(handle_level_up_confirm)
-                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                .observe(cursor::<Out>(SystemCursorIcon::Default))
                                 .observe(handle_confirm_over)
                                 .observe(handle_confirm_out)
                                 .observe(handle_confirm_press)
-                                .observe(handle_confirm_release)
-                                .with_children(|parent| {
-                                    let text_color = if confirm_ready {
-                                        BUTTON_TEXT_COLOR
-                                    } else {
-                                        Color::srgba(0.6, 0.55, 0.4, 0.5)
-                                    };
-                                    parent.spawn((
-                                        add_text(confirm_label.to_string(), "bold", 1.8, assets),
-                                        TextColor(text_color),
-                                    ));
-                                });
+                                .observe(handle_confirm_release);
+
+                            let text_color = if confirm_ready {
+                                BUTTON_TEXT_COLOR
+                            } else {
+                                Color::srgba(0.6, 0.55, 0.4, 0.5)
+                            };
+                            c_btn.with_children(|parent| {
+                                parent.spawn((
+                                    add_text(confirm_label.to_string(), "bold", 1.8, assets),
+                                    TextColor(text_color),
+                                ));
+                            });
                         });
                 });
         });

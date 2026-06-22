@@ -30,11 +30,21 @@ pub fn reset_cursor(
 /// Set cursor icon on event
 pub fn cursor<T: Debug + Clone + Reflect>(
     icon: SystemCursorIcon,
-) -> impl FnMut(On<Pointer<T>>, Commands, Query<&DisabledButton>, Single<Entity, With<Window>>) {
+) -> impl FnMut(
+    On<Pointer<T>>,
+    Commands,
+    Query<&DisabledButton>,
+    Single<Entity, With<Window>>,
+    Query<Entity, With<crate::core::ui::playing::PrecombatDragGhost>>,
+) {
     move |ev: On<Pointer<T>>,
           mut commands: Commands,
           disabled_q: Query<&DisabledButton>,
-          window_e: Single<Entity, With<Window>>| {
+          window_e: Single<Entity, With<Window>>,
+          ghost_q: Query<Entity, With<crate::core::ui::playing::PrecombatDragGhost>>| {
+        if !ghost_q.is_empty() {
+            return;
+        }
         if icon == SystemCursorIcon::Pointer && disabled_q.contains(ev.entity) {
             commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
         } else {

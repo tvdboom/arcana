@@ -30,7 +30,7 @@ pub use crate::core::ui::toast::ToastContainer;
 pub use crate::core::ui::tooltip::*;
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
-use bevy::window::SystemCursorIcon;
+use bevy::window::{CursorIcon, SystemCursorIcon};
 
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
@@ -38,6 +38,25 @@ const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
 // Viewport-relative icon sizes (scale with window width)
 const ICON_ACTION: Val = Val::Vh(8.5); // action button circles
 const ICON_BADGE: Val = Val::Vw(1.9); // equipped badge overlay
+
+const EMPTY_SLOT_COLOR: Color = Color::srgba(0.08, 0.08, 0.14, 0.8);
+const ACTIVE_HOTKEY_SLOT_SIZE: Val = Val::Vw(5.6);
+
+/// Hotkey letters for the 5 ability slots.
+const ABILITY_HOTKEYS: [&str; 5] = ["Q", "W", "E", "R", "T"];
+
+
+
+#[derive(Component, Clone, Copy)]
+pub struct ActiveHotkeySlot {
+    pub index: usize,
+}
+
+#[derive(Component)]
+pub struct DraggingSlot;
+
+#[derive(Component)]
+pub struct PrecombatDragGhost;
 const ICON_STAT: Val = Val::Vw(2.4); // gold / AP stat icons
 
 #[derive(Component)]
@@ -379,6 +398,7 @@ fn spawn_card(
     name_key: Option<String>,
     lines: Vec<String>,
     tooltip: Option<RightColumnTooltip>,
+    is_equipped: bool,
 ) {
     let mut cmd = parent.spawn((
         Node {
@@ -390,6 +410,7 @@ fn spawn_card(
             padding: UiRect::all(Val::Px(6.)),
             margin: UiRect::bottom(Val::Px(6.)),
             border: UiRect::all(Val::Px(1.)),
+            position_type: PositionType::Relative,
             ..default()
         },
         BackgroundColor(BAR_BG_COLOR),
@@ -405,9 +426,33 @@ fn spawn_card(
         if let RightColumnTooltip::Perk(_) = t {
             cmd.observe(handle_perk_card_click);
         }
+        if let RightColumnTooltip::Ability(_) = t {
+            cmd.observe(handle_active_ability_card_click);
+        }
     }
 
     cmd.with_children(|parent| {
+        if is_equipped {
+            parent
+                .spawn((Node {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(4.),
+                    top: Val::Px(4.),
+                    ..default()
+                },))
+                .with_children(|parent| {
+                    parent.spawn((
+                        Node {
+                            width: ICON_BADGE,
+                            height: ICON_BADGE,
+                            ..default()
+                        },
+                        ImageNode::new(assets.image("equipped"))
+                            .with_mode(NodeImageMode::Stretch),
+                    ));
+                });
+        }
+
         spawn_placeholder(parent, assets, image_key, ICON_ITEM);
 
         parent
@@ -450,7 +495,7 @@ pub fn handle_perk_card_click(
 }
 
 /// One of the three combat-stat boxes (attack / defense / initiative).
-fn spawn_combat_stat(
+pub fn spawn_combat_stat(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
     localization: &Localization,
@@ -625,7 +670,7 @@ pub fn setup_playing_screen(
                         ))
                         .with_children(|parent| {
                             // Column 1: Character portrait image
-                            spawn_image_column(parent, &assets, &player);
+                            spawn_image_column(parent, &assets, &player, Some(GlobalZIndex(850)));
 
                             // Column 2: Stats (level, bars, characteristics, attributes, combat)
                             spawn_stats_column(parent, &assets, &localization, lang, &player);
@@ -646,8 +691,8 @@ pub fn setup_playing_screen(
                                 align_items: AlignItems::Center,
                                 column_gap: Val::Px(4.),
                                 padding: UiRect {
-                                    top: Val::Vh(1.5),
-                                    bottom: Val::Px(4.),
+                                    top: Val::Vh(6.5),
+                                    bottom: Val::Px(0.),
                                     ..default()
                                 },
                                 ..default()
@@ -724,19 +769,25 @@ pub fn setup_playing_screen(
 }
 
 /// Column 1: Character portrait image with equipment slot overlays and pet.
-fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, player: &Player) {
-    parent
-        .spawn((
-            Node {
-                width: percent(33.5),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Stretch,
-                padding: UiRect::all(Val::Px(6.)),
-                ..default()
-            },
-            GlobalZIndex(850),
-        ))
-        .with_children(|parent| {
+pub fn spawn_image_column(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    player: &Player,
+    z_index: Option<GlobalZIndex>,
+) {
+    let mut cmd = parent.spawn(Node {
+        width: percent(33.5),
+        flex_direction: FlexDirection::Column,
+        align_items: AlignItems::Stretch,
+        padding: UiRect::all(Val::Px(6.)),
+        ..default()
+    });
+
+    if let Some(z) = z_index {
+        cmd.insert(z);
+    }
+
+    cmd.with_children(|parent| {
             // Portrait (relative container for equipment slot / pet overlays)
             parent
                 .spawn((
@@ -915,7 +966,7 @@ fn spawn_image_column(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, p
 }
 
 /// Column 2: Level, health/mana bars, characteristics, attributes, combat stats.
-fn spawn_stats_column(
+pub fn spawn_stats_column(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
     localization: &Localization,
@@ -1094,7 +1145,7 @@ fn spawn_stats_column(
 
             // Spacer between bars and characteristics
             parent.spawn(Node {
-                height: Val::Px(20.),
+                height: Val::Px(8.),
                 ..default()
             });
 
@@ -1240,7 +1291,7 @@ fn spawn_stats_column(
 
             // Spacer between attributes and combat stats
             parent.spawn(Node {
-                height: Val::Px(20.),
+                flex_grow: 1.0,
                 ..default()
             });
 
@@ -1257,10 +1308,35 @@ fn spawn_stats_column(
                     spawn_combat_stat(parent, assets, localization, lang, PlayingStat::Defense);
                     spawn_combat_stat(parent, assets, localization, lang, PlayingStat::Initiative);
                 });
+
+            // Spacer to push active abilities to the bottom!
+            parent.spawn(Node {
+                height: Val::Px(14.),
+                ..default()
+            });
+
+            parent
+                .spawn(Node {
+                    width: percent(100.),
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::SpaceBetween,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    for index in 0..5 {
+                        spawn_active_hotkey_slot(
+                            parent,
+                            assets,
+                            index,
+                            player.active_abilities.get(index).and_then(|opt| opt.as_deref()),
+                            ABILITY_HOTKEYS[index],
+                        );
+                    }
+                });
         });
 }
 
-fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_health: bool) {
+pub fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_health: bool) {
     let bar_height = Val::Px(36.);
     let font_size = 1.9;
     parent
@@ -1270,6 +1346,7 @@ fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_health:
                 height: bar_height,
                 position_type: PositionType::Relative,
                 border: UiRect::all(Val::Px(2.)),
+                flex_shrink: 0.,
                 ..default()
             },
             BackgroundColor(BAR_BG_COLOR),
@@ -1423,6 +1500,7 @@ pub fn right_column_tooltip_system(
     level_up: Res<LevelUpPending>,
     active_modal: Res<ActiveModal>,
     right_tab: Res<RightTab>,
+    _state: Res<State<GameState>>,
     player: Res<Player>,
     card_q: Query<(&Interaction, &RightColumnTooltip)>,
     changed_card_q: Query<(), (With<RightColumnTooltip>, Changed<Interaction>)>,
@@ -1658,7 +1736,7 @@ fn spawn_right_column(
         .spawn((
             Node {
                 width: percent(33.5),
-                height: percent(91.5),
+                height: percent(97.0),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
                 padding: UiRect {
@@ -1758,6 +1836,7 @@ fn spawn_right_column(
                 Node {
                     width: percent(100.),
                     height: percent(100.),
+                    min_height: Val::Px(0.),
                     flex_direction: FlexDirection::Column,
                     overflow: Overflow::scroll_y(),
                     ..default()
@@ -1775,6 +1854,7 @@ fn spawn_right_column(
                             width: percent(100.),
                             flex_direction: FlexDirection::Column,
                             flex_shrink: 0.,
+                            overflow: Overflow::clip(),
                             ..default()
                         },
                         EquipmentListWrapper,
@@ -1801,6 +1881,7 @@ fn spawn_right_column(
                             flex_direction: FlexDirection::Column,
                             flex_shrink: 0.,
                             display: Display::None,
+                            overflow: Overflow::clip(),
                             ..default()
                         },
                         ConsumablesListWrapper,
@@ -1827,6 +1908,7 @@ fn spawn_right_column(
                             flex_direction: FlexDirection::Column,
                             flex_shrink: 0.,
                             display: Display::None,
+                            overflow: Overflow::clip(),
                             ..default()
                         },
                         AbilitiesListWrapper,
@@ -1853,6 +1935,7 @@ fn spawn_right_column(
                             flex_direction: FlexDirection::Column,
                             flex_shrink: 0.,
                             display: Display::None,
+                            overflow: Overflow::clip(),
                             ..default()
                         },
                         PerksListWrapper,
@@ -1878,6 +1961,7 @@ fn spawn_right_column(
                             flex_direction: FlexDirection::Column,
                             flex_shrink: 0.,
                             display: Display::None,
+                            overflow: Overflow::clip(),
                             ..default()
                         },
                         ArtifactsListWrapper,
@@ -2052,6 +2136,7 @@ pub fn rebuild_playing_lists(
     localization: Res<Localization>,
     player: Res<Player>,
     right_tab: Res<RightTab>,
+    _game_state: Res<State<GameState>>,
     mut queries: RebuildPlayingListsQueries<'_, '_>,
 ) {
     let lang = settings.language;
@@ -2096,6 +2181,13 @@ pub fn rebuild_playing_lists(
             EquipSlot::Boots => player.boots.is_some(),
             EquipSlot::Gloves => player.gloves.is_some(),
         };
+        // Still hide WeaponRH if two-handed is equipped!
+        let visible = if slot == &EquipSlot::WeaponRH && is_lh_two_hand {
+            false
+        } else {
+            visible
+        };
+
         *vis = if visible {
             Visibility::Inherited
         } else {
@@ -2161,6 +2253,7 @@ pub fn rebuild_playing_lists(
                         is_equipped: true,
                         price: weapon.sell_price(player.charisma_mod()),
                     },
+                    false,
                 );
             }
 
@@ -2197,6 +2290,7 @@ pub fn rebuild_playing_lists(
                         is_equipped: false,
                         price: weapon.sell_price(player.charisma_mod()),
                     },
+                    false,
                 );
             }
             if empty {
@@ -2264,6 +2358,7 @@ pub fn rebuild_playing_lists(
                         is_equipped: false,
                         price: weapon.sell_price(player.charisma_mod()),
                     },
+                    false,
                 );
             }
 
@@ -2331,6 +2426,7 @@ pub fn rebuild_playing_lists(
                         is_equipped: false,
                         price: weapon.sell_price(player.charisma_mod()),
                     },
+                    false,
                 );
             }
 
@@ -2355,8 +2451,18 @@ pub fn rebuild_playing_lists(
             }
             let mut sorted_abilities: Vec<_> =
                 player.abilities.iter().filter_map(|key| get_ability(key)).collect();
-            sorted_abilities.sort_by(|a, b| a.level.cmp(&b.level).then(a.name.cmp(&b.name)));
+            sorted_abilities.sort_by(|a, b| {
+                let pos_a = player.active_abilities.iter().position(|x| x.as_ref() == Some(&a.name));
+                let pos_b = player.active_abilities.iter().position(|x| x.as_ref() == Some(&b.name));
+                match (pos_a, pos_b) {
+                    (Some(idx_a), Some(idx_b)) => idx_a.cmp(&idx_b),
+                    (Some(_), None) => std::cmp::Ordering::Less,
+                    (None, Some(_)) => std::cmp::Ordering::Greater,
+                    (None, None) => a.level.cmp(&b.level).then(a.name.cmp(&b.name)),
+                }
+            });
             for ability in &sorted_abilities {
+                let is_equipped = player.active_abilities.contains(&Some(ability.name.clone()));
                 spawn_card(
                     parent,
                     &assets,
@@ -2371,6 +2477,7 @@ pub fn rebuild_playing_lists(
                     None,
                     vec![ability.description(lang, &localization)],
                     Some(RightColumnTooltip::Ability(ability.name.clone())),
+                    is_equipped,
                 );
             }
         });
@@ -2398,6 +2505,7 @@ pub fn rebuild_playing_lists(
                     None,
                     vec![perk.description(lang, &localization)],
                     Some(RightColumnTooltip::Perk(perk.name.clone())),
+                    false,
                 );
             }
         });
@@ -2920,6 +3028,7 @@ pub fn handle_equipment_card_click(
     right_tab: Res<RightTab>,
     mut craft_seed: ResMut<CraftSeed>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    _game_state: Option<Res<State<GameState>>>,
     card_q: Query<&EquipmentCard>,
 ) {
     if *right_tab != RightTab::Equipment
@@ -3021,6 +3130,7 @@ pub fn handle_equipment_slot_click(
     settings: Res<Settings>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    _game_state: Option<Res<State<GameState>>>,
     slot_q: Query<&EquipSlot>,
 ) {
     if let Ok(slot) = slot_q.get(event.entity) {
@@ -3069,20 +3179,21 @@ pub fn handle_equipment_slot_click(
     }
 }
 
-pub fn spawn_equipment_card(
-    parent: &mut ChildSpawnerCommands,
+pub fn spawn_equipment_card<'a>(
+    parent: &'a mut ChildSpawnerCommands,
     assets: &WorldAssets,
     image_key: &str,
     name: String,
     lines: Vec<String>,
     card: EquipmentCard,
-) {
+    highlight_equipped: bool,
+) -> EntityCommands<'a> {
     let is_equipped = card.is_equipped;
     let price = card.price;
     let card_key = card.key.clone();
     let tooltip = RightColumnTooltip::Equipment(card.key.clone());
-    parent
-        .spawn((
+    let out_color = if is_equipped && highlight_equipped { SELECTED_COLOR } else { BAR_BG_COLOR };
+    let mut cmd = parent.spawn((
             Node {
                 width: percent(100.),
                 flex_direction: FlexDirection::Row,
@@ -3095,20 +3206,20 @@ pub fn spawn_equipment_card(
                 position_type: PositionType::Relative,
                 ..default()
             },
-            BackgroundColor(BAR_BG_COLOR),
+            BackgroundColor(out_color),
             BorderColor::all(BUTTON_BORDER_COLOR),
             Button,
             Interaction::default(),
             Pickable::default(),
             card,
             tooltip,
-        ))
-        .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-        .observe(recolor::<Out>(BAR_BG_COLOR))
-        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-        .observe(cursor::<Out>(SystemCursorIcon::Default))
-        .observe(handle_equipment_card_click)
-        .with_children(|parent| {
+        ));
+    cmd.observe(recolor::<Over>(HOVERED_BUTTON_COLOR));
+    cmd.observe(recolor::<Out>(out_color));
+    cmd.observe(cursor::<Over>(SystemCursorIcon::Pointer));
+    cmd.observe(cursor::<Out>(SystemCursorIcon::Default));
+    cmd.observe(handle_equipment_card_click);
+    cmd.with_children(|parent| {
             // Top-right corner: equipped badge (if equipped) + price display
             parent
                 .spawn((Node {
@@ -3180,6 +3291,7 @@ pub fn spawn_equipment_card(
                     }
                 });
         });
+    cmd
 }
 
 pub fn update_action_buttons(
@@ -3195,19 +3307,411 @@ pub fn update_action_buttons(
     )>,
 ) {
     for (entity, _action_btn, mut bg, mut border, mut img, disabled) in &mut btn_q {
-        if true {
-            if disabled.is_some() {
-                commands.entity(entity).remove::<DisabledButton>();
-                bg.0 = NORMAL_BUTTON_COLOR;
-                *border = BorderColor::all(BUTTON_BORDER_COLOR);
-                img.color = Color::WHITE;
-            }
+        if disabled.is_some() {
+            commands.entity(entity).remove::<DisabledButton>();
+            bg.0 = NORMAL_BUTTON_COLOR;
+            *border = BorderColor::all(BUTTON_BORDER_COLOR);
+            img.color = Color::WHITE;
+        }
+    }
+}
+
+pub fn handle_active_ability_card_click(
+    _event: On<Pointer<Click>>,
+    mut player: ResMut<Player>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    card_q: Query<&RightColumnTooltip>,
+) {
+    let Ok(RightColumnTooltip::Ability(ability_name)) = card_q.get(_event.entity) else {
+        return;
+    };
+
+    let is_currently_equipped = player.active_abilities.contains(&Some(ability_name.clone()));
+    if is_currently_equipped {
+        if let Some(pos) = player.active_abilities.iter().position(|x| x.as_ref() == Some(ability_name)) {
+            player.active_abilities[pos] = None;
+            play_audio_msg.write(PlayAudioMsg::new("button"));
+        }
+    } else {
+        if let Some(pos) = player.active_abilities.iter().position(|x| x.is_none()) {
+            player.active_abilities[pos] = Some(ability_name.clone());
+            play_audio_msg.write(PlayAudioMsg::new("button"));
         } else {
-            if disabled.is_none() {
-                commands.entity(entity).insert(DisabledButton);
-                bg.0 = DISABLED_BUTTON_COLOR;
-                *border = BorderColor::all(DISABLED_BORDER_COLOR);
-                img.color = Color::srgb(0.3, 0.3, 0.3);
+            play_audio_msg.write(PlayAudioMsg::new("error"));
+        }
+    }
+}
+
+fn spawn_active_hotkey_slot(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    index: usize,
+    key: Option<&str>,
+    hotkey: &str,
+) {
+    let mut cmd = parent.spawn((
+        Node {
+            width: ACTIVE_HOTKEY_SLOT_SIZE,
+            height: ACTIVE_HOTKEY_SLOT_SIZE,
+            border: UiRect::all(Val::Px(2.)),
+            position_type: PositionType::Relative,
+            ..default()
+        },
+        BorderColor::all(BUTTON_BORDER_COLOR),
+        BackgroundColor(if key.is_some() {
+            SELECTED_COLOR
+        } else {
+            EMPTY_SLOT_COLOR
+        }),
+        Interaction::default(),
+        Pickable::default(),
+        ActiveHotkeySlot {
+            index,
+        },
+    ));
+
+    let image_key = match key {
+        Some(k) => format!("build_{k}"),
+        None => "stone".to_string(),
+    };
+    let image_color = match key {
+        Some(_) => Color::WHITE,
+        None => Color::NONE,
+    };
+    cmd.insert(ImageNode {
+        image: assets.image(&image_key),
+        color: image_color,
+        ..default()
+    });
+
+    cmd.observe(handle_hotkey_slot_hover)
+        .observe(handle_hotkey_slot_hover_out)
+        .observe(handle_hotkey_drag_start)
+        .observe(handle_hotkey_drag)
+        .observe(handle_hotkey_drag_end)
+        .observe(handle_hotkey_drop)
+        .observe(handle_active_hotkey_slot_click)
+        .with_children(|parent| {
+            // Hotkey letter in the bottom-right corner.
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        right: Val::Px(1.),
+                        bottom: Val::Px(-1.),
+                        padding: UiRect::axes(Val::Px(2.), Val::Px(0.)),
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgba(0., 0., 0., 0.7)),
+                    Pickable::IGNORE,
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text(hotkey, "bold", 1.4, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        Pickable::IGNORE,
+                    ));
+                });
+        });
+}
+
+pub fn handle_hotkey_slot_hover(
+    event: On<Pointer<Over>>,
+    mut commands: Commands,
+    player: Res<Player>,
+    slot_q: Query<&ActiveHotkeySlot>,
+    ghost_q: Query<Entity, With<PrecombatDragGhost>>,
+    window_e: Single<Entity, With<Window>>,
+) {
+    if !ghost_q.is_empty() {
+        return;
+    }
+    let Ok(slot) = slot_q.get(event.entity) else {
+        return;
+    };
+    let is_filled = player.active_abilities.get(slot.index).and_then(|opt| opt.as_ref()).is_some();
+    if is_filled {
+        commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Pointer));
+    } else {
+        commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
+    }
+}
+
+pub fn handle_hotkey_slot_hover_out(
+    _event: On<Pointer<Out>>,
+    mut commands: Commands,
+    ghost_q: Query<Entity, With<PrecombatDragGhost>>,
+    window_e: Single<Entity, With<Window>>,
+) {
+    if !ghost_q.is_empty() {
+        return;
+    }
+    commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
+}
+
+pub fn update_active_hotkey_slots(
+    mut player: ResMut<Player>,
+    assets: Res<WorldAssets>,
+    dragging_q: Query<&ActiveHotkeySlot, With<DraggingSlot>>,
+    mut slot_q: Query<(&ActiveHotkeySlot, &mut ImageNode, &mut BackgroundColor, Entity)>,
+    mut known_abilities: Local<Vec<String>>,
+) {
+    // Check if player gained any new abilities
+    let player_abilities = player.abilities.clone();
+    for ability in &player_abilities {
+        if !known_abilities.contains(ability) {
+            let is_equipped = player.active_abilities.contains(&Some(ability.clone()));
+            if !is_equipped {
+                if let Some(pos) = player.active_abilities.iter().position(|x| x.is_none()) {
+                    player.active_abilities[pos] = Some(ability.clone());
+                }
+            }
+        }
+    }
+    *known_abilities = player_abilities;
+
+    let dragged_slot = dragging_q.iter().next();
+
+    for (slot, mut image_node, mut bg_color, _entity) in &mut slot_q {
+        let is_dragged = dragged_slot.map(|d| d.index == slot.index).unwrap_or(false);
+
+        let key = if is_dragged {
+            None
+        } else {
+            player.active_abilities.get(slot.index).and_then(|opt| opt.as_deref())
+        };
+
+        if let Some(key) = key {
+            image_node.image = assets.image(format!("build_{key}"));
+            image_node.color = Color::WHITE;
+            *bg_color = BackgroundColor(SELECTED_COLOR);
+        } else {
+            image_node.image = assets.image("stone");
+            image_node.color = Color::NONE;
+            *bg_color = BackgroundColor(EMPTY_SLOT_COLOR);
+        }
+    }
+}
+
+fn clear_drag_ghost(commands: &mut Commands, ghost_q: &Query<Entity, With<PrecombatDragGhost>>) {
+    for entity in ghost_q {
+        commands.entity(entity).try_despawn();
+    }
+}
+
+pub fn handle_hotkey_drag_start(
+    event: On<Pointer<DragStart>>,
+    mut commands: Commands,
+    assets: Res<WorldAssets>,
+    player: Res<Player>,
+    slot_q: Query<&ActiveHotkeySlot>,
+    ghost_q: Query<Entity, With<PrecombatDragGhost>>,
+    window_e: Single<Entity, With<Window>>,
+) {
+    let Ok(slot) = slot_q.get(event.entity) else {
+        return;
+    };
+    if event.button != PointerButton::Primary {
+        return;
+    }
+    let key = player.active_abilities.get(slot.index).and_then(|opt| opt.as_deref());
+    let Some(key) = key else {
+        return;
+    };
+
+    clear_drag_ghost(&mut commands, &ghost_q);
+    let pos = event.pointer_location.position;
+    let left = pos.x - 36.0;
+    let top = pos.y - 36.0;
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(left),
+            top: Val::Px(top),
+            width: ACTIVE_HOTKEY_SLOT_SIZE,
+            height: ACTIVE_HOTKEY_SLOT_SIZE,
+            border: UiRect::all(Val::Px(2.)),
+            ..default()
+        },
+        BorderColor::all(BUTTON_BORDER_COLOR),
+        BackgroundColor(Color::srgba(1., 1., 1., 0.25)),
+        ImageNode::new(assets.image(format!("build_{key}"))).with_mode(NodeImageMode::Stretch),
+        GlobalZIndex(1200),
+        Pickable::IGNORE,
+        PrecombatDragGhost,
+    ));
+    commands
+        .entity(*window_e)
+        .insert(CursorIcon::from(SystemCursorIcon::Move));
+
+    commands.entity(event.entity).insert(DraggingSlot);
+}
+
+pub fn handle_hotkey_drag(
+    event: On<Pointer<Drag>>,
+    mut ghost_node_q: Query<&mut Node, With<PrecombatDragGhost>>,
+) {
+    let pos = event.pointer_location.position;
+    for mut node in ghost_node_q.iter_mut() {
+        node.left = Val::Px(pos.x - 36.0);
+        node.top = Val::Px(pos.y - 36.0);
+    }
+}
+
+pub fn handle_hotkey_drag_end(
+    event: On<Pointer<DragEnd>>,
+    mut commands: Commands,
+    player: Res<Player>,
+    slot_q: Query<&ActiveHotkeySlot>,
+    ghost_q: Query<Entity, With<PrecombatDragGhost>>,
+    window_e: Single<Entity, With<Window>>,
+    dragging_q: Query<Entity, With<DraggingSlot>>,
+) {
+    clear_drag_ghost(&mut commands, &ghost_q);
+    let mut cursor_icon = SystemCursorIcon::Default;
+    if let Ok(slot) = slot_q.get(event.entity) {
+        let is_filled = player.active_abilities.get(slot.index).and_then(|opt| opt.as_ref()).is_some();
+        if is_filled {
+            cursor_icon = SystemCursorIcon::Pointer;
+        }
+    }
+    commands
+        .entity(*window_e)
+        .insert(CursorIcon::from(cursor_icon));
+
+    for entity in &dragging_q {
+        commands.entity(entity).remove::<DraggingSlot>();
+    }
+}
+
+pub fn handle_hotkey_drop(
+    event: On<Pointer<DragDrop>>,
+    mut player: ResMut<Player>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    slot_q: Query<&ActiveHotkeySlot>,
+    mut commands: Commands,
+    ghost_q: Query<Entity, With<PrecombatDragGhost>>,
+    window_e: Single<Entity, With<Window>>,
+    dragging_q: Query<Entity, With<DraggingSlot>>,
+) {
+    clear_drag_ghost(&mut commands, &ghost_q);
+
+    for entity in &dragging_q {
+        commands.entity(entity).remove::<DraggingSlot>();
+    }
+
+    let (Ok(target), Ok(source)) = (slot_q.get(event.entity), slot_q.get(event.dropped)) else {
+        commands
+            .entity(*window_e)
+            .insert(CursorIcon::from(SystemCursorIcon::Default));
+        return;
+    };
+
+    if target.index == source.index {
+        let is_filled = player.active_abilities.get(target.index).and_then(|opt| opt.as_ref()).is_some();
+        let cursor_icon = if is_filled { SystemCursorIcon::Pointer } else { SystemCursorIcon::Default };
+        commands
+            .entity(*window_e)
+            .insert(CursorIcon::from(cursor_icon));
+        return;
+    }
+
+    if source.index < player.active_abilities.len() && target.index < player.active_abilities.len() {
+        player.active_abilities.swap(source.index, target.index);
+        play_audio_msg.write(PlayAudioMsg::new("button"));
+    }
+
+    let is_filled = player.active_abilities.get(target.index).and_then(|opt| opt.as_ref()).is_some();
+    let cursor_icon = if is_filled { SystemCursorIcon::Pointer } else { SystemCursorIcon::Default };
+    commands
+        .entity(*window_e)
+        .insert(CursorIcon::from(cursor_icon));
+}
+
+pub fn handle_active_hotkey_slot_click(
+    event: On<Pointer<Click>>,
+    mut player: ResMut<Player>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    slot_q: Query<&ActiveHotkeySlot>,
+    mut commands: Commands,
+    window_e: Single<Entity, With<Window>>,
+) {
+    let Ok(slot) = slot_q.get(event.entity) else {
+        return;
+    };
+
+    if slot.index < player.active_abilities.len() && player.active_abilities[slot.index].is_some() {
+        player.active_abilities[slot.index] = None;
+        play_audio_msg.write(PlayAudioMsg::new("button"));
+        commands
+            .entity(*window_e)
+            .insert(CursorIcon::from(SystemCursorIcon::Default));
+    }
+}
+
+pub fn active_hotkey_slot_tooltip_system(
+    mut commands: Commands,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    player: Res<Player>,
+    level_up: Res<LevelUpPending>,
+    active_modal: Res<ActiveModal>,
+    slot_q: Query<(&Interaction, &ActiveHotkeySlot)>,
+    changed_slot_q: Query<(), (With<ActiveHotkeySlot>, Changed<Interaction>)>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
+    windows: Query<&Window>,
+) {
+    if active_modal.active {
+        for entity in tooltip_q.iter() {
+            commands.entity(entity).try_despawn();
+        }
+        return;
+    }
+
+    if level_up.active {
+        return;
+    }
+
+    if changed_slot_q.is_empty() {
+        return;
+    }
+
+    let mut hovered_slot = None;
+    for (interaction, slot) in &slot_q {
+        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
+            hovered_slot = Some(slot);
+            break;
+        }
+    }
+
+    for entity in tooltip_q.iter() {
+        commands.entity(entity).try_despawn();
+    }
+
+    if let Some(slot) = hovered_slot {
+        let lang = settings.language;
+        let equipped_key = player.active_abilities.get(slot.index).and_then(|opt| opt.as_deref());
+
+        if let Some(key) = equipped_key {
+            if let Some(ability) = get_ability(key) {
+                let title = name_with_level(
+                    &ability.name,
+                    "ability",
+                    ability.level as u8,
+                    &localization,
+                    lang,
+                );
+                let lines = ability.full_description(lang, &localization);
+                spawn_item_tooltip(
+                    &mut commands,
+                    &assets,
+                    title,
+                    lines,
+                    &windows,
+                    None,
+                    Some(ability.name.clone()),
+                );
             }
         }
     }

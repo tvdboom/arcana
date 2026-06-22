@@ -151,6 +151,7 @@ impl FromWorld for WorldAssets {
             ("bg_hunt", assets.load("images/bg/hunt.ktx2")),
             ("bg_quest", assets.load("images/bg/quest.ktx2")),
             ("bg_duel", assets.load("images/bg/duel.ktx2")),
+            ("bg_combat", assets.load("images/bg/combat.ktx2")),
             ("defeat", assets.load("images/bg/defeat.ktx2")),
             // UI
             ("border", assets.load("images/ui/border.ktx2")),

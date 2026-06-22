@@ -20,10 +20,10 @@ mod systems;
 mod ui;
 mod utils;
 
-use crate::core::actions::craft::{setup_craft_ui, update_craft_ui};
+use crate::core::actions::craft::{setup_craft_ui, update_craft_ui, CraftSeed};
 use crate::core::actions::duel::setup_duel_ui;
-use crate::core::actions::hunt::{setup_hunt_ui, update_hunt_ui};
-use crate::core::combat::precombat::*;
+use crate::core::actions::hunt::{apply_pending_hunt_xp, setup_hunt_ui, update_hunt_ui, PendingHuntXp};
+use crate::core::combat::{setup_combat_ui, CombatCmp};
 use crate::core::actions::quest::setup_quest_ui;
 use crate::core::actions::rest::{setup_rest_ui, update_rest_ui};
 use crate::core::actions::shop::*;
@@ -106,8 +106,8 @@ impl Plugin for GamePlugin {
             .init_resource::<WorkSliderState>()
             .init_resource::<StudySliderState>()
             .init_resource::<TrainSliderState>()
-            .init_resource::<crate::core::actions::craft::CraftSeed>()
-            .init_resource::<PrecombatLoadout>()
+            .init_resource::<CraftSeed>()
+            .init_resource::<PendingHuntXp>()
             .init_resource::<RightTab>();
 
         // Sets
@@ -181,7 +181,7 @@ impl Plugin for GamePlugin {
             .add_systems(Update, handle_pet_name_input.run_if(in_state(GameState::ChooseSubClass)))
             .add_systems(
                 OnEnter(GameState::Playing),
-                (setup_playing_screen, rebuild_playing_lists).chain(),
+                (apply_pending_hunt_xp, setup_playing_screen, rebuild_playing_lists).chain(),
             )
             .add_systems(
                 OnExit(GameState::Playing),
@@ -200,6 +200,8 @@ impl Plugin for GamePlugin {
                     tooltip_follow_cursor_system,
                     tick_gold_toasts,
                     manage_level_up_overlay,
+                    update_active_hotkey_slots,
+                    active_hotkey_slot_tooltip_system,
                 )
                     .run_if(in_state(GameState::Playing)),
             )
@@ -318,13 +320,14 @@ impl Plugin for GamePlugin {
                 )
                     .run_if(in_state(GameState::Hunt)),
             )
-            // Precombat Systems
-            .add_systems(OnEnter(GameState::Precombat), setup_precombat_ui)
-            .add_systems(OnExit(GameState::Precombat), despawn::<PrecombatCmp>)
+            // Combat Systems
             .add_systems(
-                Update,
-                (update_precombat_ui, tooltip_follow_cursor_system)
-                    .run_if(in_state(GameState::Precombat)),
+                OnEnter(GameState::Combat),
+                (despawn::<PlayingCmp>, setup_combat_ui).chain(),
+            )
+            .add_systems(
+                OnExit(GameState::Combat),
+                (despawn::<CombatCmp>, despawn::<TooltipNode>),
             )
             // Quest Systems
             .add_systems(OnEnter(GameState::Quest), setup_quest_ui)

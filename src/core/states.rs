@@ -34,7 +34,6 @@ pub enum GameState {
     Hunt,
     Quest,
     Duel,
-    Precombat,
 }
 
 pub fn is_panel_state(state: GameState) -> bool {

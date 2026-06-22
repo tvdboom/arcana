@@ -1124,8 +1124,9 @@ pub fn build_craft_content_inner(
 
                     let wisdom_mod = player.wisdom_mod();
                     let percentage = (100.0 - wisdom_mod as f32).max(1.0);
-                    let max_allowed_gold_cost =
-                        (total_selected_price as f32 * percentage / 100.0) as u32;
+                    // Budget is the bench's total gold value; the wisdom modifier instead
+                    // reduces each recipe's craft gold cost (applied below).
+                    let max_allowed_gold_cost = total_selected_price;
 
                     let selected_set: HashSet<String> =
                         item_selection.items.iter().cloned().collect();
@@ -1532,16 +1533,23 @@ pub fn handle_craft_item_select(
             if let Some(item) = get_equipment(&btn.item_name) {
                 let wisdom_mod = player.wisdom_mod();
 
-                // Calculate current combined gold cost
+                // Calculate current combined gold cost using discounted craft price (15% of item price)
                 let mut combined_gold_cost = 0;
                 for sel_name in &item_selection.items {
                     if let Some(sel_item) = get_equipment(sel_name) {
-                        combined_gold_cost += sel_item.price();
+                        let base_gold_cost = (sel_item.price() as f32 * 0.15) as u32;
+                        let gold_cost = (base_gold_cost as f32
+                            * (1.0 - 0.01 * wisdom_mod as f32))
+                            .max(1.0) as u32;
+                        combined_gold_cost += gold_cost;
                     }
                 }
 
-                // Add the new item's gold cost
-                let new_gold_cost = item.price();
+                // Add the new item's craft gold cost
+                let base_gold_cost = (item.price() as f32 * 0.15) as u32;
+                let new_gold_cost = (base_gold_cost as f32
+                    * (1.0 - 0.01 * wisdom_mod as f32))
+                    .max(1.0) as u32;
 
                 // Calculate total budget
                 let mut total_selected_price = 0;
@@ -1550,9 +1558,7 @@ pub fn handle_craft_item_select(
                         total_selected_price += art.price;
                     }
                 }
-                let percentage = (100.0 - wisdom_mod as f32).max(1.0);
-                let max_allowed_gold_cost =
-                    (total_selected_price as f32 * percentage / 100.0) as u32;
+                let max_allowed_gold_cost = total_selected_price;
 
                 if combined_gold_cost + new_gold_cost <= max_allowed_gold_cost {
                     item_selection.items.push(btn.item_name.clone());
@@ -1589,13 +1595,16 @@ pub fn handle_craft_all_click(
             total_selected_price += art.price;
         }
     }
-    let percentage = (100.0 - wisdom_mod as f32).max(1.0);
-    let max_allowed_gold_cost = (total_selected_price as f32 * percentage / 100.0) as u32;
+    let max_allowed_gold_cost = total_selected_price;
 
     let mut combined_gold_cost = 0;
     for sel_name in &item_selection.items {
         if let Some(sel_item) = get_equipment(sel_name) {
-            combined_gold_cost += sel_item.price();
+            let base_gold_cost = (sel_item.price() as f32 * 0.15) as u32;
+            let gold_cost = (base_gold_cost as f32
+                * (1.0 - 0.01 * wisdom_mod as f32))
+                .max(1.0) as u32;
+            combined_gold_cost += gold_cost;
         }
     }
 

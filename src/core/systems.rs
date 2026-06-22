@@ -40,8 +40,7 @@ pub fn check_keys_menu(
                 | GameState::Work
                 | GameState::Study
                 | GameState::Train
-                | GameState::Rest
-                | GameState::Precombat => {
+                | GameState::Rest => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_game_state.set(GameState::Playing);
                 },

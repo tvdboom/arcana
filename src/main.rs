@@ -87,7 +87,7 @@ fn init_panic_logger() {
 fn set_window_icon(_: NonSendMarker) {
     use winit::window::Icon;
 
-    let image = image::open("assets/images/icons/favicon.ico").unwrap().into_rgba8();
+    let image = image::open("assets/images/icons/favicon.png").unwrap().into_rgba8();
     let (width, height) = image.dimensions();
     let rgba = image.into_raw();
 

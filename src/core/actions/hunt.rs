@@ -21,6 +21,33 @@ pub struct HuntContentWrapper;
 #[derive(Component)]
 pub struct HuntCardMarker(pub u32); // 0 = Easy, 1 = Wild, 2 = Deadly
 
+#[derive(Resource, Default)]
+pub struct PendingHuntXp {
+    pub amount: u32,
+}
+
+pub fn apply_pending_hunt_xp(
+    mut pending_hunt_xp: ResMut<PendingHuntXp>,
+    mut player: ResMut<Player>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    mut level_up: ResMut<LevelUpPending>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    if pending_hunt_xp.amount == 0 {
+        return;
+    }
+
+    let amount = pending_hunt_xp.amount;
+    pending_hunt_xp.amount = 0;
+    gain_xp(
+        &mut player,
+        amount,
+        &mut level_up,
+        &mut play_audio_msg,
+        &mut next_game_state,
+    );
+}
+
 pub fn setup_hunt_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -404,6 +431,7 @@ pub fn handle_hunt_card_clicks(
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut level_up: ResMut<LevelUpPending>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut pending_hunt_xp: ResMut<PendingHuntXp>,
     card_q: Query<&HuntCardMarker>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
@@ -422,10 +450,7 @@ pub fn handle_hunt_card_clicks(
     };
 
     player.ap += ap_gain;
-    let old_level = player.level();
-    gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state);
-
-    let combat_triggered = player.level() == old_level && rng.random_bool(combat_chance);
+    let combat_triggered = rng.random_bool(combat_chance);
 
     let mut loot_found = None;
     if rng.random_bool(loot_chance) {
@@ -436,10 +461,12 @@ pub fn handle_hunt_card_clicks(
     }
 
     if combat_triggered {
-        next_game_state.set(GameState::Precombat);
+        pending_hunt_xp.amount = pending_hunt_xp.amount.saturating_add(xp_gain);
+        next_game_state.set(GameState::Combat);
         return;
     }
 
+    gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state);
     play_audio_msg.write(PlayAudioMsg::new("hunt"));
 
     if let Some(artifact_name) = loot_found {
