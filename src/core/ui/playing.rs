@@ -115,7 +115,7 @@ pub struct AbilitiesList;
 #[derive(Component)]
 pub struct PerksList;
 
-#[derive(Resource, Default, PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(Resource, Default, PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum RightTab {
     #[default]
     Equipment,
@@ -123,6 +123,18 @@ pub enum RightTab {
     Abilities,
     Perks,
     Artifacts,
+}
+
+/// Remembers each right-panel tab's scroll offset so switching tabs and back
+/// restores the previous scroll position instead of resetting to the top.
+/// `pending` holds an offset waiting to be applied once the newly-shown tab's
+/// content has actually been laid out (its `ComputedNode` content size is only
+/// valid a frame or two after the wrapper toggles from `display: none`).
+#[derive(Resource, Default)]
+pub struct RightTabScroll {
+    offsets: std::collections::HashMap<RightTab, f32>,
+    current: RightTab,
+    pending: Option<f32>,
 }
 
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
@@ -140,6 +152,11 @@ pub struct PerksListWrapper;
 pub struct ArtifactsListWrapper;
 #[derive(Component)]
 pub struct ArtifactsList;
+
+/// Marker for the playing screen's right-column scroll viewport. Used to gate
+/// hover/click on cards that are scrolled outside the visible (clipped) area.
+#[derive(Component)]
+pub struct RightColumnScroll;
 
 /// The equipment image-slots overlaid on the character portrait.
 #[derive(Component, Clone, Copy, PartialEq, Eq, Debug)]
@@ -258,10 +275,7 @@ fn combat_breakdown(
                 vec![format!("[base] {}", signed_line(localization.get("general.base", lang), 5))];
             lines.push(format!(
                 "[strength] {}",
-                signed_line(
-                    localization.get("attribute.strength", lang),
-                    player.strength() as i32 - 10,
-                )
+                signed_line(localization.get("attribute.strength", lang), player.strength_mod())
             ));
             let training_bonus = player.training_bonus_for_skill("attack");
             if training_bonus > 0 {
@@ -275,13 +289,12 @@ fn combat_breakdown(
             lines
         },
         PlayingStat::Defense => {
-            let mut lines = vec![format!(
+            let mut lines =
+                vec![format!("[base] {}", signed_line(localization.get("general.base", lang), 5))];
+            lines.push(format!(
                 "[constitution] {}",
-                signed_line(
-                    localization.get("attribute.constitution", lang),
-                    player.constitution() as i32 / 4,
-                )
-            )];
+                signed_line(localization.get("attribute.constitution", lang), player.constitution_mod())
+            ));
             let training_bonus = player.training_bonus_for_skill("defense");
             if training_bonus > 0 {
                 lines.push(format!(
@@ -294,13 +307,12 @@ fn combat_breakdown(
             lines
         },
         PlayingStat::Initiative => {
-            let mut lines = vec![format!(
+            let mut lines =
+                vec![format!("[base] {}", signed_line(localization.get("general.base", lang), 5))];
+            lines.push(format!(
                 "[dexterity] {}",
-                signed_line(
-                    localization.get("attribute.dexterity", lang),
-                    player.dexterity() as i32 / 2,
-                )
-            )];
+                signed_line(localization.get("attribute.dexterity", lang), player.dexterity_mod())
+            ));
             let training_bonus = player.training_bonus_for_skill("initiative");
             if training_bonus > 0 {
                 lines.push(format!(
@@ -367,6 +379,88 @@ fn perk_bonus_lines(
     lines
 }
 
+fn clear_tooltips(commands: &mut Commands, tooltip_q: &Query<Entity, With<TooltipNode>>) {
+    for entity in tooltip_q.iter() {
+        commands.entity(entity).try_despawn();
+    }
+}
+
+fn spawn_active_hotkey_tooltip(
+    commands: &mut Commands,
+    assets: &WorldAssets,
+    localization: &Localization,
+    settings: &Settings,
+    player: &Player,
+    slot_index: usize,
+    tooltip_q: &Query<Entity, With<TooltipNode>>,
+    windows: &Query<&Window>,
+) {
+    clear_tooltips(commands, tooltip_q);
+
+    let lang = settings.language;
+    let equipped_key = player.active_abilities.get(slot_index).and_then(|opt| opt.as_deref());
+    if let Some(key) = equipped_key {
+        if let Some(ability) = get_ability(key) {
+            let title = name_with_level(
+                &ability.name,
+                "ability",
+                ability.level as u8,
+                &localization,
+                lang,
+            );
+            let lines = ability.full_description(lang, &localization);
+            spawn_item_tooltip(
+                commands,
+                assets,
+                title,
+                lines,
+                windows,
+                None,
+                Some(ability.name.clone()),
+            );
+        }
+    }
+}
+
+/// Sets the cursor and tooltip for whichever active hotkey slot is currently
+/// hovered (pointer + tooltip if it holds an ability, default otherwise).
+fn refresh_hovered_hotkey_slot(
+    commands: &mut Commands,
+    assets: &WorldAssets,
+    localization: &Localization,
+    settings: &Settings,
+    player: &Player,
+    window_e: Entity,
+    slot_state_q: &Query<(&bevy::ui::RelativeCursorPosition, &ActiveHotkeySlot)>,
+    tooltip_q: &Query<Entity, With<TooltipNode>>,
+    windows: &Query<&Window>,
+) {
+    let hovered = slot_state_q.iter().find_map(|(rel, slot)| {
+        rel.cursor_over().then_some(slot.index)
+    });
+
+    let filled = hovered.filter(|idx| {
+        player.active_abilities.get(*idx).and_then(|opt| opt.as_ref()).is_some()
+    });
+
+    if let Some(idx) = filled {
+        commands.entity(window_e).insert(CursorIcon::from(SystemCursorIcon::Pointer));
+        spawn_active_hotkey_tooltip(
+            commands,
+            assets,
+            localization,
+            settings,
+            player,
+            idx,
+            tooltip_q,
+            windows,
+        );
+    } else {
+        commands.entity(window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
+        clear_tooltips(commands, tooltip_q);
+    }
+}
+
 /// A bordered placeholder box (used wherever an item/ability image will go later).
 fn spawn_placeholder(
     parent: &mut ChildSpawnerCommands,
@@ -411,6 +505,7 @@ fn spawn_card(
             margin: UiRect::bottom(Val::Px(6.)),
             border: UiRect::all(Val::Px(1.)),
             position_type: PositionType::Relative,
+            overflow: Overflow::clip(),
             ..default()
         },
         BackgroundColor(BAR_BG_COLOR),
@@ -438,6 +533,7 @@ fn spawn_card(
                     position_type: PositionType::Absolute,
                     right: Val::Px(4.),
                     top: Val::Px(4.),
+                    overflow: Overflow::clip(),
                     ..default()
                 },))
                 .with_children(|parent| {
@@ -458,6 +554,7 @@ fn spawn_card(
         parent
             .spawn(Node {
                 flex_direction: FlexDirection::Column,
+                overflow: Overflow::clip(),
                 ..default()
             })
             .with_children(|parent| {
@@ -482,7 +579,13 @@ pub fn handle_perk_card_click(
     settings: Res<Settings>,
     card_q: Query<&RightColumnTooltip>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    scroll_q: Query<&bevy::ui::RelativeCursorPosition, With<RightColumnScroll>>,
 ) {
+    if let Some(rel) = scroll_q.iter().next() {
+        if !rel.cursor_over() {
+            return;
+        }
+    }
     if event.button == PointerButton::Secondary {
         if let Ok(RightColumnTooltip::Perk(perk_name)) = card_q.get(event.entity) {
             let lang = settings.language;
@@ -1506,11 +1609,10 @@ pub fn right_column_tooltip_system(
     changed_card_q: Query<(), (With<RightColumnTooltip>, Changed<Interaction>)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
     windows: Query<&Window>,
+    ghost_q: Query<Entity, With<PrecombatDragGhost>>,
 ) {
-    if active_modal.active {
-        for entity in tooltip_q.iter() {
-            commands.entity(entity).try_despawn();
-        }
+    if active_modal.active || !ghost_q.is_empty() {
+        clear_tooltips(&mut commands, &tooltip_q);
         return;
     }
 
@@ -1541,9 +1643,7 @@ pub fn right_column_tooltip_system(
         }
     }
 
-    for entity in tooltip_q.iter() {
-        commands.entity(entity).try_despawn();
-    }
+    clear_tooltips(&mut commands, &tooltip_q);
 
     if let Some(card) = hovered_card {
         let lang = settings.language;
@@ -1844,6 +1944,8 @@ fn spawn_right_column(
                 ScrollableContainer,
                 ScrollPosition::default(),
                 Interaction::default(),
+                bevy::ui::RelativeCursorPosition::default(),
+                RightColumnScroll,
             ));
             let container_entity = container_cmd.id();
             container_cmd.with_children(|parent| {
@@ -1867,6 +1969,7 @@ fn spawn_right_column(
                                 flex_direction: FlexDirection::Column,
                                 flex_shrink: 0.,
                                 margin: UiRect::bottom(Val::Px(15.)),
+                                overflow: Overflow::clip(),
                                 ..default()
                             },
                             EquipmentList,
@@ -1894,6 +1997,7 @@ fn spawn_right_column(
                                 flex_direction: FlexDirection::Column,
                                 flex_shrink: 0.,
                                 margin: UiRect::bottom(Val::Px(15.)),
+                                overflow: Overflow::clip(),
                                 ..default()
                             },
                             ConsumablesList,
@@ -1921,6 +2025,7 @@ fn spawn_right_column(
                                 flex_direction: FlexDirection::Column,
                                 flex_shrink: 0.,
                                 margin: UiRect::bottom(Val::Px(15.)),
+                                overflow: Overflow::clip(),
                                 ..default()
                             },
                             AbilitiesList,
@@ -1947,6 +2052,7 @@ fn spawn_right_column(
                                 width: percent(100.),
                                 flex_direction: FlexDirection::Column,
                                 flex_shrink: 0.,
+                                overflow: Overflow::clip(),
                                 ..default()
                             },
                             PerksList,
@@ -1973,6 +2079,7 @@ fn spawn_right_column(
                                 width: percent(100.),
                                 flex_direction: FlexDirection::Column,
                                 flex_shrink: 0.,
+                                overflow: Overflow::clip(),
                                 ..default()
                             },
                             ArtifactsList,
@@ -2136,6 +2243,7 @@ pub fn rebuild_playing_lists(
     localization: Res<Localization>,
     player: Res<Player>,
     right_tab: Res<RightTab>,
+    mut tab_scroll: ResMut<RightTabScroll>,
     _game_state: Res<State<GameState>>,
     mut queries: RebuildPlayingListsQueries<'_, '_>,
 ) {
@@ -2558,10 +2666,22 @@ pub fn rebuild_playing_lists(
         }
     }
 
-    // Reset scroll position to top if the tab was just changed.
+    // On tab change, save the outgoing tab's scroll offset and queue a restore of
+    // the incoming tab's remembered offset. The actual restore is deferred to
+    // `restore_tab_scroll` because the freshly-shown wrapper's content size is not
+    // laid out yet this frame (so writing scroll.y now would be reset to 0 by the
+    // scrollbar system once it sees content_size <= viewport).
     if right_tab.is_changed() {
         if let Ok(mut scroll) = queries.scroll_q.single_mut() {
-            scroll.y = 0.0;
+            let new_tab = *right_tab;
+            if tab_scroll.current != new_tab {
+                let outgoing = tab_scroll.current;
+                tab_scroll.offsets.insert(outgoing, scroll.y);
+                tab_scroll.current = new_tab;
+            }
+            let target = tab_scroll.offsets.get(&new_tab).copied().unwrap_or(0.0);
+            scroll.y = target;
+            tab_scroll.pending = Some(target);
         }
     }
 
@@ -2589,6 +2709,33 @@ pub fn rebuild_playing_lists(
                 }
             }
         }
+    }
+}
+
+/// Applies a queued per-tab scroll offset once the newly-shown tab's content has
+/// been laid out. Runs every frame; when `content_size` finally exceeds the
+/// viewport (layout settled) it writes the saved offset and clears the request.
+pub fn restore_tab_scroll(
+    mut tab_scroll: ResMut<RightTabScroll>,
+    mut scroll_q: Query<(&mut ScrollPosition, &ComputedNode), With<RightColumnScroll>>,
+) {
+    let Some(target) = tab_scroll.pending else {
+        return;
+    };
+
+    if target <= 0.0 {
+        tab_scroll.pending = None;
+        return;
+    }
+
+    let Ok((mut scroll, node)) = scroll_q.single_mut() else {
+        return;
+    };
+
+    let max_scroll = (node.content_size().y - node.size().y).max(0.0);
+    if max_scroll > 0.0 {
+        scroll.y = target.min(max_scroll);
+        tab_scroll.pending = None;
     }
 }
 
@@ -3030,7 +3177,13 @@ pub fn handle_equipment_card_click(
     mut next_game_state: ResMut<NextState<GameState>>,
     _game_state: Option<Res<State<GameState>>>,
     card_q: Query<&EquipmentCard>,
+    scroll_q: Query<&bevy::ui::RelativeCursorPosition, With<RightColumnScroll>>,
 ) {
+    if let Some(rel) = scroll_q.iter().next() {
+        if !rel.cursor_over() {
+            return;
+        }
+    }
     if *right_tab != RightTab::Equipment
         && *right_tab != RightTab::Consumables
         && *right_tab != RightTab::Artifacts
@@ -3204,6 +3357,7 @@ pub fn spawn_equipment_card<'a>(
                 margin: UiRect::bottom(Val::Px(6.)),
                 border: UiRect::all(Val::Px(1.)),
                 position_type: PositionType::Relative,
+                overflow: Overflow::clip(),
                 ..default()
             },
             BackgroundColor(out_color),
@@ -3229,6 +3383,7 @@ pub fn spawn_equipment_card<'a>(
                     flex_direction: FlexDirection::Row,
                     align_items: AlignItems::Center,
                     column_gap: Val::Px(4.),
+                    overflow: Overflow::clip(),
                     ..default()
                 },))
                 .with_children(|parent| {
@@ -3268,6 +3423,7 @@ pub fn spawn_equipment_card<'a>(
                 .spawn(Node {
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Px(4.),
+                    overflow: Overflow::clip(),
                     ..default()
                 })
                 .with_children(|parent| {
@@ -3317,28 +3473,50 @@ pub fn update_action_buttons(
 }
 
 pub fn handle_active_ability_card_click(
-    _event: On<Pointer<Click>>,
+    event: On<Pointer<Click>>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     card_q: Query<&RightColumnTooltip>,
+    scroll_q: Query<&bevy::ui::RelativeCursorPosition, With<RightColumnScroll>>,
 ) {
-    let Ok(RightColumnTooltip::Ability(ability_name)) = card_q.get(_event.entity) else {
+    // Reject clicks whose cursor isn't actually over the visible (non-clipped)
+    // scroll viewport. Scrolled-out cards can remain pickable at screen positions
+    // outside the container, which would otherwise select them.
+    if let Some(rel) = scroll_q.iter().next() {
+        if !rel.cursor_over() {
+            return;
+        }
+    }
+
+    let Ok(RightColumnTooltip::Ability(ability_name)) = card_q.get(event.entity) else {
         return;
     };
 
     let is_currently_equipped = player.active_abilities.contains(&Some(ability_name.clone()));
-    if is_currently_equipped {
-        if let Some(pos) = player.active_abilities.iter().position(|x| x.as_ref() == Some(ability_name)) {
-            player.active_abilities[pos] = None;
-            play_audio_msg.write(PlayAudioMsg::new("button"));
-        }
-    } else {
-        if let Some(pos) = player.active_abilities.iter().position(|x| x.is_none()) {
-            player.active_abilities[pos] = Some(ability_name.clone());
-            play_audio_msg.write(PlayAudioMsg::new("button"));
-        } else {
-            play_audio_msg.write(PlayAudioMsg::new("error"));
-        }
+
+    match event.button {
+        // Right-click removes the ability from its active slot.
+        PointerButton::Secondary => {
+            if let Some(pos) =
+                player.active_abilities.iter().position(|x| x.as_ref() == Some(ability_name))
+            {
+                player.active_abilities[pos] = None;
+                play_audio_msg.write(PlayAudioMsg::new("button"));
+            }
+        },
+        // Left-click selects the ability into a free slot, or errors if full.
+        PointerButton::Primary => {
+            if is_currently_equipped {
+                return;
+            }
+            if let Some(pos) = player.active_abilities.iter().position(|x| x.is_none()) {
+                player.active_abilities[pos] = Some(ability_name.clone());
+                play_audio_msg.write(PlayAudioMsg::new("button"));
+            } else {
+                play_audio_msg.write(PlayAudioMsg::new("error"));
+            }
+        },
+        _ => {},
     }
 }
 
@@ -3365,6 +3543,7 @@ fn spawn_active_hotkey_slot(
         }),
         Interaction::default(),
         Pickable::default(),
+        bevy::ui::RelativeCursorPosition::default(),
         ActiveHotkeySlot {
             index,
         },
@@ -3506,6 +3685,7 @@ pub fn handle_hotkey_drag_start(
     player: Res<Player>,
     slot_q: Query<&ActiveHotkeySlot>,
     ghost_q: Query<Entity, With<PrecombatDragGhost>>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
     window_e: Single<Entity, With<Window>>,
 ) {
     let Ok(slot) = slot_q.get(event.entity) else {
@@ -3520,6 +3700,7 @@ pub fn handle_hotkey_drag_start(
     };
 
     clear_drag_ghost(&mut commands, &ghost_q);
+    clear_tooltips(&mut commands, &tooltip_q);
     let pos = event.pointer_location.position;
     let left = pos.x - 36.0;
     let top = pos.y - 36.0;
@@ -3549,6 +3730,8 @@ pub fn handle_hotkey_drag_start(
 
 pub fn handle_hotkey_drag(
     event: On<Pointer<Drag>>,
+    mut commands: Commands,
+    window_e: Single<Entity, With<Window>>,
     mut ghost_node_q: Query<&mut Node, With<PrecombatDragGhost>>,
 ) {
     let pos = event.pointer_location.position;
@@ -3556,32 +3739,40 @@ pub fn handle_hotkey_drag(
         node.left = Val::Px(pos.x - 36.0);
         node.top = Val::Px(pos.y - 36.0);
     }
+    commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Move));
 }
 
 pub fn handle_hotkey_drag_end(
-    event: On<Pointer<DragEnd>>,
+    _event: On<Pointer<DragEnd>>,
     mut commands: Commands,
     player: Res<Player>,
-    slot_q: Query<&ActiveHotkeySlot>,
+    slot_state_q: Query<(&bevy::ui::RelativeCursorPosition, &ActiveHotkeySlot)>,
     ghost_q: Query<Entity, With<PrecombatDragGhost>>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
     window_e: Single<Entity, With<Window>>,
     dragging_q: Query<Entity, With<DraggingSlot>>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    windows: Query<&Window>,
 ) {
     clear_drag_ghost(&mut commands, &ghost_q);
-    let mut cursor_icon = SystemCursorIcon::Default;
-    if let Ok(slot) = slot_q.get(event.entity) {
-        let is_filled = player.active_abilities.get(slot.index).and_then(|opt| opt.as_ref()).is_some();
-        if is_filled {
-            cursor_icon = SystemCursorIcon::Pointer;
-        }
-    }
-    commands
-        .entity(*window_e)
-        .insert(CursorIcon::from(cursor_icon));
 
     for entity in &dragging_q {
         commands.entity(entity).remove::<DraggingSlot>();
     }
+
+    refresh_hovered_hotkey_slot(
+        &mut commands,
+        &assets,
+        &localization,
+        &settings,
+        &player,
+        *window_e,
+        &slot_state_q,
+        &tooltip_q,
+        &windows,
+    );
 }
 
 pub fn handle_hotkey_drop(
@@ -3589,10 +3780,16 @@ pub fn handle_hotkey_drop(
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     slot_q: Query<&ActiveHotkeySlot>,
+    slot_state_q: Query<(&bevy::ui::RelativeCursorPosition, &ActiveHotkeySlot)>,
     mut commands: Commands,
     ghost_q: Query<Entity, With<PrecombatDragGhost>>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
     window_e: Single<Entity, With<Window>>,
     dragging_q: Query<Entity, With<DraggingSlot>>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    windows: Query<&Window>,
 ) {
     clear_drag_ghost(&mut commands, &ghost_q);
 
@@ -3600,32 +3797,27 @@ pub fn handle_hotkey_drop(
         commands.entity(entity).remove::<DraggingSlot>();
     }
 
-    let (Ok(target), Ok(source)) = (slot_q.get(event.entity), slot_q.get(event.dropped)) else {
-        commands
-            .entity(*window_e)
-            .insert(CursorIcon::from(SystemCursorIcon::Default));
-        return;
-    };
-
-    if target.index == source.index {
-        let is_filled = player.active_abilities.get(target.index).and_then(|opt| opt.as_ref()).is_some();
-        let cursor_icon = if is_filled { SystemCursorIcon::Pointer } else { SystemCursorIcon::Default };
-        commands
-            .entity(*window_e)
-            .insert(CursorIcon::from(cursor_icon));
-        return;
+    if let (Ok(target), Ok(source)) = (slot_q.get(event.entity), slot_q.get(event.dropped)) {
+        if target.index != source.index
+            && source.index < player.active_abilities.len()
+            && target.index < player.active_abilities.len()
+        {
+            player.active_abilities.swap(source.index, target.index);
+            play_audio_msg.write(PlayAudioMsg::new("button"));
+        }
     }
 
-    if source.index < player.active_abilities.len() && target.index < player.active_abilities.len() {
-        player.active_abilities.swap(source.index, target.index);
-        play_audio_msg.write(PlayAudioMsg::new("button"));
-    }
-
-    let is_filled = player.active_abilities.get(target.index).and_then(|opt| opt.as_ref()).is_some();
-    let cursor_icon = if is_filled { SystemCursorIcon::Pointer } else { SystemCursorIcon::Default };
-    commands
-        .entity(*window_e)
-        .insert(CursorIcon::from(cursor_icon));
+    refresh_hovered_hotkey_slot(
+        &mut commands,
+        &assets,
+        &localization,
+        &settings,
+        &player,
+        *window_e,
+        &slot_state_q,
+        &tooltip_q,
+        &windows,
+    );
 }
 
 pub fn handle_active_hotkey_slot_click(
@@ -3636,6 +3828,10 @@ pub fn handle_active_hotkey_slot_click(
     mut commands: Commands,
     window_e: Single<Entity, With<Window>>,
 ) {
+    if event.button != PointerButton::Secondary {
+        return;
+    }
+
     let Ok(slot) = slot_q.get(event.entity) else {
         return;
     };
@@ -3657,15 +3853,15 @@ pub fn active_hotkey_slot_tooltip_system(
     player: Res<Player>,
     level_up: Res<LevelUpPending>,
     active_modal: Res<ActiveModal>,
-    slot_q: Query<(&Interaction, &ActiveHotkeySlot)>,
-    changed_slot_q: Query<(), (With<ActiveHotkeySlot>, Changed<Interaction>)>,
+    slot_q: Query<(&bevy::ui::RelativeCursorPosition, &ActiveHotkeySlot)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
     windows: Query<&Window>,
+    ghost_q: Query<Entity, With<PrecombatDragGhost>>,
+    mut last_shown: Local<Option<usize>>,
 ) {
     if active_modal.active {
-        for entity in tooltip_q.iter() {
-            commands.entity(entity).try_despawn();
-        }
+        clear_tooltips(&mut commands, &tooltip_q);
+        *last_shown = None;
         return;
     }
 
@@ -3673,46 +3869,46 @@ pub fn active_hotkey_slot_tooltip_system(
         return;
     }
 
-    if changed_slot_q.is_empty() {
+    if !ghost_q.is_empty() {
+        clear_tooltips(&mut commands, &tooltip_q);
+        *last_shown = None;
         return;
     }
 
-    let mut hovered_slot = None;
-    for (interaction, slot) in &slot_q {
-        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
-            hovered_slot = Some(slot);
-            break;
-        }
-    }
+    // Re-evaluate the hovered slot every frame (no `Changed` gate) so the tooltip
+    // reliably reappears after a drag ends. Geometry-based `cursor_over` is used
+    // instead of `Interaction` because the press/hover state stays locked to the
+    // dragged slot right after a drop, whereas the relative cursor position always
+    // reflects the slot actually under the pointer.
+    let hovered_index = slot_q.iter().find_map(|(rel, slot)| {
+        rel.cursor_over().then_some(slot.index)
+    });
 
-    for entity in tooltip_q.iter() {
-        commands.entity(entity).try_despawn();
-    }
-
-    if let Some(slot) = hovered_slot {
-        let lang = settings.language;
-        let equipped_key = player.active_abilities.get(slot.index).and_then(|opt| opt.as_deref());
-
-        if let Some(key) = equipped_key {
-            if let Some(ability) = get_ability(key) {
-                let title = name_with_level(
-                    &ability.name,
-                    "ability",
-                    ability.level as u8,
-                    &localization,
-                    lang,
-                );
-                let lines = ability.full_description(lang, &localization);
-                spawn_item_tooltip(
+    match hovered_index {
+        Some(idx) => {
+            // Respawn if the hovered slot changed OR if another tooltip system
+            // (e.g. right_column/equip) cleared our tooltip when one of its own
+            // targets changed interaction during/after the drag.
+            if *last_shown != Some(idx) || tooltip_q.is_empty() {
+                spawn_active_hotkey_tooltip(
                     &mut commands,
                     &assets,
-                    title,
-                    lines,
+                    &localization,
+                    &settings,
+                    &player,
+                    idx,
+                    &tooltip_q,
                     &windows,
-                    None,
-                    Some(ability.name.clone()),
                 );
             }
-        }
+            *last_shown = Some(idx);
+        },
+        None => {
+            // Only clear the tooltip we own, so we don't clobber other systems'.
+            if last_shown.is_some() {
+                clear_tooltips(&mut commands, &tooltip_q);
+                *last_shown = None;
+            }
+        },
     }
 }

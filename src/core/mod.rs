@@ -108,7 +108,8 @@ impl Plugin for GamePlugin {
             .init_resource::<TrainSliderState>()
             .init_resource::<CraftSeed>()
             .init_resource::<PendingHuntXp>()
-            .init_resource::<RightTab>();
+            .init_resource::<RightTab>()
+            .init_resource::<RightTabScroll>();
 
         // Sets
         configure_stages!(app, InGameSet, in_state(AppState::Game));
@@ -202,6 +203,7 @@ impl Plugin for GamePlugin {
                     manage_level_up_overlay,
                     update_active_hotkey_slots,
                     active_hotkey_slot_tooltip_system,
+                    restore_tab_scroll,
                 )
                     .run_if(in_state(GameState::Playing)),
             )

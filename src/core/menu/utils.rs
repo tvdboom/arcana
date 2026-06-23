@@ -91,6 +91,7 @@ pub fn spawn_rich_text_row(
             align_items: AlignItems::Center,
             flex_wrap: FlexWrap::Wrap,
             column_gap: Val::Px(2.),
+            overflow: Overflow::clip(),
             ..default()
         })
         .with_children(|parent| {
