@@ -280,7 +280,7 @@ fn on_attribute_button_click(
                     Attribute::Charisma => &mut player.charisma,
                 };
 
-                if *val < 15 {
+                if *val < START_CHARACTERISTIC + 3 {
                     *val += 1;
                 }
             }
@@ -295,7 +295,7 @@ fn on_attribute_button_click(
                 Attribute::Charisma => &mut player.charisma,
             };
 
-            if *val > 5 {
+            if *val > START_CHARACTERISTIC.saturating_sub(3) {
                 *val -= 1;
             }
         },
@@ -403,7 +403,7 @@ pub fn update_attribute_buttons(
                     Attribute::Wisdom => player.wisdom,
                     Attribute::Charisma => player.charisma,
                 };
-                val <= 5
+                val <= START_CHARACTERISTIC.saturating_sub(3)
             },
             AttributeAction::Plus(attr) => {
                 let val = match attr {
@@ -414,7 +414,7 @@ pub fn update_attribute_buttons(
                     Attribute::Wisdom => player.wisdom,
                     Attribute::Charisma => player.charisma,
                 };
-                val >= 15 || remaining <= 0
+                val >= START_CHARACTERISTIC + 3 || remaining <= 0
             },
         };
 
@@ -1070,6 +1070,7 @@ fn on_age_slider_drag(
     // Generate random age within the range for this race and stage
     let age_stage = AgeStage::from_u32(stage);
     let (min_age, max_age) = player.race.age_stage_range(age_stage);
+    player.stage = age_stage;
     player.age = rng().random_range(min_age..=max_age);
 
     if let Ok(mut text) = text_q.single_mut() {
@@ -1255,7 +1256,7 @@ fn apply_age_stage(
     let age_stage = AgeStage::from_u32(stage);
     let (min_age, max_age) = player.race.age_stage_range(age_stage);
     let new_age = rng().random_range(min_age..=max_age);
-    let changed = player.age != new_age;
+    player.stage = age_stage;
     player.age = new_age;
     let snapped_frac = stage as f32 / 4.0;
     set_age_slider_position(handle_q, value_node_q, snapped_frac * AGE_SLIDER_WIDTH);
@@ -1265,10 +1266,6 @@ fn apply_age_stage(
             format!("general.{}", age_stage.to_lowername().replace(" ", "_")),
             settings.language,
         );
-    }
-
-    if !changed {
-        return;
     }
 
     for (mut text, val_attr) in attr_text_q.iter_mut() {

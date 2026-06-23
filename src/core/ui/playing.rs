@@ -230,7 +230,7 @@ pub fn name_with_level(
 
 fn signed_line(label: impl Into<String>, value: i32) -> String {
     let label = label.into();
-    if value > 0 {
+    if value >= 0 {
         format!("{}: +{}", label, value)
     } else {
         format!("{}: {}", label, value)
@@ -417,6 +417,7 @@ fn spawn_active_hotkey_tooltip(
                 windows,
                 None,
                 Some(ability.name.clone()),
+                0.0,
             );
         }
     }
@@ -1582,6 +1583,11 @@ pub fn equip_slot_tooltip_system(
                     &windows,
                     Some(sell_price),
                     Some(weapon.name().to_string()),
+                    if matches!(weapon, Equipment::Artifact(_)) {
+                        64.0
+                    } else {
+                        0.0
+                    },
                 );
             }
         }
@@ -1666,6 +1672,7 @@ pub fn right_column_tooltip_system(
                         &windows,
                         None,
                         Some(ability.name.clone()),
+                        0.0,
                     );
                 }
             },
@@ -1682,6 +1689,7 @@ pub fn right_column_tooltip_system(
                         &windows,
                         None,
                         Some(perk.name.clone()),
+                        0.0,
                     );
                 }
             },
@@ -1702,6 +1710,11 @@ pub fn right_column_tooltip_system(
                     );
                     let lines = equipment.full_description(lang, &localization);
                     let sell_price = equipment.sell_price(player.charisma_mod());
+                    let extra_width = if matches!(equipment, Equipment::Artifact(_)) {
+                        64.0
+                    } else {
+                        0.0
+                    };
                     spawn_item_tooltip(
                         &mut commands,
                         &assets,
@@ -1710,6 +1723,7 @@ pub fn right_column_tooltip_system(
                         &windows,
                         Some(sell_price),
                         Some(equipment.name().to_string()),
+                        extra_width,
                     );
                 }
             },
@@ -1808,7 +1822,7 @@ pub fn info_tooltip_system(
             InfoTooltip::Action(_) | InfoTooltip::Pet => unreachable!(),
         };
 
-        spawn_item_tooltip(&mut commands, &assets, title, lines, &windows, None, None);
+        spawn_item_tooltip(&mut commands, &assets, title, lines, &windows, None, None, 0.0);
     }
 }
 

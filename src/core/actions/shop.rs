@@ -895,6 +895,11 @@ pub fn shop_tooltip_system(
                 &windows,
                 Some(equipment.price()),
                 Some(equipment.name().to_string()),
+                if matches!(equipment, Equipment::Artifact(_)) {
+                    64.0
+                } else {
+                    0.0
+                },
             );
         }
     }

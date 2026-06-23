@@ -283,18 +283,9 @@ pub fn handle_work_card_clicks(
         let lang = settings.language;
         let toast = toast_container_q.single().unwrap();
 
-        let slider_mult = [1.0, 2.5, 4.0][slider_val as usize];
-
-        // Fixed costs calculations:
-        let craft_percentage =
-            (10.0 + player.level() as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
-        let craft_cost =
-            ((craft_percentage / 100.0) * player.max_mana() as f32 * slider_mult).max(1.0) as u32;
-
-        let manual_percentage =
-            (14.0 + player.level() as f32 * 0.5 - player.charisma_mod() as f32).max(1.0);
-        let manual_cost = ((manual_percentage / 100.0) * player.max_health() as f32 * slider_mult)
-            .max(1.0) as u32;
+        let values = work::calculate_work_values(&player, slider_val);
+        let craft_cost = values.craft_cost;
+        let manual_cost = values.manual_cost;
 
         match marker.0 {
             0 => {
@@ -337,13 +328,7 @@ pub fn handle_work_card_clicks(
         match marker.0 {
             0 => {
                 // Clerical Labor
-                let base = (1.0 + player.charisma_mod() as f32)
-                    * (player.level() as f32).powf(1.2)
-                    * 4.0
-                    * slider_mult;
-                let min_gold = (base * 0.8).max(1.0) as u32;
-                let max_gold = (base * 1.2).max(2.0) as u32;
-                let gold_earned = rng.random_range(min_gold..=max_gold);
+                let gold_earned = rng.random_range(values.min_clerical..=values.max_clerical);
 
                 let award_artifact = rng.random_bool(0.5);
                 if award_artifact {
@@ -417,13 +402,7 @@ pub fn handle_work_card_clicks(
             },
             1 => {
                 // Craft Labor
-                let base = (1.0 + player.charisma_mod() as f32)
-                    * (player.level() as f32).powf(1.2)
-                    * 5.0
-                    * slider_mult;
-                let min_gold = (base * 0.8).max(1.0) as u32;
-                let max_gold = (base * 1.2).max(2.0) as u32;
-                let gold_earned = rng.random_range(min_gold..=max_gold);
+                let gold_earned = rng.random_range(values.min_craft..=values.max_craft);
 
                 let next_mana = player.mana().saturating_sub(craft_cost);
                 player.set_mana(next_mana);
@@ -517,13 +496,7 @@ pub fn handle_work_card_clicks(
             },
             2 => {
                 // Manual Labor
-                let base = (1.0 + player.charisma_mod() as f32)
-                    * (player.level() as f32).powf(1.2)
-                    * 7.0
-                    * slider_mult;
-                let min_gold = (base * 0.8).max(1.0) as u32;
-                let max_gold = (base * 1.2).max(2.0) as u32;
-                let gold_earned = rng.random_range(min_gold..=max_gold);
+                let gold_earned = rng.random_range(values.min_manual..=values.max_manual);
 
                 let next_health = player.health().saturating_sub(manual_cost).max(1);
                 player.set_health(next_health);

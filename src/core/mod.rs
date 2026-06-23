@@ -23,8 +23,8 @@ mod utils;
 use crate::core::actions::craft::{setup_craft_ui, update_craft_ui, CraftSeed};
 use crate::core::actions::duel::setup_duel_ui;
 use crate::core::actions::hunt::{apply_pending_hunt_xp, setup_hunt_ui, update_hunt_ui, PendingHuntXp};
+use crate::core::actions::quest::{apply_pending_quest_xp, setup_quest_ui, update_quest_ui, PendingQuestXp};
 use crate::core::combat::{setup_combat_ui, CombatCmp};
-use crate::core::actions::quest::setup_quest_ui;
 use crate::core::actions::rest::{setup_rest_ui, update_rest_ui};
 use crate::core::actions::shop::*;
 use crate::core::actions::study::{setup_study_ui, update_study_ui, StudySliderState};
@@ -108,6 +108,7 @@ impl Plugin for GamePlugin {
             .init_resource::<TrainSliderState>()
             .init_resource::<CraftSeed>()
             .init_resource::<PendingHuntXp>()
+            .init_resource::<PendingQuestXp>()
             .init_resource::<RightTab>()
             .init_resource::<RightTabScroll>();
 
@@ -182,7 +183,13 @@ impl Plugin for GamePlugin {
             .add_systems(Update, handle_pet_name_input.run_if(in_state(GameState::ChooseSubClass)))
             .add_systems(
                 OnEnter(GameState::Playing),
-                (apply_pending_hunt_xp, setup_playing_screen, rebuild_playing_lists).chain(),
+                (
+                    apply_pending_hunt_xp,
+                    apply_pending_quest_xp,
+                    setup_playing_screen,
+                    rebuild_playing_lists,
+                )
+                    .chain(),
             )
             .add_systems(
                 OnExit(GameState::Playing),
@@ -334,6 +341,17 @@ impl Plugin for GamePlugin {
             // Quest Systems
             .add_systems(OnEnter(GameState::Quest), setup_quest_ui)
             .add_systems(OnExit(GameState::Quest), (cleanup_panel_ui, despawn::<TooltipNode>))
+            .add_systems(
+                Update,
+                (
+                    update_quest_ui,
+                    tooltip_follow_cursor_system,
+                    tick_gold_toasts,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Quest)),
+            )
             // Duel Systems
             .add_systems(OnEnter(GameState::Duel), setup_duel_ui)
             .add_systems(OnExit(GameState::Duel), (cleanup_panel_ui, despawn::<TooltipNode>));

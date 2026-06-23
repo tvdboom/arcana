@@ -197,6 +197,14 @@ impl Default for Player {
 }
 
 impl Player {
+    fn apply_combat_bonus(base: u32, bonus: i32) -> u32 {
+        if bonus >= 0 {
+            base.saturating_add(bonus as u32)
+        } else {
+            base.saturating_sub((-bonus) as u32)
+        }
+    }
+
     pub fn level(&self) -> u32 {
         self.xp / 10
     }
@@ -291,7 +299,7 @@ impl Player {
             }
         }
         let perk_mod = self.attribute_perk_mod(Attribute::Constitution);
-        (self.constitution as i32 + race_mod - age_mod + equip_mod + perk_mod).max(0) as u32
+        (self.constitution as i32 + race_mod + age_mod + equip_mod + perk_mod).max(0) as u32
     }
 
     pub fn constitution_mod(&self) -> i32 {
@@ -504,7 +512,7 @@ impl Player {
     }
 
     pub fn attack(&self) -> u32 {
-        (5 + self.strength_mod()
+        let bonus = self.strength_mod()
             + self.training_bonus_for_skill("attack") as i32
             + self.equipped_equipment().iter().map(|w| w.attack()).sum::<i32>()
             + self
@@ -519,12 +527,12 @@ impl Player {
                         None
                     }
                 })
-                .sum::<i32>()
-                .max(0)) as u32
+                .sum::<i32>();
+        Self::apply_combat_bonus(5, bonus)
     }
 
     pub fn defense(&self) -> u32 {
-        (5 + self.constitution_mod()
+        let bonus = self.constitution_mod()
             + self.training_bonus_for_skill("defense") as i32
             + self.equipped_equipment().iter().map(|w| w.defense()).sum::<i32>()
             + self
@@ -539,12 +547,12 @@ impl Player {
                         None
                     }
                 })
-                .sum::<i32>()
-                .max(0)) as u32
+                .sum::<i32>();
+        Self::apply_combat_bonus(5, bonus)
     }
 
     pub fn initiative(&self) -> u32 {
-        (5 + self.dexterity_mod()
+        let bonus = self.dexterity_mod()
             + self.training_bonus_for_skill("initiative") as i32
             + self.equipped_equipment().iter().map(|w| w.initiative()).sum::<i32>()
             + self
@@ -559,8 +567,8 @@ impl Player {
                         None
                     }
                 })
-                .sum::<i32>()
-                .max(0)) as u32
+                .sum::<i32>();
+        Self::apply_combat_bonus(5, bonus)
     }
 
     /// (height_cm, weight_kg). Height and weight are derived deterministically from name and race.

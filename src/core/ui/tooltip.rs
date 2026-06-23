@@ -30,6 +30,7 @@ pub struct TooltipContent {
     pub badge: Option<TooltipBadge>,
     pub pet_stats: Option<Vec<PetStat>>,
     pub image: Option<String>,
+    pub extra_width: f32,
 }
 
 pub fn spawn_tooltip(
@@ -44,7 +45,7 @@ pub fn spawn_tooltip(
         (1600., 900., None)
     };
 
-    let max_allowed_width = window_width * 0.35;
+    let max_allowed_width = window_width * 0.35 + content.extra_width;
 
     let font_size_title = window_height * 0.024;
     let font_size_desc = window_height * 0.018;
@@ -377,6 +378,7 @@ pub fn spawn_pet_tooltip(
             },
         ]),
         image: None,
+        extra_width: 0.0,
     };
 
     spawn_tooltip(commands, assets, content, windows);
@@ -396,6 +398,7 @@ pub fn spawn_action_tooltip(
         badge: Some(TooltipBadge::ActionPoints(ap_cost)),
         pet_stats: None,
         image: None,
+        extra_width: 0.0,
     };
 
     spawn_tooltip(commands, assets, content, windows);
@@ -409,6 +412,7 @@ pub fn spawn_item_tooltip(
     windows: &Query<&Window>,
     price: Option<u32>,
     image: Option<String>,
+    extra_width: f32,
 ) {
     let content = TooltipContent {
         title,
@@ -416,8 +420,8 @@ pub fn spawn_item_tooltip(
         badge: price.map(TooltipBadge::Price),
         pet_stats: None,
         image,
+        extra_width,
     };
-
     spawn_tooltip(commands, assets, content, windows);
 }
 

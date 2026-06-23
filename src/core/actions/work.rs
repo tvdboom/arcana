@@ -32,6 +32,53 @@ impl From<u32> for WorkSliderStageButton {
 #[derive(Component)]
 pub struct WorkCardMarker(pub u32); // 0 = Clerical, 1 = Craft, 2 = Manual
 
+#[derive(Clone, Copy, Debug)]
+pub struct WorkValues {
+    pub min_clerical: u32,
+    pub max_clerical: u32,
+    pub min_craft: u32,
+    pub max_craft: u32,
+    pub min_manual: u32,
+    pub max_manual: u32,
+    pub craft_cost: u32,
+    pub manual_cost: u32,
+}
+
+pub fn calculate_work_values(player: &Player, slider_val: u32) -> WorkValues {
+    let slider_mult = [1.0, 2.5, 4.0][slider_val as usize];
+    let charisma_factor = (1.0 + player.charisma_mod() as f32).max(1.0);
+    let level_factor = (player.level() as f32).powf(1.2);
+
+    let base_clerical = charisma_factor * level_factor * 5.0 * slider_mult;
+    let min_clerical = (base_clerical * 0.8).max(1.0) as u32;
+    let max_clerical = (base_clerical * 1.2).max(2.0) as u32;
+
+    let base_craft = charisma_factor * level_factor * 8.0 * slider_mult;
+    let min_craft = (base_craft * 0.8).max(1.0) as u32;
+    let max_craft = (base_craft * 1.2).max(2.0) as u32;
+
+    let base_manual = charisma_factor * level_factor * 12.0 * slider_mult;
+    let min_manual = (base_manual * 0.8).max(1.0) as u32;
+    let max_manual = (base_manual * 1.2).max(2.0) as u32;
+
+    let intensity_mult = slider_val.saturating_add(1);
+
+    WorkValues {
+        min_clerical,
+        max_clerical,
+        min_craft,
+        max_craft,
+        min_manual,
+        max_manual,
+        craft_cost: 10u32
+            .saturating_mul(player.level())
+            .saturating_mul(intensity_mult),
+        manual_cost: 10u32
+            .saturating_mul(player.level())
+            .saturating_mul(intensity_mult),
+    }
+}
+
 pub fn setup_work_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -183,38 +230,8 @@ pub fn build_work_content_inner(
     let mut handle_ent = Entity::PLACEHOLDER;
     let mut card_ents = Vec::new();
 
-    // Calculate gold ranges
-    let slider_mult = [1.0, 2.5, 4.0][slider_val as usize];
-
-    // Card 1 Ranges
-    let base_clerical = (1.0 + player.charisma_mod() as f32)
-        * (player.level() as f32).powf(1.2)
-        * 5.0
-        * slider_mult;
-    let min_clerical = (base_clerical * 0.8).max(1.0) as u32;
-    let max_clerical = (base_clerical * 1.2).max(2.0) as u32;
-
-    // Card 2 Ranges
-    let base_craft = (1.0 + player.charisma_mod() as f32)
-        * (player.level() as f32).powf(1.2)
-        * 8.0
-        * slider_mult;
-    let min_craft = (base_craft * 0.8).max(1.0) as u32;
-    let max_craft = (base_craft * 1.2).max(2.0) as u32;
-
-    // Card 3 Ranges
-    let base_manual = (1.0 + player.charisma_mod() as f32)
-        * (player.level() as f32).powf(1.2)
-        * 12.0
-        * slider_mult;
-    let min_manual = (base_manual * 0.8).max(1.0) as u32;
-    let max_manual = (base_manual * 1.2).max(2.0) as u32;
-
+    let values = calculate_work_values(player, slider_val);
     let ap_cost = slider_val + 1;
-
-    // Fixed costs calculations:
-    let craft_cost = 10 * player.level();
-    let manual_cost = 10 * player.level();
 
     // Top Row
     parent
@@ -347,8 +364,8 @@ pub fn build_work_content_inner(
             let title1 = localization.get("clerical_labor_title", lang);
             let desc1_raw = localization
                 .get("clerical_labor_desc", lang)
-                .replace("{min}", &min_clerical.to_string())
-                .replace("{max}", &max_clerical.to_string());
+                .replace("{min}", &values.min_clerical.to_string())
+                .replace("{max}", &values.max_clerical.to_string());
             let desc1 = desc1_raw.split('\n').next().unwrap().to_string();
             let c1 = spawn_card_ui(
                 parent,
@@ -367,8 +384,8 @@ pub fn build_work_content_inner(
             let title2 = localization.get("craft_labor_title", lang);
             let desc2_raw = localization
                 .get("craft_labor_desc", lang)
-                .replace("{min}", &min_craft.to_string())
-                .replace("{max}", &max_craft.to_string());
+                .replace("{min}", &values.min_craft.to_string())
+                .replace("{max}", &values.max_craft.to_string());
             let desc2 = desc2_raw.split('\n').next().unwrap().to_string();
             let c2 = spawn_card_ui(
                 parent,
@@ -377,7 +394,11 @@ pub fn build_work_content_inner(
                 &desc2,
                 "action_craft_labor",
                 Some(ap_cost),
-                Some((craft_cost, "mana", Color::srgb(40. / 255., 80. / 255., 185. / 255.))),
+                Some((
+                    values.craft_cost,
+                    "mana",
+                    Color::srgb(40. / 255., 80. / 255., 185. / 255.),
+                )),
                 None,
                 WorkCardMarker(1),
             );
@@ -387,8 +408,8 @@ pub fn build_work_content_inner(
             let title3 = localization.get("manual_labor_title", lang);
             let desc3_raw = localization
                 .get("manual_labor_desc", lang)
-                .replace("{min}", &min_manual.to_string())
-                .replace("{max}", &max_manual.to_string());
+                .replace("{min}", &values.min_manual.to_string())
+                .replace("{max}", &values.max_manual.to_string());
             let desc3 = desc3_raw.split('\n').next().unwrap().to_string();
             let c3 = spawn_card_ui(
                 parent,
@@ -397,7 +418,11 @@ pub fn build_work_content_inner(
                 &desc3,
                 "action_manual_labor",
                 Some(ap_cost),
-                Some((manual_cost, "health", Color::srgb(170. / 255., 35. / 255., 35. / 255.))),
+                Some((
+                    values.manual_cost,
+                    "health",
+                    Color::srgb(170. / 255., 35. / 255., 35. / 255.),
+                )),
                 None,
                 WorkCardMarker(2),
             );
