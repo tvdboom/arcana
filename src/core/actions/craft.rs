@@ -1642,7 +1642,7 @@ pub fn handle_craft_all_click(
     for item_name in &crafted {
         if let Some(item_eq) = get_equipment(item_name) {
             let has_empty = has_empty_slot_for(&player, &item_eq);
-            player.inventory.push(item_name.clone());
+            player.add_inventory_item(item_name.clone());
             if has_empty {
                 equip_item(&mut player, item_name);
             }

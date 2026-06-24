@@ -192,6 +192,9 @@ fn confirm_modal_action(
                 if let Some(pos) = player.inventory.iter().position(|k| k == &key) {
                     player.inventory.remove(pos);
                 }
+                if !player.inventory.iter().any(|inv| inv == &key) {
+                    player.equipped_consumables.retain(|eq| eq != &key);
+                }
                 player.gold += price;
                 play_audio_msg.write(PlayAudioMsg::new("sell"));
                 if let Some(win_e) = window_entity {

@@ -889,7 +889,10 @@ fn spawn_level_up_overlay(
                                 .observe(handle_confirm_over)
                                 .observe(handle_confirm_out)
                                 .observe(handle_confirm_press)
-                                .observe(handle_confirm_release);
+                                .observe(handle_confirm_release)
+                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                .observe(cursor::<Release>(SystemCursorIcon::Pointer));
 
                             let text_color = if confirm_ready {
                                 BUTTON_TEXT_COLOR

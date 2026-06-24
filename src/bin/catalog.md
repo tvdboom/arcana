@@ -166,3 +166,24 @@ Artifacts are special items that can't be quipped and are not used in combat. Th
 through the work, hunt or quest actions, as well as bought in the shop. They can be sold for
 gold or used in the craft action to craft equipment or consumables. Artifacts belong to a kind,
 like weapons, which determine which items can be crafted from it.
+
+
+
+### Monsters
+Monsters are defined in `assets/catalog/monsters.ron` and loaded through `all_monsters()` in
+`src/core/catalog/catalog.rs`. Each entry maps directly to the `Monster` struct in
+`src/core/monsters.rs`.
+
+Setup conventions:
+ - Keep `name` unique across the catalog.
+ - Keep image paths consistent with subtype folders:
+   - `images/monsters/creatures/...`
+   - `images/monsters/pets/...`
+   - `images/monsters/dragons/...`
+ - Encounter systems use image folder + level range filtering:
+   - Hunt pulls from `pets` + `dragons`.
+   - Quest pulls from `creatures` + `dragons`.
+ - `kind` should match the visual/category intent (`Dragon` for dragon naming/UI handling, `Pet`
+   for companion-style content).
+ - Scale stats and effect strength with level in the same progression spirit as the rest of the
+   catalog (higher level = stronger baseline and/or effects).

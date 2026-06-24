@@ -827,7 +827,7 @@ pub fn handle_shop_item_card_click(
     play_audio_msg.write(PlayAudioMsg::new("buy"));
 
     if event.button == PointerButton::Primary {
-        player.inventory.push(card.key.clone());
+        player.add_inventory_item(card.key.clone());
         let auto_equip = get_equipment(&card.key)
             .map(|eq| !matches!(eq, Equipment::Consumable(_) | Equipment::Artifact(_)))
             .unwrap_or(false);
@@ -835,7 +835,7 @@ pub fn handle_shop_item_card_click(
             crate::core::ui::playing::equip_item(&mut player, &card.key);
         }
     } else {
-        player.inventory.push(card.key.clone());
+        player.add_inventory_item(card.key.clone());
     }
 }
 

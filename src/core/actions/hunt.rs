@@ -455,7 +455,7 @@ pub fn handle_hunt_card_clicks(
     let mut loot_found = None;
     if rng.random_bool(loot_chance) {
         if let Some(artifact_name) = choose_hunting_artifact(tier) {
-            player.inventory.push(artifact_name.clone());
+            player.add_inventory_item(artifact_name.clone());
             loot_found = Some(artifact_name);
         }
     }

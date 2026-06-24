@@ -1435,9 +1435,9 @@ impl SelectionItem for Ajah {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, strum_macros::EnumIter)]
 pub enum PetChoice {
-    Rat,
     Owl,
-    Wolf,
+    Rat,
+    Snake,
     Weasel,
 }
 
@@ -1461,7 +1461,7 @@ impl SelectionItem for PetChoice {
         let monster_name = match self {
             PetChoice::Rat => "Rat",
             PetChoice::Owl => "Owl",
-            PetChoice::Wolf => "Wolf",
+            PetChoice::Snake => "Snake",
             PetChoice::Weasel => "Weasel",
         };
         if let Some(mut pet_monster) = crate::core::catalog::catalog::get_monster(monster_name) {
@@ -1472,7 +1472,7 @@ impl SelectionItem for PetChoice {
     }
 
     fn items() -> Vec<Self> {
-        vec![PetChoice::Rat, PetChoice::Owl, PetChoice::Wolf, PetChoice::Weasel]
+        vec![PetChoice::Rat, PetChoice::Owl, PetChoice::Snake, PetChoice::Weasel]
     }
 }
 

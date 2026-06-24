@@ -287,7 +287,7 @@ fn grant_equipment_reward(player: &mut Player, key: String) -> bool {
         }
     }
 
-    player.inventory.push(key);
+    player.add_inventory_item(key);
     false
 }
 
@@ -647,7 +647,7 @@ pub fn handle_quest_card_clicks(
 
     for reward in quest_consumable_rewards(marker.0, player.level(), consumable_count, &mut rng) {
         loot_found = true;
-        player.inventory.push(reward.clone());
+        player.add_inventory_item(reward.clone());
         spawn_toast(
             &mut commands,
             &assets,
@@ -661,7 +661,7 @@ pub fn handle_quest_card_clicks(
 
     for reward in quest_artifact_rewards(marker.0, player.level(), artifact_count, &mut rng) {
         loot_found = true;
-        player.inventory.push(reward.clone());
+        player.add_inventory_item(reward.clone());
         spawn_toast(
             &mut commands,
             &assets,

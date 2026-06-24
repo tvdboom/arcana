@@ -1,4 +1,5 @@
 use crate::core::audio::PlayAudioMsg;
+use crate::core::actions::gain_xp;
 use crate::core::classes::{Ajah, Class};
 use crate::core::menu::systems::StartNewCharacterMsg;
 use crate::core::player::Player;
@@ -7,6 +8,7 @@ use crate::core::ui::creation::SelectionItem;
 use crate::core::ui::level_up::{ApplyLevelUpMsg, LevelUpPending};
 use crate::core::ui::modal::ActiveModal;
 use bevy::prelude::*;
+use rand::{rng, RngExt};
 
 pub fn check_keys_menu(
     app_state: Res<State<AppState>>,
@@ -17,10 +19,38 @@ pub fn check_keys_menu(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    level_up: Res<LevelUpPending>,
+    mut level_up: ResMut<LevelUpPending>,
     mut apply_level_up_msg: MessageWriter<ApplyLevelUpMsg>,
     active_modal: Res<ActiveModal>,
 ) {
+    let cheat_level_up = *app_state.get() == AppState::Game
+        && keyboard.just_released(KeyCode::ArrowUp)
+        && (keyboard.pressed(KeyCode::ControlLeft) || keyboard.pressed(KeyCode::ControlRight))
+        && (keyboard.pressed(KeyCode::ShiftLeft) || keyboard.pressed(KeyCode::ShiftRight));
+    if cheat_level_up {
+        let old_level = player.level();
+        gain_xp(
+            &mut player,
+            10,
+            &mut level_up,
+            &mut play_audio_msg,
+            &mut next_game_state,
+        );
+        if player.level() > old_level && level_up.active {
+            let mut rng = rng();
+            while level_up.points_remaining > 0 {
+                let idx = rng.random_range(0..level_up.attr_gains.len());
+                if level_up.attr_gains[idx] < 2 {
+                    level_up.attr_gains[idx] += 1;
+                    level_up.points_remaining -= 1;
+                }
+            }
+            apply_level_up_msg.write(ApplyLevelUpMsg);
+        }
+        player.gold = player.gold.saturating_add(1000);
+        return;
+    }
+
     if keyboard.just_released(KeyCode::Escape) {
         if active_modal.active {
             return;

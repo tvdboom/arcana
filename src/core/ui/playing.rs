@@ -2359,7 +2359,7 @@ pub fn rebuild_playing_lists(
                 .filter_map(|(slot_val, _)| slot_val.as_deref().and_then(get_equipment))
                 .filter(|eq| !matches!(eq, Equipment::Consumable(_) | Equipment::Artifact(_)))
                 .collect();
-            equipped_items.sort_by(|a, b| a.level().cmp(&b.level()).then(a.name().cmp(b.name())));
+            equipped_items.sort_by(|a, b| b.level().cmp(&a.level()).then(a.name().cmp(b.name())));
             for weapon in &equipped_items {
                 empty = false;
                 let prefix = match weapon {
@@ -2396,7 +2396,7 @@ pub fn rebuild_playing_lists(
                 .filter_map(|key| get_equipment(key))
                 .filter(|eq| !matches!(eq, Equipment::Consumable(_) | Equipment::Artifact(_)))
                 .collect();
-            inventory_items.sort_by(|a, b| a.level().cmp(&b.level()).then(a.name().cmp(b.name())));
+            inventory_items.sort_by(|a, b| b.level().cmp(&a.level()).then(a.name().cmp(b.name())));
             for weapon in &inventory_items {
                 empty = false;
                 let prefix = match weapon {
@@ -2446,18 +2446,23 @@ pub fn rebuild_playing_lists(
                 }
             }
 
-            let mut sorted_consumables_keys: Vec<String> =
-                consumables_map.keys().cloned().collect();
+            let mut sorted_consumables_keys: Vec<String> = consumables_map.keys().cloned().collect();
             sorted_consumables_keys.sort_by(|a, b| {
                 let eq_a = get_equipment(a).unwrap();
                 let eq_b = get_equipment(b).unwrap();
-                eq_a.level().cmp(&eq_b.level()).then(eq_a.name().cmp(eq_b.name()))
+                let a_equipped = player.is_consumable_equipped(a);
+                let b_equipped = player.is_consumable_equipped(b);
+                b_equipped
+                    .cmp(&a_equipped)
+                    .then(eq_b.level().cmp(&eq_a.level()))
+                    .then(eq_a.name().cmp(eq_b.name()))
             });
 
             for key in &sorted_consumables_keys {
                 empty = false;
                 let weapon = get_equipment(key).unwrap();
                 let count = consumables_map.get(key).unwrap();
+                let is_equipped = player.is_consumable_equipped(key);
                 let display_name = if *count > 1 {
                     format!(
                         "{} (x{})",
@@ -2487,7 +2492,7 @@ pub fn rebuild_playing_lists(
                     vec![weapon.description(lang, &localization)],
                     EquipmentCard {
                         key: weapon.name().to_string(),
-                        is_equipped: false,
+                        is_equipped,
                         price: weapon.sell_price(player.charisma_mod()),
                     },
                     false,
@@ -2519,7 +2524,7 @@ pub fn rebuild_playing_lists(
             sorted_artifacts_keys.sort_by(|a, b| {
                 let eq_a = get_equipment(a).unwrap();
                 let eq_b = get_equipment(b).unwrap();
-                eq_a.level().cmp(&eq_b.level()).then(eq_a.name().cmp(eq_b.name()))
+                eq_b.level().cmp(&eq_a.level()).then(eq_a.name().cmp(eq_b.name()))
             });
 
             for key in &sorted_artifacts_keys {
@@ -2590,7 +2595,7 @@ pub fn rebuild_playing_lists(
                     (Some(idx_a), Some(idx_b)) => idx_a.cmp(&idx_b),
                     (Some(_), None) => std::cmp::Ordering::Less,
                     (None, Some(_)) => std::cmp::Ordering::Greater,
-                    (None, None) => a.level.cmp(&b.level).then(a.name.cmp(&b.name)),
+                    (None, None) => b.level.cmp(&a.level).then(a.name.cmp(&b.name)),
                 }
             });
             for ability in &sorted_abilities {
@@ -2627,7 +2632,7 @@ pub fn rebuild_playing_lists(
             }
             let mut sorted_perks: Vec<_> =
                 player.perks.iter().filter_map(|key| get_perk(key)).collect();
-            sorted_perks.sort_by(|a, b| a.level.cmp(&b.level).then(a.name.cmp(&b.name)));
+            sorted_perks.sort_by(|a, b| b.level.cmp(&a.level).then(a.name.cmp(&b.name)));
             for perk in &sorted_perks {
                 spawn_card(
                     parent,
@@ -3035,6 +3040,9 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
                         _ => {},
                     }
                 }
+                if !player.inventory.iter().any(|inv| inv == key) {
+                    player.equipped_consumables.retain(|eq| eq != key);
+                }
                 player.update_health_mana(old_hp, old_mp);
                 return Some("button");
             },
@@ -3215,6 +3223,18 @@ pub fn handle_equipment_card_click(
         return;
     }
     if let Ok(card) = card_q.get(event.entity) {
+        if *right_tab == RightTab::Consumables && event.button != PointerButton::Secondary {
+            if card.is_equipped {
+                player.equipped_consumables.retain(|k| k != &card.key);
+                play_audio_msg.write(PlayAudioMsg::new("click"));
+            } else if player.toggle_consumable_equipped(&card.key) {
+                play_audio_msg.write(PlayAudioMsg::new("click"));
+            } else {
+                play_audio_msg.write(PlayAudioMsg::new("error"));
+            }
+            return;
+        }
+
         if *right_tab == RightTab::Artifacts {
             // Right-click sells the artifact.
             if event.button == PointerButton::Secondary {
@@ -3537,6 +3557,12 @@ pub fn handle_active_ability_card_click(
         // Left-click selects the ability into a free slot, or errors if full.
         PointerButton::Primary => {
             if is_currently_equipped {
+                if let Some(pos) =
+                    player.active_abilities.iter().position(|x| x.as_ref() == Some(ability_name))
+                {
+                    player.active_abilities[pos] = None;
+                    play_audio_msg.write(PlayAudioMsg::new("button"));
+                }
                 return;
             }
             if let Some(pos) = player.active_abilities.iter().position(|x| x.is_none()) {

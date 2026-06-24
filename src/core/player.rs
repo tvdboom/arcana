@@ -151,6 +151,8 @@ pub struct Player {
     pub weapon_rh: Option<String>,
     pub accessory: Option<String>,
     pub accessory2: Option<String>,
+    #[serde(default)]
+    pub equipped_consumables: Vec<String>,
     pub inventory: Vec<String>,
     pub gold: u32,
     pub training: Training,
@@ -189,6 +191,7 @@ impl Default for Player {
             accessory: None,
             gloves: None,
             accessory2: None,
+            equipped_consumables: vec![],
             inventory: vec![],
             gold: 100,
             training: Training::default(),
@@ -197,6 +200,8 @@ impl Default for Player {
 }
 
 impl Player {
+    pub const MAX_EQUIPPED_CONSUMABLE_TYPES: usize = 8;
+
     fn apply_combat_bonus(base: u32, bonus: i32) -> u32 {
         if bonus >= 0 {
             base.saturating_add(bonus as u32)
@@ -378,6 +383,47 @@ impl Player {
         .flatten()
         .filter_map(|key| get_equipment(key))
         .collect()
+    }
+
+    pub fn is_consumable_equipped(&self, key: &str) -> bool {
+        self.equipped_consumables.iter().any(|k| k == key)
+    }
+
+    pub fn toggle_consumable_equipped(&mut self, key: &str) -> bool {
+        if self.is_consumable_equipped(key) {
+            self.equipped_consumables.retain(|k| k != key);
+            return true;
+        }
+
+        if !self.inventory.iter().any(|k| k == key) {
+            return false;
+        }
+        if !matches!(get_equipment(key), Some(Equipment::Consumable(_))) {
+            return false;
+        }
+        if self.equipped_consumables.len() >= Self::MAX_EQUIPPED_CONSUMABLE_TYPES {
+            return false;
+        }
+
+        self.equipped_consumables.push(key.to_string());
+        true
+    }
+
+    pub fn add_inventory_item(&mut self, key: String) {
+        self.inventory.push(key.clone());
+        self.auto_equip_consumable_if_possible(&key);
+    }
+
+    fn auto_equip_consumable_if_possible(&mut self, key: &str) {
+        if self.is_consumable_equipped(key) {
+            return;
+        }
+        if self.equipped_consumables.len() >= Self::MAX_EQUIPPED_CONSUMABLE_TYPES {
+            return;
+        }
+        if matches!(get_equipment(key), Some(Equipment::Consumable(_))) {
+            self.equipped_consumables.push(key.to_string());
+        }
     }
 
     pub fn has_equipped_melee(&self) -> bool {

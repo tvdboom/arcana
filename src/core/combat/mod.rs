@@ -15,7 +15,9 @@ use crate::core::PlayingStat;
 use crate::core::settings::Settings;
 use crate::core::states::GameState;
 use crate::core::ui::creation::SelectionItem;
-use crate::core::ui::playing::{spawn_bar, EquipSlot, InfoTooltip, RightColumnTooltip};
+use crate::core::ui::playing::{
+    EquipSlot, InfoTooltip, PetHealthBarFill, RightColumnTooltip, StatLabel,
+};
 use crate::utils::capitalize_words;
 use bevy::window::SystemCursorIcon;
 use crate::core::classes::Class;
@@ -25,13 +27,14 @@ const ACTIVE_HOTKEYS: [&str; 5] = ["Q", "W", "E", "R", "T"];
 const LEFT_PANEL_WIDTH: f32 = 46.0;
 const RIGHT_PANEL_WIDTH: f32 = 46.0;
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
+const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
 const BUTTON_TEXT_SIZE: f32 = 2.2;
 const COMBAT_PORTRAIT_ASPECT: f32 = 0.88;
 const COMBAT_IMAGE_COLUMN_WIDTH: f32 = 80.0;
 const COMBAT_STATS_COLUMN_WIDTH: f32 = 20.0;
 const COMBAT_CONSUMABLE_CARD_SIZE: f32 = 4.2;
 const COMBAT_ABILITY_CARD_SIZE: f32 = 5.6;
-const CONSUMABLE_HOTKEYS: [&str; 6] = ["A", "S", "D", "F", "G", "H"];
+const CONSUMABLE_HOTKEYS: [&str; 8] = ["A", "S", "D", "F", "G", "H", "J", "K"];
 
 #[derive(Component)]
 pub struct CombatCmp;
@@ -167,7 +170,7 @@ fn spawn_player_panel(
                         .spawn(Node {
                             width: percent(COMBAT_IMAGE_COLUMN_WIDTH),
                             flex_direction: FlexDirection::Column,
-                            row_gap: Val::Px(8.),
+                            row_gap: Val::Px(0.),
                             align_items: AlignItems::Stretch,
                             align_self: AlignSelf::FlexStart,
                             ..default()
@@ -181,8 +184,8 @@ fn spawn_player_panel(
                                 &player_image_key(player),
                                 player.pet.as_ref(),
                             );
-                            spawn_bar(parent, assets, true);
-                            spawn_bar(parent, assets, false);
+                            spawn_combat_resource_bar(parent, assets, true, true);
+                            spawn_combat_resource_bar(parent, assets, false, true);
                             spawn_active_abilities(parent, assets, player);
                             spawn_consumables(parent, assets, player);
                         });
@@ -306,6 +309,52 @@ fn spawn_combat_pet_overlay(
                 })
                 .with_children(|parent| {
                     parent.spawn((add_text(capitalize_words(&pet.name), "bold", 1.8, assets), TextColor(BUTTON_TEXT_COLOR)));
+                });
+
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Percent(5.),
+                        right: Val::Percent(5.),
+                        bottom: Val::Px(4.),
+                        height: Val::Px(20.),
+                        border: UiRect::all(Val::Px(1.5)),
+                        ..default()
+                    },
+                    BackgroundColor(BAR_BG_COLOR),
+                    BorderColor::all(BUTTON_BORDER_COLOR),
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(0.),
+                            top: Val::Px(0.),
+                            width: percent(100.),
+                            height: percent(100.),
+                            ..default()
+                        },
+                        BackgroundColor(HEALTH_COLOR),
+                        PetHealthBarFill,
+                    ));
+
+                    parent
+                        .spawn(Node {
+                            position_type: PositionType::Absolute,
+                            width: percent(100.),
+                            height: percent(100.),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            parent.spawn((
+                                add_text("", "bold", 1.2, assets),
+                                TextColor(Color::WHITE),
+                                StatLabel(PlayingStat::PetHealth),
+                            ));
+                        });
                 });
         });
 }
@@ -522,6 +571,7 @@ fn spawn_active_abilities(
             width: percent(100.),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.),
+            margin: UiRect::top(Val::Px(6.)),
             ..default()
         })
         .with_children(|parent| {
@@ -560,20 +610,23 @@ fn spawn_consumables(
     assets: &WorldAssets,
     player: &Player,
 ) {
-    let consumables: Vec<_> = player
-        .inventory
+    let mut consumables: Vec<_> = player
+        .equipped_consumables
         .iter()
+        .filter(|key| player.inventory.iter().any(|inv| inv == *key))
         .filter_map(|key| match get_equipment(key) {
             Some(Equipment::Consumable(item)) => Some((key.clone(), item)),
             _ => None,
         })
         .collect();
+    consumables.sort_by(|a, b| b.1.level.cmp(&a.1.level).then(a.1.name.cmp(&b.1.name)));
 
     parent
         .spawn(Node {
             width: percent(100.),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.),
+            margin: UiRect::top(Val::Px(6.)),
             ..default()
         })
         .with_children(|parent| {
@@ -587,7 +640,7 @@ fn spawn_consumables(
                     ..default()
                 })
                 .with_children(|parent| {
-                    for (index, (key, item)) in consumables.iter().take(6).enumerate() {
+                    for (index, (key, item)) in consumables.iter().take(CONSUMABLE_HOTKEYS.len()).enumerate() {
                         spawn_hover_card(
                             parent,
                             assets,
@@ -746,7 +799,7 @@ fn spawn_monster_panel(
                         .spawn(Node {
                             width: percent(COMBAT_IMAGE_COLUMN_WIDTH),
                             flex_direction: FlexDirection::Column,
-                            row_gap: Val::Px(8.),
+                            row_gap: Val::Px(0.),
                             align_items: AlignItems::Stretch,
                                 align_self: AlignSelf::FlexStart,
                                 ..default()
@@ -766,11 +819,19 @@ fn spawn_monster_panel(
 }
 
 fn monster_display_name(monster: &Monster) -> String {
-    let mut name = capitalize_words(&monster.name);
-    if monster.kind == MonsterKind::Dragon && !name.to_lowercase().ends_with("dragon") {
-        name.push_str(" Dragon");
+    let name = capitalize_words(&monster.name);
+    if monster.kind != MonsterKind::Dragon {
+        return name;
     }
-    name
+
+    let mut parts = name.split_whitespace();
+    let color = parts.next().unwrap_or("Dragon");
+    let stage = parts.collect::<Vec<_>>().join(" ");
+    if stage.is_empty() {
+        format!("{color} Dragon")
+    } else {
+        format!("{color} Dragon ({stage})")
+    }
 }
 
 fn spawn_monster_portrait(
@@ -811,7 +872,12 @@ fn spawn_monster_health_bar(
                 width: percent(100.),
                 height: Val::Px(36.),
                 position_type: PositionType::Relative,
-                border: UiRect::all(Val::Px(2.)),
+                border: UiRect {
+                    left: Val::Px(2.),
+                    right: Val::Px(2.),
+                    top: Val::Px(0.),
+                    bottom: Val::Px(2.),
+                },
                 flex_shrink: 0.,
                 ..default()
             },
@@ -858,6 +924,77 @@ fn spawn_monster_health_bar(
                             assets,
                         ),
                         TextColor(Color::WHITE),
+                    ));
+                });
+        });
+}
+
+fn spawn_combat_resource_bar(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    is_health: bool,
+    omit_top_border: bool,
+) {
+    let bar_height = Val::Px(36.);
+    let font_size = 1.9;
+    parent
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: bar_height,
+                position_type: PositionType::Relative,
+                border: UiRect {
+                    left: Val::Px(2.),
+                    right: Val::Px(2.),
+                    top: if omit_top_border {
+                        Val::Px(0.)
+                    } else {
+                        Val::Px(2.)
+                    },
+                    bottom: Val::Px(2.),
+                },
+                flex_shrink: 0.,
+                ..default()
+            },
+            BackgroundColor(BAR_BG_COLOR),
+            BorderColor::all(BUTTON_BORDER_COLOR),
+        ))
+        .with_children(|parent| {
+            let mut fill = parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.),
+                    top: Val::Px(0.),
+                    width: percent(100.),
+                    height: percent(100.),
+                    ..default()
+                },
+                BackgroundColor(if is_health { HEALTH_COLOR } else { MANA_COLOR }),
+            ));
+            if is_health {
+                fill.insert(crate::core::ui::playing::HealthBarFill);
+            } else {
+                fill.insert(crate::core::ui::playing::ManaBarFill);
+            }
+
+            parent
+                .spawn(Node {
+                    position_type: PositionType::Absolute,
+                    width: percent(100.),
+                    height: percent(100.),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text("", "bold", font_size, assets),
+                        TextColor(Color::WHITE),
+                        StatLabel(if is_health {
+                            PlayingStat::Health
+                        } else {
+                            PlayingStat::Mana
+                        }),
                     ));
                 });
         });

@@ -360,7 +360,7 @@ pub fn handle_work_card_clicks(
                         }
                         let chosen =
                             closest_artifacts[rng.random_range(0..closest_artifacts.len())];
-                        player.inventory.push(chosen.name.clone());
+                        player.add_inventory_item(chosen.name.clone());
 
                         spawn_toast(
                             &mut commands,
@@ -449,7 +449,7 @@ pub fn handle_work_card_clicks(
                         }
                         let chosen =
                             closest_artifacts[rng.random_range(0..closest_artifacts.len())];
-                        player.inventory.push(chosen.name.clone());
+                        player.add_inventory_item(chosen.name.clone());
 
                         spawn_toast(
                             &mut commands,
@@ -535,7 +535,7 @@ pub fn handle_work_card_clicks(
                         }
                         let chosen =
                             closest_artifacts[rng.random_range(0..closest_artifacts.len())];
-                        player.inventory.push(chosen.name.clone());
+                        player.add_inventory_item(chosen.name.clone());
 
                         spawn_toast(
                             &mut commands,
