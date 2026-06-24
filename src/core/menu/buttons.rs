@@ -105,6 +105,7 @@ pub fn on_click_menu_button(
                 next_app_state.set(AppState::MainMenu)
             },
             AppState::MainMenu => std::process::exit(0),
+            AppState::Loading => {},
             _ => unreachable!(),
         },
     }

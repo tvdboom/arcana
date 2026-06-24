@@ -5,6 +5,7 @@ use std::io::{Read, Write};
 
 use crate::core::actions::shop::ShopInventory;
 use crate::core::audio::ChangeAudioMsg;
+use crate::core::menu::systems::PendingGameStart;
 use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::states::{AppState, GameState};
@@ -52,7 +53,6 @@ pub fn load_game(
     mut load_game_msg: MessageReader<LoadCharacterMsg>,
     mut change_audio_msg: MessageWriter<ChangeAudioMsg>,
     mut next_app_state: ResMut<NextState<AppState>>,
-    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     for _ in load_game_msg.read() {
         if let Some(file_path) = FileDialog::new().pick_file() {
@@ -64,9 +64,11 @@ pub fn load_game(
             commands.insert_resource(data.settings);
             commands.insert_resource(data.player);
             commands.insert_resource(data.shop_inventory);
+            commands.insert_resource(PendingGameStart {
+                target_game_state: GameState::Playing,
+            });
 
-            next_game_state.set(GameState::Playing);
-            next_app_state.set(AppState::Game);
+            next_app_state.set(AppState::Loading);
         }
     }
 }

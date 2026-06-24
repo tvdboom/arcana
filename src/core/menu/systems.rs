@@ -12,14 +12,33 @@ use crate::core::states::{AppState, GameState};
 #[derive(Message)]
 pub struct StartNewCharacterMsg;
 
+#[derive(Resource)]
+pub struct PendingGameStart {
+    pub target_game_state: GameState,
+}
+
+#[derive(Resource)]
+pub struct LoadingDelay(pub Timer);
+
+#[derive(Component)]
+pub struct MenuContentRoot;
+
+#[derive(Component)]
+pub struct LoadingCmp;
+
+#[derive(Component)]
+pub struct LoadingText;
+
 pub fn setup_menu(
     mut commands: Commands,
     app_state: Res<State<AppState>>,
+    asset_server: Res<AssetServer>,
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
 ) {
     let lang = settings.language;
+    let menu_bg_ready = asset_server.is_loaded_with_dependencies(assets.image("bg").id());
     commands
         .spawn((
             add_root_node(true),
@@ -28,15 +47,23 @@ pub fn setup_menu(
         ))
         .with_children(|parent| {
             parent
-                .spawn(Node {
-                    width: percent(100.),
-                    height: percent(100.),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    flex_direction: FlexDirection::Column,
-                    margin: UiRect::top(percent(12.)),
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        width: percent(100.),
+                        height: percent(100.),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        flex_direction: FlexDirection::Column,
+                        margin: UiRect::top(percent(12.)),
+                        ..default()
+                    },
+                    if menu_bg_ready {
+                        Visibility::Inherited
+                    } else {
+                        Visibility::Hidden
+                    },
+                    MenuContentRoot,
+                ))
                 .with_children(|parent| match app_state.get() {
                     AppState::MainMenu => {
                         spawn_menu_button(
@@ -124,6 +151,104 @@ pub fn setup_menu(
                     ));
                 });
         });
+}
+
+pub fn reveal_menu_content_when_bg_ready(
+    asset_server: Res<AssetServer>,
+    assets: Res<WorldAssets>,
+    mut content_q: Query<&mut Visibility, With<MenuContentRoot>>,
+) {
+    if !asset_server.is_loaded_with_dependencies(assets.image("bg").id()) {
+        return;
+    }
+    for mut visibility in &mut content_q {
+        *visibility = Visibility::Inherited;
+    }
+}
+
+pub fn setup_loading_screen(
+    mut commands: Commands,
+    assets: Res<WorldAssets>,
+) {
+    commands.insert_resource(LoadingDelay(Timer::from_seconds(0.35, TimerMode::Once)));
+    commands
+        .spawn((
+            add_root_node(true),
+            ImageNode::new(assets.image("bg")).with_mode(NodeImageMode::Stretch),
+            LoadingCmp,
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    row_gap: Val::Px(8.),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text("Loading", "bold", 4.0, &assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        LoadingText,
+                    ));
+                });
+        });
+}
+
+pub fn animate_loading_text(
+    time: Res<Time>,
+    mut text_q: Query<&mut Text, With<LoadingText>>,
+) {
+    let dot_count = ((time.elapsed_secs() * 3.0) as usize) % 4;
+    let dots = ".".repeat(dot_count);
+    for mut text in &mut text_q {
+        text.0 = format!("Loading{dots}");
+    }
+}
+
+pub fn complete_loading_when_ready(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut delay: Option<ResMut<LoadingDelay>>,
+    pending: Option<Res<PendingGameStart>>,
+    assets: Res<WorldAssets>,
+    asset_server: Res<AssetServer>,
+    mut next_app_state: ResMut<NextState<AppState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    let Some(pending) = pending else {
+        return;
+    };
+
+    if let Some(ref mut delay) = delay {
+        delay.0.tick(time.delta());
+        if !delay.0.is_finished() {
+            return;
+        }
+    }
+
+    let images_ready = assets
+        .images
+        .values()
+        .all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
+    let fonts_ready = assets
+        .fonts
+        .values()
+        .all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
+    let audio_ready = assets
+        .audio
+        .values()
+        .all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
+
+    if !(images_ready && fonts_ready && audio_ready) {
+        return;
+    }
+
+    next_game_state.set(pending.target_game_state);
+    next_app_state.set(AppState::Game);
+    commands.remove_resource::<PendingGameStart>();
+    commands.remove_resource::<LoadingDelay>();
 }
 
 pub fn setup_game_menu(
@@ -220,15 +345,17 @@ pub fn setup_game_settings(
 }
 
 pub fn start_new_game_message(
+    mut commands: Commands,
     mut start_new_char_msg: MessageReader<StartNewCharacterMsg>,
     mut next_app_state: ResMut<NextState<AppState>>,
-    mut next_game_state: ResMut<NextState<GameState>>,
     mut player: ResMut<Player>,
 ) {
     if !start_new_char_msg.is_empty() {
         *player = Player::default();
-        next_game_state.set(GameState::default());
-        next_app_state.set(AppState::Game);
+        commands.insert_resource(PendingGameStart {
+            target_game_state: GameState::CreateCharacter,
+        });
+        next_app_state.set(AppState::Loading);
 
         start_new_char_msg.clear();
     }

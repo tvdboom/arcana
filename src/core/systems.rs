@@ -34,6 +34,7 @@ pub fn check_keys_menu(
                 play_audio_msg.write(PlayAudioMsg::new("button"));
                 next_app_state.set(AppState::MainMenu);
             },
+            AppState::Loading => {},
             AppState::Game => match game_state.get() {
                 GameState::Playing => next_game_state.set(GameState::GameMenu),
                 GameState::Shop
@@ -98,6 +99,7 @@ pub fn check_keys_menu(
                 play_audio_msg.write(PlayAudioMsg::new("button"));
                 next_app_state.set(AppState::MainMenu);
             },
+            AppState::Loading => {},
             AppState::Game => match game_state.get() {
                 GameState::EndGame => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));

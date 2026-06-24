@@ -137,10 +137,12 @@ impl Plugin for GamePlugin {
             );
 
         // Menu
-        for state in AppState::iter().filter(|s| *s != AppState::Game) {
-            app.add_systems(OnEnter(state), (reset_cursor, setup_menu))
-                .add_systems(OnExit(state), despawn::<MenuCmp>);
-        }
+        app.add_systems(OnEnter(AppState::MainMenu), (reset_cursor, setup_menu))
+            .add_systems(OnExit(AppState::MainMenu), despawn::<MenuCmp>)
+            .add_systems(OnEnter(AppState::Settings), (reset_cursor, setup_menu))
+            .add_systems(OnExit(AppState::Settings), despawn::<MenuCmp>)
+            .add_systems(OnEnter(AppState::Loading), (reset_cursor, setup_loading_screen))
+            .add_systems(OnExit(AppState::Loading), despawn::<LoadingCmp>);
         for state in GameState::iter() {
             if !is_panel_state(state) {
                 app.add_systems(OnEnter(state), reset_cursor);
@@ -160,6 +162,10 @@ impl Plugin for GamePlugin {
                     update_playing_screen.run_if(resource_changed::<Settings>),
                     scroll_system.before(update_scrollbar_system).run_if(in_state(AppState::Game)),
                     update_scrollbar_system.run_if(in_state(AppState::Game)),
+                    reveal_menu_content_when_bg_ready
+                        .run_if(in_state(AppState::MainMenu).or_else(in_state(AppState::Settings))),
+                    animate_loading_text.run_if(in_state(AppState::Loading)),
+                    complete_loading_when_ready.run_if(in_state(AppState::Loading)),
                 ),
             )
             .add_systems(OnEnter(GameState::CreateCharacter), setup_character_creation)
