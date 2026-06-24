@@ -5,6 +5,7 @@ use crate::core::catalog::equipment::{Equipment, Kind};
 use crate::core::catalog::weapons::{Category, Hand};
 use crate::core::catalog::wearables::WearableSlot;
 use crate::core::constants::*;
+use crate::core::game_state::ShopUiState;
 use crate::core::localization::Localization;
 use crate::core::menu::utils::{add_text, recolor};
 use crate::core::player::Player;
@@ -66,7 +67,7 @@ pub enum WeaponTypeFilter {
     Books,
 }
 
-#[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ShopFilters {
     pub tab: ShopTab,
     pub weapon_hand: Option<Hand>,
@@ -151,6 +152,7 @@ pub fn setup_shop_ui(
     settings: Res<Settings>,
     player: Res<Player>,
     mut shop_inventory: ResMut<ShopInventory>,
+    shop_ui_state: Res<ShopUiState>,
     columns_container_q: Query<Entity, With<PlayScreenColumnsContainer>>,
     mut columns_2_3_q: Query<&mut Node, (With<PlayScreenColumns2And3>, Without<PanelCmp>)>,
 ) {
@@ -216,7 +218,10 @@ pub fn setup_shop_ui(
                 &localization,
                 settings.language,
                 &shop_inventory,
-                ShopFilters::default(),
+                shop_ui_state.current_filters(),
+                shop_ui_state
+                    .state_for(shop_ui_state.active_tab)
+                    .scroll_y,
                 player.gold,
                 player.level(),
             );
@@ -231,14 +236,23 @@ pub fn update_shop_ui(
     settings: Res<Settings>,
     player: Res<Player>,
     shop_inventory: Res<ShopInventory>,
-    filters: Res<ShopFilters>,
+    shop_ui_state: Res<ShopUiState>,
     open_dropdown: Res<OpenDropdown>,
     wrapper_q: Query<Entity, With<ShopContentWrapper>>,
     children_q: Query<&Children>,
     scroll_q: Query<&ScrollPosition, With<ShopItemsScroll>>,
+    mut last_rendered_tab: Local<Option<ShopTab>>,
 ) {
-    if filters.is_changed() || shop_inventory.is_changed() || open_dropdown.is_changed() {
-        let current_scroll = scroll_q.iter().next().map_or(0.0, |s| s.0.y);
+    if shop_ui_state.is_changed() || shop_inventory.is_changed() || open_dropdown.is_changed() {
+        let filters = shop_ui_state.current_filters();
+        let current_scroll = if *last_rendered_tab == Some(filters.tab) {
+            scroll_q
+                .iter()
+                .next()
+                .map_or_else(|| shop_ui_state.state_for(filters.tab).scroll_y, |s| s.0.y)
+        } else {
+            shop_ui_state.state_for(filters.tab).scroll_y
+        };
         if let Some(wrapper_entity) = wrapper_q.iter().next() {
             despawn_descendants_manual(&mut commands, wrapper_entity, &children_q);
             commands.entity(wrapper_entity).with_children(|parent| {
@@ -248,13 +262,14 @@ pub fn update_shop_ui(
                     &localization,
                     settings.language,
                     &shop_inventory,
-                    *filters,
+                    filters,
                     player.gold,
                     player.level(),
                     *open_dropdown,
                     current_scroll,
                 );
             });
+            *last_rendered_tab = Some(filters.tab);
         }
     }
 }
@@ -266,6 +281,7 @@ pub fn build_shop_content(
     lang: Language,
     shop_inventory: &ShopInventory,
     filters: ShopFilters,
+    initial_scroll: f32,
     player_gold: u32,
     player_level: u32,
 ) {
@@ -302,7 +318,7 @@ pub fn build_shop_content(
                         player_gold,
                         player_level,
                         OpenDropdown::None,
-                        0.0,
+                        initial_scroll,
                     );
                 });
 
@@ -758,22 +774,31 @@ pub struct ShopTabButton(pub ShopTab);
 
 pub fn handle_shop_tab_click(
     event: On<Pointer<Click>>,
-    mut filters: ResMut<ShopFilters>,
+    mut shop_ui_state: ResMut<ShopUiState>,
     mut tab_click_guard: ResMut<ShopTabClickGuard>,
+    scroll_q: Query<&ScrollPosition, With<ShopItemsScroll>>,
     btn_q: Query<&ShopTabButton>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     if let Ok(btn) = btn_q.get(event.entity) {
-        let clicking_current_tab = filters.tab == btn.0;
-        if filters.tab != btn.0 {
-            filters.kind = None;
-            filters.weapon_type = WeaponTypeFilter::All;
-            filters.weapon_category = None;
-            filters.weapon_hand = None;
+        let old_tab = shop_ui_state.active_tab;
+        let clicking_current_tab = old_tab == btn.0;
+        if let Some(scroll) = scroll_q.iter().next() {
+            shop_ui_state.state_for_mut(old_tab).scroll_y = scroll.0.y;
         }
-        filters.tab = btn.0;
+        shop_ui_state.active_tab = btn.0;
         tab_click_guard.suppress_next_item_click = clicking_current_tab;
         play_audio_msg.write(PlayAudioMsg::new("button"));
+    }
+}
+
+pub fn remember_shop_scroll_position(
+    mut shop_ui_state: ResMut<ShopUiState>,
+    scroll_q: Query<&ScrollPosition, With<ShopItemsScroll>>,
+) {
+    if let Some(scroll) = scroll_q.iter().next() {
+        let active_tab = shop_ui_state.active_tab;
+        shop_ui_state.state_for_mut(active_tab).scroll_y = scroll.0.y;
     }
 }
 
@@ -906,13 +931,13 @@ pub fn shop_tooltip_system(
 }
 
 pub fn shop_tab_button_system(
-    filters: Res<ShopFilters>,
+    shop_ui_state: Res<ShopUiState>,
     mut tab_btn_q: Query<(Entity, &ShopTabButton, &Interaction, &mut BackgroundColor)>,
     children_q: Query<&Children>,
     mut text_color_q: Query<&mut TextColor>,
 ) {
     for (entity, btn, interaction, mut bg) in &mut tab_btn_q {
-        let active = btn.0 == filters.tab;
+        let active = btn.0 == shop_ui_state.active_tab;
         *bg = match (active, interaction) {
             (_, Interaction::Pressed) => BackgroundColor(Color::srgba_u8(30, 30, 50, 240)),
             (true, Interaction::Hovered) => BackgroundColor(NORMAL_BUTTON_COLOR),

@@ -2,12 +2,13 @@ use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
 use serde::{Deserialize, Serialize};
 
-use crate::core::actions::shop::{ShopFilters, WeaponTypeFilter};
+use crate::core::actions::shop::WeaponTypeFilter;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::equipment::Kind;
 use crate::core::catalog::weapons::{Category, Hand};
 use crate::core::constants::*;
+use crate::core::game_state::ShopUiState;
 use crate::core::menu::utils::{add_text, recolor};
 use crate::core::utils::cursor;
 
@@ -55,12 +56,13 @@ pub fn handle_shop_dropdown_click(
 pub fn handle_shop_dropdown_option_hand(
     event: On<Pointer<Click>>,
     opt_q: Query<&ShopDropdownOptionHand>,
-    mut filters: ResMut<ShopFilters>,
+    mut shop_ui_state: ResMut<ShopUiState>,
     mut open_dropdown: ResMut<OpenDropdown>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     if let Ok(opt) = opt_q.get(event.entity) {
-        filters.weapon_hand = opt.0;
+        let active_tab = shop_ui_state.active_tab;
+        shop_ui_state.state_for_mut(active_tab).weapon_hand = opt.0;
         *open_dropdown = OpenDropdown::None;
         play_audio_msg.write(PlayAudioMsg::new("button"));
     }
@@ -69,12 +71,13 @@ pub fn handle_shop_dropdown_option_hand(
 pub fn handle_shop_dropdown_option_type(
     event: On<Pointer<Click>>,
     opt_q: Query<&ShopDropdownOptionType>,
-    mut filters: ResMut<ShopFilters>,
+    mut shop_ui_state: ResMut<ShopUiState>,
     mut open_dropdown: ResMut<OpenDropdown>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     if let Ok(opt) = opt_q.get(event.entity) {
-        filters.weapon_type = opt.0;
+        let active_tab = shop_ui_state.active_tab;
+        shop_ui_state.state_for_mut(active_tab).weapon_type = opt.0;
         *open_dropdown = OpenDropdown::None;
         play_audio_msg.write(PlayAudioMsg::new("button"));
     }
@@ -83,12 +86,13 @@ pub fn handle_shop_dropdown_option_type(
 pub fn handle_shop_dropdown_option_category(
     event: On<Pointer<Click>>,
     opt_q: Query<&ShopDropdownOptionCategory>,
-    mut filters: ResMut<ShopFilters>,
+    mut shop_ui_state: ResMut<ShopUiState>,
     mut open_dropdown: ResMut<OpenDropdown>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     if let Ok(opt) = opt_q.get(event.entity) {
-        filters.weapon_category = opt.0;
+        let active_tab = shop_ui_state.active_tab;
+        shop_ui_state.state_for_mut(active_tab).weapon_category = opt.0;
         *open_dropdown = OpenDropdown::None;
         play_audio_msg.write(PlayAudioMsg::new("button"));
     }
@@ -97,12 +101,13 @@ pub fn handle_shop_dropdown_option_category(
 pub fn handle_shop_dropdown_option_kind(
     event: On<Pointer<Click>>,
     opt_q: Query<&ShopDropdownOptionKind>,
-    mut filters: ResMut<ShopFilters>,
+    mut shop_ui_state: ResMut<ShopUiState>,
     mut open_dropdown: ResMut<OpenDropdown>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     if let Ok(opt) = opt_q.get(event.entity) {
-        filters.kind = opt.0;
+        let active_tab = shop_ui_state.active_tab;
+        shop_ui_state.state_for_mut(active_tab).kind = opt.0;
         *open_dropdown = OpenDropdown::None;
         play_audio_msg.write(PlayAudioMsg::new("button"));
     }

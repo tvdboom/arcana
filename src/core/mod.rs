@@ -33,6 +33,7 @@ use crate::core::actions::work::{setup_work_ui, update_work_ui, WorkSliderState}
 use crate::core::assets::WorldAssets;
 use crate::core::audio::*;
 use crate::core::camera::*;
+use crate::core::game_state::ShopUiState;
 use crate::core::localization::{update_localized_text, Localization};
 use crate::core::menu::buttons::MenuCmp;
 use crate::core::menu::systems::*;
@@ -100,8 +101,8 @@ impl Plugin for GamePlugin {
             .init_resource::<LevelUpPending>()
             .init_resource::<ActiveModal>()
             .init_resource::<ShopInventory>()
+            .init_resource::<ShopUiState>()
             .init_resource::<OpenDropdown>()
-            .init_resource::<ShopFilters>()
             .init_resource::<ShopTabClickGuard>()
             .init_resource::<WorkSliderState>()
             .init_resource::<StudySliderState>()
@@ -234,7 +235,14 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::Settings), despawn::<MenuCmp>)
             // Shop Systems
             .add_systems(OnEnter(GameState::Shop), setup_shop_ui)
-            .add_systems(OnExit(GameState::Shop), (cleanup_panel_ui, despawn::<TooltipNode>))
+            .add_systems(
+                OnExit(GameState::Shop),
+                (
+                    remember_shop_scroll_position,
+                    cleanup_panel_ui,
+                    despawn::<TooltipNode>,
+                ),
+            )
             .add_systems(
                 Update,
                 (
