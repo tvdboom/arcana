@@ -12,7 +12,7 @@ use crate::core::constants::*;
 use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
-use crate::core::monsters::{Monster, MonsterStats};
+use crate::core::monsters::MonsterKind;
 use crate::core::player::{AgeStage, Attribute, Player, Sex};
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
@@ -1433,7 +1433,15 @@ impl SelectionItem for Ajah {
     }
 }
 
-impl SelectionItem for Monster {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, strum_macros::EnumIter)]
+pub enum PetChoice {
+    Rat,
+    Owl,
+    Wolf,
+    Weasel,
+}
+
+impl SelectionItem for PetChoice {
     type DescComponent = LocalizedPetDesc;
 
     fn get_description(&self, lang: Language, localization: &Localization) -> String {
@@ -1450,12 +1458,40 @@ impl SelectionItem for Monster {
         } else {
             PET_NAMES.choose(&mut rng()).copied().unwrap().to_string()
         };
-        player.pet = Some(MonsterStats::new(pet_name, *self));
+        let monster_name = match self {
+            PetChoice::Rat => "Rat",
+            PetChoice::Owl => "Owl",
+            PetChoice::Wolf => "Wolf",
+            PetChoice::Weasel => "Weasel",
+        };
+        if let Some(mut pet_monster) = crate::core::catalog::catalog::get_monster(monster_name) {
+            pet_monster.name = pet_name;
+            player.pet = Some(pet_monster);
+        }
         next_game_state.set(GameState::Playing);
     }
 
     fn items() -> Vec<Self> {
-        vec![Monster::Rat, Monster::Owl, Monster::Wolf, Monster::Weasel]
+        vec![PetChoice::Rat, PetChoice::Owl, PetChoice::Wolf, PetChoice::Weasel]
+    }
+}
+
+impl SelectionItem for MonsterKind {
+    type DescComponent = LocalizedMonsterKindDesc;
+
+    fn get_description(&self, lang: Language, localization: &Localization) -> String {
+        format_monster_kind_description(*self, lang, localization)
+    }
+
+    fn create_desc_component(&self) -> Self::DescComponent {
+        LocalizedMonsterKindDesc(*self)
+    }
+
+    fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
+        if let Some(ref mut pet) = player.pet {
+            pet.kind = *self;
+        }
+        next_game_state.set(GameState::Playing);
     }
 }
 
@@ -1737,9 +1773,12 @@ pub fn setup_subclass_selection(
             if player.pet.is_none() {
                 let pet_name =
                     PET_NAMES.choose(&mut rand::rng()).copied().unwrap_or("Ash").to_string();
-                player.pet = Some(MonsterStats::new(pet_name, Monster::Wolf));
+                if let Some(mut pet_monster) = crate::core::catalog::catalog::get_monster("Wolf") {
+                    pet_monster.name = pet_name;
+                    player.pet = Some(pet_monster);
+                }
             }
-            setup_selection_screen::<Monster>(
+            setup_selection_screen::<PetChoice>(
                 commands,
                 settings,
                 assets,

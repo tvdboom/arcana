@@ -4,6 +4,7 @@ use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
 use std::collections::HashMap;
+use std::path::Path;
 
 /// Forces linear (smooth) filtering for an image, overriding the global
 /// `ImagePlugin::default_nearest()` setting. Used for painted/photographic art
@@ -18,6 +19,28 @@ fn load_linear(
     path: impl Into<bevy::asset::AssetPath<'static>>,
 ) -> Handle<Image> {
     assets.load_builder().with_settings(linear_sampler).load(path)
+}
+
+fn leak_str(value: String) -> &'static str {
+    Box::leak(value.into_boxed_str())
+}
+
+fn insert_image_aliases(
+    images: &mut HashMap<&'static str, Handle<Image>>,
+    image: &Handle<Image>,
+    aliases: impl IntoIterator<Item = String>,
+) {
+    for alias in aliases {
+        images.entry(leak_str(alias)).or_insert_with(|| image.clone());
+    }
+}
+
+fn catalog_image_aliases(name: &str, image: &str) -> Vec<String> {
+    let mut aliases = vec![format!("build_{}", name), image.to_string()];
+    if let Some(stem) = Path::new(image).file_stem().and_then(|s| s.to_str()) {
+        aliases.push(stem.to_string());
+    }
+    aliases
 }
 
 #[derive(Resource)]
@@ -237,34 +260,6 @@ impl FromWorld for WorldAssets {
             ("mage_white_dwarf_woman", assets.load("images/classes/mage_white_dwarf_woman.ktx2")),
             ("mage_white_orc_man", assets.load("images/classes/mage_white_orc_man.ktx2")),
             ("mage_white_orc_woman", assets.load("images/classes/mage_white_orc_woman.ktx2")),
-            // Monsters
-            ("wolf", assets.load("images/monsters/wolf.ktx2")),
-            ("snake", assets.load("images/monsters/snake.ktx2")),
-            ("eagle", assets.load("images/monsters/eagle.ktx2")),
-            ("bear", assets.load("images/monsters/bear.ktx2")),
-            ("bat", assets.load("images/monsters/bat.ktx2")),
-            ("crocodile", assets.load("images/monsters/crocodile.ktx2")),
-            ("griffin", assets.load("images/monsters/griffin.ktx2")),
-            ("hell hound", assets.load("images/monsters/hell hound.ktx2")),
-            ("hell_hound", assets.load("images/monsters/hell hound.ktx2")),
-            ("hyena", assets.load("images/monsters/hyena.ktx2")),
-            ("lizard", assets.load("images/monsters/lizard.ktx2")),
-            ("manticore", assets.load("images/monsters/manticore.ktx2")),
-            ("owl", assets.load("images/monsters/owl.ktx2")),
-            ("owl bear", assets.load("images/monsters/owlbear.ktx2")),
-            ("owl_bear", assets.load("images/monsters/owlbear.ktx2")),
-            ("owlbear", assets.load("images/monsters/owlbear.ktx2")),
-            ("pegasus", assets.load("images/monsters/pegasus.ktx2")),
-            ("puma", assets.load("images/monsters/puma.ktx2")),
-            ("rat", assets.load("images/monsters/rat.ktx2")),
-            ("spider", assets.load("images/monsters/spider.ktx2")),
-            ("three headed dog", assets.load("images/monsters/three headed dog.ktx2")),
-            ("three_headed_dog", assets.load("images/monsters/three headed dog.ktx2")),
-            ("tiger", assets.load("images/monsters/tiger.ktx2")),
-            ("unicorn", assets.load("images/monsters/unicorn.ktx2")),
-            ("vulture", assets.load("images/monsters/vulture.ktx2")),
-            ("weasel", assets.load("images/monsters/weasel.ktx2")),
-            ("worg", assets.load("images/monsters/worg.ktx2")),
             // Actions
             ("action_clerical_labor", load_linear(assets, "images/actions/clerical_labor.ktx2")),
             ("action_craft_labor", load_linear(assets, "images/actions/craft_labor.ktx2")),
@@ -290,29 +285,55 @@ impl FromWorld for WorldAssets {
         ]);
 
         for ability in all_abilities() {
-            let key: &'static str = Box::leak(format!("build_{}", ability.name).into_boxed_str());
-            images.insert(key, load_linear(assets, ability.image.clone()));
+            let image = load_linear(assets, ability.image.clone());
+            insert_image_aliases(&mut images, &image, catalog_image_aliases(&ability.name, &ability.image));
         }
+
         for perk in all_perks() {
-            let key: &'static str = Box::leak(format!("build_{}", perk.name).into_boxed_str());
-            images.insert(key, load_linear(assets, perk.image.clone()));
+            let image = load_linear(assets, perk.image.clone());
+            insert_image_aliases(&mut images, &image, catalog_image_aliases(&perk.name, &perk.image));
         }
+
         for weapon in all_weapons() {
-            let key: &'static str = Box::leak(format!("build_{}", weapon.name).into_boxed_str());
-            images.insert(key, load_linear(assets, weapon.image.clone()));
+            let image = load_linear(assets, weapon.image.clone());
+            insert_image_aliases(&mut images, &image, catalog_image_aliases(&weapon.name, &weapon.image));
         }
+
         for wearable in all_wearables() {
-            let key: &'static str = Box::leak(format!("build_{}", wearable.name).into_boxed_str());
-            images.insert(key, load_linear(assets, wearable.image.clone()));
+            let image = load_linear(assets, wearable.image.clone());
+            insert_image_aliases(&mut images, &image, catalog_image_aliases(&wearable.name, &wearable.image));
         }
+
         for consumable in all_consumables() {
-            let key: &'static str =
-                Box::leak(format!("build_{}", consumable.name).into_boxed_str());
-            images.insert(key, load_linear(assets, consumable.image.clone()));
+            let image = load_linear(assets, consumable.image.clone());
+            insert_image_aliases(
+                &mut images,
+                &image,
+                catalog_image_aliases(&consumable.name, &consumable.image),
+            );
         }
+
         for artifact in all_artifacts() {
-            let key: &'static str = Box::leak(format!("build_{}", artifact.name).into_boxed_str());
-            images.insert(key, load_linear(assets, artifact.image.clone()));
+            let image = load_linear(assets, artifact.image.clone());
+            insert_image_aliases(&mut images, &image, catalog_image_aliases(&artifact.name, &artifact.image));
+        }
+
+        for monster in all_monsters() {
+            let image = load_linear(assets, monster.image.clone());
+            insert_image_aliases(
+                &mut images,
+                &image,
+                [
+                    monster.name.to_lowercase(),
+                    monster.name.to_lowercase().replace(" ", "_"),
+                    monster.image.clone(),
+                    Path::new(&monster.image)
+                        .file_stem()
+                        .and_then(|s| s.to_str())
+                        .map(|s| s.to_string())
+                        .unwrap_or_else(|| monster.image.clone()),
+                ],
+            );
         }
 
         Self {
@@ -320,5 +341,24 @@ impl FromWorld for WorldAssets {
             fonts,
             images,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::catalog_image_aliases;
+
+    #[test]
+    fn catalog_image_aliases_include_build_key_and_raw_path() {
+        let aliases = catalog_image_aliases(
+            "Mythic Alchemy Poisonousherbs",
+            "images/catalog/consumable/Alchemy_40_poisonousherbs.ktx2",
+        );
+
+        assert!(aliases.iter().any(|alias| alias == "build_Mythic Alchemy Poisonousherbs"));
+        assert!(aliases
+            .iter()
+            .any(|alias| alias == "images/catalog/consumable/Alchemy_40_poisonousherbs.ktx2"));
+        assert!(aliases.iter().any(|alias| alias == "Alchemy_40_poisonousherbs"));
     }
 }

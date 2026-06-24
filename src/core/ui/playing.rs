@@ -31,6 +31,7 @@ pub use crate::core::ui::tooltip::*;
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
 use bevy::window::{CursorIcon, SystemCursorIcon};
+use std::path::Path;
 
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
@@ -203,6 +204,14 @@ fn playing_title(player: &Player) -> String {
         }
     }
     player.name.clone()
+}
+
+fn pet_image_key(pet: &crate::core::monsters::Monster) -> String {
+    Path::new(&pet.image)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or(&pet.image)
+        .to_lowercase()
 }
 
 fn localized_class_name(player: &Player, localization: &Localization, lang: Language) -> String {
@@ -1006,13 +1015,13 @@ pub fn spawn_image_column(
                                     justify_content: JustifyContent::FlexEnd,
                                     ..default()
                                 },
-                                BorderColor::all(BUTTON_BORDER_COLOR),
-                                ImageNode::new(assets.image(pet.kind.to_lowername()))
+                                    BorderColor::all(BUTTON_BORDER_COLOR),
+                                    ImageNode::new(assets.image(pet_image_key(pet)))
                                     .with_mode(NodeImageMode::Stretch),
-                                PetImage,
-                                Interaction::default(),
-                                Pickable::default(),
-                                InfoTooltip::Pet,
+                                    PetImage,
+                                    Interaction::default(),
+                                    Pickable::default(),
+                                    InfoTooltip::Pet,
                             ))
                             .with_children(|parent| {
                                 // Thicker health bar container at the bottom of the pet image
@@ -1632,15 +1641,16 @@ pub fn right_column_tooltip_system(
             let is_active_tab = if level_up.active {
                 true
             } else {
-                match card {
-                    RightColumnTooltip::Ability(_) => *right_tab == RightTab::Abilities,
-                    RightColumnTooltip::Perk(_) => *right_tab == RightTab::Perks,
-                    RightColumnTooltip::Equipment(_) => {
-                        *right_tab == RightTab::Equipment
-                            || *right_tab == RightTab::Consumables
-                            || *right_tab == RightTab::Artifacts
-                    },
-                }
+                matches!(*_state.get(), GameState::Combat)
+                    || match card {
+                        RightColumnTooltip::Ability(_) => *right_tab == RightTab::Abilities,
+                        RightColumnTooltip::Perk(_) => *right_tab == RightTab::Perks,
+                        RightColumnTooltip::Equipment(_) => {
+                            *right_tab == RightTab::Equipment
+                                || *right_tab == RightTab::Consumables
+                                || *right_tab == RightTab::Artifacts
+                        },
+                    }
             };
             if is_active_tab {
                 hovered_card = Some(card);
@@ -3297,9 +3307,15 @@ pub fn handle_equipment_slot_click(
     settings: Res<Settings>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    _game_state: Option<Res<State<GameState>>>,
+    game_state: Option<Res<State<GameState>>>,
     slot_q: Query<&EquipSlot>,
 ) {
+    if let Some(state) = game_state {
+        if *state.get() == GameState::Combat {
+            return;
+        }
+    }
+
     if let Ok(slot) = slot_q.get(event.entity) {
         // Get the equipped item key for this slot
         let equipped_key = match slot {

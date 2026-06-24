@@ -37,6 +37,6 @@ fn main() {
             "png"
         };
         println!("Generating catalogs (img_ext={img_ext})…");
-        catalog_gen::run("assets-src/images", "assets/inventory", img_ext);
+        catalog_gen::run("assets-src/images", "assets/catalog", img_ext);
     }
 }

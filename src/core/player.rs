@@ -4,7 +4,7 @@ use crate::core::catalog::modifiers::Modifier;
 use crate::core::catalog::weapons::Category;
 use crate::core::classes::Class;
 use crate::core::constants::{NAMES, START_CHARACTERISTIC};
-use crate::core::monsters::MonsterStats;
+use crate::core::monsters::Monster;
 use crate::core::races::Race;
 use bevy::prelude::*;
 use rand::prelude::IndexedRandom;
@@ -142,7 +142,7 @@ pub struct Player {
     pub abilities: Vec<String>,
     pub active_abilities: Vec<Option<String>>,
     pub perks: Vec<String>,
-    pub pet: Option<MonsterStats>,
+    pub pet: Option<Monster>,
     pub helmet: Option<String>,
     pub armor: Option<String>,
     pub gloves: Option<String>,

@@ -3,6 +3,11 @@
 mod core;
 mod utils;
 
+#[cfg(feature = "generate-catalogs")]
+mod catalog_gen {
+    include!("bin/generate_catalogs.rs");
+}
+
 use bevy::asset::AssetMetaCheck;
 use bevy::ecs::system::NonSendMarker;
 use bevy::prelude::*;
@@ -12,6 +17,7 @@ use bevy_kira_audio::AudioPlugin;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::panic;
+use std::path::Path;
 use std::sync::Mutex;
 
 use crate::core::GamePlugin;
@@ -25,6 +31,9 @@ static LOG_FILE: Mutex<Option<File>> = Mutex::new(None);
 fn main() {
     #[cfg(not(debug_assertions))]
     init_panic_logger();
+
+    #[cfg(feature = "generate-catalogs")]
+    ensure_inventory_catalogs();
 
     let mut app = App::new();
 
@@ -60,6 +69,20 @@ fn main() {
     app.add_systems(Startup, set_window_icon);
 
     app.run();
+}
+
+#[cfg(feature = "generate-catalogs")]
+fn ensure_inventory_catalogs() {
+    if Path::new("assets/catalog/monsters.ron").exists() {
+        return;
+    }
+
+    let img_ext = if cfg!(feature = "process-assets") {
+        "ktx2"
+    } else {
+        "png"
+    };
+    catalog_gen::run("assets-src/images", "assets/catalog", img_ext);
 }
 
 #[allow(dead_code)]

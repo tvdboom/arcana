@@ -5,9 +5,10 @@ use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::constants::*;
 use crate::core::localization::Localization;
-use crate::core::menu::utils::{add_root_node, add_text, recolor};
+use crate::core::menu::utils::{add_root_node, add_text};
 use crate::core::player::Player;
 use crate::core::settings::Language;
+use crate::core::ui::button::spawn_action_button;
 use crate::core::ui::playing::{unequip_item, EquipSlot};
 use crate::core::utils::cursor;
 
@@ -143,64 +144,14 @@ pub fn spawn_modal(
                         })
                         .with_children(|parent| {
                             // OK button
-                            parent
-                                .spawn((
-                                    Node {
-                                        align_self: AlignSelf::Center,
-                                        padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
-                                        border: UiRect::all(Val::Px(1.)),
-                                        ..default()
-                                    },
-                                    BackgroundColor(NORMAL_BUTTON_COLOR),
-                                    BorderColor::all(BUTTON_BORDER_COLOR),
-                                    Button,
-                                    Interaction::default(),
-                                    Pickable::default(),
-                                ))
-                                .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                                .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
-                                .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
-                                .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
-                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                .observe(cursor::<Release>(SystemCursorIcon::Default))
+                            spawn_action_button(parent, assets, ok_text)
                                 .observe(handle_modal_ok_click)
-                                .with_children(|parent| {
-                                    parent.spawn((
-                                        add_text(ok_text, "bold", 1.8, assets),
-                                        TextColor(BUTTON_TEXT_COLOR),
-                                    ));
-                                });
+                                .observe(cursor::<Release>(SystemCursorIcon::Default));
 
                             // Cancel Button
-                            parent
-                                .spawn((
-                                    Node {
-                                        align_self: AlignSelf::Center,
-                                        padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
-                                        border: UiRect::all(Val::Px(1.)),
-                                        ..default()
-                                    },
-                                    BackgroundColor(NORMAL_BUTTON_COLOR),
-                                    BorderColor::all(BUTTON_BORDER_COLOR),
-                                    Button,
-                                    Interaction::default(),
-                                    Pickable::default(),
-                                ))
-                                .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                                .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
-                                .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
-                                .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
-                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                .observe(cursor::<Release>(SystemCursorIcon::Default))
+                            spawn_action_button(parent, assets, cancel_text)
                                 .observe(handle_modal_cancel_click)
-                                .with_children(|parent| {
-                                    parent.spawn((
-                                        add_text(cancel_text, "bold", 1.8, assets),
-                                        TextColor(BUTTON_TEXT_COLOR),
-                                    ));
-                                });
+                                .observe(cursor::<Release>(SystemCursorIcon::Default));
                         });
                 });
         });

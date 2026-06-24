@@ -461,9 +461,32 @@ pub fn handle_hunt_card_clicks(
     }
 
     if combat_triggered {
-        pending_hunt_xp.amount = pending_hunt_xp.amount.saturating_add(xp_gain);
-        next_game_state.set(GameState::Combat);
-        return;
+        let p_level = player.level();
+        let (min_lvl, max_lvl) = match tier {
+            0 => (p_level.saturating_sub(2).max(1), p_level),
+            1 => (p_level.saturating_sub(1).max(1), p_level.saturating_add(1)),
+            _ => (p_level, p_level.saturating_add(2)),
+        };
+
+        let possible: Vec<crate::core::monsters::Monster> =
+            crate::core::catalog::catalog::all_monsters()
+                .iter()
+                .filter(|m| {
+                    (m.is_from_image_dir("pets") || m.is_from_image_dir("dragons"))
+                        && m.level >= min_lvl
+                        && m.level <= max_lvl
+                })
+                .cloned()
+                .collect();
+
+        if !possible.is_empty() {
+            pending_hunt_xp.amount = pending_hunt_xp.amount.saturating_add(xp_gain);
+            let idx = rng.random_range(0..possible.len());
+            let selected = possible[idx].clone();
+            commands.insert_resource(crate::core::monsters::ActiveMonster { monster: selected });
+            next_game_state.set(GameState::Combat);
+            return;
+        }
     }
 
     gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state);

@@ -5,6 +5,7 @@ use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::perks::Perk;
 use crate::core::catalog::weapons::Weapon;
 use crate::core::catalog::wearables::Wearable;
+use crate::core::monsters::Monster;
 use std::sync::OnceLock;
 
 static ABILITIES: OnceLock<Vec<Ability>> = OnceLock::new();
@@ -14,45 +15,53 @@ static WEARABLE: OnceLock<Vec<Wearable>> = OnceLock::new();
 static CONSUMABLES: OnceLock<Vec<Consumable>> = OnceLock::new();
 static EQUIPMENT: OnceLock<Vec<Equipment>> = OnceLock::new();
 static ARTIFACTS: OnceLock<Vec<Artifact>> = OnceLock::new();
+static MONSTERS: OnceLock<Vec<Monster>> = OnceLock::new();
+
+pub fn all_monsters() -> &'static [Monster] {
+    MONSTERS.get_or_init(|| {
+        let ron_str = include_str!("../../../assets/catalog/monsters.ron");
+        ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse monsters.ron: {}", e))
+    })
+}
 
 pub fn all_abilities() -> &'static [Ability] {
     ABILITIES.get_or_init(|| {
-        let ron_str = include_str!("../../../assets/inventory/abilities.ron");
+        let ron_str = include_str!("../../../assets/catalog/abilities.ron");
         ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse abilities.ron: {}", e))
     })
 }
 
 pub fn all_perks() -> &'static [Perk] {
     PERKS.get_or_init(|| {
-        let ron_str = include_str!("../../../assets/inventory/perks.ron");
+        let ron_str = include_str!("../../../assets/catalog/perks.ron");
         ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse perks.ron: {}", e))
     })
 }
 
 pub fn all_weapons() -> &'static [Weapon] {
     WEAPONS.get_or_init(|| {
-        let ron_str = include_str!("../../../assets/inventory/weapons.ron");
+        let ron_str = include_str!("../../../assets/catalog/weapons.ron");
         ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse weapons.ron: {}", e))
     })
 }
 
 pub fn all_wearables() -> &'static [Wearable] {
     WEARABLE.get_or_init(|| {
-        let ron_str = include_str!("../../../assets/inventory/wearables.ron");
+        let ron_str = include_str!("../../../assets/catalog/wearables.ron");
         ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse wearables.ron: {}", e))
     })
 }
 
 pub fn all_consumables() -> &'static [Consumable] {
     CONSUMABLES.get_or_init(|| {
-        let ron_str = include_str!("../../../assets/inventory/consumables.ron");
+        let ron_str = include_str!("../../../assets/catalog/consumables.ron");
         ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse consumables.ron: {}", e))
     })
 }
 
 pub fn all_artifacts() -> &'static [Artifact] {
     ARTIFACTS.get_or_init(|| {
-        let ron_str = include_str!("../../../assets/inventory/artifacts.ron");
+        let ron_str = include_str!("../../../assets/catalog/artifacts.ron");
         ron::from_str(ron_str).unwrap_or_else(|e| panic!("Failed to parse artifacts.ron: {}", e))
     })
 }
@@ -92,12 +101,19 @@ pub fn get_equipment(name: &str) -> Option<Equipment> {
     all_equipment().iter().find(|e| e.name() == name).cloned()
 }
 
+pub fn get_monster(name: &str) -> Option<Monster> {
+    all_monsters().iter().find(|m| m.name == name).cloned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_load_all_catalogs() {
+        let mns = all_monsters();
+        assert!(!mns.is_empty(), "Monsters catalog is empty");
+
         let abs = all_abilities();
         assert!(!abs.is_empty(), "Abilities catalog is empty");
 

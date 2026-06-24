@@ -673,27 +673,23 @@ pub fn handle_quest_card_clicks(
         );
     }
 
-    if xp_gain > 0 {
-        if combat_triggered {
-            pending_quest_xp.amount = pending_quest_xp.amount.saturating_add(xp_gain);
-        } else {
-            gain_xp(
-                &mut player,
-                xp_gain,
-                &mut level_up,
-                &mut play_audio_msg,
-                &mut next_game_state,
-            );
-            spawn_toast(
-                &mut commands,
-                &assets,
-                format!("Quest complete. +{} XP", xp_gain),
-                Color::srgba(0.08, 0.10, 0.20, 0.93),
-                Color::srgb(0.35, 0.55, 0.90),
-                Color::srgb(0.75, 0.90, 1.0),
-                toast,
-            );
-        }
+    if xp_gain > 0 && !combat_triggered {
+        gain_xp(
+            &mut player,
+            xp_gain,
+            &mut level_up,
+            &mut play_audio_msg,
+            &mut next_game_state,
+        );
+        spawn_toast(
+            &mut commands,
+            &assets,
+            format!("Quest complete. +{} XP", xp_gain),
+            Color::srgba(0.08, 0.10, 0.20, 0.93),
+            Color::srgb(0.35, 0.55, 0.90),
+            Color::srgb(0.75, 0.90, 1.0),
+            toast,
+        );
     }
 
     if loot_found {
@@ -710,7 +706,53 @@ pub fn handle_quest_card_clicks(
         );
     }
 
+    let mut combat_encounter_selected = false;
     if combat_triggered {
-        next_game_state.set(GameState::Combat);
+        let p_level = player.level();
+        let tier = marker.0;
+        let (min_lvl, max_lvl) = match tier {
+            0 => (p_level.saturating_sub(2).max(1), p_level),
+            1 => (p_level.saturating_sub(1).max(1), p_level.saturating_add(1)),
+            _ => (p_level, p_level.saturating_add(2)),
+        };
+
+        let possible: Vec<crate::core::monsters::Monster> =
+            crate::core::catalog::catalog::all_monsters()
+                .iter()
+                .filter(|m| {
+                    (m.is_from_image_dir("creatures") || m.is_from_image_dir("dragons"))
+                        && m.level >= min_lvl
+                        && m.level <= max_lvl
+                })
+                .cloned()
+                .collect();
+
+        if !possible.is_empty() {
+            pending_quest_xp.amount = pending_quest_xp.amount.saturating_add(xp_gain);
+            let idx = rng.random_range(0..possible.len());
+            let selected = possible[idx].clone();
+            commands.insert_resource(crate::core::monsters::ActiveMonster { monster: selected });
+            next_game_state.set(GameState::Combat);
+            combat_encounter_selected = true;
+        }
+    }
+
+    if combat_triggered && !combat_encounter_selected && xp_gain > 0 {
+        gain_xp(
+            &mut player,
+            xp_gain,
+            &mut level_up,
+            &mut play_audio_msg,
+            &mut next_game_state,
+        );
+        spawn_toast(
+            &mut commands,
+            &assets,
+            format!("Quest complete. +{} XP", xp_gain),
+            Color::srgba(0.08, 0.10, 0.20, 0.93),
+            Color::srgb(0.35, 0.55, 0.90),
+            Color::srgb(0.75, 0.90, 1.0),
+            toast,
+        );
     }
 }

@@ -1,5 +1,5 @@
 /// Catalog generation logic: reads PNG image lists from assets-src/images/catalog/
-/// and writes inventory RON files to assets/inventory/.
+/// and writes catalog RON files to assets/catalog/.
 ///
 /// This file is used in two ways:
 ///   1. As the `generate_catalogs` binary  (`cargo run --bin generate_catalogs`)
@@ -450,8 +450,147 @@ fn list_png_files(dir: &str) -> Vec<String> {
     files
 }
 
+fn list_image_files(dir: &str) -> Vec<String> {
+    let mut files = Vec::new();
+    if let Ok(entries) = fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_file() {
+                if let Some(ext) = path.extension() {
+                    let ext_lower = ext.to_string_lossy().to_lowercase();
+                    if ext_lower == "png" || ext_lower == "jpg" || ext_lower == "jpeg" {
+                        if let Some(name) = path.file_name() {
+                            files.push(name.to_string_lossy().to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    files
+}
+
 fn img_name(filename: &str, img_ext: &str) -> String {
-    format!("{}.{}", Path::new(filename).file_stem().unwrap().to_str().unwrap(), img_ext)
+    let path = Path::new(filename);
+    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+    if ext == "jpg" || ext == "jpeg" {
+        filename.to_string()
+    } else {
+        format!("{}.{}", path.file_stem().unwrap().to_str().unwrap(), img_ext)
+    }
+}
+
+fn monster_modifiers(name: &str, level: u32, kind: &str) -> Vec<String> {
+    let mut mods = Vec::new();
+    if kind == "Creature" {
+        return mods;
+    }
+    
+    let name_lower = name.to_lowercase();
+    let val1 = (level / 4 + 1) as i32;
+    let val2 = (level / 5 + 1) as i32;
+    let val3_health = (level * 5) as i32;
+    let val3_mana = (level * 3) as i32;
+    
+    // Strengths / Attack
+    if ["wolf", "worg", "tiger", "bear", "griffin", "manticore", "three headed dog", "red"].iter().any(|x| name_lower.contains(x)) {
+        mods.push(format!("AttributeModifier(Strength, {val1})"));
+        if level > 5 {
+            mods.push(format!("AttackModifier({val2})"));
+        }
+        if level > 12 {
+            mods.push(format!("MaxHealthModifier({val3_health})"));
+        }
+    }
+    // Dexterity / Initiative
+    else if ["snake", "spider", "puma", "bat", "weasel", "hyena", "blue"].iter().any(|x| name_lower.contains(x)) {
+        mods.push(format!("AttributeModifier(Dexterity, {val1})"));
+        if level > 5 {
+            mods.push(format!("InitiativeModifier({val2})"));
+        }
+        if level > 12 {
+            mods.push(format!("CritChanceModifier({:.1})", level as f32));
+        }
+    }
+    // Wisdom / ManaRegen / MaxMana
+    else if ["owl", "pegasus", "silver"].iter().any(|x| name_lower.contains(x)) {
+        mods.push(format!("AttributeModifier(Wisdom, {val1})"));
+        if level > 5 {
+            mods.push(format!("ManaRegen({val2})"));
+        }
+        if level > 12 {
+            mods.push(format!("MaxManaModifier({val3_mana})"));
+        }
+    }
+    // Charisma / Healing / LifeSteal
+    else if ["unicorn", "gold"].iter().any(|x| name_lower.contains(x)) {
+        mods.push(format!("AttributeModifier(Charisma, {val1})"));
+        if level > 5 {
+            mods.push(format!("HealingMultiplier({:.1})", level as f32 * 2.0));
+        }
+        if level > 12 {
+            mods.push(format!("LifeSteal({:.1})", level as f32));
+        }
+    }
+    // Constitution / Defense
+    else if ["crocodile", "lizard", "owlbear", "green", "black"].iter().any(|x| name_lower.contains(x)) {
+        mods.push(format!("AttributeModifier(Constitution, {val1})"));
+        if level > 5 {
+            mods.push(format!("DefenseModifier({val2})"));
+        }
+        if level > 12 {
+            mods.push(format!("MaxHealthModifier({:.0})", (level * 6) as f32));
+        }
+    }
+    // Default
+    else {
+        mods.push(format!("AttributeModifier(Constitution, {val1})"));
+        if level > 5 {
+            mods.push(format!("DefenseModifier({val2})"));
+        }
+    }
+    mods
+}
+
+fn monster_effects(name: &str, level: u32) -> Vec<String> {
+    let mut effs = Vec::new();
+    let name_lower = name.to_lowercase();
+    
+    // Add primary thematic effect
+    if ["hell hound", "red", "fire troll"].iter().any(|x| name_lower.contains(x)) {
+        effs.push(format!("Burn(damage: {}, duration: 4.0)", level * 2 + 2));
+    } else if ["snake", "spider", "basilisk", "yuan-ti", "formicidae", "wyrmling", "green"].iter().any(|x| name_lower.contains(x)) {
+        effs.push(format!("Poison(damage: {}, duration: 5.0)", level + 2));
+    } else if ["medusa", "lich", "skeleton", "drow", "aboleth", "mindflayer", "black"].iter().any(|x| name_lower.contains(x)) {
+        effs.push(format!("Curse(damage: {}, timer: 3)", level * 3 + 3));
+    } else if ["ice troll", "blue", "silver", "winter", "frost"].iter().any(|x| name_lower.contains(x)) {
+        effs.push(format!("Freeze(attack_speed_pct: -{:.1}, duration: 3.0)", 10.0 + level as f32 * 1.5));
+    } else if ["bear", "crocodile", "ogre", "mountain troll", "stoneman", "tarrasque", "owlbear", "worg", "balor"].iter().any(|x| name_lower.contains(x)) {
+        effs.push(format!("Bleed(damage_pct: {:.1})", 10.0 + level as f32 * 5.0));
+    } else if ["bat", "vulture", "weasel", "rat", "hyena", "puma"].iter().any(|x| name_lower.contains(x)) {
+        effs.push(format!("Pierce(damage: {})", level * 3 + 3));
+    } else if ["unicorn", "pegasus", "empyrean", "gold", "angel"].iter().any(|x| name_lower.contains(x)) {
+        effs.push(format!("Regen(heal: {}, duration: 4.0)", level * 2 + 2));
+    } else if ["owl", "griffin", "manticore", "tiger", "three headed dog"].iter().any(|x| name_lower.contains(x)) {
+        effs.push(format!("Vulnerability(damage_pct: {:.1}, duration: 4.0)", 5.0 + level as f32));
+    } else {
+        // Fallback or generic
+        effs.push(format!("Pierce(damage: {})", level * 2 + 2));
+    }
+    
+    // Add additional effects for higher level monsters
+    if level >= 7 && effs.len() < 2 {
+        if !name_lower.contains("snake") {
+            effs.push(format!("Vulnerability(damage_pct: {:.1}, duration: 3.0)", 5.0 + level as f32));
+        } else {
+            effs.push(format!("Paranoia(initiative_pct: -{:.1}, duration: 3.0)", 5.0 + level as f32));
+        }
+    }
+    if level >= 14 && effs.len() < 3 {
+        effs.push(format!("Blind(miss_pct: 20.0, duration: 2.0)"));
+    }
+    
+    effs
 }
 
 fn classify_artifact_kind(name: &str) -> &'static str {
@@ -550,9 +689,40 @@ fn deterministic_shuffle<T>(items: &mut [T], mut seed: u64) {
     }
 }
 
+fn monster_creature_level(name: &str) -> u32 {
+    match name.to_lowercase().as_str() {
+        "goblin" | "skeleton" => 1,
+        "formicidae" | "kuo toa" | "lizardfolk" | "gnoll" => 2,
+        "drow" => 3,
+        "ogre" => 4,
+        "basilisk" | "fire troll" | "ice troll" | "mountain troll" => 6,
+        "medusa" | "owlbear" | "griffin" | "manticore" => 7,
+        "worg" => 4,
+        "hydra" | "yuan ti" => 10,
+        "mindflayer" | "rakshasa" => 12,
+        "aboleth" => 13,
+        "empyrean" => 15,
+        "lich" => 18,
+        "balor" => 19,
+        "tarrasque" => 20,
+        _ => 5,
+    }
+}
+
+fn monster_pet_level(name: &str) -> u32 {
+    match name.to_lowercase().as_str() {
+        "rat" | "bat" | "snake" | "spider" | "weasel" | "owl" | "vulture" | "lizard" => 1,
+        "hyena" | "puma" | "eagle" | "crocodile" => 2,
+        "wolf" | "worg" | "bear" | "tiger" => 3,
+        "hell hound" | "griffin" | "owlbear" | "three headed dog" => 5,
+        "pegasus" | "unicorn" | "manticore" => 8,
+        _ => 4,
+    }
+}
+
 /// Generate all inventory RON catalogs.
 /// - `src_images`:    path to `assets-src/images`
-/// - `out_inventory`: path to output directory (e.g. `assets/inventory`)
+/// - `out_inventory`: path to output directory (e.g. `assets/catalog`)
 /// - `img_ext`:       image extension used in RON references (`"ktx2"` or `"png"`)
 pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     fs::create_dir_all(out_inventory).unwrap();
@@ -1542,13 +1712,146 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         .write_all(consumables_ron.as_bytes())
         .unwrap();
     println!("Generated {} consumables in consumables.ron", total_cons);
+
+    // ── 6. MONSTERS ──────────────────────────────────────────────────────────
+    let creatures_dir = format!("{}/monsters/creatures", src_images);
+    let pets_dir = format!("{}/monsters/pets", src_images);
+
+    let mut creatures_files = list_image_files(&creatures_dir)
+        .into_iter()
+        .map(|filename| {
+            let name = capitalize_words(&clean_name(&filename));
+            let level = monster_creature_level(&name);
+            (filename, level)
+        })
+        .collect::<Vec<_>>();
+    creatures_files.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
+
+    let mut pets_files = list_image_files(&pets_dir)
+        .into_iter()
+        .map(|filename| {
+            let name = capitalize_words(&clean_name(&filename));
+            let level = monster_pet_level(&name);
+            (filename, level)
+        })
+        .collect::<Vec<_>>();
+    pets_files.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
+
+    let mut monsters_ron = String::from("[\n");
+
+    // Creatures
+    for (filename, level) in creatures_files.iter() {
+        let name = capitalize_words(&clean_name(filename));
+        let img = img_name(filename, img_ext);
+        let max_hp = 30 + *level * 10;
+        let attack = 5 + *level * 2;
+        let defense = 5 + *level * 2;
+        let initiative = 5 + *level * 2;
+        let modifiers = monster_modifiers(&name, *level, "Creature");
+        let effects = monster_effects(&name, *level);
+
+        monsters_ron.push_str(&format!(
+            "    (\n        name: \"{name}\",\n        image: \"images/monsters/creatures/{img}\",\n        level: {level},\n        kind: Creature,\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: 1.0,\n        modifiers: [{mods}],\n        effects: [{effs}],\n    ),\n",
+            name = name,
+            img = img,
+            level = *level,
+            max_hp = max_hp,
+            attack = attack,
+            defense = defense,
+            initiative = initiative,
+            mods = modifiers.join(", "),
+            effs = effects.join(", "),
+        ));
+    }
+
+    // Pets
+    for (filename, level) in pets_files.iter() {
+        let name = capitalize_words(&clean_name(filename));
+        let img = img_name(filename, img_ext);
+        let max_hp = 30 + *level * 10;
+        let attack = 5 + *level * 2;
+        let defense = 5 + *level * 2;
+        let initiative = 5 + *level * 2;
+        let modifiers = monster_modifiers(&name, *level, "Pet");
+        let effects = monster_effects(&name, *level);
+
+        monsters_ron.push_str(&format!(
+            "    (\n        name: \"{name}\",\n        image: \"images/monsters/pets/{img}\",\n        level: {level},\n        kind: Pet,\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: 1.0,\n        modifiers: [{mods}],\n        effects: [{effs}],\n    ),\n",
+            name = name,
+            img = img,
+            level = *level,
+            max_hp = max_hp,
+            attack = attack,
+            defense = defense,
+            initiative = initiative,
+            mods = modifiers.join(", "),
+            effs = effects.join(", "),
+        ));
+    }
+
+    // Dragons
+    let dragon_colors = [
+        ("Black", 2),
+        ("Blue", 3),
+        ("Gold", 4),
+        ("Green", 2),
+        ("Red", 4),
+        ("Silver", 3),
+    ];
+
+    let dragon_ages = [
+        ("Hatchling", "hatchling"),
+        ("Young", "hatchling"),
+        ("Juvenile", "hatchling"),
+        ("Young Adult", "adult"),
+        ("Adult", "adult"),
+        ("Old", "adult"),
+        ("Ancient", "wyrm"),
+        ("Wyrm", "wyrm"),
+        ("Great Wyrm", "wyrm"),
+    ];
+
+    for (color, start_level) in &dragon_colors {
+        for (age_idx, (age_display, file_suffix)) in dragon_ages.iter().enumerate() {
+            let level = start_level + age_idx as u32 * 2;
+            let name = format!("{} {}", color, age_display);
+            let img = format!("{}_{}.{}", color.to_lowercase(), file_suffix, img_ext);
+            let max_hp = 30 + level * 10;
+            let attack = 5 + level * 2;
+            let defense = 5 + level * 2;
+            let initiative = 5 + level * 2;
+            let modifiers = monster_modifiers(&name, level, "Dragon");
+            let effects = monster_effects(&name, level);
+
+            monsters_ron.push_str(&format!(
+                "    (\n        name: \"{name}\",\n        image: \"images/monsters/dragons/{img}\",\n        level: {level},\n        kind: Dragon,\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: 1.0,\n        modifiers: [{mods}],\n        effects: [{effs}],\n    ),\n",
+                name = name,
+                img = img,
+                level = level,
+                max_hp = max_hp,
+                attack = attack,
+                defense = defense,
+                initiative = initiative,
+                mods = modifiers.join(", "),
+                effs = effects.join(", "),
+            ));
+        }
+    }
+
+    monsters_ron.push_str("]\n");
+    File::create(format!("{out_inventory}/monsters.ron"))
+        .unwrap()
+        .write_all(monsters_ron.as_bytes())
+        .unwrap();
+    println!("Generated monsters in monsters.ron");
 }
 
+#[allow(dead_code)]
 fn main() {
     #[cfg(feature = "process-assets")]
     let img_ext = "ktx2";
     #[cfg(not(feature = "process-assets"))]
     let img_ext = "png";
 
-    run("assets-src/images", "assets/inventory", img_ext);
+    run("assets-src/images", "assets/catalog", img_ext);
 }

@@ -4,8 +4,9 @@ use crate::core::localization::Localization;
 use crate::core::menu::utils::{add_text, spawn_rich_text_row};
 use crate::core::player::Player;
 use crate::core::settings::Language;
-use crate::utils::{capitalize_words, NameFromEnum};
+use crate::utils::capitalize_words;
 use bevy::prelude::*;
+use std::path::Path;
 
 #[derive(Component)]
 pub struct TooltipNode {
@@ -350,10 +351,15 @@ pub fn spawn_pet_tooltip(
     let Some(ref pet) = player.pet else {
         return;
     };
-    let pet_type_name = capitalize_words(&pet.kind.to_lowername());
+    let pet_type_key = Path::new(&pet.image)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or(&pet.name)
+        .to_lowercase();
+    let pet_type_name = capitalize_words(&pet_type_key);
     let title = format!("{} ({})", pet.name, pet_type_name);
     let desc = localization
-        .get_opt(&format!("pet.{}_desc", pet.kind.to_lowername()), lang)
+        .get_opt(&format!("pet.{}_desc", pet_type_key), lang)
         .unwrap_or_else(|| format!("A loyal {} companion.", pet_type_name.to_lowercase()));
 
     let content = TooltipContent {

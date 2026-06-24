@@ -59,6 +59,6 @@ fn main() {
 
     if gen_catalogs {
         println!("Generating catalogs (img_ext=ktx2…");
-        catalog_gen::run("assets-src/images", "assets/inventory", "ktx2");
+        catalog_gen::run("assets-src/images", "assets/catalog", "ktx2");
     }
 }

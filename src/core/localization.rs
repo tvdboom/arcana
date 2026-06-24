@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 
 use crate::core::classes::{Ajah, Class};
-use crate::core::monsters::Monster;
+use crate::core::monsters::MonsterKind;
+use crate::core::ui::creation::PetChoice;
 use crate::core::player::Attribute;
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
 use crate::utils::NameFromEnum;
+use crate::utils::capitalize_words;
 use bevy::prelude::*;
 use serde_json;
 use strum::IntoEnumIterator;
@@ -155,7 +157,11 @@ pub struct LocalizedAjahDesc(pub Ajah);
 
 /// Marks a text entity with the pet description so it can be updated on language change.
 #[derive(Component)]
-pub struct LocalizedPetDesc(pub Monster);
+pub struct LocalizedPetDesc(pub PetChoice);
+
+/// Marks a text entity with the monster kind text so it can be updated on language change.
+#[derive(Component)]
+pub struct LocalizedMonsterKindDesc(pub MonsterKind);
 
 pub fn format_race_description(
     race: Race,
@@ -235,12 +241,20 @@ pub fn format_ajah_description(
 }
 
 pub fn format_pet_description(
-    pet: Monster,
+    pet: PetChoice,
     language: Language,
     localization: &Localization,
 ) -> String {
     let pet_key = pet.to_lowername();
     localization.get(format!("pet.{}_desc", pet_key), language)
+}
+
+pub fn format_monster_kind_description(
+    kind: MonsterKind,
+    _language: Language,
+    _localization: &Localization,
+) -> String {
+    capitalize_words(&kind.to_lowername())
 }
 
 /// Updates all LocalizedText and LocalizedRaceDesc entities whenever the Settings resource changes.
@@ -266,6 +280,16 @@ pub fn update_localized_text(
             Without<LocalizedAjahDesc>,
         ),
     >,
+    mut monster_kind_desc_q: Query<
+        (&mut Text, &LocalizedMonsterKindDesc),
+        (
+            Without<LocalizedText>,
+            Without<LocalizedRaceDesc>,
+            Without<LocalizedClassDesc>,
+            Without<LocalizedAjahDesc>,
+            Without<LocalizedPetDesc>,
+        ),
+    >,
 ) {
     for (mut text, loc) in &mut text_q {
         text.0 = localization.get(&loc.0, settings.language);
@@ -285,5 +309,9 @@ pub fn update_localized_text(
 
     for (mut text, desc) in &mut pet_desc_q {
         text.0 = format_pet_description(desc.0, settings.language, &localization);
+    }
+
+    for (mut text, desc) in &mut monster_kind_desc_q {
+        text.0 = format_monster_kind_description(desc.0, settings.language, &localization);
     }
 }

@@ -335,6 +335,16 @@ impl Plugin for GamePlugin {
                 (despawn::<PlayingCmp>, setup_combat_ui).chain(),
             )
             .add_systems(
+                Update,
+                (
+                    update_playing_screen,
+                    tooltip_follow_cursor_system,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Combat)),
+            )
+            .add_systems(
                 OnExit(GameState::Combat),
                 (despawn::<CombatCmp>, despawn::<TooltipNode>),
             )
