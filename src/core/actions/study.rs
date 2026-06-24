@@ -211,16 +211,16 @@ pub fn build_study_content_inner(
     let attr_plural = localization.get("general.attribute_plural", lang);
 
     let cond_breakdown = match slider_val {
-        0 => format!(" - 1 {}: {}%", attr_single, chance),
+        0 => format!(" • 1 {}: {}%", attr_single, chance),
         1 => {
             let p = (chance as f32 * 0.5).round() as u32;
-            format!(" - 1 {}: {}%\n - 2 {}: {}%", attr_single, p, attr_plural, p)
+            format!(" • 1 {}: {}%\n • 2 {}: {}%", attr_single, p, attr_plural, p)
         },
         _ => {
             let p1 = (chance as f32 * 0.2).round() as u32;
             let p2 = (chance as f32 * 0.4).round() as u32;
             format!(
-                " - 1 {}: {}%\n - 2 {}: {}%\n - 3 {}: {}%",
+                " • 1 {}: {}%\n • 2 {}: {}%\n • 3 {}: {}%",
                 attr_single, p1, attr_plural, p2, attr_plural, p2
             )
         },

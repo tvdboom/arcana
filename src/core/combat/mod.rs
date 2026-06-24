@@ -247,7 +247,7 @@ fn spawn_character_portrait(
                 parent,
                 assets,
                 2.0,
-                2.0,
+                14.0,
                 &[EquipSlot::Accessory, EquipSlot::Accessory2],
                 true,
             );
@@ -308,7 +308,7 @@ fn spawn_combat_pet_overlay(
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn((add_text(capitalize_words(&pet.name), "bold", 1.8, assets), TextColor(BUTTON_TEXT_COLOR)));
+                    parent.spawn((add_text(capitalize_words(&pet.name), "bold", 2.2, assets), TextColor(BUTTON_TEXT_COLOR)));
                 });
 
             parent
