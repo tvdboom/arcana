@@ -24,7 +24,7 @@ use crate::core::actions::craft::{setup_craft_ui, update_craft_ui, CraftSeed};
 use crate::core::actions::duel::setup_duel_ui;
 use crate::core::actions::hunt::{apply_pending_hunt_xp, setup_hunt_ui, update_hunt_ui, PendingHuntXp};
 use crate::core::actions::quest::{apply_pending_quest_xp, setup_quest_ui, update_quest_ui, PendingQuestXp};
-use crate::core::combat::{setup_combat_ui, CombatCmp};
+use crate::core::combat::ui::{setup_combat_ui, CombatCmp};
 use crate::core::actions::rest::{setup_rest_ui, update_rest_ui};
 use crate::core::actions::shop::*;
 use crate::core::actions::study::{setup_study_ui, update_study_ui, StudySliderState};
