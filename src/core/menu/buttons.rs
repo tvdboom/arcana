@@ -124,10 +124,11 @@ pub fn spawn_menu_button(
     let (width, height) = match btn {
         MenuBtn::Back => (Val::Vh(22.22), Val::Vh(5.0)),
         MenuBtn::NewCharacter
-        | MenuBtn::LoadCharacter
         | MenuBtn::Settings
         | MenuBtn::Quit
-        | MenuBtn::Continue
+        | MenuBtn::Continue => (Val::Vh(46.67), Val::Vh(8.33)),
+        #[cfg(not(target_arch = "wasm32"))]
+        MenuBtn::LoadCharacter
         | MenuBtn::SaveCharacter => (Val::Vh(46.67), Val::Vh(8.33)),
         #[allow(unreachable_patterns)]
         _ => (Val::Vh(33.33), Val::Vh(6.11)),

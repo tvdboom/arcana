@@ -23,7 +23,7 @@ jobs:
           rust-version: stable
 
       - name: Install KTX-Software (toktx)
-        run: install-ktx
+        run: just install-ktx
 
       - name: Build release exe
         run: just build-release

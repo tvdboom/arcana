@@ -73,6 +73,7 @@ pub fn setup_menu(
                             &localization,
                             lang,
                         );
+                        #[cfg(not(target_arch = "wasm32"))]
                         spawn_menu_button(
                             parent,
                             MenuBtn::LoadCharacter,
