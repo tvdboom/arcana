@@ -1248,12 +1248,10 @@ pub fn combat_input(
         return;
     };
 
-    // Combat speed: Ctrl+Shift+Right doubles it, Ctrl+Shift+Left halves it.
+    // Combat speed: Ctrl+Right doubles it, Ctrl+Left halves it.
     let ctrl =
         keyboard.pressed(KeyCode::ControlLeft) || keyboard.pressed(KeyCode::ControlRight);
-    let shift =
-        keyboard.pressed(KeyCode::ShiftLeft) || keyboard.pressed(KeyCode::ShiftRight);
-    if ctrl && shift {
+    if ctrl {
         if keyboard.just_pressed(KeyCode::ArrowRight) {
             combat_speed.faster();
             play_audio_msg.write(PlayAudioMsg::new("click"));
