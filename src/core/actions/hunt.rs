@@ -26,6 +26,11 @@ pub struct PendingHuntXp {
     pub amount: u32,
 }
 
+#[derive(Resource, Default)]
+pub struct PendingHuntLoot {
+    pub artifacts: Vec<String>,
+}
+
 pub fn apply_pending_hunt_xp(
     mut pending_hunt_xp: ResMut<PendingHuntXp>,
     mut player: ResMut<Player>,
@@ -46,6 +51,18 @@ pub fn apply_pending_hunt_xp(
         &mut play_audio_msg,
         &mut next_game_state,
     );
+}
+
+pub fn apply_pending_hunt_loot(
+    mut pending_hunt_loot: ResMut<PendingHuntLoot>,
+    mut player: ResMut<Player>,
+) {
+    if pending_hunt_loot.artifacts.is_empty() {
+        return;
+    }
+    for key in pending_hunt_loot.artifacts.drain(..) {
+        player.add_inventory_item(key);
+    }
 }
 
 pub fn setup_hunt_ui(
@@ -432,6 +449,7 @@ pub fn handle_hunt_card_clicks(
     mut level_up: ResMut<LevelUpPending>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut pending_hunt_xp: ResMut<PendingHuntXp>,
+    mut pending_hunt_loot: ResMut<PendingHuntLoot>,
     card_q: Query<&HuntCardMarker>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
@@ -455,7 +473,6 @@ pub fn handle_hunt_card_clicks(
     let mut loot_found = None;
     if rng.random_bool(loot_chance) {
         if let Some(artifact_name) = choose_hunting_artifact(tier) {
-            player.add_inventory_item(artifact_name.clone());
             loot_found = Some(artifact_name);
         }
     }
@@ -481,12 +498,19 @@ pub fn handle_hunt_card_clicks(
 
         if !possible.is_empty() {
             pending_hunt_xp.amount = pending_hunt_xp.amount.saturating_add(xp_gain);
+            if let Some(artifact_name) = loot_found {
+                pending_hunt_loot.artifacts.push(artifact_name);
+            }
             let idx = rng.random_range(0..possible.len());
             let selected = possible[idx].clone();
             commands.insert_resource(crate::core::monsters::ActiveMonster { monster: selected });
             next_game_state.set(GameState::Combat);
             return;
         }
+    }
+
+    if let Some(artifact_name) = &loot_found {
+        player.add_inventory_item(artifact_name.clone());
     }
 
     gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state);

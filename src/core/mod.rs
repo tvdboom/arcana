@@ -22,8 +22,19 @@ mod utils;
 
 use crate::core::actions::craft::{setup_craft_ui, update_craft_ui, CraftSeed};
 use crate::core::actions::duel::setup_duel_ui;
-use crate::core::actions::hunt::{apply_pending_hunt_xp, setup_hunt_ui, update_hunt_ui, PendingHuntXp};
-use crate::core::actions::quest::{apply_pending_quest_xp, setup_quest_ui, update_quest_ui, PendingQuestXp};
+use crate::core::actions::hunt::{
+    apply_pending_hunt_loot, apply_pending_hunt_xp, setup_hunt_ui, update_hunt_ui,
+    PendingHuntLoot, PendingHuntXp,
+};
+use crate::core::actions::quest::{
+    apply_pending_quest_rewards, apply_pending_quest_xp, setup_quest_ui, update_quest_ui,
+    PendingQuestRewards, PendingQuestXp,
+};
+use crate::core::combat::mechanics::{
+    animate_death_skulls, animate_floating_text, cleanup_combat_state, combat_input, combat_tick,
+    setup_combat_state, sync_consumable_cards, update_combat_visuals,
+    update_combat_pause_indicator, update_combat_speed_label, CombatSpeed,
+};
 use crate::core::combat::ui::{setup_combat_ui, CombatCmp};
 use crate::core::actions::rest::{setup_rest_ui, update_rest_ui};
 use crate::core::actions::shop::*;
@@ -109,8 +120,11 @@ impl Plugin for GamePlugin {
             .init_resource::<TrainSliderState>()
             .init_resource::<CraftSeed>()
             .init_resource::<PendingHuntXp>()
+            .init_resource::<PendingHuntLoot>()
             .init_resource::<PendingQuestXp>()
+            .init_resource::<PendingQuestRewards>()
             .init_resource::<RightTab>()
+            .init_resource::<CombatSpeed>()
             .init_resource::<RightTabScroll>();
 
         // Sets
@@ -134,7 +148,16 @@ impl Plugin for GamePlugin {
             .add_systems(OnEnter(GameState::Playing), play_music)
             .add_systems(
                 Update,
-                (toggle_audio, update_audio, play_audio, pause_audio, stop_audio, mute_audio),
+                (
+                    toggle_audio,
+                    update_audio,
+                    apply_live_volume_to_playing_audio,
+                    mute_audio,
+                    pause_audio,
+                    stop_audio,
+                    play_audio,
+                    crate::core::menu::settings::update_volume_slider_visibility,
+                ),
             );
 
         // Menu
@@ -169,7 +192,10 @@ impl Plugin for GamePlugin {
                     complete_loading_when_ready.run_if(in_state(AppState::Loading)),
                 ),
             )
-            .add_systems(OnEnter(GameState::CreateCharacter), setup_character_creation)
+            .add_systems(
+                OnEnter(GameState::CreateCharacter),
+                setup_character_creation.run_if(in_state(AppState::Game)),
+            )
             .add_systems(OnExit(GameState::CreateCharacter), despawn::<MenuCmp>)
             .add_systems(
                 Update,
@@ -192,7 +218,9 @@ impl Plugin for GamePlugin {
                 OnEnter(GameState::Playing),
                 (
                     apply_pending_hunt_xp,
+                    apply_pending_hunt_loot,
                     apply_pending_quest_xp,
+                    apply_pending_quest_rewards,
                     setup_playing_screen,
                     rebuild_playing_lists,
                 )
@@ -346,12 +374,19 @@ impl Plugin for GamePlugin {
             // Combat Systems
             .add_systems(
                 OnEnter(GameState::Combat),
-                (despawn::<PlayingCmp>, setup_combat_ui).chain(),
+                (despawn::<PlayingCmp>, setup_combat_ui, setup_combat_state).chain(),
             )
             .add_systems(
                 Update,
                 (
-                    update_playing_screen,
+                    combat_input,
+                    combat_tick,
+                    update_combat_visuals,
+                    update_combat_pause_indicator,
+                    update_combat_speed_label,
+                    animate_death_skulls,
+                    animate_floating_text,
+                    sync_consumable_cards,
                     tooltip_follow_cursor_system,
                     right_column_tooltip_system,
                     equip_slot_tooltip_system,
@@ -360,7 +395,7 @@ impl Plugin for GamePlugin {
             )
             .add_systems(
                 OnExit(GameState::Combat),
-                (despawn::<CombatCmp>, despawn::<TooltipNode>),
+                (despawn::<CombatCmp>, despawn::<TooltipNode>, cleanup_combat_state),
             )
             // Quest Systems
             .add_systems(OnEnter(GameState::Quest), setup_quest_ui)

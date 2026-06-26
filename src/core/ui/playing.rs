@@ -2848,15 +2848,17 @@ pub fn update_playing_screen(
                 format!("{} kg", weight)
             },
             PlayingStat::Health => format!(
-                "{} / {} {}",
+                "{} / {} (+{}) {}",
                 player.health() as i32,
                 player.max_health() as i32,
+                player.health_regen(),
                 localization.get("general.health", lang)
             ),
             PlayingStat::Mana => format!(
-                "{} / {} {}",
+                "{} / {} (+{}) {}",
                 player.mana() as i32,
                 player.max_mana() as i32,
+                player.mana_regen(),
                 localization.get("general.mana", lang)
             ),
             PlayingStat::Money => format!("{}", player.gold),

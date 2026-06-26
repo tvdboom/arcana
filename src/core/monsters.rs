@@ -24,6 +24,9 @@ pub struct Monster {
     pub defense: u32,
     pub initiative: u32,
     pub attack_speed: f32,
+    /// Health regenerated per second during combat.
+    #[serde(default)]
+    pub health_regen: i32,
     pub modifiers: Vec<Modifier>,
     pub effects: Vec<Effect>,
 }

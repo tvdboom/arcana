@@ -4,7 +4,7 @@ use crate::core::assets::WorldAssets;
 use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::buttons::*;
-use crate::core::menu::settings::{spawn_label, SettingsBtn};
+use crate::core::menu::settings::{spawn_label, spawn_volume_slider, SettingsBtn};
 use crate::core::menu::utils::{add_root_node, add_text};
 use crate::core::player::Player;
 use crate::core::settings::Settings;
@@ -114,6 +114,7 @@ pub fn setup_menu(
                                     &assets,
                                     &localization,
                                 );
+                                spawn_volume_slider(parent, &settings, &assets, &localization);
                                 spawn_label(
                                     parent,
                                     "autosave",
@@ -324,6 +325,7 @@ pub fn setup_game_settings(
                         &assets,
                         &localization,
                     );
+                    spawn_volume_slider(parent, &settings, &assets, &localization);
                     spawn_label(
                         parent,
                         "autosave",
@@ -335,7 +337,7 @@ pub fn setup_game_settings(
 
                     // Spacer to push the back button lower down
                     parent.spawn(Node {
-                        height: Val::Vh(8.33),
+                        height: Val::Vh(3.0),
                         ..default()
                     });
 

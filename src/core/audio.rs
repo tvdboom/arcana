@@ -20,6 +20,26 @@ impl PlayingAudio {
     pub const TWEEN: AudioTween = AudioTween::new(Duration::from_secs(2), AudioEasing::OutPowi(2));
 }
 
+fn master_volume_db(volume: f32) -> f32 {
+    if volume <= 0.0 {
+        -80.0
+    } else {
+        20.0 * volume.clamp(0.0, 1.0).log10()
+    }
+}
+
+fn effective_volume_db(base: f32, settings: &Settings) -> f32 {
+    base + master_volume_db(settings.volume)
+}
+
+fn base_volume_for_key(name: &str) -> f32 {
+    if name == "music" {
+        PlayingAudio::DEFAULT_MUSIC_VOLUME
+    } else {
+        PlayingAudio::DEFAULT_VOLUME
+    }
+}
+
 #[derive(Message, Clone)]
 pub struct PlayAudioMsg {
     pub name: String,
@@ -169,7 +189,7 @@ pub fn toggle_audio(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut change_audio_msg: MessageWriter<ChangeAudioMsg>,
 ) {
-    if keyboard.just_pressed(KeyCode::KeyQ) {
+    if keyboard.just_pressed(KeyCode::KeyP) {
         change_audio_msg.write(ChangeAudioMsg(None));
     }
 }
@@ -222,7 +242,7 @@ pub fn play_audio(
                         audio
                             .play(assets.audio(&msg.name))
                             .fade_in(PlayingAudio::TWEEN)
-                            .with_volume(msg.volume)
+                            .with_volume(effective_volume_db(msg.volume, &settings))
                             .looped()
                             .handle(),
                     );
@@ -234,9 +254,29 @@ pub fn play_audio(
             if new_sound {
                 playing_audio.insert(
                     msg.name.clone(),
-                    audio.play(assets.audio(&msg.name)).with_volume(msg.volume).handle(),
+                    audio
+                        .play(assets.audio(&msg.name))
+                        .with_volume(effective_volume_db(msg.volume, &settings))
+                        .handle(),
                 );
             }
+        }
+    }
+}
+
+pub fn apply_live_volume_to_playing_audio(
+    settings: Res<Settings>,
+    playing_audio: Res<PlayingAudio>,
+    mut audio_instances: ResMut<Assets<AudioInstance>>,
+) {
+    if !settings.is_changed() {
+        return;
+    }
+
+    for (name, handle) in playing_audio.iter() {
+        if let Some(mut instance) = audio_instances.get_mut(handle) {
+            let target = effective_volume_db(base_volume_for_key(name), &settings);
+            instance.set_decibels(target, AudioTween::default());
         }
     }
 }

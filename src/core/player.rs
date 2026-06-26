@@ -557,6 +557,105 @@ impl Player {
             as u32
     }
 
+    /// Health regenerated per second (used during combat).
+    pub fn health_regen(&self) -> i32 {
+        let base = 2 + (self.constitution_mod() / 2);
+        let perk_mod: i32 = self
+            .perks
+            .iter()
+            .filter_map(|key| get_perk(key))
+            .flat_map(|perk| perk.modifiers)
+            .filter_map(|m| {
+                if let Modifier::HealthRegen(v) = m {
+                    Some(v)
+                } else {
+                    None
+                }
+            })
+            .sum();
+        let equip_mod: i32 = self
+            .equipped_equipment()
+            .iter()
+            .flat_map(|eq| eq.modifiers().iter())
+            .filter_map(|m| {
+                if let Modifier::HealthRegen(v) = m {
+                    Some(*v)
+                } else {
+                    None
+                }
+            })
+            .sum();
+        (base + perk_mod + equip_mod).max(0)
+    }
+
+    /// Mana regenerated per second (used during combat).
+    pub fn mana_regen(&self) -> i32 {
+        let base = 2 + (self.wisdom_mod() / 2);
+        let perk_mod: i32 = self
+            .perks
+            .iter()
+            .filter_map(|key| get_perk(key))
+            .flat_map(|perk| perk.modifiers)
+            .filter_map(|m| {
+                if let Modifier::ManaRegen(v) = m {
+                    Some(v)
+                } else {
+                    None
+                }
+            })
+            .sum();
+        let equip_mod: i32 = self
+            .equipped_equipment()
+            .iter()
+            .flat_map(|eq| eq.modifiers().iter())
+            .filter_map(|m| {
+                if let Modifier::ManaRegen(v) = m {
+                    Some(*v)
+                } else {
+                    None
+                }
+            })
+            .sum();
+        (base + perk_mod + equip_mod).max(0)
+    }
+
+    /// Effective basic-attack speed (attacks per second), derived from equipped weapons.
+    pub fn attack_speed(&self) -> f32 {
+        let speeds: Vec<f32> = self
+            .equipped_equipment()
+            .iter()
+            .filter_map(|eq| {
+                if let Equipment::Weapon(w) = eq {
+                    Some(w.attack_speed)
+                } else {
+                    None
+                }
+            })
+            .filter(|s| *s > 0.0)
+            .collect();
+        if speeds.is_empty() {
+            1.0
+        } else {
+            speeds.iter().sum::<f32>() / speeds.len() as f32
+        }
+    }
+
+    /// Combined critical-strike chance (0.0-1.0) from equipped weapons.
+    pub fn crit_chance(&self) -> f32 {
+        let chances: Vec<f32> = self
+            .equipped_equipment()
+            .iter()
+            .filter_map(|eq| {
+                if let Equipment::Weapon(w) = eq {
+                    Some(w.crit_chance)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        chances.iter().cloned().fold(0.0_f32, f32::max)
+    }
+
     pub fn attack(&self) -> u32 {
         let bonus = self.strength_mod()
             + self.training_bonus_for_skill("attack") as i32

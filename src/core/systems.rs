@@ -177,6 +177,10 @@ pub fn check_keys_menu(
                         },
                     }
                 },
+                GameState::GameMenu | GameState::Settings => {
+                    play_audio_msg.write(PlayAudioMsg::new("button"));
+                    next_game_state.set(GameState::Playing);
+                },
                 _ => (),
             },
         }

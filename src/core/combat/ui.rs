@@ -6,15 +6,14 @@ use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::get_equipment;
 use crate::core::catalog::equipment::Equipment;
 use crate::core::constants::{
-    BAR_BG_COLOR, BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, NORMAL_BUTTON_COLOR,
+    BAR_BG_COLOR, BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, LABEL_TEXT_SIZE, NORMAL_BUTTON_COLOR,
     PLACEHOLDER_COLOR, PRESSED_BUTTON_COLOR, SELECTED_COLOR, HOVERED_BUTTON_COLOR,
 };
-use crate::core::localization::Localization;
+use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
 use crate::core::player::Player;
 use crate::core::PlayingStat;
 use crate::core::settings::Settings;
-use crate::core::states::GameState;
 use crate::core::ui::creation::SelectionItem;
 use crate::core::ui::playing::{
     EquipSlot, InfoTooltip, PetHealthBarFill, RightColumnTooltip, StatLabel,
@@ -41,7 +40,24 @@ const CONSUMABLE_HOTKEYS: [&str; 8] = ["A", "S", "D", "F", "G", "H", "J", "K"];
 pub struct CombatCmp;
 
 #[derive(Component)]
-struct CombatMonsterHealthFill;
+pub struct CombatMonsterHealthFill;
+
+#[derive(Component)]
+pub struct CombatMonsterHealthText;
+
+#[derive(Component)]
+pub struct CombatPlayerPortrait;
+
+#[derive(Component)]
+pub struct CombatEnemyPortrait;
+
+#[derive(Component)]
+pub struct CombatPausedOverlay;
+
+#[derive(Component)]
+pub struct AbilityCardImage {
+    pub slot: usize,
+}
 
 pub fn setup_combat_ui(
     mut commands: Commands,
@@ -50,6 +66,7 @@ pub fn setup_combat_ui(
     settings: Res<Settings>,
     player: Res<Player>,
     active_monster: Option<Res<ActiveMonster>>,
+    combat_speed: Res<crate::core::combat::mechanics::CombatSpeed>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     play_audio_msg.write(PlayAudioMsg::new("horn"));
@@ -97,9 +114,17 @@ pub fn setup_combat_ui(
                     position_type: PositionType::Absolute,
                     right: Val::Px(24.),
                     bottom: Val::Px(24.),
+                    flex_direction: FlexDirection::Row,
+                    align_items: AlignItems::Center,
+                    column_gap: Val::Px(12.),
                     ..default()
                 })
                 .with_children(|parent| {
+                    parent.spawn((
+                        add_text(combat_speed.label(), "bold", LABEL_TEXT_SIZE, &assets),
+                        TextColor(Color::WHITE),
+                        crate::core::combat::mechanics::CombatSpeedText,
+                    ));
                     parent
                         .spawn((
                             Node {
@@ -116,6 +141,7 @@ pub fn setup_combat_ui(
                             Button,
                             Interaction::default(),
                             Pickable::default(),
+                            crate::core::combat::mechanics::CombatEndButton,
                         ))
                         .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
                         .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
@@ -124,7 +150,7 @@ pub fn setup_combat_ui(
                         .observe(crate::core::utils::cursor::<Over>(SystemCursorIcon::Pointer))
                         .observe(crate::core::utils::cursor::<Out>(SystemCursorIcon::Default))
                         .observe(crate::core::utils::cursor::<Release>(SystemCursorIcon::Default))
-                        .observe(handle_forfeit_combat_click)
+                        .observe(crate::core::combat::mechanics::handle_combat_end_button_click)
                         .with_children(|parent| {
                             parent.spawn((
                                 add_text(
@@ -134,8 +160,39 @@ pub fn setup_combat_ui(
                                     &assets,
                                 ),
                                 TextColor(BUTTON_TEXT_COLOR),
+                                crate::core::combat::mechanics::CombatEndButtonText,
                             ));
                         });
+                });
+
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        top: percent(0.),
+                        left: percent(0.),
+                        width: percent(100.),
+                        height: percent(100.),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.55)),
+                    GlobalZIndex(1100),
+                    Visibility::Hidden,
+                    CombatPausedOverlay,
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text(
+                            localization.get("general.paused", lang),
+                            "bold",
+                            8.0,
+                            &assets,
+                        ),
+                        TextColor(Color::WHITE),
+                        LocalizedText("general.paused".to_string()),
+                    ));
                 });
         });
 }
@@ -238,6 +295,7 @@ fn spawn_character_portrait(
             },
             BorderColor::all(BUTTON_BORDER_COLOR),
             ImageNode::new(assets.image(portrait_key.to_string())).with_mode(NodeImageMode::Stretch),
+            CombatPlayerPortrait,
         ))
         .with_children(|parent| {
             spawn_portrait_label(parent, assets, name, level);
@@ -600,6 +658,7 @@ fn spawn_active_abilities(
                             ability_key.map(|key| RightColumnTooltip::Ability(key.to_string())),
                             COMBAT_ABILITY_CARD_SIZE,
                             false,
+                            Some(crate::core::combat::mechanics::CombatCard::Ability(index)),
                         );
                     }
                 });
@@ -653,6 +712,9 @@ fn spawn_consumables(
                             Some(RightColumnTooltip::Equipment(key.clone())),
                             COMBAT_CONSUMABLE_CARD_SIZE,
                             true,
+                            Some(crate::core::combat::mechanics::CombatCard::Consumable(
+                                key.clone(),
+                            )),
                         );
                     }
                 });
@@ -670,7 +732,11 @@ fn spawn_hover_card(
     tooltip: Option<RightColumnTooltip>,
     card_size: f32,
     dark_background: bool,
+    combat_card: Option<crate::core::combat::mechanics::CombatCard>,
 ) {
+    use crate::core::combat::mechanics::{
+        handle_combat_card_click, AbilityCooldownOverlay, CombatCard, ConsumableCardRoot,
+    };
     let mut cmd = parent.spawn((
         Node {
             width: Val::Vw(card_size),
@@ -712,7 +778,35 @@ fn spawn_hover_card(
         .observe(crate::core::utils::cursor::<Over>(SystemCursorIcon::Pointer))
         .observe(crate::core::utils::cursor::<Out>(SystemCursorIcon::Default));
 
+    if let Some(card) = combat_card.clone() {
+        cmd.insert(card.clone());
+        cmd.observe(handle_combat_card_click);
+        if let CombatCard::Ability(slot) = card {
+            cmd.insert(AbilityCardImage { slot });
+        }
+        if let CombatCard::Consumable(key) = &card {
+            cmd.insert(ConsumableCardRoot(key.clone()));
+        }
+    }
+
     cmd.with_children(|parent| {
+        // Cooldown / disabled dark overlay for abilities (driven by combat state).
+        if let Some(CombatCard::Ability(slot)) = combat_card.clone() {
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.),
+                    right: Val::Px(0.),
+                    bottom: Val::Px(0.),
+                    width: percent(100.),
+                    height: percent(0.),
+                    ..default()
+                },
+                BackgroundColor(Color::srgba(0., 0., 0., 0.9)),
+                Pickable::IGNORE,
+                AbilityCooldownOverlay { slot },
+            ));
+        }
         if show_hotkey {
             parent
                 .spawn((
@@ -854,6 +948,7 @@ fn spawn_monster_portrait(
             },
             BorderColor::all(BUTTON_BORDER_COLOR),
             ImageNode::new(assets.image(image_key.to_string())).with_mode(NodeImageMode::Stretch),
+            CombatEnemyPortrait,
         ))
         .with_children(|parent| {
             spawn_portrait_label(parent, assets, name, level);
@@ -925,6 +1020,7 @@ fn spawn_monster_health_bar(
                             assets,
                         ),
                         TextColor(Color::WHITE),
+                        CombatMonsterHealthText,
                     ));
                 });
         });
@@ -999,13 +1095,4 @@ fn spawn_combat_resource_bar(
                     ));
                 });
         });
-}
-
-pub fn handle_forfeit_combat_click(
-    _event: On<Pointer<Click>>,
-    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-    mut next_game_state: ResMut<NextState<GameState>>,
-) {
-    play_audio_msg.write(PlayAudioMsg::new("button"));
-    next_game_state.set(GameState::Playing);
 }

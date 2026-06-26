@@ -1776,7 +1776,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         let effects = monster_effects(&name, *level);
 
         monsters_ron.push_str(&format!(
-            "    (\n        name: \"{name}\",\n        image: \"images/monsters/pets/{img}\",\n        level: {level},\n        kind: Pet,\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: 1.0,\n        modifiers: [{mods}],\n        effects: [{effs}],\n    ),\n",
+            "    (\n        name: \"{name}\",\n        image: \"images/monsters/pets/{img}\",\n        level: {level},\n        kind: Pet,\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: 1.0,\n        health_regen: {regen},\n        modifiers: [{mods}],\n        effects: [{effs}],\n    ),\n",
             name = name,
             img = img,
             level = *level,
@@ -1784,6 +1784,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             attack = attack,
             defense = defense,
             initiative = initiative,
+            regen = 1 + *level as i32,
             mods = modifiers.join(", "),
             effs = effects.join(", "),
         ));

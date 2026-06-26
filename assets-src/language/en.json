@@ -1,4 +1,11 @@
 {
+  "general.victory": "Victory!",
+  "general.defeat": "Defeat",
+  "general.miss": "Miss",
+  "general.dodge": "Dodge",
+  "general.critical": "Crit!",
+  "general.paused": "Paused",
+  "general.volume": "Volume",
   "ability.absorb": "Absorb",
   "ability.absorb_of_the_sun": "Absorb Of The Sun",
   "ability.absorb_of_the_wind": "Absorb Of The Wind",

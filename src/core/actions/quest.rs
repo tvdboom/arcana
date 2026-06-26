@@ -28,6 +28,14 @@ pub struct PendingQuestXp {
     pub amount: u32,
 }
 
+#[derive(Resource, Default)]
+pub struct PendingQuestRewards {
+    pub gold: u32,
+    pub equipment: Vec<String>,
+    pub consumables: Vec<String>,
+    pub artifacts: Vec<String>,
+}
+
 #[derive(Clone, Copy)]
 struct QuestCardProfile {
     combat_chance: f64,
@@ -63,6 +71,32 @@ pub fn apply_pending_quest_xp(
         &mut play_audio_msg,
         &mut next_game_state,
     );
+}
+
+pub fn apply_pending_quest_rewards(
+    mut pending_quest_rewards: ResMut<PendingQuestRewards>,
+    mut player: ResMut<Player>,
+) {
+    if pending_quest_rewards.gold == 0
+        && pending_quest_rewards.equipment.is_empty()
+        && pending_quest_rewards.consumables.is_empty()
+        && pending_quest_rewards.artifacts.is_empty()
+    {
+        return;
+    }
+
+    player.gold = player.gold.saturating_add(pending_quest_rewards.gold);
+    pending_quest_rewards.gold = 0;
+
+    for key in pending_quest_rewards.equipment.drain(..) {
+        grant_equipment_reward(&mut player, key);
+    }
+    for key in pending_quest_rewards.consumables.drain(..) {
+        player.add_inventory_item(key);
+    }
+    for key in pending_quest_rewards.artifacts.drain(..) {
+        player.add_inventory_item(key);
+    }
 }
 
 pub fn setup_quest_ui(
@@ -587,6 +621,7 @@ pub fn handle_quest_card_clicks(
     mut level_up: ResMut<LevelUpPending>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut pending_quest_xp: ResMut<PendingQuestXp>,
+    mut pending_quest_rewards: ResMut<PendingQuestRewards>,
     card_q: Query<&QuestCardMarker>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
@@ -609,68 +644,75 @@ pub fn handle_quest_card_clicks(
     let consumable_count = roll_count(&mut rng, profile.consumable_min, profile.consumable_max);
     let artifact_count = roll_count(&mut rng, profile.artifact_min, profile.artifact_max);
 
-    let mut loot_found = false;
+    let equipment_rewards =
+        quest_equipment_rewards(marker.0, player.level(), equipment_count, &mut rng);
+    let consumable_rewards =
+        quest_consumable_rewards(marker.0, player.level(), consumable_count, &mut rng);
+    let artifact_rewards = quest_artifact_rewards(marker.0, player.level(), artifact_count, &mut rng);
 
-    if gold_gain > 0 {
-        player.gold += gold_gain;
-        loot_found = true;
-        spawn_toast(
-            &mut commands,
-            &assets,
-            localization
-                .get("general.toast_gold_earned", lang)
-                .replace("{gold}", &gold_gain.to_string()),
-            Color::srgba(0.08, 0.16, 0.12, 0.93),
-            Color::srgb(0.25, 0.75, 0.50),
-            Color::srgb(0.60, 1.0, 0.75),
-            toast,
-        );
-    }
+    let loot_found = gold_gain > 0
+        || !equipment_rewards.is_empty()
+        || !consumable_rewards.is_empty()
+        || !artifact_rewards.is_empty();
 
-    for reward in quest_equipment_rewards(marker.0, player.level(), equipment_count, &mut rng) {
-        loot_found = true;
-        let auto_equipped = grant_equipment_reward(&mut player, reward.clone());
-        spawn_toast(
-            &mut commands,
-            &assets,
-            if auto_equipped {
-                format!("Quest equipment found and equipped: {}", capitalize_words(&reward))
-            } else {
-                format!("Quest equipment found: {}", capitalize_words(&reward))
-            },
-            Color::srgba(0.08, 0.16, 0.12, 0.93),
-            Color::srgb(0.25, 0.75, 0.50),
-            Color::srgb(0.60, 1.0, 0.75),
-            toast,
-        );
-    }
+    if !combat_triggered {
+        if gold_gain > 0 {
+            player.gold += gold_gain;
+            spawn_toast(
+                &mut commands,
+                &assets,
+                localization
+                    .get("general.toast_gold_earned", lang)
+                    .replace("{gold}", &gold_gain.to_string()),
+                Color::srgba(0.08, 0.16, 0.12, 0.93),
+                Color::srgb(0.25, 0.75, 0.50),
+                Color::srgb(0.60, 1.0, 0.75),
+                toast,
+            );
+        }
 
-    for reward in quest_consumable_rewards(marker.0, player.level(), consumable_count, &mut rng) {
-        loot_found = true;
-        player.add_inventory_item(reward.clone());
-        spawn_toast(
-            &mut commands,
-            &assets,
-            format!("Quest consumable found: {}", capitalize_words(&reward)),
-            Color::srgba(0.08, 0.16, 0.12, 0.93),
-            Color::srgb(0.25, 0.75, 0.50),
-            Color::srgb(0.60, 1.0, 0.75),
-            toast,
-        );
-    }
+        for reward in &equipment_rewards {
+            let auto_equipped = grant_equipment_reward(&mut player, reward.clone());
+            spawn_toast(
+                &mut commands,
+                &assets,
+                if auto_equipped {
+                    format!("Quest equipment found and equipped: {}", capitalize_words(reward))
+                } else {
+                    format!("Quest equipment found: {}", capitalize_words(reward))
+                },
+                Color::srgba(0.08, 0.16, 0.12, 0.93),
+                Color::srgb(0.25, 0.75, 0.50),
+                Color::srgb(0.60, 1.0, 0.75),
+                toast,
+            );
+        }
 
-    for reward in quest_artifact_rewards(marker.0, player.level(), artifact_count, &mut rng) {
-        loot_found = true;
-        player.add_inventory_item(reward.clone());
-        spawn_toast(
-            &mut commands,
-            &assets,
-            format!("Quest artifact found: {}", capitalize_words(&reward)),
-            Color::srgba(0.08, 0.16, 0.12, 0.93),
-            Color::srgb(0.25, 0.75, 0.50),
-            Color::srgb(0.60, 1.0, 0.75),
-            toast,
-        );
+        for reward in &consumable_rewards {
+            player.add_inventory_item(reward.clone());
+            spawn_toast(
+                &mut commands,
+                &assets,
+                format!("Quest consumable found: {}", capitalize_words(reward)),
+                Color::srgba(0.08, 0.16, 0.12, 0.93),
+                Color::srgb(0.25, 0.75, 0.50),
+                Color::srgb(0.60, 1.0, 0.75),
+                toast,
+            );
+        }
+
+        for reward in &artifact_rewards {
+            player.add_inventory_item(reward.clone());
+            spawn_toast(
+                &mut commands,
+                &assets,
+                format!("Quest artifact found: {}", capitalize_words(reward)),
+                Color::srgba(0.08, 0.16, 0.12, 0.93),
+                Color::srgb(0.25, 0.75, 0.50),
+                Color::srgb(0.60, 1.0, 0.75),
+                toast,
+            );
+        }
     }
 
     if xp_gain > 0 && !combat_triggered {
@@ -692,9 +734,9 @@ pub fn handle_quest_card_clicks(
         );
     }
 
-    if loot_found {
+    if loot_found && !combat_triggered {
         play_audio_msg.write(PlayAudioMsg::new("quest"));
-    } else {
+    } else if !combat_triggered {
         spawn_toast(
             &mut commands,
             &assets,
@@ -729,6 +771,16 @@ pub fn handle_quest_card_clicks(
 
         if !possible.is_empty() {
             pending_quest_xp.amount = pending_quest_xp.amount.saturating_add(xp_gain);
+            pending_quest_rewards.gold = pending_quest_rewards.gold.saturating_add(gold_gain);
+            pending_quest_rewards
+                .equipment
+                .extend(equipment_rewards.iter().cloned());
+            pending_quest_rewards
+                .consumables
+                .extend(consumable_rewards.iter().cloned());
+            pending_quest_rewards
+                .artifacts
+                .extend(artifact_rewards.iter().cloned());
             let idx = rng.random_range(0..possible.len());
             let selected = possible[idx].clone();
             commands.insert_resource(crate::core::monsters::ActiveMonster { monster: selected });
@@ -737,22 +789,91 @@ pub fn handle_quest_card_clicks(
         }
     }
 
-    if combat_triggered && !combat_encounter_selected && xp_gain > 0 {
-        gain_xp(
-            &mut player,
-            xp_gain,
-            &mut level_up,
-            &mut play_audio_msg,
-            &mut next_game_state,
-        );
-        spawn_toast(
-            &mut commands,
-            &assets,
-            format!("Quest complete. +{} XP", xp_gain),
-            Color::srgba(0.08, 0.10, 0.20, 0.93),
-            Color::srgb(0.35, 0.55, 0.90),
-            Color::srgb(0.75, 0.90, 1.0),
-            toast,
-        );
+    if combat_triggered && !combat_encounter_selected {
+        if gold_gain > 0 {
+            player.gold += gold_gain;
+            spawn_toast(
+                &mut commands,
+                &assets,
+                localization
+                    .get("general.toast_gold_earned", lang)
+                    .replace("{gold}", &gold_gain.to_string()),
+                Color::srgba(0.08, 0.16, 0.12, 0.93),
+                Color::srgb(0.25, 0.75, 0.50),
+                Color::srgb(0.60, 1.0, 0.75),
+                toast,
+            );
+        }
+        for reward in &equipment_rewards {
+            let auto_equipped = grant_equipment_reward(&mut player, reward.clone());
+            spawn_toast(
+                &mut commands,
+                &assets,
+                if auto_equipped {
+                    format!("Quest equipment found and equipped: {}", capitalize_words(reward))
+                } else {
+                    format!("Quest equipment found: {}", capitalize_words(reward))
+                },
+                Color::srgba(0.08, 0.16, 0.12, 0.93),
+                Color::srgb(0.25, 0.75, 0.50),
+                Color::srgb(0.60, 1.0, 0.75),
+                toast,
+            );
+        }
+        for reward in &consumable_rewards {
+            player.add_inventory_item(reward.clone());
+            spawn_toast(
+                &mut commands,
+                &assets,
+                format!("Quest consumable found: {}", capitalize_words(reward)),
+                Color::srgba(0.08, 0.16, 0.12, 0.93),
+                Color::srgb(0.25, 0.75, 0.50),
+                Color::srgb(0.60, 1.0, 0.75),
+                toast,
+            );
+        }
+        for reward in &artifact_rewards {
+            player.add_inventory_item(reward.clone());
+            spawn_toast(
+                &mut commands,
+                &assets,
+                format!("Quest artifact found: {}", capitalize_words(reward)),
+                Color::srgba(0.08, 0.16, 0.12, 0.93),
+                Color::srgb(0.25, 0.75, 0.50),
+                Color::srgb(0.60, 1.0, 0.75),
+                toast,
+            );
+        }
+        if loot_found {
+            play_audio_msg.write(PlayAudioMsg::new("quest"));
+        } else {
+            spawn_toast(
+                &mut commands,
+                &assets,
+                "Quest yielded no loot this time.".to_string(),
+                Color::srgba(0.08, 0.10, 0.20, 0.93),
+                Color::srgb(0.35, 0.55, 0.90),
+                Color::srgb(0.75, 0.90, 1.0),
+                toast,
+            );
+        }
+        if xp_gain > 0 {
+            gain_xp(
+                &mut player,
+                xp_gain,
+                &mut level_up,
+                &mut play_audio_msg,
+                &mut next_game_state,
+            );
+            spawn_toast(
+                &mut commands,
+                &assets,
+                format!("Quest complete. +{} XP", xp_gain),
+                Color::srgba(0.08, 0.10, 0.20, 0.93),
+                Color::srgb(0.35, 0.55, 0.90),
+                Color::srgb(0.75, 0.90, 1.0),
+                toast,
+            );
+        }
     }
 }

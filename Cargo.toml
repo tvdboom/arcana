@@ -19,7 +19,7 @@ process-assets = []
 generate-catalogs = []
 
 [dependencies]
-bevy = { version = "0.19.0-rc.3", default-features = false, features = [
+bevy = { version = "0.19.0", default-features = false, features = [
     "bevy_asset",
     "bevy_color",
     "bevy_core_pipeline",
@@ -43,13 +43,13 @@ bevy = { version = "0.19.0-rc.3", default-features = false, features = [
     "x11",
     "zstd_rust",
 ]}
-bevy_kira_audio = "0.26.0-rc.1"
+bevy_kira_audio = "0.26.0"
 gpu-allocator = "0.28.0"
 itertools = "0.15.0"
 indicatif = "0.18.4"
 rand = "0.10.1"
 regex = "1.12.4"
-ron = "0.12.1"
+ron = "0.12.2"
 serde_json = "1.0.150"
 serde = "1.0.228"
 strum = "0.28.0"
