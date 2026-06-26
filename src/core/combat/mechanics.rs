@@ -47,6 +47,12 @@ const COMBAT_SPEED_MAX: f32 = 8.0;
 #[derive(Resource)]
 pub struct CombatSpeed(pub f32);
 
+/// Marker inserted while a *networked* duel combat is running. The standard
+/// single-player combat systems check for it and stand aside so the duel
+/// systems (in `core::network`) can drive an authoritative, synced fight.
+#[derive(Resource)]
+pub struct DuelActive;
+
 impl Default for CombatSpeed {
     fn default() -> Self {
         Self(1.0)
@@ -942,24 +948,20 @@ fn tick_fighter_effects(fighter: &mut Fighter, dt: f32) -> Vec<(FxSide, String, 
     fx
 }
 
-pub fn combat_tick(
-    time: Res<Time>,
-    combat_speed: Res<CombatSpeed>,
-    mut state: Option<ResMut<CombatState>>,
-    mut player: ResMut<Player>,
-    active_monster: Option<ResMut<ActiveMonster>>,
-    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+/// Advance the combat simulation by `dt` seconds, mutating only the
+/// [`CombatState`]. Shared by single-player combat and networked duels (where
+/// the host drives this directly and streams the result to the client).
+pub fn step_combat(
+    state: &mut CombatState,
+    dt: f32,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
 ) {
-    let Some(state) = state.as_mut() else {
-        return;
-    };
     if state.status == CombatStatus::Over {
         return;
     }
     if state.paused {
         return;
     }
-    let dt = time.delta_secs() * combat_speed.0;
 
     // Ability cooldowns.
     for slot in state.abilities.iter_mut() {
@@ -1038,6 +1040,47 @@ pub fn combat_tick(
         }
     }
 
+    // End condition.
+    let player_side_dead = !state.player.alive;
+    let enemy_dead = !state.enemy.alive;
+    if enemy_dead || player_side_dead {
+        state.status = CombatStatus::Over;
+        state.player_won = enemy_dead && state.player.alive;
+        if state.player_won {
+            let xp_reward = state.xp_reward();
+            let xp_word = state.xp_word.clone();
+            state.fx.push(CombatFx {
+                side: FxSide::Player,
+                text: format!("+{} {}", xp_reward, xp_word),
+                color: Color::srgb(1.0, 0.9, 0.3),
+            });
+        } else {
+            play_audio_msg.write(PlayAudioMsg::new("defeat"));
+        }
+    }
+}
+
+pub fn combat_tick(
+    time: Res<Time>,
+    combat_speed: Res<CombatSpeed>,
+    mut state: Option<ResMut<CombatState>>,
+    mut player: ResMut<Player>,
+    active_monster: Option<ResMut<ActiveMonster>>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+) {
+    let Some(state) = state.as_mut() else {
+        return;
+    };
+    if state.status == CombatStatus::Over {
+        return;
+    }
+    if state.paused {
+        return;
+    }
+    let dt = time.delta_secs() * combat_speed.0;
+
+    step_combat(state, dt, &mut play_audio_msg);
+
     // Sync working values back to the Player / pet / monster resources so other
     // displays stay coherent and combat results persist after leaving. Only write
     // when the rounded value actually changed to avoid needless change detection.
@@ -1063,32 +1106,13 @@ pub fn combat_tick(
             am.monster.health = new_enemy_hp;
         }
     }
-
-    // End condition.
-    let player_side_dead = !state.player.alive;
-    let enemy_dead = !state.enemy.alive;
-    if enemy_dead || player_side_dead {
-        state.status = CombatStatus::Over;
-        state.player_won = enemy_dead && state.player.alive;
-        if state.player_won {
-            let xp_reward = state.xp_reward();
-            let xp_word = state.xp_word.clone();
-            state.fx.push(CombatFx {
-                side: FxSide::Player,
-                text: format!("+{} {}", xp_reward, xp_word),
-                color: Color::srgb(1.0, 0.9, 0.3),
-            });
-        } else {
-            play_audio_msg.write(PlayAudioMsg::new("defeat"));
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------
 // Casting abilities & using consumables
 // ---------------------------------------------------------------------------
 
-fn try_cast_ability(
+pub fn try_cast_ability(
     state: &mut CombatState,
     index: usize,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
@@ -1172,7 +1196,7 @@ fn try_cast_ability(
     play_audio_msg.write(PlayAudioMsg::new(cast_sound));
 }
 
-fn try_use_consumable(
+pub fn try_use_consumable(
     state: &mut CombatState,
     player: &mut Player,
     key: &str,
@@ -1214,13 +1238,105 @@ fn try_use_consumable(
     play_audio_msg.write(PlayAudioMsg::new("drink"));
 }
 
+/// Apply an ability cast by the networked opponent (the `Enemy` side). Used by
+/// the duel host to fold a remote player's ability into the authoritative sim.
+pub fn enemy_cast_ability(
+    state: &mut CombatState,
+    key: &str,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) {
+    if state.status == CombatStatus::Over {
+        return;
+    }
+    if !state.enemy.alive || !state.enemy.can_cast() {
+        return;
+    }
+    let Some(ability) = get_ability(key) else {
+        return;
+    };
+
+    // The host player can dodge offensive effects.
+    let has_offensive = ability.effects.iter().any(|e| !effect_targets_self(e));
+    let player_dodged = if has_offensive {
+        let mut rng = rng();
+        state.player.can_dodge()
+            && rng.random_bool(
+                dodge_chance(state.enemy.eff_initiative(), state.player.eff_initiative()) as f64,
+            )
+    } else {
+        false
+    };
+    if player_dodged {
+        let dodge_word = state.dodge_word.clone();
+        state.fx.push(CombatFx {
+            side: FxSide::Player,
+            text: dodge_word,
+            color: Color::srgb(0.85, 0.85, 0.4),
+        });
+    }
+
+    for effect in &ability.effects {
+        if effect_targets_self(effect) {
+            apply_effect(state, Who::Enemy, Who::Enemy, effect);
+        } else if !player_dodged && state.player.alive {
+            apply_effect(state, Who::Enemy, Who::Player, effect);
+        }
+    }
+
+    state.fx.push(CombatFx {
+        side: FxSide::Enemy,
+        text: "Cast!".to_string(),
+        color: Color::srgb(0.5, 0.8, 1.0),
+    });
+    let cast_sound = if ability.kind == Kind::Holy {
+        "holy"
+    } else {
+        "cast"
+    };
+    play_audio_msg.write(PlayAudioMsg::new(cast_sound));
+}
+
+/// Apply a consumable used by the networked opponent (the `Enemy` side).
+pub fn enemy_use_consumable(
+    state: &mut CombatState,
+    key: &str,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) {
+    if state.status == CombatStatus::Over {
+        return;
+    }
+    let Some(Equipment::Consumable(consumable)) = get_equipment(key) else {
+        return;
+    };
+
+    for effect in &consumable.effects {
+        if effect_targets_self(effect) {
+            apply_effect(state, Who::Enemy, Who::Enemy, effect);
+        } else if state.player.alive {
+            apply_effect(state, Who::Enemy, Who::Player, effect);
+        }
+    }
+
+    state.fx.push(CombatFx {
+        side: FxSide::Enemy,
+        text: "Used!".to_string(),
+        color: Color::srgb(0.5, 0.9, 0.6),
+    });
+    play_audio_msg.write(PlayAudioMsg::new("drink"));
+}
+
 pub fn handle_combat_card_click(
     event: On<Pointer<Click>>,
     card_q: Query<&CombatCard>,
     mut state: Option<ResMut<CombatState>>,
     mut player: ResMut<Player>,
+    duel: Option<Res<DuelActive>>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
+    // During a networked duel, card clicks are routed through the duel systems.
+    if duel.is_some() {
+        return;
+    }
     let Some(state) = state.as_mut() else {
         return;
     };
@@ -1705,10 +1821,15 @@ pub fn sync_consumable_cards(
 pub fn handle_combat_end_button_click(
     _event: On<Pointer<Click>>,
     state: Option<Res<CombatState>>,
+    duel: Option<Res<DuelActive>>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut pending_hunt_xp: ResMut<PendingHuntXp>,
 ) {
+    // During a networked duel, leaving combat is handled by the duel systems.
+    if duel.is_some() {
+        return;
+    }
     if let Some(state) = state {
         if state.status == CombatStatus::Over {
             pending_hunt_xp.amount = state.xp_reward();

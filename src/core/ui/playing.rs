@@ -869,6 +869,7 @@ pub fn setup_playing_screen(
                                 &localization,
                                 lang,
                             );
+                            #[cfg(not(target_arch = "wasm32"))]
                             spawn_playing_action_button(
                                 parent,
                                 Action::Duel,

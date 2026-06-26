@@ -11,6 +11,8 @@ pub mod localization;
 mod menu;
 mod monsters;
 #[cfg(not(target_arch = "wasm32"))]
+pub mod network;
+#[cfg(not(target_arch = "wasm32"))]
 mod persistence;
 mod player;
 mod races;
@@ -33,7 +35,7 @@ use crate::core::actions::quest::{
 use crate::core::combat::mechanics::{
     animate_death_skulls, animate_floating_text, cleanup_combat_state, combat_input, combat_tick,
     setup_combat_state, sync_consumable_cards, update_combat_visuals,
-    update_combat_pause_indicator, update_combat_speed_label, CombatSpeed,
+    update_combat_pause_indicator, update_combat_speed_label, CombatSpeed, DuelActive,
 };
 use crate::core::combat::ui::{setup_combat_ui, CombatCmp};
 use crate::core::actions::rest::{setup_rest_ui, update_rest_ui};
@@ -379,8 +381,8 @@ impl Plugin for GamePlugin {
             .add_systems(
                 Update,
                 (
-                    combat_input,
-                    combat_tick,
+                    combat_input.run_if(not(resource_exists::<DuelActive>)),
+                    combat_tick.run_if(not(resource_exists::<DuelActive>)),
                     update_combat_visuals,
                     update_combat_pause_indicator,
                     update_combat_speed_label,
@@ -414,6 +416,9 @@ impl Plugin for GamePlugin {
             // Duel Systems
             .add_systems(OnEnter(GameState::Duel), setup_duel_ui)
             .add_systems(OnExit(GameState::Duel), (cleanup_panel_ui, despawn::<TooltipNode>));
+
+        #[cfg(not(target_arch = "wasm32"))]
+        app.add_plugins(crate::core::network::NetworkPlugin);
 
         #[cfg(not(target_arch = "wasm32"))]
         app
