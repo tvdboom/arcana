@@ -28,11 +28,13 @@ jobs:
       - name: Add KTX-Software to PATH
         shell: pwsh
         run: |
-          $ktxPath = "C:\KTX-Software\bin"
-          if (Test-Path $ktxPath) {
-            echo "KTX_BIN_PATH=$ktxPath" >> $env:GITHUB_ENV
-            echo "$ktxPath" >> $env:GITHUB_PATH
+          $toktx = Get-ChildItem -Path "C:\KTX-Software" -Recurse -File -Filter "toktx.exe" | Select-Object -First 1
+          if (-not $toktx) {
+            throw "toktx.exe not found under C:\KTX-Software after install"
           }
+          $ktxPath = $toktx.Directory.FullName
+          echo "KTX_BIN_PATH=$ktxPath" >> $env:GITHUB_ENV
+          echo "$ktxPath" >> $env:GITHUB_PATH
 
       - name: Build release exe
         run: just build-release
@@ -108,6 +110,8 @@ jobs:
       - name: Configure GitHub Pages
         id: pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
         continue-on-error: true
 
       - name: Upload GitHub Pages artifact
@@ -128,4 +132,3 @@ jobs:
           ITCH_GAME: ${{ env.GAME_NAME }}
           CHANNEL: html
           PACKAGE: docs/
-
