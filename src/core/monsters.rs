@@ -1,7 +1,7 @@
 use crate::core::catalog::effects::Effect;
 use crate::core::catalog::modifiers::Modifier;
-use serde::{Deserialize, Serialize};
 use bevy::prelude::Resource;
+use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
 #[derive(EnumIter, Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]

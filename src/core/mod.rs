@@ -25,19 +25,13 @@ mod utils;
 use crate::core::actions::craft::{setup_craft_ui, update_craft_ui, CraftSeed};
 use crate::core::actions::duel::setup_duel_ui;
 use crate::core::actions::hunt::{
-    apply_pending_hunt_loot, apply_pending_hunt_xp, setup_hunt_ui, update_hunt_ui,
-    PendingHuntLoot, PendingHuntXp,
+    apply_pending_hunt_loot, apply_pending_hunt_xp, setup_hunt_ui, update_hunt_ui, PendingHuntLoot,
+    PendingHuntXp,
 };
 use crate::core::actions::quest::{
     apply_pending_quest_rewards, apply_pending_quest_xp, setup_quest_ui, update_quest_ui,
     PendingQuestRewards, PendingQuestXp,
 };
-use crate::core::combat::mechanics::{
-    animate_death_skulls, animate_floating_text, cleanup_combat_state, combat_input, combat_tick,
-    setup_combat_state, sync_consumable_cards, update_combat_visuals,
-    update_combat_pause_indicator, update_combat_speed_label, CombatSpeed, DuelActive,
-};
-use crate::core::combat::ui::{setup_combat_ui, CombatCmp};
 use crate::core::actions::rest::{setup_rest_ui, update_rest_ui};
 use crate::core::actions::shop::*;
 use crate::core::actions::study::{setup_study_ui, update_study_ui, StudySliderState};
@@ -46,6 +40,13 @@ use crate::core::actions::work::{setup_work_ui, update_work_ui, WorkSliderState}
 use crate::core::assets::WorldAssets;
 use crate::core::audio::*;
 use crate::core::camera::*;
+use crate::core::combat::mechanics::{
+    animate_death_skulls, animate_floating_text, cleanup_any_combat_artifacts,
+    cleanup_combat_on_exit, combat_input, combat_tick, setup_combat_state, sync_consumable_cards,
+    update_combat_pause_indicator, update_combat_speed_label, update_combat_visuals, CombatSpeed,
+    DuelActive,
+};
+use crate::core::combat::ui::setup_combat_ui;
 use crate::core::game_state::ShopUiState;
 use crate::core::localization::{update_localized_text, Localization};
 use crate::core::menu::buttons::MenuCmp;
@@ -127,6 +128,8 @@ impl Plugin for GamePlugin {
             .init_resource::<PendingQuestRewards>()
             .init_resource::<RightTab>()
             .init_resource::<CombatSpeed>()
+            .init_resource::<GameMenuOrigin>()
+            .init_resource::<CombatMenuSuspended>()
             .init_resource::<RightTabScroll>();
 
         // Sets
@@ -159,6 +162,7 @@ impl Plugin for GamePlugin {
                     stop_audio,
                     play_audio,
                     crate::core::menu::settings::update_volume_slider_visibility,
+                    crate::core::menu::settings::handle_volume_keyboard_input,
                 ),
             );
 
@@ -232,7 +236,10 @@ impl Plugin for GamePlugin {
                 OnExit(GameState::Playing),
                 (despawn::<TooltipNode>, despawn::<GoldToast>, despawn::<LevelUpOverlayCmp>),
             )
-            .add_systems(OnExit(AppState::Game), (despawn::<PlayingCmp>, despawn::<TooltipNode>))
+            .add_systems(
+                OnExit(AppState::Game),
+                (despawn::<PlayingCmp>, despawn::<TooltipNode>, cleanup_any_combat_artifacts),
+            )
             .add_systems(
                 Update,
                 (
@@ -267,11 +274,7 @@ impl Plugin for GamePlugin {
             .add_systems(OnEnter(GameState::Shop), setup_shop_ui)
             .add_systems(
                 OnExit(GameState::Shop),
-                (
-                    remember_shop_scroll_position,
-                    cleanup_panel_ui,
-                    despawn::<TooltipNode>,
-                ),
+                (remember_shop_scroll_position, cleanup_panel_ui, despawn::<TooltipNode>),
             )
             .add_systems(
                 Update,
@@ -395,10 +398,7 @@ impl Plugin for GamePlugin {
                 )
                     .run_if(in_state(GameState::Combat)),
             )
-            .add_systems(
-                OnExit(GameState::Combat),
-                (despawn::<CombatCmp>, despawn::<TooltipNode>, cleanup_combat_state),
-            )
+            .add_systems(OnExit(GameState::Combat), cleanup_combat_on_exit)
             // Quest Systems
             .add_systems(OnEnter(GameState::Quest), setup_quest_ui)
             .add_systems(OnExit(GameState::Quest), (cleanup_panel_ui, despawn::<TooltipNode>))

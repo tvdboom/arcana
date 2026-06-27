@@ -362,9 +362,36 @@ pub fn update_volume_slider_visibility(
 ) {
     let muted = settings.audio == AudioSettings::Mute;
     for mut node in &mut row_q {
-        let target = if muted { Display::None } else { Display::Flex };
+        let target = if muted {
+            Display::None
+        } else {
+            Display::Flex
+        };
         if node.display != target {
             node.display = target;
         }
+    }
+}
+
+/// Handle arrow keys to adjust volume by 10% increments.
+pub fn handle_volume_keyboard_input(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mut settings: ResMut<Settings>,
+    mut handle_q: Query<&mut Node, (With<VolumeSliderHandle>, Without<VolumeSliderFill>)>,
+    mut fill_q: Query<&mut Node, (With<VolumeSliderFill>, Without<VolumeSliderHandle>)>,
+    mut text_q: Query<&mut Text, With<VolumeSliderText>>,
+) {
+    let mut changed = false;
+    
+    if keyboard.just_pressed(KeyCode::ArrowUp) {
+        settings.volume = (settings.volume + 0.1).min(1.0);
+        changed = true;
+    } else if keyboard.just_pressed(KeyCode::ArrowDown) {
+        settings.volume = (settings.volume - 0.1).max(0.0);
+        changed = true;
+    }
+    
+    if changed {
+        set_volume_visuals(settings.volume, &mut settings, &mut handle_q, &mut fill_q, &mut text_q);
     }
 }

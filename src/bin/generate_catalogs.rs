@@ -485,15 +485,18 @@ fn monster_modifiers(name: &str, level: u32, kind: &str) -> Vec<String> {
     if kind == "Creature" {
         return mods;
     }
-    
+
     let name_lower = name.to_lowercase();
     let val1 = (level / 4 + 1) as i32;
     let val2 = (level / 5 + 1) as i32;
     let val3_health = (level * 5) as i32;
     let val3_mana = (level * 3) as i32;
-    
+
     // Strengths / Attack
-    if ["wolf", "worg", "tiger", "bear", "griffin", "manticore", "three headed dog", "red"].iter().any(|x| name_lower.contains(x)) {
+    if ["wolf", "worg", "tiger", "bear", "griffin", "manticore", "three headed dog", "red"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         mods.push(format!("AttributeModifier(Strength, {val1})"));
         if level > 5 {
             mods.push(format!("AttackModifier({val2})"));
@@ -503,7 +506,10 @@ fn monster_modifiers(name: &str, level: u32, kind: &str) -> Vec<String> {
         }
     }
     // Dexterity / Initiative
-    else if ["snake", "spider", "puma", "bat", "weasel", "hyena", "blue"].iter().any(|x| name_lower.contains(x)) {
+    else if ["snake", "spider", "puma", "bat", "weasel", "hyena", "blue"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         mods.push(format!("AttributeModifier(Dexterity, {val1})"));
         if level > 5 {
             mods.push(format!("InitiativeModifier({val2})"));
@@ -533,7 +539,10 @@ fn monster_modifiers(name: &str, level: u32, kind: &str) -> Vec<String> {
         }
     }
     // Constitution / Defense
-    else if ["crocodile", "lizard", "owlbear", "green", "black"].iter().any(|x| name_lower.contains(x)) {
+    else if ["crocodile", "lizard", "owlbear", "green", "black"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         mods.push(format!("AttributeModifier(Constitution, {val1})"));
         if level > 5 {
             mods.push(format!("DefenseModifier({val2})"));
@@ -555,41 +564,81 @@ fn monster_modifiers(name: &str, level: u32, kind: &str) -> Vec<String> {
 fn monster_effects(name: &str, level: u32) -> Vec<String> {
     let mut effs = Vec::new();
     let name_lower = name.to_lowercase();
-    
+
     // Add primary thematic effect
     if ["hell hound", "red", "fire troll"].iter().any(|x| name_lower.contains(x)) {
         effs.push(format!("Burn(damage: {}, duration: 4.0)", level * 2 + 2));
-    } else if ["snake", "spider", "basilisk", "yuan-ti", "formicidae", "wyrmling", "green"].iter().any(|x| name_lower.contains(x)) {
+    } else if ["snake", "spider", "basilisk", "yuan-ti", "formicidae", "wyrmling", "green"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         effs.push(format!("Poison(damage: {}, duration: 5.0)", level + 2));
-    } else if ["medusa", "lich", "skeleton", "drow", "aboleth", "mindflayer", "black"].iter().any(|x| name_lower.contains(x)) {
+    } else if ["medusa", "lich", "skeleton", "drow", "aboleth", "mindflayer", "black"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         effs.push(format!("Curse(damage: {}, timer: 3)", level * 3 + 3));
-    } else if ["ice troll", "blue", "silver", "winter", "frost"].iter().any(|x| name_lower.contains(x)) {
-        effs.push(format!("Freeze(attack_speed_pct: -{:.1}, duration: 3.0)", 10.0 + level as f32 * 1.5));
-    } else if ["bear", "crocodile", "ogre", "mountain troll", "stoneman", "tarrasque", "owlbear", "worg", "balor"].iter().any(|x| name_lower.contains(x)) {
+    } else if ["ice troll", "blue", "silver", "winter", "frost"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
+        effs.push(format!(
+            "Freeze(attack_speed_pct: -{:.1}, duration: 3.0)",
+            10.0 + level as f32 * 1.5
+        ));
+    } else if [
+        "bear",
+        "crocodile",
+        "ogre",
+        "mountain troll",
+        "stoneman",
+        "tarrasque",
+        "owlbear",
+        "worg",
+        "balor",
+    ]
+    .iter()
+    .any(|x| name_lower.contains(x))
+    {
         effs.push(format!("Bleed(damage_pct: {:.1})", 10.0 + level as f32 * 5.0));
-    } else if ["bat", "vulture", "weasel", "rat", "hyena", "puma"].iter().any(|x| name_lower.contains(x)) {
+    } else if ["bat", "vulture", "weasel", "rat", "hyena", "puma"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         effs.push(format!("Pierce(damage: {})", level * 3 + 3));
-    } else if ["unicorn", "pegasus", "empyrean", "gold", "angel"].iter().any(|x| name_lower.contains(x)) {
+    } else if ["unicorn", "pegasus", "empyrean", "gold", "angel"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         effs.push(format!("Regen(heal: {}, duration: 4.0)", level * 2 + 2));
-    } else if ["owl", "griffin", "manticore", "tiger", "three headed dog"].iter().any(|x| name_lower.contains(x)) {
+    } else if ["owl", "griffin", "manticore", "tiger", "three headed dog"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         effs.push(format!("Vulnerability(damage_pct: {:.1}, duration: 4.0)", 5.0 + level as f32));
     } else {
         // Fallback or generic
         effs.push(format!("Pierce(damage: {})", level * 2 + 2));
     }
-    
+
     // Add additional effects for higher level monsters
     if level >= 7 && effs.len() < 2 {
         if !name_lower.contains("snake") {
-            effs.push(format!("Vulnerability(damage_pct: {:.1}, duration: 3.0)", 5.0 + level as f32));
+            effs.push(format!(
+                "Vulnerability(damage_pct: {:.1}, duration: 3.0)",
+                5.0 + level as f32
+            ));
         } else {
-            effs.push(format!("Paranoia(initiative_pct: -{:.1}, duration: 3.0)", 5.0 + level as f32));
+            effs.push(format!(
+                "Paranoia(initiative_pct: -{:.1}, duration: 3.0)",
+                5.0 + level as f32
+            ));
         }
     }
     if level >= 14 && effs.len() < 3 {
         effs.push(format!("Blind(miss_pct: 20.0, duration: 2.0)"));
     }
-    
+
     effs
 }
 
@@ -1791,14 +1840,8 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     }
 
     // Dragons
-    let dragon_colors = [
-        ("Black", 2),
-        ("Blue", 3),
-        ("Gold", 4),
-        ("Green", 2),
-        ("Red", 4),
-        ("Silver", 3),
-    ];
+    let dragon_colors =
+        [("Black", 2), ("Blue", 3), ("Gold", 4), ("Green", 2), ("Red", 4), ("Silver", 3)];
 
     let dragon_ages = [
         ("Hatchling", "hatchling"),

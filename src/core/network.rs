@@ -22,9 +22,9 @@ use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::equipment::Equipment;
 use crate::core::classes::Class;
 use crate::core::combat::mechanics::{
-    consumable_card_order, enemy_cast_ability, enemy_use_consumable, step_combat,
-    try_cast_ability, try_use_consumable, CombatCard, CombatFx, CombatSpeed,
-    CombatState, CombatStatus, Fighter, FxSide, ABILITY_HOTKEYS, CONSUMABLE_HOTKEYS,
+    consumable_card_order, enemy_cast_ability, enemy_use_consumable, step_combat, try_cast_ability,
+    try_use_consumable, CombatCard, CombatFx, CombatSpeed, CombatState, CombatStatus, Fighter,
+    FxSide, ABILITY_HOTKEYS, CONSUMABLE_HOTKEYS,
 };
 use crate::core::monsters::{ActiveMonster, Monster, MonsterKind};
 use crate::core::player::Player;
@@ -175,7 +175,9 @@ pub enum ServerMessage {
 impl ServerMessage {
     pub fn channel(&self) -> DefaultChannel {
         match self {
-            ServerMessage::Snapshot { .. } => DefaultChannel::Unreliable,
+            ServerMessage::Snapshot {
+                ..
+            } => DefaultChannel::Unreliable,
             _ => DefaultChannel::ReliableOrdered,
         }
     }
@@ -218,7 +220,10 @@ pub struct ServerSendMsg {
 
 impl ServerSendMsg {
     pub fn new(message: ServerMessage, client: Option<ClientId>) -> Self {
-        Self { message, client }
+        Self {
+            message,
+            client,
+        }
     }
 }
 
@@ -229,7 +234,9 @@ pub struct ClientSendMsg {
 
 impl ClientSendMsg {
     pub fn new(message: ClientMessage) -> Self {
-        Self { message }
+        Self {
+            message,
+        }
     }
 }
 
@@ -391,7 +398,9 @@ pub fn on_server_event(
         return;
     };
     match **event {
-        ServerEvent::ClientConnected { client_id } => {
+        ServerEvent::ClientConnected {
+            client_id,
+        } => {
             if duel.phase == DuelPhase::Connecting {
                 duel.phase = DuelPhase::Betting;
             }
@@ -399,7 +408,9 @@ pub fn on_server_event(
                 .write(ServerSendMsg::new(ServerMessage::Profile(player.clone()), Some(client_id)));
             broadcast_lobby(duel, &mut server_send);
         },
-        ServerEvent::ClientDisconnected { .. } => {
+        ServerEvent::ClientDisconnected {
+            ..
+        } => {
             if duel.phase == DuelPhase::Betting || duel.phase == DuelPhase::Connecting {
                 duel.opponent = None;
                 duel.opp_accept = false;
@@ -474,7 +485,10 @@ pub fn server_lobby_recv(
                     duel.opponent = Some(p);
                     broadcast_lobby(duel, &mut server_send);
                 },
-                ClientMessage::SetBet { gold, items } => {
+                ClientMessage::SetBet {
+                    gold,
+                    items,
+                } => {
                     duel.opp_gold_bet = gold;
                     duel.opp_item_bet = items;
                     duel.opp_accept = false;
@@ -595,7 +609,11 @@ pub fn client_lobby_recv(
                         s.paused = paused;
                     }
                     duel.pause_owner = if paused {
-                        Some(if owner_is_host { DuelRole::Host } else { DuelRole::Client })
+                        Some(if owner_is_host {
+                            DuelRole::Host
+                        } else {
+                            DuelRole::Client
+                        })
                     } else {
                         None
                     };
@@ -671,7 +689,9 @@ fn start_duel_combat(
     opponent: &Player,
     next_game_state: &mut NextState<GameState>,
 ) {
-    commands.insert_resource(ActiveMonster { monster: player_to_monster(opponent) });
+    commands.insert_resource(ActiveMonster {
+        monster: player_to_monster(opponent),
+    });
     commands.insert_resource(DuelActive);
     commands.insert_resource(CombatSpeed(1.0));
     next_game_state.set(GameState::Combat);
@@ -770,8 +790,8 @@ fn apply_local_rewards(
         for it in items_won {
             player.add_inventory_item(it.clone());
         }
-        gain_xp(player, xp_won, level_up, play_audio_msg, next_game_state);
-        play_audio_msg.write(PlayAudioMsg::new("button"));
+        gain_xp(player, xp_won, level_up, play_audio_msg, next_game_state, false);
+        play_audio_msg.write(PlayAudioMsg::new("levelup").volume(-10.));
     } else {
         player.gold = player.gold.saturating_sub(my_gold_bet);
         for it in my_item_bet {
@@ -812,7 +832,16 @@ pub fn duel_host_combat(
 
     // Result screen: wait for the host to leave.
     if state.status == CombatStatus::Over {
-        resolve_host_result(duel, state, &mut player, &mut level_up, &mut play_audio_msg, &mut server_send, &mut next_game_state, &keyboard);
+        resolve_host_result(
+            duel,
+            state,
+            &mut player,
+            &mut level_up,
+            &mut play_audio_msg,
+            &mut server_send,
+            &mut next_game_state,
+            &keyboard,
+        );
         return;
     }
 
@@ -906,7 +935,7 @@ fn resolve_host_result(
                 player.add_inventory_item(it);
             }
             let xp = level_diff_xp(host_level, opp_level);
-            gain_xp(player, xp, level_up, play_audio_msg, next_game_state);
+            gain_xp(player, xp, level_up, play_audio_msg, next_game_state, false);
         } else {
             player.gold = player.gold.saturating_sub(duel.my_gold_bet);
             for it in &duel.my_item_bet {
@@ -921,9 +950,21 @@ fn resolve_host_result(
         server_send.write(ServerSendMsg::new(
             ServerMessage::Result {
                 client_won: !host_won,
-                gold_won: if host_won { 0 } else { duel.my_gold_bet },
-                items_won: if host_won { Vec::new() } else { duel.my_item_bet.clone() },
-                xp_won: if host_won { 0 } else { level_diff_xp(opp_level, host_level) },
+                gold_won: if host_won {
+                    0
+                } else {
+                    duel.my_gold_bet
+                },
+                items_won: if host_won {
+                    Vec::new()
+                } else {
+                    duel.my_item_bet.clone()
+                },
+                xp_won: if host_won {
+                    0
+                } else {
+                    level_diff_xp(opp_level, host_level)
+                },
             },
             None,
         ));
@@ -1124,14 +1165,10 @@ impl Plugin for NetworkPlugin {
                 // Authoritative / mirrored combat.
                 duel_host_combat
                     .before(crate::core::combat::mechanics::update_combat_visuals)
-                    .run_if(
-                        in_state(GameState::Combat).and_then(resource_exists::<DuelActive>),
-                    ),
+                    .run_if(in_state(GameState::Combat).and_then(resource_exists::<DuelActive>)),
                 duel_client_combat
                     .before(crate::core::combat::mechanics::update_combat_visuals)
-                    .run_if(
-                        in_state(GameState::Combat).and_then(resource_exists::<DuelActive>),
-                    ),
+                    .run_if(in_state(GameState::Combat).and_then(resource_exists::<DuelActive>)),
             ),
         )
         .add_systems(

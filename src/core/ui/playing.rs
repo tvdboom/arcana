@@ -46,8 +46,6 @@ const ACTIVE_HOTKEY_SLOT_SIZE: Val = Val::Vw(5.6);
 /// Hotkey letters for the 5 ability slots.
 const ABILITY_HOTKEYS: [&str; 5] = ["Q", "W", "E", "R", "T"];
 
-
-
 #[derive(Component, Clone, Copy)]
 pub struct ActiveHotkeySlot {
     pub index: usize,
@@ -207,11 +205,7 @@ fn playing_title(player: &Player) -> String {
 }
 
 fn pet_image_key(pet: &crate::core::monsters::Monster) -> String {
-    Path::new(&pet.image)
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or(&pet.image)
-        .to_lowercase()
+    Path::new(&pet.image).file_stem().and_then(|s| s.to_str()).unwrap_or(&pet.image).to_lowercase()
 }
 
 fn localized_class_name(player: &Player, localization: &Localization, lang: Language) -> String {
@@ -302,7 +296,10 @@ fn combat_breakdown(
                 vec![format!("[base] {}", signed_line(localization.get("general.base", lang), 5))];
             lines.push(format!(
                 "[constitution] {}",
-                signed_line(localization.get("attribute.constitution", lang), player.constitution_mod())
+                signed_line(
+                    localization.get("attribute.constitution", lang),
+                    player.constitution_mod()
+                )
             ));
             let training_bonus = player.training_bonus_for_skill("defense");
             if training_bonus > 0 {
@@ -410,13 +407,8 @@ fn spawn_active_hotkey_tooltip(
     let equipped_key = player.active_abilities.get(slot_index).and_then(|opt| opt.as_deref());
     if let Some(key) = equipped_key {
         if let Some(ability) = get_ability(key) {
-            let title = name_with_level(
-                &ability.name,
-                "ability",
-                ability.level as u8,
-                &localization,
-                lang,
-            );
+            let title =
+                name_with_level(&ability.name, "ability", ability.level as u8, &localization, lang);
             let lines = ability.full_description(lang, &localization);
             spawn_item_tooltip(
                 commands,
@@ -445,13 +437,11 @@ fn refresh_hovered_hotkey_slot(
     tooltip_q: &Query<Entity, With<TooltipNode>>,
     windows: &Query<&Window>,
 ) {
-    let hovered = slot_state_q.iter().find_map(|(rel, slot)| {
-        rel.cursor_over().then_some(slot.index)
-    });
+    let hovered =
+        slot_state_q.iter().find_map(|(rel, slot)| rel.cursor_over().then_some(slot.index));
 
-    let filled = hovered.filter(|idx| {
-        player.active_abilities.get(*idx).and_then(|opt| opt.as_ref()).is_some()
-    });
+    let filled = hovered
+        .filter(|idx| player.active_abilities.get(*idx).and_then(|opt| opt.as_ref()).is_some());
 
     if let Some(idx) = filled {
         commands.entity(window_e).insert(CursorIcon::from(SystemCursorIcon::Pointer));
@@ -553,8 +543,7 @@ fn spawn_card(
                             height: ICON_BADGE,
                             ..default()
                         },
-                        ImageNode::new(assets.image("equipped"))
-                            .with_mode(NodeImageMode::Stretch),
+                        ImageNode::new(assets.image("equipped")).with_mode(NodeImageMode::Stretch),
                     ));
                 });
         }
@@ -902,181 +891,181 @@ pub fn spawn_image_column(
     }
 
     cmd.with_children(|parent| {
-            // Portrait (relative container for equipment slot / pet overlays)
-            parent
-                .spawn((
-                    Node {
-                        width: percent(100.),
-                        aspect_ratio: Some(0.88),
-                        position_type: PositionType::Relative,
-                        border: UiRect::all(Val::Px(3.)),
-                        margin: UiRect::top(Val::Px(2.)),
+        // Portrait (relative container for equipment slot / pet overlays)
+        parent
+            .spawn((
+                Node {
+                    width: percent(100.),
+                    aspect_ratio: Some(0.88),
+                    position_type: PositionType::Relative,
+                    border: UiRect::all(Val::Px(3.)),
+                    margin: UiRect::top(Val::Px(2.)),
+                    ..default()
+                },
+                BorderColor::all(BUTTON_BORDER_COLOR),
+                ImageNode::new(assets.image(portrait_key(player)))
+                    .with_mode(NodeImageMode::Stretch),
+            ))
+            .with_children(|parent| {
+                // Left column: two accessory slots
+                parent
+                    .spawn(Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Percent(2.),
+                        top: Val::Percent(2.),
+                        width: percent(16.),
+                        height: percent(30.),
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::SpaceBetween,
+                        row_gap: Val::Px(1.),
                         ..default()
-                    },
-                    BorderColor::all(BUTTON_BORDER_COLOR),
-                    ImageNode::new(assets.image(portrait_key(player)))
-                        .with_mode(NodeImageMode::Stretch),
-                ))
-                .with_children(|parent| {
-                    // Left column: two accessory slots
-                    parent
-                        .spawn(Node {
-                            position_type: PositionType::Absolute,
-                            left: Val::Percent(2.),
-                            top: Val::Percent(2.),
-                            width: percent(16.),
-                            height: percent(30.),
-                            flex_direction: FlexDirection::Column,
-                            justify_content: JustifyContent::SpaceBetween,
-                            row_gap: Val::Px(1.),
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            for slot in [EquipSlot::Accessory, EquipSlot::Accessory2] {
-                                parent
-                                    .spawn((
-                                        Node {
-                                            width: percent(100.),
-                                            aspect_ratio: Some(1.),
-                                            border: UiRect::all(Val::Px(1.)),
-                                            ..default()
-                                        },
-                                        BackgroundColor(PLACEHOLDER_COLOR),
-                                        BorderColor::all(BUTTON_BORDER_COLOR),
-                                        ImageNode::new(assets.image("stone"))
-                                            .with_mode(NodeImageMode::Stretch),
-                                        Interaction::default(),
-                                        Button,
-                                        Pickable::default(),
-                                        slot,
-                                    ))
-                                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                    .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                    .observe(handle_equipment_slot_click);
-                            }
-                        });
-
-                    // Right column: 6 equipment slots
-                    parent
-                        .spawn(Node {
-                            position_type: PositionType::Absolute,
-                            right: Val::Percent(2.),
-                            top: Val::Percent(2.),
-                            width: percent(16.),
-                            height: percent(96.),
-                            flex_direction: FlexDirection::Column,
-                            justify_content: JustifyContent::SpaceBetween,
-                            row_gap: Val::Px(1.),
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            for slot in [
-                                EquipSlot::Helmet,
-                                EquipSlot::Chestplate,
-                                EquipSlot::WeaponLH,
-                                EquipSlot::WeaponRH,
-                                EquipSlot::Gloves,
-                                EquipSlot::Boots,
-                            ] {
-                                parent
-                                    .spawn((
-                                        Node {
-                                            width: percent(100.),
-                                            aspect_ratio: Some(1.),
-                                            border: UiRect::all(Val::Px(1.)),
-                                            ..default()
-                                        },
-                                        BackgroundColor(PLACEHOLDER_COLOR),
-                                        BorderColor::all(BUTTON_BORDER_COLOR),
-                                        ImageNode::new(assets.image("stone"))
-                                            .with_mode(NodeImageMode::Stretch),
-                                        Interaction::default(),
-                                        Button,
-                                        Pickable::default(),
-                                        slot,
-                                    ))
-                                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                    .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                    .observe(handle_equipment_slot_click);
-                            }
-                        });
-
-                    // Pet image, bottom-left overlay — larger
-                    if let Some(pet) = &player.pet {
-                        parent
-                            .spawn((
-                                Node {
-                                    position_type: PositionType::Absolute,
-                                    left: Val::Px(3.),
-                                    bottom: Val::Px(3.),
-                                    width: percent(55.),
-                                    aspect_ratio: Some(0.92),
-                                    border: UiRect::all(Val::Px(2.)),
-                                    flex_direction: FlexDirection::Column,
-                                    justify_content: JustifyContent::FlexEnd,
-                                    ..default()
-                                },
+                    })
+                    .with_children(|parent| {
+                        for slot in [EquipSlot::Accessory, EquipSlot::Accessory2] {
+                            parent
+                                .spawn((
+                                    Node {
+                                        width: percent(100.),
+                                        aspect_ratio: Some(1.),
+                                        border: UiRect::all(Val::Px(1.)),
+                                        ..default()
+                                    },
+                                    BackgroundColor(PLACEHOLDER_COLOR),
                                     BorderColor::all(BUTTON_BORDER_COLOR),
-                                    ImageNode::new(assets.image(pet_image_key(pet)))
-                                    .with_mode(NodeImageMode::Stretch),
-                                    PetImage,
+                                    ImageNode::new(assets.image("stone"))
+                                        .with_mode(NodeImageMode::Stretch),
                                     Interaction::default(),
+                                    Button,
                                     Pickable::default(),
-                                    InfoTooltip::Pet,
-                            ))
-                            .with_children(|parent| {
-                                // Thicker health bar container at the bottom of the pet image
-                                parent
-                                    .spawn((
+                                    slot,
+                                ))
+                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                .observe(handle_equipment_slot_click);
+                        }
+                    });
+
+                // Right column: 6 equipment slots
+                parent
+                    .spawn(Node {
+                        position_type: PositionType::Absolute,
+                        right: Val::Percent(2.),
+                        top: Val::Percent(2.),
+                        width: percent(16.),
+                        height: percent(96.),
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::SpaceBetween,
+                        row_gap: Val::Px(1.),
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        for slot in [
+                            EquipSlot::Helmet,
+                            EquipSlot::Chestplate,
+                            EquipSlot::WeaponLH,
+                            EquipSlot::WeaponRH,
+                            EquipSlot::Gloves,
+                            EquipSlot::Boots,
+                        ] {
+                            parent
+                                .spawn((
+                                    Node {
+                                        width: percent(100.),
+                                        aspect_ratio: Some(1.),
+                                        border: UiRect::all(Val::Px(1.)),
+                                        ..default()
+                                    },
+                                    BackgroundColor(PLACEHOLDER_COLOR),
+                                    BorderColor::all(BUTTON_BORDER_COLOR),
+                                    ImageNode::new(assets.image("stone"))
+                                        .with_mode(NodeImageMode::Stretch),
+                                    Interaction::default(),
+                                    Button,
+                                    Pickable::default(),
+                                    slot,
+                                ))
+                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                .observe(handle_equipment_slot_click);
+                        }
+                    });
+
+                // Pet image, bottom-left overlay — larger
+                if let Some(pet) = &player.pet {
+                    parent
+                        .spawn((
+                            Node {
+                                position_type: PositionType::Absolute,
+                                left: Val::Px(3.),
+                                bottom: Val::Px(3.),
+                                width: percent(55.),
+                                aspect_ratio: Some(0.92),
+                                border: UiRect::all(Val::Px(2.)),
+                                flex_direction: FlexDirection::Column,
+                                justify_content: JustifyContent::FlexEnd,
+                                ..default()
+                            },
+                            BorderColor::all(BUTTON_BORDER_COLOR),
+                            ImageNode::new(assets.image(pet_image_key(pet)))
+                                .with_mode(NodeImageMode::Stretch),
+                            PetImage,
+                            Interaction::default(),
+                            Pickable::default(),
+                            InfoTooltip::Pet,
+                        ))
+                        .with_children(|parent| {
+                            // Thicker health bar container at the bottom of the pet image
+                            parent
+                                .spawn((
+                                    Node {
+                                        width: percent(90.),
+                                        height: Val::Px(24.),
+                                        border: UiRect::all(Val::Px(1.5)),
+                                        align_self: AlignSelf::Center,
+                                        margin: UiRect::bottom(Val::Px(4.)),
+                                        position_type: PositionType::Relative,
+                                        ..default()
+                                    },
+                                    BackgroundColor(BAR_BG_COLOR),
+                                    BorderColor::all(BUTTON_BORDER_COLOR),
+                                ))
+                                .with_children(|parent| {
+                                    // Health bar fill
+                                    parent.spawn((
                                         Node {
-                                            width: percent(90.),
-                                            height: Val::Px(24.),
-                                            border: UiRect::all(Val::Px(1.5)),
-                                            align_self: AlignSelf::Center,
-                                            margin: UiRect::bottom(Val::Px(4.)),
-                                            position_type: PositionType::Relative,
+                                            position_type: PositionType::Absolute,
+                                            left: Val::Px(0.),
+                                            top: Val::Px(0.),
+                                            width: percent(100.),
+                                            height: percent(100.),
                                             ..default()
                                         },
-                                        BackgroundColor(BAR_BG_COLOR),
-                                        BorderColor::all(BUTTON_BORDER_COLOR),
-                                    ))
-                                    .with_children(|parent| {
-                                        // Health bar fill
-                                        parent.spawn((
-                                            Node {
-                                                position_type: PositionType::Absolute,
-                                                left: Val::Px(0.),
-                                                top: Val::Px(0.),
-                                                width: percent(100.),
-                                                height: percent(100.),
-                                                ..default()
-                                            },
-                                            BackgroundColor(HEALTH_COLOR),
-                                            PetHealthBarFill,
-                                        ));
+                                        BackgroundColor(HEALTH_COLOR),
+                                        PetHealthBarFill,
+                                    ));
 
-                                        // Text overlay
-                                        parent
-                                            .spawn(Node {
-                                                position_type: PositionType::Absolute,
-                                                width: percent(100.),
-                                                height: percent(100.),
-                                                align_items: AlignItems::Center,
-                                                justify_content: JustifyContent::Center,
-                                                ..default()
-                                            })
-                                            .with_children(|parent| {
-                                                parent.spawn((
-                                                    add_text("", "bold", 1.4, assets),
-                                                    TextColor(Color::WHITE),
-                                                    StatLabel(PlayingStat::PetHealth),
-                                                ));
-                                            });
-                                    });
-                            });
-                    }
-                });
-        });
+                                    // Text overlay
+                                    parent
+                                        .spawn(Node {
+                                            position_type: PositionType::Absolute,
+                                            width: percent(100.),
+                                            height: percent(100.),
+                                            align_items: AlignItems::Center,
+                                            justify_content: JustifyContent::Center,
+                                            ..default()
+                                        })
+                                        .with_children(|parent| {
+                                            parent.spawn((
+                                                add_text("", "bold", 1.4, assets),
+                                                TextColor(Color::WHITE),
+                                                StatLabel(PlayingStat::PetHealth),
+                                            ));
+                                        });
+                                });
+                        });
+                }
+            });
+    });
 }
 
 /// Column 2: Level, health/mana bars, characteristics, attributes, combat stats.
@@ -2447,7 +2436,8 @@ pub fn rebuild_playing_lists(
                 }
             }
 
-            let mut sorted_consumables_keys: Vec<String> = consumables_map.keys().cloned().collect();
+            let mut sorted_consumables_keys: Vec<String> =
+                consumables_map.keys().cloned().collect();
             sorted_consumables_keys.sort_by(|a, b| {
                 let eq_a = get_equipment(a).unwrap();
                 let eq_b = get_equipment(b).unwrap();
@@ -2590,8 +2580,10 @@ pub fn rebuild_playing_lists(
             let mut sorted_abilities: Vec<_> =
                 player.abilities.iter().filter_map(|key| get_ability(key)).collect();
             sorted_abilities.sort_by(|a, b| {
-                let pos_a = player.active_abilities.iter().position(|x| x.as_ref() == Some(&a.name));
-                let pos_b = player.active_abilities.iter().position(|x| x.as_ref() == Some(&b.name));
+                let pos_a =
+                    player.active_abilities.iter().position(|x| x.as_ref() == Some(&a.name));
+                let pos_b =
+                    player.active_abilities.iter().position(|x| x.as_ref() == Some(&b.name));
                 match (pos_a, pos_b) {
                     (Some(idx_a), Some(idx_b)) => idx_a.cmp(&idx_b),
                     (Some(_), None) => std::cmp::Ordering::Less,
@@ -3398,108 +3390,110 @@ pub fn spawn_equipment_card<'a>(
     let price = card.price;
     let card_key = card.key.clone();
     let tooltip = RightColumnTooltip::Equipment(card.key.clone());
-    let out_color = if is_equipped && highlight_equipped { SELECTED_COLOR } else { BAR_BG_COLOR };
+    let out_color = if is_equipped && highlight_equipped {
+        SELECTED_COLOR
+    } else {
+        BAR_BG_COLOR
+    };
     let mut cmd = parent.spawn((
-            Node {
-                width: percent(100.),
-                flex_direction: FlexDirection::Row,
-                align_items: AlignItems::FlexStart,
-                flex_shrink: 0.,
-                column_gap: Val::Px(8.),
-                padding: UiRect::all(Val::Px(6.)),
-                margin: UiRect::bottom(Val::Px(6.)),
-                border: UiRect::all(Val::Px(1.)),
-                position_type: PositionType::Relative,
-                overflow: Overflow::clip(),
-                ..default()
-            },
-            BackgroundColor(out_color),
-            BorderColor::all(BUTTON_BORDER_COLOR),
-            Button,
-            Interaction::default(),
-            Pickable::default(),
-            card,
-            tooltip,
-        ));
+        Node {
+            width: percent(100.),
+            flex_direction: FlexDirection::Row,
+            align_items: AlignItems::FlexStart,
+            flex_shrink: 0.,
+            column_gap: Val::Px(8.),
+            padding: UiRect::all(Val::Px(6.)),
+            margin: UiRect::bottom(Val::Px(6.)),
+            border: UiRect::all(Val::Px(1.)),
+            position_type: PositionType::Relative,
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(out_color),
+        BorderColor::all(BUTTON_BORDER_COLOR),
+        Button,
+        Interaction::default(),
+        Pickable::default(),
+        card,
+        tooltip,
+    ));
     cmd.observe(recolor::<Over>(HOVERED_BUTTON_COLOR));
     cmd.observe(recolor::<Out>(out_color));
     cmd.observe(cursor::<Over>(SystemCursorIcon::Pointer));
     cmd.observe(cursor::<Out>(SystemCursorIcon::Default));
     cmd.observe(handle_equipment_card_click);
     cmd.with_children(|parent| {
-            // Top-right corner: equipped badge (if equipped) + price display
-            parent
-                .spawn((Node {
-                    position_type: PositionType::Absolute,
-                    right: Val::Px(4.),
-                    top: Val::Px(4.),
-                    flex_direction: FlexDirection::Row,
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(4.),
-                    overflow: Overflow::clip(),
-                    ..default()
-                },))
-                .with_children(|parent| {
-                    // Equipped badge (left of price)
-                    if is_equipped {
-                        parent.spawn((
-                            Node {
-                                width: ICON_BADGE,
-                                height: ICON_BADGE,
-                                ..default()
-                            },
-                            ImageNode::new(assets.image("equipped"))
-                                .with_mode(NodeImageMode::Stretch),
-                        ));
-                    }
-
-                    // Gold icon (same size as equipped badge)
+        // Top-right corner: equipped badge (if equipped) + price display
+        parent
+            .spawn((Node {
+                position_type: PositionType::Absolute,
+                right: Val::Px(4.),
+                top: Val::Px(4.),
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(4.),
+                overflow: Overflow::clip(),
+                ..default()
+            },))
+            .with_children(|parent| {
+                // Equipped badge (left of price)
+                if is_equipped {
                     parent.spawn((
                         Node {
                             width: ICON_BADGE,
                             height: ICON_BADGE,
                             ..default()
                         },
-                        ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                        ImageNode::new(assets.image("equipped")).with_mode(NodeImageMode::Stretch),
                     ));
+                }
 
-                    // Price number (same color as weapon name)
-                    parent.spawn((
-                        add_text(format!("{}", price), "bold", 2.3, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
-                });
+                // Gold icon (same size as equipped badge)
+                parent.spawn((
+                    Node {
+                        width: ICON_BADGE,
+                        height: ICON_BADGE,
+                        ..default()
+                    },
+                    ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                ));
 
-            spawn_placeholder(parent, assets, image_key, ICON_ITEM);
+                // Price number (same color as weapon name)
+                parent.spawn((
+                    add_text(format!("{}", price), "bold", 2.3, assets),
+                    TextColor(BUTTON_TEXT_COLOR),
+                ));
+            });
 
-            parent
-                .spawn(Node {
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(4.),
-                    overflow: Overflow::clip(),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    parent
-                        .spawn((add_text(name, "bold", 2.3, assets), TextColor(BUTTON_TEXT_COLOR)));
+        spawn_placeholder(parent, assets, image_key, ICON_ITEM);
 
-                    if let Some(artifact) = get_artifact(&card_key) {
-                        let k = artifact.kind;
-                        spawn_rich_text_row(
-                            parent,
-                            assets,
-                            format!("[{}] {}", k.to_string().to_lowercase(), k),
-                            2.0,
-                            "medium",
-                            Color::WHITE,
-                        );
-                    } else {
-                        for line in lines {
-                            spawn_rich_text_row(parent, assets, line, 2.0, "medium", Color::WHITE);
-                        }
+        parent
+            .spawn(Node {
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(4.),
+                overflow: Overflow::clip(),
+                ..default()
+            })
+            .with_children(|parent| {
+                parent.spawn((add_text(name, "bold", 2.3, assets), TextColor(BUTTON_TEXT_COLOR)));
+
+                if let Some(artifact) = get_artifact(&card_key) {
+                    let k = artifact.kind;
+                    spawn_rich_text_row(
+                        parent,
+                        assets,
+                        format!("[{}] {}", k.to_string().to_lowercase(), k),
+                        2.0,
+                        "medium",
+                        Color::WHITE,
+                    );
+                } else {
+                    for line in lines {
+                        spawn_rich_text_row(parent, assets, line, 2.0, "medium", Color::WHITE);
                     }
-                });
-        });
+                }
+            });
+    });
     cmd
 }
 
@@ -3780,9 +3774,7 @@ pub fn handle_hotkey_drag_start(
         Pickable::IGNORE,
         PrecombatDragGhost,
     ));
-    commands
-        .entity(*window_e)
-        .insert(CursorIcon::from(SystemCursorIcon::Move));
+    commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Move));
 
     commands.entity(event.entity).insert(DraggingSlot);
 }
@@ -3898,9 +3890,7 @@ pub fn handle_active_hotkey_slot_click(
     if slot.index < player.active_abilities.len() && player.active_abilities[slot.index].is_some() {
         player.active_abilities[slot.index] = None;
         play_audio_msg.write(PlayAudioMsg::new("button"));
-        commands
-            .entity(*window_e)
-            .insert(CursorIcon::from(SystemCursorIcon::Default));
+        commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
     }
 }
 
@@ -3939,9 +3929,8 @@ pub fn active_hotkey_slot_tooltip_system(
     // instead of `Interaction` because the press/hover state stays locked to the
     // dragged slot right after a drop, whereas the relative cursor position always
     // reflects the slot actually under the pointer.
-    let hovered_index = slot_q.iter().find_map(|(rel, slot)| {
-        rel.cursor_over().then_some(slot.index)
-    });
+    let hovered_index =
+        slot_q.iter().find_map(|(rel, slot)| rel.cursor_over().then_some(slot.index));
 
     match hovered_index {
         Some(idx) => {

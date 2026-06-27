@@ -1,7 +1,7 @@
-use crate::core::audio::PlayAudioMsg;
 use crate::core::actions::gain_xp;
+use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::{Ajah, Class};
-use crate::core::menu::systems::StartNewCharacterMsg;
+use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin, StartNewCharacterMsg};
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
 use crate::core::ui::creation::SelectionItem;
@@ -22,6 +22,8 @@ pub fn check_keys_menu(
     mut level_up: ResMut<LevelUpPending>,
     mut apply_level_up_msg: MessageWriter<ApplyLevelUpMsg>,
     active_modal: Res<ActiveModal>,
+    mut game_menu_origin: ResMut<GameMenuOrigin>,
+    mut combat_menu_suspended: ResMut<CombatMenuSuspended>,
 ) {
     let cheat_level_up = *app_state.get() == AppState::Game
         && keyboard.just_released(KeyCode::ArrowUp)
@@ -29,13 +31,7 @@ pub fn check_keys_menu(
         && (keyboard.pressed(KeyCode::ShiftLeft) || keyboard.pressed(KeyCode::ShiftRight));
     if cheat_level_up {
         let old_level = player.level();
-        gain_xp(
-            &mut player,
-            10,
-            &mut level_up,
-            &mut play_audio_msg,
-            &mut next_game_state,
-        );
+        gain_xp(&mut player, 10, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
         if player.level() > old_level && level_up.active {
             let mut rng = rng();
             while level_up.points_remaining > 0 {
@@ -66,16 +62,34 @@ pub fn check_keys_menu(
             },
             AppState::Loading => {},
             AppState::Game => match game_state.get() {
-                GameState::Playing => next_game_state.set(GameState::GameMenu),
+                GameState::Playing => {
+                    game_menu_origin.0 = Some(GameState::Playing);
+                    combat_menu_suspended.0 = false;
+                    next_game_state.set(GameState::GameMenu);
+                },
+                GameState::Combat => {
+                    game_menu_origin.0 = Some(GameState::Combat);
+                    combat_menu_suspended.0 = true;
+                    next_game_state.set(GameState::GameMenu);
+                },
                 GameState::Shop
                 | GameState::Work
                 | GameState::Study
                 | GameState::Train
-                | GameState::Rest => {
+                | GameState::Rest
+                | GameState::Craft
+                | GameState::Hunt
+                | GameState::Quest
+                | GameState::Duel => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_game_state.set(GameState::Playing);
                 },
-                GameState::GameMenu => next_game_state.set(GameState::Playing),
+                GameState::GameMenu => {
+                    let target = game_menu_origin.0.unwrap_or(GameState::Playing);
+                    combat_menu_suspended.0 = false;
+                    game_menu_origin.0 = None;
+                    next_game_state.set(target);
+                },
                 GameState::EndGame => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_app_state.set(AppState::MainMenu);
@@ -131,6 +145,11 @@ pub fn check_keys_menu(
             },
             AppState::Loading => {},
             AppState::Game => match game_state.get() {
+                GameState::Combat => {
+                    game_menu_origin.0 = Some(GameState::Combat);
+                    combat_menu_suspended.0 = true;
+                    next_game_state.set(GameState::GameMenu);
+                },
                 GameState::EndGame => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_app_state.set(AppState::MainMenu);
@@ -168,8 +187,7 @@ pub fn check_keys_menu(
                             ajah.on_select(&mut player, &mut next_game_state);
                         },
                         Class::Druid => {
-                            let kind =
-                                player.pet.as_ref().map(|p| p.kind).unwrap_or_default();
+                            let kind = player.pet.as_ref().map(|p| p.kind).unwrap_or_default();
                             kind.on_select(&mut player, &mut next_game_state);
                         },
                         _ => {
@@ -179,7 +197,10 @@ pub fn check_keys_menu(
                 },
                 GameState::GameMenu | GameState::Settings => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
-                    next_game_state.set(GameState::Playing);
+                    let target = game_menu_origin.0.unwrap_or(GameState::Playing);
+                    combat_menu_suspended.0 = false;
+                    game_menu_origin.0 = None;
+                    next_game_state.set(target);
                 },
                 _ => (),
             },

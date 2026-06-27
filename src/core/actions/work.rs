@@ -70,12 +70,8 @@ pub fn calculate_work_values(player: &Player, slider_val: u32) -> WorkValues {
         max_craft,
         min_manual,
         max_manual,
-        craft_cost: 10u32
-            .saturating_mul(player.level())
-            .saturating_mul(intensity_mult),
-        manual_cost: 10u32
-            .saturating_mul(player.level())
-            .saturating_mul(intensity_mult),
+        craft_cost: 10u32.saturating_mul(player.level()).saturating_mul(intensity_mult),
+        manual_cost: 10u32.saturating_mul(player.level()).saturating_mul(intensity_mult),
     }
 }
 
@@ -394,11 +390,7 @@ pub fn build_work_content_inner(
                 &desc2,
                 "action_craft_labor",
                 Some(ap_cost),
-                Some((
-                    values.craft_cost,
-                    "mana",
-                    Color::srgb(40. / 255., 80. / 255., 185. / 255.),
-                )),
+                Some((values.craft_cost, "mana", Color::srgb(40. / 255., 80. / 255., 185. / 255.))),
                 None,
                 WorkCardMarker(1),
             );

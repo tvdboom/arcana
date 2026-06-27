@@ -185,11 +185,10 @@ pub fn handle_name_input(
                 player.name.pop();
                 changed = true;
             },
-            Key::Space
-                if player.name.len() < 16 => {
-                    player.name.push(' ');
-                    changed = true;
-                },
+            Key::Space if player.name.len() < 16 => {
+                player.name.push(' ');
+                changed = true;
+            },
             _ => {},
         }
     }
@@ -225,11 +224,10 @@ pub fn handle_pet_name_input(
                     pet.name.pop();
                     changed = true;
                 },
-                Key::Space
-                    if pet.name.len() < 16 => {
-                        pet.name.push(' ');
-                        changed = true;
-                    },
+                Key::Space if pet.name.len() < 16 => {
+                    pet.name.push(' ');
+                    changed = true;
+                },
                 _ => {},
             }
         }

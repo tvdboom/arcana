@@ -99,7 +99,12 @@ mod native {
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::FlexStart,
                         row_gap: Val::Px(14.),
-                        padding: UiRect::all(percent(5.)),
+                        padding: UiRect {
+                            left: percent(5.),
+                            right: percent(5.),
+                            top: percent(14.),
+                            bottom: percent(5.),
+                        },
                         ..default()
                     },
                     DuelLobbyContent,
@@ -123,6 +128,9 @@ mod native {
             match key {
                 KeyCode::Backspace => {
                     ip.pop();
+                },
+                KeyCode::Space => {
+                    ip.0 = local_ip().to_string();
                 },
                 KeyCode::Period | KeyCode::NumpadDecimal => ip.push('.'),
                 KeyCode::Digit0 | KeyCode::Numpad0 => ip.push('0'),
@@ -178,7 +186,9 @@ mod native {
             ),
         };
 
-        if *signature == sig {
+        let content_empty =
+            children_q.get(content).map(|children| children.is_empty()).unwrap_or(true);
+        if *signature == sig && !content_empty {
             return;
         }
         *signature = sig;
@@ -198,15 +208,9 @@ mod native {
             Some(d) if d.phase == DuelPhase::Connecting => {
                 build_waiting_view(&mut commands, content, &assets, &localization, lang)
             },
-            Some(d) => build_betting_view(
-                &mut commands,
-                content,
-                &assets,
-                &localization,
-                lang,
-                &player,
-                d,
-            ),
+            Some(d) => {
+                build_betting_view(&mut commands, content, &assets, &localization, lang, &player, d)
+            },
         }
     }
 
@@ -221,7 +225,14 @@ mod native {
     ) {
         let valid = is_valid_ip(ip);
         let is_host = valid && ip.trim() == my_ip;
-        let label = localization.get(if is_host { "duel.host" } else { "duel.connect" }, lang);
+        let label = localization.get(
+            if is_host {
+                "duel.host"
+            } else {
+                "duel.connect"
+            },
+            lang,
+        );
 
         commands.entity(content).with_children(|parent| {
             parent.spawn((
@@ -241,7 +252,7 @@ mod native {
                 BackgroundColor(NORMAL_BUTTON_COLOR),
                 BorderColor::all(BUTTON_BORDER_COLOR),
                 children![(
-                    add_text(format!("{ip}_"), "medium", 2.4, assets),
+                    add_text(ip.to_string(), "medium", 2.4, assets),
                     TextColor(Color::WHITE),
                 )],
             ));
@@ -267,10 +278,9 @@ mod native {
                     Interaction::default(),
                     Pickable::default(),
                     DuelActionBtn,
-                    children![(
-                        add_text(label, "bold", 2.0, assets),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    )],
+                    children![
+                        (add_text(label, "bold", 2.0, assets), TextColor(BUTTON_TEXT_COLOR),)
+                    ],
                 ))
                 .observe(on_action_click);
         });
@@ -300,8 +310,7 @@ mod native {
         player: &Player,
         duel: &DuelState,
     ) {
-        let opponent_name =
-            duel.opponent.as_ref().map(|o| o.name.clone()).unwrap_or_default();
+        let opponent_name = duel.opponent.as_ref().map(|o| o.name.clone()).unwrap_or_default();
         let opponent_img =
             duel.opponent.as_ref().map(portrait_key).unwrap_or_else(|| "unknown".to_string());
 
@@ -316,7 +325,11 @@ mod native {
                 })
                 .with_children(|parent| {
                     parent.spawn((
-                        Node { width: Val::Px(110.), height: Val::Px(110.), ..default() },
+                        Node {
+                            width: Val::Px(110.),
+                            height: Val::Px(110.),
+                            ..default()
+                        },
                         ImageNode::new(assets.image(&opponent_img))
                             .with_mode(NodeImageMode::Stretch),
                     ));
@@ -358,7 +371,11 @@ mod native {
                     spawn_step_button(parent, assets, "-100", DuelGoldBtn(-100));
                     spawn_step_button(parent, assets, "-10", DuelGoldBtn(-10));
                     parent.spawn((
-                        Node { width: Val::Px(28.), height: Val::Px(28.), ..default() },
+                        Node {
+                            width: Val::Px(28.),
+                            height: Val::Px(28.),
+                            ..default()
+                        },
                         ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
                     ));
                     parent.spawn((

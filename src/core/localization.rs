@@ -2,12 +2,12 @@ use std::collections::HashMap;
 
 use crate::core::classes::{Ajah, Class};
 use crate::core::monsters::MonsterKind;
-use crate::core::ui::creation::PetChoice;
 use crate::core::player::Attribute;
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
-use crate::utils::NameFromEnum;
+use crate::core::ui::creation::PetChoice;
 use crate::utils::capitalize_words;
+use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use serde_json;
 use strum::IntoEnumIterator;

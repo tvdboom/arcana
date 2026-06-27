@@ -298,22 +298,38 @@ impl FromWorld for WorldAssets {
 
         for ability in all_abilities() {
             let image = load_linear(assets, ability.image.clone());
-            insert_image_aliases(&mut images, &image, catalog_image_aliases(&ability.name, &ability.image));
+            insert_image_aliases(
+                &mut images,
+                &image,
+                catalog_image_aliases(&ability.name, &ability.image),
+            );
         }
 
         for perk in all_perks() {
             let image = load_linear(assets, perk.image.clone());
-            insert_image_aliases(&mut images, &image, catalog_image_aliases(&perk.name, &perk.image));
+            insert_image_aliases(
+                &mut images,
+                &image,
+                catalog_image_aliases(&perk.name, &perk.image),
+            );
         }
 
         for weapon in all_weapons() {
             let image = load_linear(assets, weapon.image.clone());
-            insert_image_aliases(&mut images, &image, catalog_image_aliases(&weapon.name, &weapon.image));
+            insert_image_aliases(
+                &mut images,
+                &image,
+                catalog_image_aliases(&weapon.name, &weapon.image),
+            );
         }
 
         for wearable in all_wearables() {
             let image = load_linear(assets, wearable.image.clone());
-            insert_image_aliases(&mut images, &image, catalog_image_aliases(&wearable.name, &wearable.image));
+            insert_image_aliases(
+                &mut images,
+                &image,
+                catalog_image_aliases(&wearable.name, &wearable.image),
+            );
         }
 
         for consumable in all_consumables() {
@@ -327,7 +343,11 @@ impl FromWorld for WorldAssets {
 
         for artifact in all_artifacts() {
             let image = load_linear(assets, artifact.image.clone());
-            insert_image_aliases(&mut images, &image, catalog_image_aliases(&artifact.name, &artifact.image));
+            insert_image_aliases(
+                &mut images,
+                &image,
+                catalog_image_aliases(&artifact.name, &artifact.image),
+            );
         }
 
         for monster in all_monsters() {

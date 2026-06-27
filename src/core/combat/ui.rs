@@ -1,27 +1,26 @@
-
 use bevy::prelude::*;
 
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::get_equipment;
 use crate::core::catalog::equipment::Equipment;
+use crate::core::classes::Class;
 use crate::core::constants::{
-    BAR_BG_COLOR, BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, LABEL_TEXT_SIZE, NORMAL_BUTTON_COLOR,
-    PLACEHOLDER_COLOR, PRESSED_BUTTON_COLOR, SELECTED_COLOR, HOVERED_BUTTON_COLOR,
+    BAR_BG_COLOR, BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, HOVERED_BUTTON_COLOR, LABEL_TEXT_SIZE,
+    NORMAL_BUTTON_COLOR, PLACEHOLDER_COLOR, PRESSED_BUTTON_COLOR, SELECTED_COLOR,
 };
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
+use crate::core::monsters::{ActiveMonster, Monster, MonsterKind};
 use crate::core::player::Player;
-use crate::core::PlayingStat;
 use crate::core::settings::Settings;
 use crate::core::ui::creation::SelectionItem;
 use crate::core::ui::playing::{
     EquipSlot, InfoTooltip, PetHealthBarFill, RightColumnTooltip, StatLabel,
 };
+use crate::core::PlayingStat;
 use crate::utils::capitalize_words;
 use bevy::window::SystemCursorIcon;
-use crate::core::classes::Class;
-use crate::core::monsters::{ActiveMonster, Monster, MonsterKind};
 
 const ACTIVE_HOTKEYS: [&str; 5] = ["Q", "W", "E", "R", "T"];
 const LEFT_PANEL_WIDTH: f32 = 46.0;
@@ -59,6 +58,24 @@ pub struct AbilityCardImage {
     pub slot: usize,
 }
 
+#[derive(Component)]
+pub struct CombatPortraitName {
+    pub is_player: bool,
+}
+
+#[derive(Component)]
+pub struct CombatPortraitLevel {
+    pub is_player: bool,
+}
+
+#[derive(Component)]
+pub struct CombatStatLabel {
+    pub title_key: String,
+}
+
+#[derive(Component)]
+pub struct CombatPetName;
+
 pub fn setup_combat_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -68,7 +85,11 @@ pub fn setup_combat_ui(
     active_monster: Option<Res<ActiveMonster>>,
     combat_speed: Res<crate::core::combat::mechanics::CombatSpeed>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    existing_combat_q: Query<Entity, With<CombatCmp>>,
 ) {
+    if !existing_combat_q.is_empty() {
+        return;
+    }
     play_audio_msg.write(PlayAudioMsg::new("horn"));
 
     let active_monster =
@@ -178,18 +199,13 @@ pub fn setup_combat_ui(
                         ..default()
                     },
                     BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.55)),
-                    GlobalZIndex(1100),
+                    GlobalZIndex(985),
                     Visibility::Hidden,
                     CombatPausedOverlay,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
-                        add_text(
-                            localization.get("general.paused", lang),
-                            "bold",
-                            8.0,
-                            &assets,
-                        ),
+                        add_text(localization.get("general.paused", lang), "bold", 8.0, &assets),
                         TextColor(Color::WHITE),
                         LocalizedText("general.paused".to_string()),
                     ));
@@ -259,7 +275,16 @@ fn spawn_player_panel(
                             ..default()
                         })
                         .with_children(|parent| {
-                            spawn_combat_stats(parent, assets, localization, lang, player.attack(), player.defense(), player.initiative());
+                            spawn_combat_stats(
+                                parent,
+                                assets,
+                                localization,
+                                lang,
+                                player.attack(),
+                                player.defense(),
+                                player.initiative(),
+                                true,
+                            );
                             if let Some(pet) = &player.pet {
                                 spawn_pet_stats(parent, assets, localization, lang, pet);
                             }
@@ -294,11 +319,12 @@ fn spawn_character_portrait(
                 ..default()
             },
             BorderColor::all(BUTTON_BORDER_COLOR),
-            ImageNode::new(assets.image(portrait_key.to_string())).with_mode(NodeImageMode::Stretch),
+            ImageNode::new(assets.image(portrait_key.to_string()))
+                .with_mode(NodeImageMode::Stretch),
             CombatPlayerPortrait,
         ))
         .with_children(|parent| {
-            spawn_portrait_label(parent, assets, name, level);
+            spawn_portrait_label(parent, assets, name, level, true);
             if let Some(pet) = pet {
                 spawn_combat_pet_overlay(parent, assets, pet);
             }
@@ -367,7 +393,11 @@ fn spawn_combat_pet_overlay(
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn((add_text(capitalize_words(&pet.name), "bold", 2.2, assets), TextColor(BUTTON_TEXT_COLOR)));
+                    parent.spawn((
+                        add_text(capitalize_words(&pet.name), "bold", 2.2, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        CombatPetName,
+                    ));
                 });
 
             parent
@@ -423,6 +453,7 @@ fn spawn_portrait_label(
     assets: &WorldAssets,
     name: &str,
     level: u32,
+    is_player: bool,
 ) {
     parent
         .spawn(Node {
@@ -435,8 +466,16 @@ fn spawn_portrait_label(
             ..default()
         })
         .with_children(|parent| {
-            parent.spawn((add_text(capitalize_words(name), "bold", 2.8, assets), TextColor(BUTTON_TEXT_COLOR)));
-            parent.spawn((add_text(format!("Level {}", level), "medium", 2.2, assets), TextColor(Color::WHITE)));
+            parent.spawn((
+                add_text(capitalize_words(name), "bold", 2.8, assets),
+                TextColor(BUTTON_TEXT_COLOR),
+                CombatPortraitName { is_player },
+            ));
+            parent.spawn((
+                add_text(format!("Level {}", level), "medium", 2.2, assets),
+                TextColor(Color::WHITE),
+                CombatPortraitLevel { is_player },
+            ));
         });
 }
 
@@ -448,6 +487,7 @@ fn spawn_combat_stats(
     attack: u32,
     defense: u32,
     initiative: u32,
+    is_player: bool,
 ) {
     parent
         .spawn(Node {
@@ -458,9 +498,54 @@ fn spawn_combat_stats(
             ..default()
         })
         .with_children(|parent| {
-            spawn_combat_stat_row(parent, assets, localization, lang, "attack", "general.attack", attack, PlayingStat::Attack, 100.0, 2.2, 4.5, true, true);
-            spawn_combat_stat_row(parent, assets, localization, lang, "defense", "general.defense", defense, PlayingStat::Defense, 100.0, 2.2, 4.5, true, true);
-            spawn_combat_stat_row(parent, assets, localization, lang, "initiative", "general.initiative", initiative, PlayingStat::Initiative, 100.0, 2.2, 4.5, true, true);
+            spawn_combat_stat_row(
+                parent,
+                assets,
+                localization,
+                lang,
+                "attack",
+                "general.attack",
+                attack,
+                PlayingStat::Attack,
+                100.0,
+                2.2,
+                4.5,
+                true,
+                true,
+                is_player,
+            );
+            spawn_combat_stat_row(
+                parent,
+                assets,
+                localization,
+                lang,
+                "defense",
+                "general.defense",
+                defense,
+                PlayingStat::Defense,
+                100.0,
+                2.2,
+                4.5,
+                true,
+                true,
+                is_player,
+            );
+            spawn_combat_stat_row(
+                parent,
+                assets,
+                localization,
+                lang,
+                "initiative",
+                "general.initiative",
+                initiative,
+                PlayingStat::Initiative,
+                100.0,
+                2.2,
+                4.5,
+                true,
+                true,
+                is_player,
+            );
         });
 }
 
@@ -481,9 +566,54 @@ fn spawn_pet_stats(
             ..default()
         })
         .with_children(|parent| {
-            spawn_combat_stat_row(parent, assets, localization, lang, "attack", "Atk.", pet.attack, PlayingStat::Attack, 42.0, 1.2, 2.2, false, false);
-            spawn_combat_stat_row(parent, assets, localization, lang, "defense", "Def.", pet.defense, PlayingStat::Defense, 42.0, 1.2, 2.2, false, false);
-            spawn_combat_stat_row(parent, assets, localization, lang, "initiative", "Init.", pet.initiative, PlayingStat::Initiative, 42.0, 1.2, 2.2, false, false);
+            spawn_combat_stat_row(
+                parent,
+                assets,
+                localization,
+                lang,
+                "attack",
+                "general.atk",
+                pet.attack,
+                PlayingStat::Attack,
+                42.0,
+                1.2,
+                2.2,
+                false,
+                true,
+                false,
+            );
+            spawn_combat_stat_row(
+                parent,
+                assets,
+                localization,
+                lang,
+                "defense",
+                "general.def",
+                pet.defense,
+                PlayingStat::Defense,
+                42.0,
+                1.2,
+                2.2,
+                false,
+                true,
+                false,
+            );
+            spawn_combat_stat_row(
+                parent,
+                assets,
+                localization,
+                lang,
+                "initiative",
+                "general.init",
+                pet.initiative,
+                PlayingStat::Initiative,
+                42.0,
+                1.2,
+                2.2,
+                false,
+                true,
+                false,
+            );
         });
 }
 
@@ -501,18 +631,19 @@ fn spawn_combat_stat_row(
     value_font_size: f32,
     show_tooltip: bool,
     localize_label: bool,
+    _is_player: bool,
 ) {
     let mut cmd = parent.spawn(Node {
-            width: percent(card_width),
-            aspect_ratio: Some(1.),
-            flex_direction: FlexDirection::Column,
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            row_gap: Val::Px(3.),
-            border: UiRect::all(Val::Px(2.)),
-            position_type: PositionType::Relative,
-            ..default()
-        });
+        width: percent(card_width),
+        aspect_ratio: Some(1.),
+        flex_direction: FlexDirection::Column,
+        align_items: AlignItems::Center,
+        justify_content: JustifyContent::Center,
+        row_gap: Val::Px(3.),
+        border: UiRect::all(Val::Px(2.)),
+        position_type: PositionType::Relative,
+        ..default()
+    });
     cmd.insert(BackgroundColor(PLACEHOLDER_COLOR))
         .insert(BorderColor::all(BUTTON_BORDER_COLOR))
         .insert(Interaction::default())
@@ -521,35 +652,34 @@ fn spawn_combat_stat_row(
         cmd.insert(InfoTooltip::Combat(stat));
     }
     cmd.with_children(|parent| {
-            parent.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(0.),
-                    top: Val::Px(0.),
-                    width: percent(100.),
-                    height: percent(100.),
-                    ..default()
-                },
-                ImageNode {
-                    image: assets.image(image_key),
-                    image_mode: NodeImageMode::Stretch,
-                    color: Color::srgba(1., 1., 1., 0.30),
-                    ..default()
-                },
-            ));
-            parent.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    width: percent(100.),
-                    height: percent(100.),
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    row_gap: Val::Px(1.),
-                    padding: UiRect::all(Val::Px(8.)),
-                    ..default()
-                },
-            ))
+        parent.spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.),
+                top: Val::Px(0.),
+                width: percent(100.),
+                height: percent(100.),
+                ..default()
+            },
+            ImageNode {
+                image: assets.image(image_key),
+                image_mode: NodeImageMode::Stretch,
+                color: Color::srgba(1., 1., 1., 0.30),
+                ..default()
+            },
+        ));
+        parent
+            .spawn((Node {
+                position_type: PositionType::Absolute,
+                width: percent(100.),
+                height: percent(100.),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                row_gap: Val::Px(1.),
+                padding: UiRect::all(Val::Px(8.)),
+                ..default()
+            },))
             .with_children(|parent| {
                 let label = if localize_label {
                     localization.get(title_key, lang)
@@ -559,13 +689,16 @@ fn spawn_combat_stat_row(
                 parent.spawn((
                     add_text(label, "medium", label_font_size, assets),
                     TextColor(BUTTON_TEXT_COLOR),
+                    CombatStatLabel {
+                        title_key: title_key.to_string(),
+                    },
                 ));
                 parent.spawn((
                     add_text(format!("{}", value), "bold", value_font_size, assets),
                     TextColor(Color::WHITE),
                 ));
             });
-        });
+    });
 }
 
 fn spawn_equipment_slot_column(
@@ -585,8 +718,16 @@ fn spawn_equipment_slot_column(
     parent
         .spawn(Node {
             position_type: PositionType::Absolute,
-            left: if is_left_column { Val::Percent(left) } else { Val::Auto },
-            right: if is_left_column { Val::Auto } else { Val::Percent(left) },
+            left: if is_left_column {
+                Val::Percent(left)
+            } else {
+                Val::Auto
+            },
+            right: if is_left_column {
+                Val::Auto
+            } else {
+                Val::Percent(left)
+            },
             top: Val::Percent(top),
             width: percent(width),
             height: percent(height),
@@ -644,7 +785,8 @@ fn spawn_active_abilities(
                 })
                 .with_children(|parent| {
                     for (index, hotkey) in ACTIVE_HOTKEYS.iter().enumerate() {
-                        let ability_key = player.active_abilities.get(index).and_then(|opt| opt.as_deref());
+                        let ability_key =
+                            player.active_abilities.get(index).and_then(|opt| opt.as_deref());
                         spawn_hover_card(
                             parent,
                             assets,
@@ -665,11 +807,7 @@ fn spawn_active_abilities(
         });
 }
 
-fn spawn_consumables(
-    parent: &mut ChildSpawnerCommands,
-    assets: &WorldAssets,
-    player: &Player,
-) {
+fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, player: &Player) {
     let mut consumables: Vec<_> = player
         .equipped_consumables
         .iter()
@@ -700,7 +838,9 @@ fn spawn_consumables(
                     ..default()
                 })
                 .with_children(|parent| {
-                    for (index, (key, item)) in consumables.iter().take(CONSUMABLE_HOTKEYS.len()).enumerate() {
+                    for (index, (key, item)) in
+                        consumables.iter().take(CONSUMABLE_HOTKEYS.len()).enumerate()
+                    {
                         spawn_hover_card(
                             parent,
                             assets,
@@ -782,7 +922,9 @@ fn spawn_hover_card(
         cmd.insert(card.clone());
         cmd.observe(handle_combat_card_click);
         if let CombatCard::Ability(slot) = card {
-            cmd.insert(AbilityCardImage { slot });
+            cmd.insert(AbilityCardImage {
+                slot,
+            });
         }
         if let CombatCard::Consumable(key) = &card {
             cmd.insert(ConsumableCardRoot(key.clone()));
@@ -804,7 +946,9 @@ fn spawn_hover_card(
                 },
                 BackgroundColor(Color::srgba(0., 0., 0., 0.9)),
                 Pickable::IGNORE,
-                AbilityCooldownOverlay { slot },
+                AbilityCooldownOverlay {
+                    slot,
+                },
             ));
         }
         if show_hotkey {
@@ -821,22 +965,31 @@ fn spawn_hover_card(
                     Pickable::IGNORE,
                 ))
                 .with_children(|parent| {
-                    parent.spawn((add_text(label, "bold", 1.4, &assets), TextColor(BUTTON_TEXT_COLOR), Pickable::IGNORE));
+                    parent.spawn((
+                        add_text(label, "bold", 1.4, &assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        Pickable::IGNORE,
+                    ));
                 });
         } else {
-            parent.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    bottom: Val::Px(2.),
-                    left: Val::Px(2.),
-                    right: Val::Px(2.),
-                    ..default()
-                },
-                Pickable::IGNORE,
-            ))
-            .with_children(|parent| {
-                parent.spawn((add_text(capitalize_words(label), "medium", 1.4, &assets), TextColor(BUTTON_TEXT_COLOR), Pickable::IGNORE));
-            });
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        bottom: Val::Px(2.),
+                        left: Val::Px(2.),
+                        right: Val::Px(2.),
+                        ..default()
+                    },
+                    Pickable::IGNORE,
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text(capitalize_words(label), "medium", 1.4, &assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        Pickable::IGNORE,
+                    ));
+                });
         }
     });
 }
@@ -872,12 +1025,12 @@ fn spawn_monster_panel(
                         .spawn(Node {
                             width: percent(COMBAT_STATS_COLUMN_WIDTH),
                             flex_direction: FlexDirection::Column,
-                                justify_content: JustifyContent::FlexStart,
+                            justify_content: JustifyContent::FlexStart,
                             align_items: AlignItems::Stretch,
-                                align_self: AlignSelf::FlexStart,
-                                row_gap: Val::Px(8.),
-                                ..default()
-                            })
+                            align_self: AlignSelf::FlexStart,
+                            row_gap: Val::Px(8.),
+                            ..default()
+                        })
                         .with_children(|parent| {
                             spawn_combat_stats(
                                 parent,
@@ -887,6 +1040,7 @@ fn spawn_monster_panel(
                                 monster.attack,
                                 monster.defense,
                                 monster.initiative,
+                                false,
                             );
                         });
 
@@ -896,9 +1050,9 @@ fn spawn_monster_panel(
                             flex_direction: FlexDirection::Column,
                             row_gap: Val::Px(0.),
                             align_items: AlignItems::Stretch,
-                                align_self: AlignSelf::FlexStart,
-                                ..default()
-                            })
+                            align_self: AlignSelf::FlexStart,
+                            ..default()
+                        })
                         .with_children(|parent| {
                             spawn_monster_portrait(
                                 parent,
@@ -951,7 +1105,7 @@ fn spawn_monster_portrait(
             CombatEnemyPortrait,
         ))
         .with_children(|parent| {
-            spawn_portrait_label(parent, assets, name, level);
+            spawn_portrait_label(parent, assets, name, level, false);
         });
 }
 
@@ -1066,7 +1220,11 @@ fn spawn_combat_resource_bar(
                     height: percent(100.),
                     ..default()
                 },
-                BackgroundColor(if is_health { HEALTH_COLOR } else { MANA_COLOR }),
+                BackgroundColor(if is_health {
+                    HEALTH_COLOR
+                } else {
+                    MANA_COLOR
+                }),
             ));
             if is_health {
                 fill.insert(crate::core::ui::playing::HealthBarFill);

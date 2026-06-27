@@ -134,10 +134,9 @@ pub fn generate_deterministic_shop(player_name: &str, player_level: u32) -> Vec<
         if matches!(eq, Equipment::Artifact(_)) {
             continue;
         }
-        if eq.level() >= 1 && eq.level() <= player_level
-            && rng.random_bool(0.5) {
-                items.push(eq.name().to_string());
-            }
+        if eq.level() >= 1 && eq.level() <= player_level && rng.random_bool(0.5) {
+            items.push(eq.name().to_string());
+        }
     }
     items
 }
@@ -219,9 +218,7 @@ pub fn setup_shop_ui(
                 settings.language,
                 &shop_inventory,
                 shop_ui_state.current_filters(),
-                shop_ui_state
-                    .state_for(shop_ui_state.active_tab)
-                    .scroll_y,
+                shop_ui_state.state_for(shop_ui_state.active_tab).scroll_y,
                 player.gold,
                 player.level(),
             );
@@ -494,9 +491,10 @@ pub fn build_shop_content_inner(
                         if artifact.level <= player_level
                             && filters.kind.is_none_or(|k| artifact.kind == k)
                             && shop_inventory.allowed_artifacts.contains(&artifact.name)
-                            && seen.insert(artifact.name.clone()) {
-                                matching.push(Equipment::Artifact(artifact.clone()));
-                            }
+                            && seen.insert(artifact.name.clone())
+                        {
+                            matching.push(Equipment::Artifact(artifact.clone()));
+                        }
                     }
                 } else {
                     for item_key in &shop_inventory.items {
@@ -517,11 +515,9 @@ pub fn build_shop_content_inner(
                                             },
                                             WeaponTypeFilter::Books => w.category == Category::Book,
                                         };
-                                        let matches_category = filters
-                                            .weapon_category
-                                            .is_none_or(|c| w.category == c);
-                                        let matches_kind =
-                                            filters.kind.is_none_or(|k| w.kind == k);
+                                        let matches_category =
+                                            filters.weapon_category.is_none_or(|c| w.category == c);
+                                        let matches_kind = filters.kind.is_none_or(|k| w.kind == k);
                                         matches_hand
                                             && matches_type
                                             && matches_category

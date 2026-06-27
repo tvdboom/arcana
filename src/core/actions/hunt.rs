@@ -44,13 +44,7 @@ pub fn apply_pending_hunt_xp(
 
     let amount = pending_hunt_xp.amount;
     pending_hunt_xp.amount = 0;
-    gain_xp(
-        &mut player,
-        amount,
-        &mut level_up,
-        &mut play_audio_msg,
-        &mut next_game_state,
-    );
+    gain_xp(&mut player, amount, &mut level_up, &mut play_audio_msg, &mut next_game_state, false);
 }
 
 pub fn apply_pending_hunt_loot(
@@ -503,7 +497,9 @@ pub fn handle_hunt_card_clicks(
             }
             let idx = rng.random_range(0..possible.len());
             let selected = possible[idx].clone();
-            commands.insert_resource(crate::core::monsters::ActiveMonster { monster: selected });
+            commands.insert_resource(crate::core::monsters::ActiveMonster {
+                monster: selected,
+            });
             next_game_state.set(GameState::Combat);
             return;
         }
@@ -513,7 +509,7 @@ pub fn handle_hunt_card_clicks(
         player.add_inventory_item(artifact_name.clone());
     }
 
-    gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state);
+    gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
     play_audio_msg.write(PlayAudioMsg::new("hunt"));
 
     if let Some(artifact_name) = loot_found {

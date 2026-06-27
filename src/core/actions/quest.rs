@@ -64,13 +64,7 @@ pub fn apply_pending_quest_xp(
 
     let amount = pending_quest_xp.amount;
     pending_quest_xp.amount = 0;
-    gain_xp(
-        &mut player,
-        amount,
-        &mut level_up,
-        &mut play_audio_msg,
-        &mut next_game_state,
-    );
+    gain_xp(&mut player, amount, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
 }
 
 pub fn apply_pending_quest_rewards(
@@ -116,7 +110,8 @@ pub fn setup_quest_ui(
         let panel_entity = spawn_panel_base(&mut commands, &assets, container_entity, "bg_quest");
         let mut card_ents = Vec::new();
         commands.entity(panel_entity).with_children(|parent| {
-            card_ents = build_quest_content(parent, &assets, &localization, settings.language, &player);
+            card_ents =
+                build_quest_content(parent, &assets, &localization, settings.language, &player);
         });
         for card in card_ents {
             commands.entity(card).observe(handle_quest_card_clicks);
@@ -141,8 +136,13 @@ pub fn update_quest_ui(
         despawn_descendants_manual(&mut commands, wrapper_entity, &children_q);
         let mut card_ents = Vec::new();
         commands.entity(wrapper_entity).with_children(|parent| {
-            card_ents =
-                build_quest_content_inner(parent, &assets, &localization, settings.language, &player);
+            card_ents = build_quest_content_inner(
+                parent,
+                &assets,
+                &localization,
+                settings.language,
+                &player,
+            );
         });
         for card in card_ents {
             commands.entity(card).observe(handle_quest_card_clicks);
@@ -225,7 +225,12 @@ fn sample_names(pool: Vec<String>, count: u32, rng: &mut impl rand::Rng) -> Vec<
     rewards
 }
 
-fn quest_equipment_rewards(tier: u32, player_level: u32, count: u32, rng: &mut impl rand::Rng) -> Vec<String> {
+fn quest_equipment_rewards(
+    tier: u32,
+    player_level: u32,
+    count: u32,
+    rng: &mut impl rand::Rng,
+) -> Vec<String> {
     let (min_level, max_level) = quest_level_range(tier, player_level);
     let mut pool: Vec<String> = all_equipment()
         .iter()
@@ -571,7 +576,8 @@ fn spawn_quest_card(
                                     height: Val::Px(20.),
                                     ..default()
                                 },
-                                ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
+                                ImageNode::new(assets.image("ap"))
+                                    .with_mode(NodeImageMode::Stretch),
                             ));
                             parent.spawn((
                                 add_text(ap_cost.to_string(), "bold", 1.6, assets),
@@ -601,9 +607,7 @@ fn spawn_quest_card(
                 .observe(crate::core::utils::cursor::<Over>(
                     bevy::window::SystemCursorIcon::Pointer,
                 ))
-                .observe(crate::core::utils::cursor::<Out>(
-                    bevy::window::SystemCursorIcon::Default,
-                ))
+                .observe(crate::core::utils::cursor::<Out>(bevy::window::SystemCursorIcon::Default))
                 .id();
         });
 
@@ -648,7 +652,8 @@ pub fn handle_quest_card_clicks(
         quest_equipment_rewards(marker.0, player.level(), equipment_count, &mut rng);
     let consumable_rewards =
         quest_consumable_rewards(marker.0, player.level(), consumable_count, &mut rng);
-    let artifact_rewards = quest_artifact_rewards(marker.0, player.level(), artifact_count, &mut rng);
+    let artifact_rewards =
+        quest_artifact_rewards(marker.0, player.level(), artifact_count, &mut rng);
 
     let loot_found = gold_gain > 0
         || !equipment_rewards.is_empty()
@@ -716,13 +721,7 @@ pub fn handle_quest_card_clicks(
     }
 
     if xp_gain > 0 && !combat_triggered {
-        gain_xp(
-            &mut player,
-            xp_gain,
-            &mut level_up,
-            &mut play_audio_msg,
-            &mut next_game_state,
-        );
+        gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
         spawn_toast(
             &mut commands,
             &assets,
@@ -772,18 +771,14 @@ pub fn handle_quest_card_clicks(
         if !possible.is_empty() {
             pending_quest_xp.amount = pending_quest_xp.amount.saturating_add(xp_gain);
             pending_quest_rewards.gold = pending_quest_rewards.gold.saturating_add(gold_gain);
-            pending_quest_rewards
-                .equipment
-                .extend(equipment_rewards.iter().cloned());
-            pending_quest_rewards
-                .consumables
-                .extend(consumable_rewards.iter().cloned());
-            pending_quest_rewards
-                .artifacts
-                .extend(artifact_rewards.iter().cloned());
+            pending_quest_rewards.equipment.extend(equipment_rewards.iter().cloned());
+            pending_quest_rewards.consumables.extend(consumable_rewards.iter().cloned());
+            pending_quest_rewards.artifacts.extend(artifact_rewards.iter().cloned());
             let idx = rng.random_range(0..possible.len());
             let selected = possible[idx].clone();
-            commands.insert_resource(crate::core::monsters::ActiveMonster { monster: selected });
+            commands.insert_resource(crate::core::monsters::ActiveMonster {
+                monster: selected,
+            });
             next_game_state.set(GameState::Combat);
             combat_encounter_selected = true;
         }
@@ -858,13 +853,7 @@ pub fn handle_quest_card_clicks(
             );
         }
         if xp_gain > 0 {
-            gain_xp(
-                &mut player,
-                xp_gain,
-                &mut level_up,
-                &mut play_audio_msg,
-                &mut next_game_state,
-            );
+            gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
             spawn_toast(
                 &mut commands,
                 &assets,

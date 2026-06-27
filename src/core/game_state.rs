@@ -3,11 +3,11 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::core::actions::shop::{ShopFilters, ShopInventory, ShopTab, WeaponTypeFilter};
-use crate::core::catalog::equipment::Kind;
-use crate::core::catalog::weapons::{Category, Hand};
 use crate::core::actions::study::StudySliderState;
 use crate::core::actions::train::TrainSliderState;
 use crate::core::actions::work::WorkSliderState;
+use crate::core::catalog::equipment::Kind;
+use crate::core::catalog::weapons::{Category, Hand};
 use crate::core::ui::dropdown::OpenDropdown;
 use crate::core::ui::level_up::LevelUpPending;
 use crate::core::ui::modal::ActiveModal;

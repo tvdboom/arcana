@@ -2,7 +2,7 @@ use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::constants::*;
 use crate::core::localization::{Localization, LocalizedText};
-use crate::core::menu::systems::StartNewCharacterMsg;
+use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin, StartNewCharacterMsg};
 use crate::core::menu::utils::{add_text, recolor};
 #[cfg(not(target_arch = "wasm32"))]
 use crate::core::persistence::{LoadCharacterMsg, SaveCharacterMsg};
@@ -45,6 +45,8 @@ pub fn on_click_menu_button(
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    mut game_menu_origin: ResMut<GameMenuOrigin>,
+    mut combat_menu_suspended: ResMut<CombatMenuSuspended>,
 ) {
     let (disabled, btn) = btn_q.get(event.entity).unwrap();
 
@@ -86,7 +88,10 @@ pub fn on_click_menu_button(
             _ => unreachable!(),
         },
         MenuBtn::Continue => {
-            next_game_state.set(GameState::Playing);
+            let target = game_menu_origin.0.unwrap_or(GameState::Playing);
+            combat_menu_suspended.0 = false;
+            game_menu_origin.0 = None;
+            next_game_state.set(target);
         },
         #[cfg(not(target_arch = "wasm32"))]
         MenuBtn::SaveCharacter => {
@@ -101,6 +106,8 @@ pub fn on_click_menu_button(
         },
         MenuBtn::Quit => match *app_state.get() {
             AppState::Game => {
+                combat_menu_suspended.0 = false;
+                game_menu_origin.0 = None;
                 next_game_state.set(GameState::default());
                 next_app_state.set(AppState::MainMenu)
             },
@@ -123,13 +130,11 @@ pub fn spawn_menu_button(
 
     let (width, height) = match btn {
         MenuBtn::Back => (Val::Vh(22.22), Val::Vh(5.0)),
-        MenuBtn::NewCharacter
-        | MenuBtn::Settings
-        | MenuBtn::Quit
-        | MenuBtn::Continue => (Val::Vh(46.67), Val::Vh(8.33)),
+        MenuBtn::NewCharacter | MenuBtn::Settings | MenuBtn::Quit | MenuBtn::Continue => {
+            (Val::Vh(46.67), Val::Vh(8.33))
+        },
         #[cfg(not(target_arch = "wasm32"))]
-        MenuBtn::LoadCharacter
-        | MenuBtn::SaveCharacter => (Val::Vh(46.67), Val::Vh(8.33)),
+        MenuBtn::LoadCharacter | MenuBtn::SaveCharacter => (Val::Vh(46.67), Val::Vh(8.33)),
         #[allow(unreachable_patterns)]
         _ => (Val::Vh(33.33), Val::Vh(6.11)),
     };

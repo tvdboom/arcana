@@ -20,6 +20,15 @@ pub struct PendingGameStart {
 #[derive(Resource)]
 pub struct LoadingDelay(pub Timer);
 
+#[derive(Resource, Default)]
+pub struct GameMenuOrigin(pub Option<GameState>);
+
+#[derive(Resource, Default)]
+pub struct CombatMenuSuspended(pub bool);
+
+#[derive(Component)]
+pub struct GameMenuRoot;
+
 #[derive(Component)]
 pub struct MenuContentRoot;
 
@@ -168,10 +177,7 @@ pub fn reveal_menu_content_when_bg_ready(
     }
 }
 
-pub fn setup_loading_screen(
-    mut commands: Commands,
-    assets: Res<WorldAssets>,
-) {
+pub fn setup_loading_screen(mut commands: Commands, assets: Res<WorldAssets>) {
     commands.insert_resource(LoadingDelay(Timer::from_seconds(0.35, TimerMode::Once)));
     commands
         .spawn((
@@ -198,10 +204,7 @@ pub fn setup_loading_screen(
         });
 }
 
-pub fn animate_loading_text(
-    time: Res<Time>,
-    mut text_q: Query<&mut Text, With<LoadingText>>,
-) {
+pub fn animate_loading_text(time: Res<Time>, mut text_q: Query<&mut Text, With<LoadingText>>) {
     let dot_count = ((time.elapsed_secs() * 3.0) as usize) % 4;
     let dots = ".".repeat(dot_count);
     for mut text in &mut text_q {
@@ -230,18 +233,12 @@ pub fn complete_loading_when_ready(
         }
     }
 
-    let images_ready = assets
-        .images
-        .values()
-        .all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
-    let fonts_ready = assets
-        .fonts
-        .values()
-        .all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
-    let audio_ready = assets
-        .audio
-        .values()
-        .all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
+    let images_ready =
+        assets.images.values().all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
+    let fonts_ready =
+        assets.fonts.values().all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
+    let audio_ready =
+        assets.audio.values().all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
 
     if !(images_ready && fonts_ready && audio_ready) {
         return;
@@ -258,10 +255,24 @@ pub fn setup_game_menu(
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
+    menu_origin: Res<GameMenuOrigin>,
 ) {
     let lang = settings.language;
+    let from_combat = menu_origin.0 == Some(GameState::Combat);
+    let (root_node, mut pickable) = add_root_node(true);
+    pickable.is_hoverable = true;
     commands
-        .spawn((add_root_node(true), MenuCmp, BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6))))
+        .spawn((
+            root_node,
+            pickable,
+            Button,
+            Interaction::default(),
+            MenuCmp,
+            GameMenuRoot,
+            GlobalZIndex(990),
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6)),
+        ))
+        .observe(close_game_menu_on_outside_click)
         .with_children(|parent| {
             parent
                 .spawn((
@@ -279,11 +290,46 @@ pub fn setup_game_menu(
                 .with_children(|parent| {
                     spawn_menu_button(parent, MenuBtn::Continue, &assets, &localization, lang);
                     #[cfg(not(target_arch = "wasm32"))]
-                    spawn_menu_button(parent, MenuBtn::SaveCharacter, &assets, &localization, lang);
+                    if !from_combat {
+                        spawn_menu_button(
+                            parent,
+                            MenuBtn::SaveCharacter,
+                            &assets,
+                            &localization,
+                            lang,
+                        );
+                    }
                     spawn_menu_button(parent, MenuBtn::Settings, &assets, &localization, lang);
                     spawn_menu_button(parent, MenuBtn::Quit, &assets, &localization, lang);
                 });
         });
+}
+
+/// Closes the in-game menu when the user clicks the darkened backdrop outside the
+/// menu banner, mirroring the action-panel "click outside to close" behaviour.
+pub fn close_game_menu_on_outside_click(
+    trigger: On<Pointer<Click>>,
+    game_state: Res<State<GameState>>,
+    root_q: Query<(), With<GameMenuRoot>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+    mut play_audio_msg: MessageWriter<crate::core::audio::PlayAudioMsg>,
+    mut game_menu_origin: ResMut<GameMenuOrigin>,
+    mut combat_menu_suspended: ResMut<CombatMenuSuspended>,
+) {
+    if *game_state.get() != GameState::GameMenu {
+        return;
+    }
+    // Only the backdrop (root) itself counts as "outside"; clicks on the banner or
+    // its buttons target child entities and must not close the menu here.
+    if root_q.get(trigger.original_event_target()).is_err() {
+        return;
+    }
+
+    let target = game_menu_origin.0.unwrap_or(GameState::Playing);
+    combat_menu_suspended.0 = false;
+    game_menu_origin.0 = None;
+    play_audio_msg.write(crate::core::audio::PlayAudioMsg::new("button"));
+    next_game_state.set(target);
 }
 
 pub fn setup_game_settings(
@@ -294,7 +340,12 @@ pub fn setup_game_settings(
 ) {
     let lang = settings.language;
     commands
-        .spawn((add_root_node(true), MenuCmp, BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6))))
+        .spawn((
+            add_root_node(true),
+            MenuCmp,
+            GlobalZIndex(990),
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6)),
+        ))
         .with_children(|parent| {
             parent
                 .spawn((

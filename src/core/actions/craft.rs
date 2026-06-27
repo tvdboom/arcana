@@ -1538,8 +1538,7 @@ pub fn handle_craft_item_select(
                 for sel_name in &item_selection.items {
                     if let Some(sel_item) = get_equipment(sel_name) {
                         let base_gold_cost = (sel_item.price() as f32 * 0.15) as u32;
-                        let gold_cost = (base_gold_cost as f32
-                            * (1.0 - 0.01 * wisdom_mod as f32))
+                        let gold_cost = (base_gold_cost as f32 * (1.0 - 0.01 * wisdom_mod as f32))
                             .max(1.0) as u32;
                         combined_gold_cost += gold_cost;
                     }
@@ -1547,9 +1546,8 @@ pub fn handle_craft_item_select(
 
                 // Add the new item's craft gold cost
                 let base_gold_cost = (item.price() as f32 * 0.15) as u32;
-                let new_gold_cost = (base_gold_cost as f32
-                    * (1.0 - 0.01 * wisdom_mod as f32))
-                    .max(1.0) as u32;
+                let new_gold_cost =
+                    (base_gold_cost as f32 * (1.0 - 0.01 * wisdom_mod as f32)).max(1.0) as u32;
 
                 // Calculate total budget
                 let mut total_selected_price = 0;
@@ -1601,9 +1599,8 @@ pub fn handle_craft_all_click(
     for sel_name in &item_selection.items {
         if let Some(sel_item) = get_equipment(sel_name) {
             let base_gold_cost = (sel_item.price() as f32 * 0.15) as u32;
-            let gold_cost = (base_gold_cost as f32
-                * (1.0 - 0.01 * wisdom_mod as f32))
-                .max(1.0) as u32;
+            let gold_cost =
+                (base_gold_cost as f32 * (1.0 - 0.01 * wisdom_mod as f32)).max(1.0) as u32;
             combined_gold_cost += gold_cost;
         }
     }

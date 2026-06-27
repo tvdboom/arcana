@@ -68,6 +68,7 @@ pub fn trigger_level_up(
     level_up: &mut LevelUpPending,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
     next_game_state: &mut NextState<GameState>,
+    play_levelup_sound: bool,
 ) {
     next_game_state.set(GameState::Playing);
     let mut rng = rng();
@@ -166,22 +167,27 @@ pub fn trigger_level_up(
         perk_chosen,
     };
 
-    play_audio_msg.write(PlayAudioMsg::new("levelup").volume(-10.));
+    if play_levelup_sound {
+        play_audio_msg.write(PlayAudioMsg::new("levelup").volume(-10.));
+    }
 }
 
-// Reusable XP gain helper that triggers level up
+// Reusable XP gain helper that triggers level up.
+// `play_levelup_sound` should be `false` when the XP is awarded right after a
+// combat win, because winning combat already plays the victory (level-up) jingle.
 pub fn gain_xp(
     player: &mut Player,
     amount: u32,
     level_up: &mut LevelUpPending,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
     next_game_state: &mut NextState<GameState>,
+    play_levelup_sound: bool,
 ) {
     let old_level = player.level();
     player.xp += amount;
     let new_level = player.level();
     if new_level > old_level {
-        trigger_level_up(player, level_up, play_audio_msg, next_game_state);
+        trigger_level_up(player, level_up, play_audio_msg, next_game_state, play_levelup_sound);
     }
 }
 
@@ -306,20 +312,19 @@ pub fn handle_work_card_clicks(
                     return;
                 }
             },
-            2
-                if player.health() <= manual_cost => {
-                    play_audio_msg.write(PlayAudioMsg::new("error"));
-                    spawn_toast(
-                        &mut commands,
-                        &assets,
-                        localization.get("not_enough_health", lang),
-                        Color::srgba(0.20, 0.05, 0.05, 0.93),
-                        Color::srgb(0.85, 0.20, 0.20),
-                        Color::srgb(1.0, 0.80, 0.80),
-                        toast,
-                    );
-                    return;
-                },
+            2 if player.health() <= manual_cost => {
+                play_audio_msg.write(PlayAudioMsg::new("error"));
+                spawn_toast(
+                    &mut commands,
+                    &assets,
+                    localization.get("not_enough_health", lang),
+                    Color::srgba(0.20, 0.05, 0.05, 0.93),
+                    Color::srgb(0.85, 0.20, 0.20),
+                    Color::srgb(1.0, 0.80, 0.80),
+                    toast,
+                );
+                return;
+            },
             _ => {},
         }
 
