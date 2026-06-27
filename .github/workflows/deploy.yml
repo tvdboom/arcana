@@ -25,6 +25,15 @@ jobs:
       - name: Install KTX-Software (toktx)
         run: just install-ktx
 
+      - name: Add KTX-Software to PATH
+        shell: pwsh
+        run: |
+          $ktxPath = "C:\KTX-Software\bin"
+          if (Test-Path $ktxPath) {
+            echo "KTX_BIN_PATH=$ktxPath" >> $env:GITHUB_ENV
+            echo "$ktxPath" >> $env:GITHUB_PATH
+          }
+
       - name: Build release exe
         run: just build-release
 
@@ -76,6 +85,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4.3.1
@@ -95,7 +105,10 @@ jobs:
       - name: Copy assets
         run: cp -r $GITHUB_WORKSPACE/assets/ docs/assets
 
-      - uses: actions/configure-pages@v5
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        continue-on-error: true
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3.0.0
@@ -103,6 +116,8 @@ jobs:
           path: docs/
 
       - name: Deploy GitHub Pages site
+        if: steps.pages.outcome == 'success'
+        id: deploy
         uses: actions/deploy-pages@v4.0.5
 
       - name: Push to itch.io
@@ -113,3 +128,4 @@ jobs:
           ITCH_GAME: ${{ env.GAME_NAME }}
           CHANNEL: html
           PACKAGE: docs/
+

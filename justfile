@@ -12,9 +12,20 @@ build-release:
 [windows]
 install-ktx:
     powershell -Command " \
-       Invoke-WebRequest -Uri 'https://github.com/KhronosGroup/KTX-Software/releases/download/v{{KTX_VERSION}}/KTX-Software-{{KTX_VERSION}}-Windows-x64.exe' -OutFile ktx-installer.exe; \
-       Start-Process -FilePath ktx-installer.exe -ArgumentList '/S' -Wait; \
-       Remove-Item ktx-installer.exe"
+       $ErrorActionPreference = 'Stop'; \
+       $ZipPath = 'KTX-Software-{{KTX_VERSION}}-Windows-x64.zip'; \
+       $ExtractPath = 'C:\KTX-Software'; \
+       try { \
+         Invoke-WebRequest -Uri 'https://github.com/KhronosGroup/KTX-Software/releases/download/v{{KTX_VERSION}}/KTX-Software-{{KTX_VERSION}}-Windows-x64.zip' -OutFile $ZipPath -ErrorAction Stop; \
+         Expand-Archive -Path $ZipPath -DestinationPath $ExtractPath -Force; \
+         Remove-Item $ZipPath; \
+         Write-Host \"KTX-Software installed to $ExtractPath\"; \
+         Write-Host \"KTX_BIN_PATH=$ExtractPath/bin\" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append -ErrorAction SilentlyContinue; \
+       } catch { \
+         Write-Error \"Failed to install KTX-Software: $_\"; \
+         exit 1; \
+       } \
+    "
 
 [macos]
 install-ktx:
@@ -22,9 +33,18 @@ install-ktx:
 
 [linux]
 install-ktx:
-    curl -fsSL "https://github.com/KhronosGroup/KTX-Software/releases/download/v{{KTX_VERSION}}/KTX-Software-{{KTX_VERSION}}-Linux-x86_64.deb" -o /tmp/ktx.deb
-    sudo dpkg -i /tmp/ktx.deb
-    rm /tmp/ktx.deb
+    set -e; \
+    KTX_VERSION="{{KTX_VERSION}}"; \
+    DEB_URL="https://github.com/KhronosGroup/KTX-Software/releases/download/v${KTX_VERSION}/KTX-Software-${KTX_VERSION}-Linux-x86_64.deb"; \
+    DEB_FILE="/tmp/ktx.deb"; \
+    echo "Downloading KTX-Software from $DEB_URL..."; \
+    curl -fsSL "$DEB_URL" -o "$DEB_FILE" || { echo "Failed to download KTX-Software"; exit 1; }; \
+    echo "Installing KTX-Software..."; \
+    sudo dpkg -i "$DEB_FILE" || { echo "Failed to install KTX-Software"; exit 1; }; \
+    rm "$DEB_FILE"; \
+    echo "KTX-Software installed successfully"; \
+    toktx --version || { echo "toktx not found in PATH"; exit 1; }
+
 
 install-wasm-prereqs:
     cargo install -f wasm-bindgen-cli --version 0.2.108
