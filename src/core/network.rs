@@ -368,20 +368,30 @@ pub fn teardown_duel(commands: &mut Commands) {
     commands.remove_resource::<ActiveMonster>();
 }
 
-/// Disconnect when leaving the duel lobby without entering combat.
-pub fn leave_duel_lobby(mut commands: Commands, duel: Option<Res<DuelState>>) {
-    if let Some(duel) = duel {
-        if duel.phase != DuelPhase::Combat && duel.phase != DuelPhase::Result {
-            teardown_duel(&mut commands);
-        }
-    }
+/// Maintain connection when leaving the duel lobby/closing the panel.
+pub fn leave_duel_lobby(_commands: Commands, _duel: Option<Res<DuelState>>) {
+    // Keep connection and lobby state alive on leaving lobby.
 }
 
-/// Disconnect when leaving combat (back to the playing screen).
-pub fn leave_duel_combat(mut commands: Commands, duel: Option<Res<DuelState>>) {
-    if duel.is_some() {
-        teardown_duel(&mut commands);
+/// Reset the duel lobby back to the betting phase when leaving combat.
+pub fn leave_duel_combat(
+    mut commands: Commands,
+    mut duel: Option<ResMut<DuelState>>,
+) {
+    if let Some(d) = duel.as_mut() {
+        d.phase = DuelPhase::Betting;
+        d.my_gold_bet = 0;
+        d.my_item_bet.clear();
+        d.opp_gold_bet = 0;
+        d.opp_item_bet.clear();
+        d.my_accept = false;
+        d.opp_accept = false;
+        d.resolved = false;
+        d.pause_owner = None;
     }
+    // Always clean up combat resources when exiting combat state
+    commands.remove_resource::<CombatState>();
+    commands.remove_resource::<ActiveMonster>();
 }
 
 // ---------------------------------------------------------------------------
@@ -558,11 +568,14 @@ pub fn client_lobby_recv(
                     duel.opp_gold_bet = host_gold;
                     duel.opp_item_bet = host_items;
                     duel.opp_accept = host_accept;
-                    duel.my_gold_bet = client_gold;
-                    duel.my_item_bet = client_items;
-                    duel.my_accept = client_accept;
                     if duel.phase == DuelPhase::Connecting {
+                        duel.my_gold_bet = client_gold;
+                        duel.my_item_bet = client_items;
+                        duel.my_accept = client_accept;
                         duel.phase = DuelPhase::Betting;
+                    } else {
+                        // Keep our local accept flag synchronized with the server's state.
+                        duel.my_accept = client_accept;
                     }
                 },
                 ServerMessage::StartCombat => {

@@ -1821,6 +1821,7 @@ pub struct CombatTranslationParams<'w, 's> {
     pub level_q: Query<'w, 's, (&'static mut Text, &'static CombatPortraitLevel), (Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>)>,
     pub stat_label_q: Query<'w, 's, (&'static mut Text, &'static CombatStatLabel), (Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>)>,
     pub pet_name_q: Query<'w, 's, &'static mut Text, (With<CombatPetName>, Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>, Without<CombatStatLabel>)>,
+    pub enemy_mana_label_q: Query<'w, 's, &'static mut Text, (With<crate::core::combat::ui::CombatEnemyManaText>, Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>, Without<CombatStatLabel>, Without<CombatPetName>)>,
 }
 
 pub fn localize_monster_name(
@@ -1869,6 +1870,7 @@ pub fn update_combat_visuals(
         Query<&mut Node, With<crate::core::ui::playing::ManaBarFill>>,
         Query<&mut Node, With<crate::core::ui::playing::PetHealthBarFill>>,
         Query<&mut Node, With<crate::core::combat::ui::CombatMonsterHealthFill>>,
+        Query<&mut Node, With<crate::core::combat::ui::CombatEnemyManaFill>>,
     )>,
     mut overlay_q: Query<
         (&AbilityCooldownOverlay, &mut Node),
@@ -1877,6 +1879,7 @@ pub fn update_combat_visuals(
             Without<crate::core::ui::playing::ManaBarFill>,
             Without<crate::core::ui::playing::PetHealthBarFill>,
             Without<crate::core::combat::ui::CombatMonsterHealthFill>,
+            Without<crate::core::combat::ui::CombatEnemyManaFill>,
         ),
     >,
     mut ability_image_q: Query<
@@ -1886,6 +1889,7 @@ pub fn update_combat_visuals(
             Without<crate::core::ui::playing::ManaBarFill>,
             Without<crate::core::ui::playing::PetHealthBarFill>,
             Without<crate::core::combat::ui::CombatMonsterHealthFill>,
+            Without<crate::core::combat::ui::CombatEnemyManaFill>,
         ),
     >,
     mut label_q: Query<(&mut Text, &crate::core::ui::playing::StatLabel)>,
@@ -1973,6 +1977,11 @@ pub fn update_combat_visuals(
         0.0
     };
     let e_hp_ratio = (state.enemy.display_health / state.enemy.max_health).clamp(0.0, 1.0) * 100.0;
+    let e_mp_ratio = if state.enemy.max_mana > 0.0 {
+        (state.enemy.display_mana / state.enemy.max_mana).clamp(0.0, 1.0) * 100.0
+    } else {
+        0.0
+    };
 
     if let Ok(mut node) = bar_q.p0().single_mut() {
         node.width = Val::Percent(p_hp_ratio);
@@ -1982,6 +1991,9 @@ pub fn update_combat_visuals(
     }
     if let Ok(mut node) = bar_q.p3().single_mut() {
         node.width = Val::Percent(e_hp_ratio);
+    }
+    if let Ok(mut node) = bar_q.p4().single_mut() {
+        node.width = Val::Percent(e_mp_ratio);
     }
     if let Some(pet) = state.pet.as_ref() {
         if let Ok(mut node) = bar_q.p2().single_mut() {
@@ -2034,6 +2046,14 @@ pub fn update_combat_visuals(
             state.enemy.max_health.round() as i32,
             active_monster.map(|am| am.monster.health_regen).unwrap_or(0),
             health_word
+        );
+    }
+    if let Ok(mut text) = translation_params.enemy_mana_label_q.single_mut() {
+        text.0 = format!(
+            "{} / {} {}",
+            state.enemy.mana.round().max(0.0) as i32,
+            state.enemy.max_mana.round() as i32,
+            mana_word
         );
     }
 
@@ -2311,15 +2331,19 @@ pub fn handle_combat_end_button_click(
     mut next_game_state: ResMut<NextState<GameState>>,
     mut pending_hunt_xp: ResMut<PendingHuntXp>,
 ) {
-    // During a networked duel, leaving combat is handled by the duel systems.
-    if duel.is_some() {
+    if let Some(ref s) = state {
+        if s.status == CombatStatus::Over {
+            if duel.is_none() {
+                pending_hunt_xp.amount = s.xp_reward();
+            }
+        } else if duel.is_some() {
+            // During a networked duel, we cannot forfeit/leave combat mid-fight.
+            return;
+        }
+    } else if duel.is_some() {
         return;
     }
-    if let Some(state) = state {
-        if state.status == CombatStatus::Over {
-            pending_hunt_xp.amount = state.xp_reward();
-        }
-    }
+
     play_audio_msg.write(PlayAudioMsg::new("button"));
     next_game_state.set(GameState::Playing);
 }

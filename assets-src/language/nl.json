@@ -7765,6 +7765,7 @@
   "duel.connect": "Verbinden",
   "duel.enter_ip": "Voer Host IP-adres in",
   "duel.waiting": "Wachten op verbinding...",
+  "duel.waiting_for_host": "Wachten op host om te starten...",
   "duel.their_wager": "Hun Inzet",
   "duel.accepted": "Geaccepteerd!",
   "duel.wager_items": "Inzet Items:",

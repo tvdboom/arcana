@@ -11,21 +11,7 @@ build-release:
 
 [windows]
 install-ktx:
-    powershell -Command " \
-       $ErrorActionPreference = 'Stop'; \
-       $ZipPath = 'KTX-Software-{{KTX_VERSION}}-Windows-x64.zip'; \
-       $ExtractPath = 'C:\KTX-Software'; \
-       try { \
-         Invoke-WebRequest -Uri 'https://github.com/KhronosGroup/KTX-Software/releases/download/v{{KTX_VERSION}}/KTX-Software-{{KTX_VERSION}}-Windows-x64.zip' -OutFile $ZipPath -ErrorAction Stop; \
-         Expand-Archive -Path $ZipPath -DestinationPath $ExtractPath -Force; \
-         Remove-Item $ZipPath; \
-         Write-Host \"KTX-Software installed to $ExtractPath\"; \
-         Write-Host \"KTX_BIN_PATH=$ExtractPath/bin\" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append -ErrorAction SilentlyContinue; \
-       } catch { \
-         Write-Error \"Failed to install KTX-Software: $_\"; \
-         exit 1; \
-       } \
-    "
+    powershell -NoProfile -NonInteractive -Command '$ErrorActionPreference = "Stop"; $ZipPath = "KTX-Software-{{KTX_VERSION}}-Windows-x64.zip"; $ExtractPath = "C:\KTX-Software"; try { Invoke-WebRequest -Uri "https://github.com/KhronosGroup/KTX-Software/releases/download/v{{KTX_VERSION}}/KTX-Software-{{KTX_VERSION}}-Windows-x64.zip" -OutFile $ZipPath -ErrorAction Stop; Expand-Archive -Path $ZipPath -DestinationPath $ExtractPath -Force; Remove-Item $ZipPath; Write-Host "KTX-Software installed to $ExtractPath"; Write-Host "KTX_BIN_PATH=$ExtractPath/bin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append -ErrorAction SilentlyContinue; } catch { Write-Error "Failed to install KTX-Software: $_"; exit 1; }'
 
 [macos]
 install-ktx:

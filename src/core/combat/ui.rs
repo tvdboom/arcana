@@ -1,5 +1,8 @@
 use bevy::prelude::*;
 
+use crate::core::network::DuelState;
+use crate::core::combat::mechanics::DuelActive;
+
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::get_equipment;
@@ -51,6 +54,12 @@ pub struct CombatPlayerPortrait;
 pub struct CombatEnemyPortrait;
 
 #[derive(Component)]
+pub struct CombatEnemyManaFill;
+
+#[derive(Component)]
+pub struct CombatEnemyManaText;
+
+#[derive(Component)]
 pub struct CombatPausedOverlay;
 
 #[derive(Component)]
@@ -86,6 +95,8 @@ pub fn setup_combat_ui(
     combat_speed: Res<crate::core::combat::mechanics::CombatSpeed>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     existing_combat_q: Query<Entity, With<CombatCmp>>,
+    duel_active: Option<Res<DuelActive>>,
+    duel_state: Option<Res<DuelState>>,
 ) {
     if !existing_combat_q.is_empty() {
         return;
@@ -96,6 +107,9 @@ pub fn setup_combat_ui(
         active_monster.expect("ActiveMonster resource missing when entering combat");
     let monster = &active_monster.monster;
     let lang = settings.language;
+
+    let is_pvp = duel_active.is_some();
+    let opponent = duel_state.as_ref().and_then(|d| d.opponent.as_ref());
 
     let (mut root_node, pickable) = add_root_node(true);
     root_node.padding = UiRect::all(Val::Px(0.));
@@ -127,7 +141,7 @@ pub fn setup_combat_ui(
                 })
                 .with_children(|parent| {
                     spawn_player_panel(parent, &assets, &localization, lang, &player);
-                    spawn_monster_panel(parent, &assets, &localization, lang, monster);
+                    spawn_monster_panel(parent, &assets, &localization, lang, monster, is_pvp, opponent);
                 });
 
             parent
@@ -1000,6 +1014,8 @@ fn spawn_monster_panel(
     localization: &Localization,
     lang: crate::core::settings::Language,
     monster: &Monster,
+    is_pvp: bool,
+    opponent: Option<&Player>,
 ) {
     parent
         .spawn(Node {
@@ -1062,6 +1078,13 @@ fn spawn_monster_panel(
                                 &monster.image,
                             );
                             spawn_monster_health_bar(parent, assets, localization, lang, monster);
+                            if is_pvp {
+                                spawn_enemy_mana_bar(parent, assets, localization, lang, opponent);
+                                if let Some(opp) = opponent {
+                                    spawn_enemy_active_abilities(parent, assets, opp);
+                                    spawn_enemy_consumables(parent, assets, opp);
+                                }
+                            }
                         });
                 });
         });
@@ -1176,6 +1199,181 @@ fn spawn_monster_health_bar(
                         TextColor(Color::WHITE),
                         CombatMonsterHealthText,
                     ));
+                });
+        });
+}
+
+fn spawn_enemy_mana_bar(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    localization: &Localization,
+    lang: crate::core::settings::Language,
+    opponent: Option<&Player>,
+) {
+    let max_mana = opponent.map(|o| o.max_mana() as f32).unwrap_or(100.0);
+    let mana = opponent.map(|o| o.mana() as f32).unwrap_or(100.0);
+    parent
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: Val::Px(36.),
+                position_type: PositionType::Relative,
+                border: UiRect {
+                    left: Val::Px(2.),
+                    right: Val::Px(2.),
+                    top: Val::Px(0.),
+                    bottom: Val::Px(2.),
+                },
+                flex_shrink: 0.,
+                ..default()
+            },
+            BackgroundColor(BAR_BG_COLOR),
+            BorderColor::all(BUTTON_BORDER_COLOR),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.),
+                    top: Val::Px(0.),
+                    width: percent(if max_mana == 0.0 {
+                        0.0
+                    } else {
+                        (mana / max_mana).clamp(0.0, 1.0) * 100.0
+                    }),
+                    height: percent(100.),
+                    ..default()
+                },
+                BackgroundColor(MANA_COLOR),
+                CombatEnemyManaFill,
+            ));
+
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.),
+                    top: Val::Px(0.),
+                    width: percent(100.),
+                    height: percent(100.),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                add_text(
+                    format!(
+                        "{} / {} {}",
+                        mana.round() as i32,
+                        max_mana.round() as i32,
+                        localization.get("general.mana", lang)
+                    ),
+                    "bold",
+                    1.6,
+                    assets,
+                ),
+                TextColor(Color::WHITE),
+                CombatEnemyManaText,
+            ));
+        });
+}
+
+fn spawn_enemy_active_abilities(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    opponent: &Player,
+) {
+    parent
+        .spawn(Node {
+            width: percent(100.),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(4.),
+            margin: UiRect::top(Val::Px(6.)),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent
+                .spawn(Node {
+                    width: percent(100.),
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::SpaceBetween,
+                    column_gap: Val::Px(1.),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    for index in 0..ACTIVE_HOTKEYS.len() {
+                        let ability_key =
+                            opponent.active_abilities.get(index).and_then(|opt| opt.as_deref());
+                        spawn_hover_card(
+                            parent,
+                            assets,
+                            ability_key.map(|key| key.to_string()),
+                            ability_key
+                                .map(|key| format!("build_{key}"))
+                                .unwrap_or_else(|| "stone".to_string()),
+                            "",
+                            ability_key.is_some(),
+                            false,
+                            ability_key.map(|key| RightColumnTooltip::Ability(key.to_string())),
+                            COMBAT_ABILITY_CARD_SIZE,
+                            false,
+                            None,
+                        );
+                    }
+                });
+        });
+}
+
+fn spawn_enemy_consumables(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    opponent: &Player,
+) {
+    let mut consumables: Vec<_> = opponent
+        .equipped_consumables
+        .iter()
+        .filter(|key| opponent.inventory.iter().any(|inv| inv == *key))
+        .filter_map(|key| match get_equipment(key) {
+            Some(Equipment::Consumable(item)) => Some((key.clone(), item)),
+            _ => None,
+        })
+        .collect();
+    consumables.sort_by(|a, b| b.1.level.cmp(&a.1.level).then(a.1.name.cmp(&b.1.name)));
+
+    parent
+        .spawn(Node {
+            width: percent(100.),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(4.),
+            margin: UiRect::top(Val::Px(6.)),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent
+                .spawn(Node {
+                    width: percent(100.),
+                    flex_direction: FlexDirection::Row,
+                    flex_wrap: FlexWrap::Wrap,
+                    column_gap: Val::Px(2.),
+                    row_gap: Val::Px(2.),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    for (_index, (key, item)) in
+                        consumables.iter().take(CONSUMABLE_HOTKEYS.len()).enumerate()
+                    {
+                        spawn_hover_card(
+                            parent,
+                            assets,
+                            Some(key.clone()),
+                            item.image.clone(),
+                            "",
+                            true,
+                            false,
+                            Some(RightColumnTooltip::Equipment(key.clone())),
+                            COMBAT_CONSUMABLE_CARD_SIZE,
+                            true,
+                            None,
+                        );
+                    }
                 });
         });
 }
