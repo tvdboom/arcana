@@ -508,6 +508,7 @@ pub fn setup_combat_state(
     settings: Res<crate::core::settings::Settings>,
     localization: Res<crate::core::localization::Localization>,
     existing_state: Option<Res<CombatState>>,
+    duel_state: Option<Res<crate::core::network::DuelState>>,
 ) {
     if existing_state.is_some() {
         return;
@@ -643,13 +644,23 @@ pub fn setup_combat_state(
         }],
     });
 
+    let (opp_max_mana, opp_mana) = if let Some(ref duel) = duel_state {
+        if let Some(ref opp) = duel.opponent {
+            (opp.max_mana() as f32, opp.mana() as f32)
+        } else {
+            (0.0, 0.0)
+        }
+    } else {
+        (0.0, 0.0)
+    };
+
     let enemy_fighter = Fighter {
         max_health: monster.max_health as f32,
         health: monster.health as f32,
         display_health: monster.health as f32,
-        max_mana: 0.0,
-        mana: 0.0,
-        display_mana: 0.0,
+        max_mana: opp_max_mana,
+        mana: opp_mana,
+        display_mana: opp_mana,
         base_attack: monster.attack as f32,
         base_defense: monster.defense as f32,
         base_initiative: monster.initiative as f32,
@@ -1807,7 +1818,7 @@ pub fn update_combat_speed_label(
     combat_speed: Res<CombatSpeed>,
     mut text_q: Query<&mut Text, With<CombatSpeedText>>,
 ) {
-    if let Ok(mut text) = text_q.single_mut() {
+    if let Some(mut text) = text_q.iter_mut().next() {
         let label = combat_speed.label();
         if text.0 != label {
             text.0 = label;

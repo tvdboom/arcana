@@ -315,6 +315,8 @@ pub fn close_game_menu_on_outside_click(
     mut play_audio_msg: MessageWriter<crate::core::audio::PlayAudioMsg>,
     mut game_menu_origin: ResMut<GameMenuOrigin>,
     mut combat_menu_suspended: ResMut<CombatMenuSuspended>,
+    mut state: Option<ResMut<crate::core::combat::mechanics::CombatState>>,
+    duel_active: Option<Res<crate::core::combat::mechanics::DuelActive>>,
 ) {
     if *game_state.get() != GameState::GameMenu {
         return;
@@ -328,6 +330,11 @@ pub fn close_game_menu_on_outside_click(
     let target = game_menu_origin.0.unwrap_or(GameState::Playing);
     combat_menu_suspended.0 = false;
     game_menu_origin.0 = None;
+    if duel_active.is_none() {
+        if let Some(s) = state.as_mut() {
+            s.paused = false;
+        }
+    }
     play_audio_msg.write(crate::core::audio::PlayAudioMsg::new("button"));
     next_game_state.set(target);
 }

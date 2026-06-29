@@ -81,6 +81,8 @@ pub struct DuelState {
     pub i_won: bool,
     /// True once end-of-combat rewards have been applied locally.
     pub resolved: bool,
+    /// Whether combat is currently paused due to opening the game menu.
+    pub paused_by_menu: bool,
 }
 
 impl DuelState {
@@ -98,6 +100,7 @@ impl DuelState {
             pause_owner: None,
             i_won: false,
             resolved: false,
+            paused_by_menu: false,
         }
     }
 
@@ -170,6 +173,8 @@ pub enum ServerMessage {
         paused: bool,
         owner_is_host: bool,
     },
+    /// A player declined the duel.
+    Decline,
 }
 
 impl ServerMessage {
@@ -200,6 +205,8 @@ pub enum ClientMessage {
     UseConsumable(String),
     /// Combat input: request pause / resume (ownership enforced by host).
     Pause(bool),
+    /// A player declined the duel.
+    Decline,
 }
 
 impl ClientMessage {
@@ -308,6 +315,19 @@ pub fn new_renet_server() -> (RenetServer, NetcodeServerTransport) {
     (server, transport)
 }
 
+#[derive(Resource)]
+pub struct DeclinePending;
+
+pub fn handle_decline_pending(
+    mut commands: Commands,
+    pending: Option<Res<DeclinePending>>,
+) {
+    if pending.is_some() {
+        commands.remove_resource::<DeclinePending>();
+        teardown_duel(&mut commands);
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Generic send systems (mirrors the reference design)
 // ---------------------------------------------------------------------------
@@ -376,22 +396,8 @@ pub fn leave_duel_lobby(_commands: Commands, _duel: Option<Res<DuelState>>) {
 /// Reset the duel lobby back to the betting phase when leaving combat.
 pub fn leave_duel_combat(
     mut commands: Commands,
-    mut duel: Option<ResMut<DuelState>>,
 ) {
-    if let Some(d) = duel.as_mut() {
-        d.phase = DuelPhase::Betting;
-        d.my_gold_bet = 0;
-        d.my_item_bet.clear();
-        d.opp_gold_bet = 0;
-        d.opp_item_bet.clear();
-        d.my_accept = false;
-        d.opp_accept = false;
-        d.resolved = false;
-        d.pause_owner = None;
-    }
-    // Always clean up combat resources when exiting combat state
-    commands.remove_resource::<CombatState>();
-    commands.remove_resource::<ActiveMonster>();
+    teardown_duel(&mut commands);
 }
 
 // ---------------------------------------------------------------------------
@@ -400,6 +406,7 @@ pub fn leave_duel_combat(
 
 pub fn on_server_event(
     event: On<RenetServerEvent>,
+    mut commands: Commands,
     player: Res<Player>,
     mut duel: Option<ResMut<DuelState>>,
     mut server_send: MessageWriter<ServerSendMsg>,
@@ -421,13 +428,7 @@ pub fn on_server_event(
         ServerEvent::ClientDisconnected {
             ..
         } => {
-            if duel.phase == DuelPhase::Betting || duel.phase == DuelPhase::Connecting {
-                duel.opponent = None;
-                duel.opp_accept = false;
-                duel.opp_gold_bet = 0;
-                duel.opp_item_bet.clear();
-                duel.phase = DuelPhase::Connecting;
-            }
+            teardown_duel(&mut commands);
         },
     }
 }
@@ -457,6 +458,18 @@ pub fn client_on_connect(
     }
 }
 
+pub fn client_check_disconnect(
+    mut commands: Commands,
+    client: Res<RenetClient>,
+    duel: Option<Res<DuelState>>,
+) {
+    if let Some(duel) = duel {
+        if !duel.is_host() && client.is_disconnected() {
+            teardown_duel(&mut commands);
+        }
+    }
+}
+
 pub fn broadcast_lobby(duel: &DuelState, server_send: &mut MessageWriter<ServerSendMsg>) {
     server_send.write(ServerSendMsg::new(
         ServerMessage::Lobby {
@@ -476,6 +489,7 @@ pub fn broadcast_lobby(duel: &DuelState, server_send: &mut MessageWriter<ServerS
 // ---------------------------------------------------------------------------
 
 pub fn server_lobby_recv(
+    mut commands: Commands,
     mut server: ResMut<RenetServer>,
     mut duel: Option<ResMut<DuelState>>,
     mut state: Option<ResMut<CombatState>>,
@@ -523,6 +537,9 @@ pub fn server_lobby_recv(
                     if let Some(s) = state.as_mut() {
                         set_pause(duel, s, p, DuelRole::Client, &mut server_send);
                     }
+                },
+                ClientMessage::Decline => {
+                    teardown_duel(&mut commands);
                 },
             }
         }
@@ -630,6 +647,9 @@ pub fn client_lobby_recv(
                     } else {
                         None
                     };
+                },
+                ServerMessage::Decline => {
+                    teardown_duel(&mut commands);
                 },
             }
         }
@@ -832,6 +852,9 @@ pub fn duel_host_combat(
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut level_up: ResMut<LevelUpPending>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut game_menu_origin: ResMut<crate::core::menu::systems::GameMenuOrigin>,
+    mut combat_menu_suspended: ResMut<crate::core::menu::systems::CombatMenuSuspended>,
+    mut commands: Commands,
 ) {
     let Some(duel) = duel.as_mut() else {
         return;
@@ -842,6 +865,27 @@ pub fn duel_host_combat(
     let Some(state) = state.as_mut() else {
         return;
     };
+
+    // Auto-resume if we returned from the in-game menu
+    if duel.paused_by_menu && !combat_menu_suspended.0 {
+        duel.paused_by_menu = false;
+        set_pause(duel, state, false, DuelRole::Host, &mut server_send);
+    }
+
+    // Entering in-game menu during pvp combat behaves as a pause request.
+    if state.status != CombatStatus::Over
+        && (keyboard.just_released(KeyCode::Escape)
+            || keyboard.just_released(KeyCode::Enter)
+            || keyboard.just_released(KeyCode::NumpadEnter))
+    {
+        game_menu_origin.0 = Some(GameState::Combat);
+        combat_menu_suspended.0 = true;
+        next_game_state.set(GameState::GameMenu);
+        duel.paused_by_menu = true;
+        set_pause(duel, state, true, DuelRole::Host, &mut server_send);
+        play_audio_msg.write(PlayAudioMsg::new("button"));
+        return;
+    }
 
     // Result screen: wait for the host to leave.
     if state.status == CombatStatus::Over {
@@ -855,6 +899,9 @@ pub fn duel_host_combat(
             &mut next_game_state,
             &keyboard,
         );
+        if keyboard.just_pressed(KeyCode::Enter) || keyboard.just_pressed(KeyCode::NumpadEnter) {
+            teardown_duel(&mut commands);
+        }
         return;
     }
 
@@ -993,12 +1040,15 @@ pub fn duel_client_combat(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut state: Option<ResMut<CombatState>>,
     mut player: ResMut<Player>,
-    duel: Option<Res<DuelState>>,
+    duel: Option<ResMut<DuelState>>,
     mut client_send: MessageWriter<ClientSendMsg>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut game_menu_origin: ResMut<crate::core::menu::systems::GameMenuOrigin>,
+    mut combat_menu_suspended: ResMut<crate::core::menu::systems::CombatMenuSuspended>,
+    mut commands: Commands,
 ) {
-    let Some(duel) = duel else {
+    let Some(mut duel) = duel else {
         return;
     };
     if duel.is_host() {
@@ -1007,6 +1057,27 @@ pub fn duel_client_combat(
     let Some(state) = state.as_mut() else {
         return;
     };
+
+    // Auto-resume if we returned from the in-game menu
+    if duel.paused_by_menu && !combat_menu_suspended.0 {
+        duel.paused_by_menu = false;
+        client_send.write(ClientSendMsg::new(ClientMessage::Pause(false)));
+    }
+
+    // Entering in-game menu during pvp combat behaves as a pause request.
+    if state.status != CombatStatus::Over
+        && (keyboard.just_released(KeyCode::Escape)
+            || keyboard.just_released(KeyCode::Enter)
+            || keyboard.just_released(KeyCode::NumpadEnter))
+    {
+        game_menu_origin.0 = Some(GameState::Combat);
+        combat_menu_suspended.0 = true;
+        next_game_state.set(GameState::GameMenu);
+        duel.paused_by_menu = true;
+        client_send.write(ClientSendMsg::new(ClientMessage::Pause(true)));
+        play_audio_msg.write(PlayAudioMsg::new("button"));
+        return;
+    }
 
     // Tick our own ability cooldowns locally for responsive UI feedback.
     if !state.paused && state.status != CombatStatus::Over {
@@ -1025,6 +1096,7 @@ pub fn duel_client_combat(
 
     if state.status == CombatStatus::Over {
         if keyboard.just_pressed(KeyCode::Enter) || keyboard.just_pressed(KeyCode::NumpadEnter) {
+            teardown_duel(&mut commands);
             next_game_state.set(GameState::Playing);
         }
         return;
@@ -1172,6 +1244,7 @@ impl Plugin for NetworkPlugin {
             (
                 // Lobby + connection handling.
                 client_on_connect.run_if(resource_exists::<RenetClient>),
+                client_check_disconnect.run_if(resource_exists::<RenetClient>),
                 server_lobby_recv.run_if(resource_exists::<RenetServer>),
                 client_lobby_recv.run_if(resource_exists::<RenetClient>),
                 host_check_start.run_if(resource_exists::<RenetServer>),
@@ -1192,6 +1265,10 @@ impl Plugin for NetworkPlugin {
             )
                 .after(server_lobby_recv)
                 .after(client_lobby_recv),
+        )
+        .add_systems(
+            Update,
+            handle_decline_pending.after(server_send_message).after(client_send_message),
         )
         .add_systems(OnExit(GameState::Duel), leave_duel_lobby)
         .add_systems(OnExit(GameState::Combat), leave_duel_combat)

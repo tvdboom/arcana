@@ -52,9 +52,14 @@ mod native {
     use super::*;
     use crate::core::audio::PlayAudioMsg;
     use crate::core::constants::*;
+    use crate::core::catalog::catalog::get_equipment;
+    use crate::core::catalog::equipment::Equipment;
+    use crate::core::ui::scrollbar::{
+        ScrollableContainer, ScrollbarTrackX, ScrollbarThumbX, on_scrollbar_thumb_drag_x,
+    };
     use crate::core::network::{
-            broadcast_lobby, is_valid_ip, local_ip, portrait_key, start_client, start_host, teardown_duel,
-            ClientMessage, ClientSendMsg, DuelPhase, DuelRole, DuelState, Ip, ServerSendMsg, MAX_BET_ITEMS,
+            broadcast_lobby, is_valid_ip, local_ip, portrait_key, start_client, start_host,
+            ClientMessage, ClientSendMsg, DeclinePending, DuelPhase, DuelRole, DuelState, Ip, ServerMessage, ServerSendMsg, MAX_BET_ITEMS,
     };
 
     /// Marker on the container whose children are rebuilt when the lobby changes.
@@ -81,6 +86,10 @@ mod native {
     #[derive(Component)]
     pub struct DuelItemBtn(pub usize);
 
+    /// A button to deselect a wagered item.
+    #[derive(Component)]
+    pub struct DuelSelectedItemBtn(pub String);
+
     /// The accept-wager toggle button.
     #[derive(Component)]
     pub struct DuelAcceptBtn;
@@ -105,12 +114,12 @@ mod native {
                         height: percent(100.),
                         flex_direction: FlexDirection::Column,
                         align_items: AlignItems::Center,
-                        justify_content: JustifyContent::FlexStart,
+                        justify_content: JustifyContent::Center,
                         row_gap: Val::Px(14.),
                         padding: UiRect {
                             left: percent(5.),
                             right: percent(5.),
-                            top: percent(14.),
+                            top: percent(5.),
                             bottom: percent(5.),
                         },
                         ..default()
@@ -214,6 +223,7 @@ mod native {
         duel: Option<Res<DuelState>>,
         content_q: Query<Entity, With<DuelLobbyContent>>,
         children_q: Query<&Children>,
+        scroll_pos_q: Query<&ScrollPosition, With<ScrollableContainer>>,
         mut signature: Local<String>,
         mut local_ip_cache: Local<Option<String>>,
     ) {
@@ -249,6 +259,8 @@ mod native {
         }
         *signature = sig;
 
+        let cached_scroll_x = scroll_pos_q.iter().next().map(|p| p.x).unwrap_or(0.0);
+
         despawn_descendants_manual(&mut commands, content, &children_q);
 
         match duel.as_deref() {
@@ -265,7 +277,7 @@ mod native {
                 build_waiting_view(&mut commands, content, &assets, &localization, lang, d)
             },
             Some(d) if d.opponent.is_some() => {
-                build_betting_view(&mut commands, content, &assets, &localization, lang, &player, d)
+                build_betting_view(&mut commands, content, &assets, &localization, lang, &player, d, cached_scroll_x)
             },
             Some(_) => {
                 build_waiting_view(&mut commands, content, &assets, &localization, lang, &duel.unwrap())
@@ -290,123 +302,133 @@ mod native {
         let is_host_ip = valid && ip.trim() == my_ip;
 
         commands.entity(content).with_children(|parent| {
-            parent.spawn((
-                add_text(localization.get("duel.enter_ip", lang), "bold", 2.6, assets),
-                TextColor(BUTTON_TEXT_COLOR),
-            ));
+            parent.spawn(Node {
+                width: percent(100.),
+                height: percent(100.),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                row_gap: Val::Px(20.),
+                ..default()
+            }).with_children(|center_parent| {
+                center_parent.spawn((
+                    add_text(localization.get("duel.enter_ip", lang), "bold", 2.6, assets),
+                    TextColor(BUTTON_TEXT_COLOR),
+                ));
 
-            // IP textbox.
-            parent.spawn((
-                Node {
-                    min_width: Val::Px(240.),
-                    padding: UiRect::axes(Val::Px(18.), Val::Px(10.)),
-                    border: UiRect::all(Val::Px(1.)),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                BackgroundColor(NORMAL_BUTTON_COLOR),
-                BorderColor::all(BUTTON_BORDER_COLOR),
-                children![(
-                    add_text(ip.to_string(), "medium", 2.4, assets),
-                    TextColor(Color::WHITE),
-                )],
-            ));
+                // IP textbox.
+                center_parent.spawn((
+                    Node {
+                        min_width: Val::Px(240.),
+                        padding: UiRect::axes(Val::Px(18.), Val::Px(10.)),
+                        border: UiRect::all(Val::Px(1.)),
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    },
+                    BackgroundColor(NORMAL_BUTTON_COLOR),
+                    BorderColor::all(BUTTON_BORDER_COLOR),
+                    children![(
+                        add_text(ip.to_string(), "medium", 2.4, assets),
+                        TextColor(Color::WHITE),
+                    )],
+                ));
 
-            // Host and Connect buttons container
-            parent
-                .spawn(Node {
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(12.),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    margin: UiRect::top(Val::Px(12.)),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    // Host button (disabled when IP is not the same as local IP)
-                    let host_disabled = !is_host_ip;
-                    let (host_bg, host_border) = if is_host_ip {
-                        (NORMAL_BUTTON_COLOR, BUTTON_BORDER_COLOR)
-                    } else {
-                        (DISABLED_BUTTON_COLOR, DISABLED_BORDER_COLOR)
-                    };
-                    let mut host_btn = parent.spawn((
-                        Node {
-                            align_self: AlignSelf::Center,
-                            padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
-                            border: UiRect::all(Val::Px(1.)),
-                            ..default()
-                        },
-                        BackgroundColor(host_bg),
-                        BorderColor::all(host_border),
-                        Button,
-                        Interaction::default(),
-                        Pickable::default(),
-                        DuelHostBtn,
-                        children![(
-                            add_text(
-                                localization.get("duel.host", lang),
-                                "bold",
-                                2.0,
-                                assets
-                            ),
-                            TextColor(BUTTON_TEXT_COLOR),
-                        )],
-                    ));
-                    if host_disabled {
-                        host_btn.insert(crate::core::menu::buttons::DisabledButton);
-                    }
-                    host_btn
-                        .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                        .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
-                        .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
-                        .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
-                        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                        .observe(cursor::<Out>(SystemCursorIcon::Default))
-                        .observe(on_host_click);
+                // Host and Connect buttons container
+                center_parent
+                    .spawn(Node {
+                        flex_direction: FlexDirection::Row,
+                        column_gap: Val::Px(12.),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        margin: UiRect::top(Val::Px(12.)),
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        // Host button (disabled when IP is not the same as local IP)
+                        let host_disabled = !is_host_ip;
+                        let (host_bg, host_border) = if is_host_ip {
+                            (NORMAL_BUTTON_COLOR, BUTTON_BORDER_COLOR)
+                        } else {
+                            (DISABLED_BUTTON_COLOR, DISABLED_BORDER_COLOR)
+                        };
+                        let mut host_btn = parent.spawn((
+                            Node {
+                                align_self: AlignSelf::Center,
+                                padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
+                                border: UiRect::all(Val::Px(1.)),
+                                ..default()
+                            },
+                            BackgroundColor(host_bg),
+                            BorderColor::all(host_border),
+                            Button,
+                            Interaction::default(),
+                            Pickable::default(),
+                            DuelHostBtn,
+                            children![(
+                                add_text(
+                                    localization.get("duel.host", lang),
+                                    "bold",
+                                    2.0,
+                                    assets
+                                ),
+                                TextColor(BUTTON_TEXT_COLOR),
+                            )],
+                        ));
+                        if host_disabled {
+                            host_btn.insert(crate::core::menu::buttons::DisabledButton);
+                        }
+                        host_btn
+                            .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                            .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                            .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+                            .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                            .observe(cursor::<Out>(SystemCursorIcon::Default))
+                            .observe(on_host_click);
 
-                    // Connect button (enabled for all valid IPs)
-                    let connect_disabled = !valid;
-                    let (connect_bg, connect_border) = if valid {
-                        (NORMAL_BUTTON_COLOR, BUTTON_BORDER_COLOR)
-                    } else {
-                        (DISABLED_BUTTON_COLOR, DISABLED_BORDER_COLOR)
-                    };
-                    let mut connect_btn = parent.spawn((
-                        Node {
-                            align_self: AlignSelf::Center,
-                            padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
-                            border: UiRect::all(Val::Px(1.)),
-                            ..default()
-                        },
-                        BackgroundColor(connect_bg),
-                        BorderColor::all(connect_border),
-                        Button,
-                        Interaction::default(),
-                        Pickable::default(),
-                        DuelConnectBtn,
-                        children![(
-                            add_text(
-                                localization.get("duel.connect", lang),
-                                "bold",
-                                2.0,
-                                assets
-                            ),
-                            TextColor(BUTTON_TEXT_COLOR),
-                        )],
-                    ));
-                    if connect_disabled {
-                        connect_btn.insert(crate::core::menu::buttons::DisabledButton);
-                    }
-                    connect_btn
-                        .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                        .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
-                        .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
-                        .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
-                        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                        .observe(cursor::<Out>(SystemCursorIcon::Default))
-                        .observe(on_connect_click);
-                });
+                        // Connect button (enabled for all valid IPs)
+                        let connect_disabled = !valid;
+                        let (connect_bg, connect_border) = if valid {
+                            (NORMAL_BUTTON_COLOR, BUTTON_BORDER_COLOR)
+                        } else {
+                            (DISABLED_BUTTON_COLOR, DISABLED_BORDER_COLOR)
+                        };
+                        let mut connect_btn = parent.spawn((
+                            Node {
+                                align_self: AlignSelf::Center,
+                                padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
+                                border: UiRect::all(Val::Px(1.)),
+                                ..default()
+                            },
+                            BackgroundColor(connect_bg),
+                            BorderColor::all(connect_border),
+                            Button,
+                            Interaction::default(),
+                            Pickable::default(),
+                            DuelConnectBtn,
+                            children![(
+                                add_text(
+                                    localization.get("duel.connect", lang),
+                                    "bold",
+                                    2.0,
+                                    assets
+                                ),
+                                TextColor(BUTTON_TEXT_COLOR),
+                            )],
+                        ));
+                        if connect_disabled {
+                            connect_btn.insert(crate::core::menu::buttons::DisabledButton);
+                        }
+                        connect_btn
+                            .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                            .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                            .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+                            .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                            .observe(cursor::<Out>(SystemCursorIcon::Default))
+                            .observe(on_connect_click);
+                    });
+            });
         });
     }
 
@@ -423,48 +445,58 @@ mod native {
         use bevy::window::SystemCursorIcon;
 
         commands.entity(content).with_children(|parent| {
-            let waiting_text = if duel.role == DuelRole::Host {
-                localization.get("duel.waiting", lang)
-            } else {
-                localization.get("duel.waiting_for_host", lang)
-            };
-            parent.spawn((
-                add_text(waiting_text, "medium", 2.4, assets),
-                TextColor(Color::WHITE),
-            ));
+            parent.spawn(Node {
+            width: percent(100.),
+            height: percent(100.),
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            row_gap: Val::Px(20.),
+            ..default()
+            }).with_children(|center_parent| {
+                let waiting_text = if duel.role == DuelRole::Host {
+                    localization.get("duel.waiting", lang)
+                } else {
+                    localization.get("duel.waiting_for_host", lang)
+                };
+                center_parent.spawn((
+                    add_text(waiting_text, "medium", 2.4, assets),
+                    TextColor(Color::WHITE),
+                ));
 
-            parent
-                .spawn((
-                    Node {
-                        align_self: AlignSelf::Center,
-                        padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
-                        border: UiRect::all(Val::Px(1.)),
-                        margin: UiRect::top(Val::Px(12.)),
-                        ..default()
-                    },
-                    BackgroundColor(NORMAL_BUTTON_COLOR),
-                    BorderColor::all(BUTTON_BORDER_COLOR),
-                    Button,
-                    Interaction::default(),
-                    Pickable::default(),
-                    DuelCancelHostBtn,
-                    children![(
-                        add_text(
-                            localization.get("duel.cancel", lang),
-                            "bold",
-                            2.0,
-                            assets
-                        ),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    )],
-                ))
-                .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
-                .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
-                .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
-                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                .observe(cursor::<Out>(SystemCursorIcon::Default))
-                .observe(on_cancel_host_click);
+                center_parent
+                    .spawn((
+                        Node {
+                            align_self: AlignSelf::Center,
+                            padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
+                            border: UiRect::all(Val::Px(1.)),
+                            margin: UiRect::top(Val::Px(12.)),
+                            ..default()
+                        },
+                        BackgroundColor(NORMAL_BUTTON_COLOR),
+                        BorderColor::all(BUTTON_BORDER_COLOR),
+                        Button,
+                        Interaction::default(),
+                        Pickable::default(),
+                        DuelCancelHostBtn,
+                        children![(
+                            add_text(
+                                localization.get("duel.cancel", lang),
+                                "bold",
+                                2.0,
+                                assets
+                            ),
+                            TextColor(BUTTON_TEXT_COLOR),
+                        )],
+                    ))
+                    .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                    .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                    .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+                    .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                    .observe(cursor::<Out>(SystemCursorIcon::Default))
+                    .observe(on_cancel_host_click);
+            });
         });
     }
 
@@ -476,6 +508,7 @@ mod native {
         lang: Language,
         player: &Player,
         duel: &DuelState,
+        cached_scroll_x: f32,
     ) {
         use crate::core::menu::utils::recolor;
         use crate::core::utils::cursor;
@@ -500,142 +533,217 @@ mod native {
                 row_parent.spawn(Node {
                     flex_grow: 1.0,
                     flex_basis: percent(55.),
+                    min_width: Val::Px(0.),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::SpaceBetween,
                     row_gap: Val::Px(12.),
                     ..default()
                 }).with_children(|left_parent| {
-                    // 1. Opponent's wager info
+                    // Row for side-by-side wagers: Your Wager vs Opponent's Wager
                     left_parent.spawn(Node {
-                        flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::Center,
-                        row_gap: Val::Px(4.),
+                        width: percent(100.),
+                        flex_direction: FlexDirection::Row,
+                        justify_content: JustifyContent::SpaceEvenly,
+                        align_items: AlignItems::FlexStart,
+                        column_gap: Val::Px(20.),
+                        margin: UiRect::top(Val::Px(24.)),
                         ..default()
-                    }).with_children(|opp_wager_parent| {
-                        opp_wager_parent.spawn((
-                            add_text(localization.get("duel.their_wager", lang), "bold", 2.0, assets),
-                            TextColor(BUTTON_TEXT_COLOR),
-                        ));
-                        
-                        // Opponent Gold
-                        opp_wager_parent.spawn(Node {
-                            flex_direction: FlexDirection::Row,
+                    }).with_children(|wagers_row| {
+                        // Left Column: Your Wager
+                        wagers_row.spawn(Node {
+                            flex_direction: FlexDirection::Column,
                             align_items: AlignItems::Center,
-                            column_gap: Val::Px(8.),
+                            row_gap: Val::Px(6.),
                             ..default()
-                        }).with_children(|gold_row| {
-                            gold_row.spawn((
+                        }).with_children(|your_wager| {
+                            your_wager.spawn((
+                                add_text(localization.get_opt("duel.your_wager", lang).unwrap_or_else(|| "Your Wager".to_string()), "bold", 2.0, assets),
+                                TextColor(BUTTON_TEXT_COLOR),
                                 Node {
-                                    width: Val::Px(24.),
-                                    height: Val::Px(24.),
+                                    margin: UiRect::top(Val::Px(15.)),
                                     ..default()
                                 },
-                                ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
                             ));
-                            gold_row.spawn((
-                                add_text(duel.opp_gold_bet.to_string(), "bold", 2.0, assets),
-                                TextColor(Color::WHITE),
-                            ));
-                        });
 
-                        // Opponent Items
-                        opp_wager_parent.spawn(Node {
-                            flex_direction: FlexDirection::Row,
-                            align_items: AlignItems::Center,
-                            column_gap: Val::Px(6.),
-                            margin: UiRect::top(Val::Px(4.)),
-                            ..default()
-                        }).with_children(|items_row| {
-                            if duel.opp_item_bet.is_empty() {
-                                items_row.spawn((
-                                    add_text("No items", "medium", 1.6, assets),
-                                    TextColor(Color::srgb(0.5, 0.5, 0.5)),
+                            // Large Gold Bet
+                            your_wager.spawn(Node {
+                                flex_direction: FlexDirection::Row,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(10.),
+                                ..default()
+                            }).with_children(|gold_row| {
+                                gold_row.spawn((
+                                    Node {
+                                        width: Val::Px(48.),
+                                        height: Val::Px(48.),
+                                        ..default()
+                                    },
+                                    ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
                                 ));
-                            } else {
-                                for key in &duel.opp_item_bet {
+                                gold_row.spawn((
+                                    add_text(duel.my_gold_bet.to_string(), "bold", 2.6, assets),
+                                    TextColor(Color::WHITE),
+                                ));
+                            });
+
+                            // Gold buttons (+/-)
+                            your_wager.spawn(Node {
+                                flex_direction: FlexDirection::Row,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(6.),
+                                ..default()
+                            }).with_children(|gold_btns| {
+                                spawn_step_button(gold_btns, assets, "-100", DuelGoldBtn(-100));
+                                spawn_step_button(gold_btns, assets, "-10", DuelGoldBtn(-10));
+                                spawn_step_button(gold_btns, assets, "+10", DuelGoldBtn(10));
+                                spawn_step_button(gold_btns, assets, "+100", DuelGoldBtn(100));
+                            });
+
+                            your_wager.spawn(Node {
+                                flex_direction: FlexDirection::Row,
+                                column_gap: Val::Px(6.),
+                                margin: UiRect::top(Val::Px(16.)),
+                                ..default()
+                            }).with_children(|items_row| {
+                                for key in &duel.my_item_bet {
                                     items_row.spawn((
                                         Node {
-                                            width: Val::Px(40.),
-                                            height: Val::Px(40.),
+                                            width: Val::Px(56.),
+                                            height: Val::Px(56.),
                                             border: UiRect::all(Val::Px(1.)),
                                             ..default()
                                         },
+                                        BackgroundColor(NORMAL_BUTTON_COLOR),
+                                        BorderColor::all(Color::srgb_u8(120, 200, 120)),
+                                        ImageNode::new(assets.image(format!("build_{key}")))
+                                            .with_mode(NodeImageMode::Stretch),
+                                        Button,
+                                        Interaction::default(),
+                                        Pickable::default(),
+                                        DuelSelectedItemBtn(key.clone()),
+                                        crate::core::ui::playing::RightColumnTooltip::Equipment(key.clone()),
+                                    ))
+                                    .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                                    .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                                    .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+                                    .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+                                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                    .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                    .observe(on_selected_item_click);
+                                }
+                            });
+                        });
+
+                        // Center VS Column
+                        wagers_row.spawn(Node {
+                            align_self: AlignSelf::Center,
+                            ..default()
+                        }).with_children(|vs_node| {
+                            vs_node.spawn((
+                                add_text("VS", "bold", 3.0, assets),
+                                TextColor(Color::srgb_u8(220, 80, 80)),
+                            ));
+                        });
+
+                        // Right Column: Opponent's Wager
+                        wagers_row.spawn(Node {
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Center,
+                            row_gap: Val::Px(6.),
+                            ..default()
+                        }).with_children(|opp_wager| {
+                            opp_wager.spawn((
+                                add_text(localization.get("duel.their_wager", lang), "bold", 2.0, assets),
+                                TextColor(BUTTON_TEXT_COLOR),
+                                Node {
+                                    margin: UiRect::top(Val::Px(15.)),
+                                    ..default()
+                                },
+                            ));
+
+                            // Large Gold Bet
+                            opp_wager.spawn(Node {
+                                flex_direction: FlexDirection::Row,
+                                align_items: AlignItems::Center,
+                                column_gap: Val::Px(10.),
+                                ..default()
+                            }).with_children(|gold_row| {
+                                gold_row.spawn((
+                                    Node {
+                                        width: Val::Px(48.),
+                                        height: Val::Px(48.),
+                                        ..default()
+                                    },
+                                    ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                                ));
+                                gold_row.spawn((
+                                    add_text(duel.opp_gold_bet.to_string(), "bold", 2.6, assets),
+                                    TextColor(Color::WHITE),
+                                ));
+                            });
+
+                            // Spacer to align item betting section
+                            opp_wager.spawn(Node {
+                                height: Val::Px(30.),
+                                ..default()
+                            });
+
+                            opp_wager.spawn(Node {
+                                flex_direction: FlexDirection::Row,
+                                column_gap: Val::Px(6.),
+                                margin: UiRect::top(Val::Px(16.)),
+                                ..default()
+                            }).with_children(|items_row| {
+                                for key in &duel.opp_item_bet {
+                                    items_row.spawn((
+                                        Node {
+                                            width: Val::Px(56.),
+                                            height: Val::Px(56.),
+                                            border: UiRect::all(Val::Px(1.)),
+                                            ..default()
+                                        },
+                                        BackgroundColor(NORMAL_BUTTON_COLOR),
                                         BorderColor::all(BUTTON_BORDER_COLOR),
                                         ImageNode::new(assets.image(format!("build_{key}")))
                                             .with_mode(NodeImageMode::Stretch),
+                                        Interaction::default(),
+                                        Pickable::default(),
+                                        crate::core::ui::playing::RightColumnTooltip::Equipment(key.clone()),
                                     ));
                                 }
+                            });
+
+                            if duel.opp_accept {
+                                opp_wager.spawn((
+                                    add_text(localization.get("duel.accepted", lang), "bold", 1.8, assets),
+                                    TextColor(Color::srgb_u8(120, 200, 120)),
+                                ));
                             }
                         });
-
-                        if duel.opp_accept {
-                            opp_wager_parent.spawn((
-                                add_text(localization.get("duel.accepted", lang), "bold", 1.8, assets),
-                                TextColor(Color::srgb_u8(120, 200, 120)),
-                            ));
-                        }
                     });
 
-                    // 2. My Gold Wager row
-                    left_parent
-                        .spawn(Node {
-                            flex_direction: FlexDirection::Row,
-                            align_items: AlignItems::Center,
-                            column_gap: Val::Px(10.),
-                            ..default()
+                    // Get sorted bettable items (all wearables, weapons, and artifacts from inventory, sorted by price desc)
+                    let mut bettable_items = player
+                        .inventory
+                        .iter()
+                        .filter_map(|key| {
+                            if let Some(eq) = get_equipment(key) {
+                                if !matches!(eq, Equipment::Consumable(_)) {
+                                    return Some((key.clone(), eq.price()));
+                                }
+                            }
+                            None
                         })
-                        .with_children(|gold_btn_row| {
-                            spawn_step_button(gold_btn_row, assets, "-100", DuelGoldBtn(-100));
-                            spawn_step_button(gold_btn_row, assets, "-10", DuelGoldBtn(-10));
-                            gold_btn_row.spawn((
-                                Node {
-                                    width: Val::Px(28.),
-                                    height: Val::Px(28.),
-                                    ..default()
-                                },
-                                ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
-                            ));
-                            gold_btn_row.spawn((
-                                add_text(duel.my_gold_bet.to_string(), "bold", 2.4, assets),
-                                TextColor(BUTTON_TEXT_COLOR),
-                            ));
-                            spawn_step_button(gold_btn_row, assets, "+10", DuelGoldBtn(10));
-                            spawn_step_button(gold_btn_row, assets, "+100", DuelGoldBtn(100));
-                        });
-
-                    // 3. Item wager (clickable unequipped items, max MAX_BET_ITEMS)
-                    left_parent.spawn((
-                        add_text(
-                            format!(
-                                "{} ({}/{})",
-                                localization.get("duel.wager_items", lang),
-                                duel.my_item_bet.len(),
-                                MAX_BET_ITEMS,
-                            ),
-                            "bold",
-                            2.0,
-                            assets,
-                        ),
-                        TextColor(BUTTON_TEXT_COLOR),
-                    ));
-
-                    // Filter out equipped items from player's inventory
-                    let mut unequipped_items = Vec::new();
-                    let mut temp_equipped = player.equipped_consumables.clone();
-                    for key in &player.inventory {
-                        if let Some(pos) = temp_equipped.iter().position(|eq| eq == key) {
-                            temp_equipped.remove(pos);
-                        } else {
-                            unequipped_items.push(key.clone());
-                        }
-                    }
+                        .collect::<Vec<_>>();
+                    bettable_items.sort_by(|a, b| b.1.cmp(&a.1));
+                    let bettable_keys: Vec<String> = bettable_items.into_iter().map(|(key, _)| key).collect();
 
                     // Build selected indices to highlight them correctly (avoiding duplicate highlighting bugs)
                     let mut temp_selected_indices = Vec::new();
                     for key in &duel.my_item_bet {
                         let mut found_idx = None;
-                        for (idx, item_key) in unequipped_items.iter().enumerate() {
+                        for (idx, item_key) in bettable_keys.iter().enumerate() {
                             if item_key == key && !temp_selected_indices.contains(&idx) {
                                 found_idx = Some(idx);
                                 break;
@@ -646,63 +754,157 @@ mod native {
                         }
                     }
 
-                    left_parent
-                        .spawn(Node {
+                    if !bettable_keys.is_empty() {
+                        // Section to group Header and Items list together with a small gap
+                        left_parent.spawn(Node {
                             width: percent(100.),
-                            flex_direction: FlexDirection::Row,
-                            flex_wrap: FlexWrap::Wrap,
-                            justify_content: JustifyContent::Center,
-                            column_gap: Val::Px(6.),
-                            row_gap: Val::Px(6.),
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Center,
+                            row_gap: Val::Px(4.),
                             ..default()
-                        })
-                        .with_children(|items_container| {
-                            for (i, key) in unequipped_items.iter().enumerate() {
-                                let selected = temp_selected_indices.contains(&i);
-                                let border = if selected {
-                                    Color::srgb_u8(120, 200, 120)
-                                } else {
-                                    BUTTON_BORDER_COLOR
-                                };
-                                items_container
+                        }).with_children(|item_select_section| {
+                            // Item Selection Header
+                            item_select_section.spawn((
+                                add_text(
+                                    format!(
+                                        "Select Items to Bet ({}/{})",
+                                        duel.my_item_bet.len(),
+                                        MAX_BET_ITEMS,
+                                    ),
+                                    "bold",
+                                    1.8,
+                                    assets,
+                                ),
+                                TextColor(BUTTON_TEXT_COLOR),
+                            ));
+
+                            // Spawn a container for the list + scrollbar
+                            item_select_section.spawn(Node {
+                                width: percent(100.),
+                                height: Val::Px(96.),
+                                position_type: PositionType::Relative,
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::FlexStart,
+                                ..default()
+                            }).with_children(|wrapper_parent| {
+                                let container_entity = wrapper_parent
                                     .spawn((
                                         Node {
-                                            width: Val::Px(48.),
-                                            height: Val::Px(48.),
-                                            border: UiRect::all(Val::Px(2.)),
+                                            width: percent(100.),
+                                            max_width: percent(100.),
+                                            height: Val::Px(80.),
+                                            flex_direction: FlexDirection::Row,
+                                            align_items: AlignItems::Center,
+                                            justify_content: JustifyContent::FlexStart,
+                                            column_gap: Val::Px(8.),
+                                            overflow: Overflow::scroll_x(),
+                                            padding: UiRect::horizontal(Val::Px(8.)),
                                             ..default()
                                         },
-                                        BorderColor::all(border),
-                                        ImageNode::new(assets.image(format!("build_{key}")))
-                                            .with_mode(NodeImageMode::Stretch),
+                                        ScrollableContainer,
+                                        ScrollPosition(Vec2::new(cached_scroll_x, 0.0)),
+                                        Interaction::default(),
+                                        bevy::ui::RelativeCursorPosition::default(),
+                                    ))
+                                    .with_children(|items_container| {
+                                        for (i, key) in bettable_keys.iter().enumerate() {
+                                            let selected = temp_selected_indices.contains(&i);
+                                            let border = if selected {
+                                                Color::srgb_u8(120, 200, 120)
+                                            } else {
+                                                BUTTON_BORDER_COLOR
+                                            };
+                                            items_container
+                                                .spawn((
+                                                    Node {
+                                                        width: Val::Px(64.),
+                                                        height: Val::Px(64.),
+                                                        border: UiRect::all(Val::Px(1.)),
+                                                        flex_shrink: 0.,
+                                                        ..default()
+                                                    },
+                                                    BackgroundColor(NORMAL_BUTTON_COLOR),
+                                                    BorderColor::all(border),
+                                                    ImageNode::new(assets.image(format!("build_{key}")))
+                                                        .with_mode(NodeImageMode::Stretch),
+                                                    Button,
+                                                    Interaction::default(),
+                                                    Pickable::default(),
+                                                    DuelItemBtn(i),
+                                                    crate::core::ui::playing::RightColumnTooltip::Equipment(key.clone()),
+                                                ))
+                                                .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                                                .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                                                .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+                                                .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+                                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                                .observe(on_item_click);
+                                        }
+                                    }).id();
+
+                                // Spawn Scrollbar X Track and Thumb
+                                wrapper_parent.spawn((
+                                    Node {
+                                        position_type: PositionType::Absolute,
+                                        height: Val::Px(6.),
+                                        left: Val::Px(8.),
+                                        right: Val::Px(8.),
+                                        bottom: Val::Px(2.),
+                                        border_radius: BorderRadius::all(Val::Px(3.)),
+                                        ..default()
+                                    },
+                                    BackgroundColor(Color::srgba_u8(0, 0, 0, 170)),
+                                    Visibility::Hidden,
+                                    ScrollbarTrackX {
+                                        container: container_entity,
+                                    },
+                                )).with_children(|track_parent| {
+                                    track_parent.spawn((
+                                        Node {
+                                            position_type: PositionType::Absolute,
+                                            height: percent(100.),
+                                            width: Val::Px(32.),
+                                            left: Val::Px(0.),
+                                            border_radius: BorderRadius::all(Val::Px(3.)),
+                                            ..default()
+                                        },
+                                        BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
                                         Button,
                                         Interaction::default(),
                                         Pickable::default(),
-                                        DuelItemBtn(i),
+                                        ScrollbarThumbX {
+                                            container: container_entity,
+                                        },
                                     ))
-                                    .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                                    .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
-                                    .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
-                                    .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
                                     .observe(cursor::<Over>(SystemCursorIcon::Pointer))
                                     .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                    .observe(on_item_click);
-                            }
+                                    .observe(on_scrollbar_thumb_drag_x);
+                                });
+                            });
                         });
+                    }
 
-                    // 4. Accept button.
-                    let accept_label = if duel.my_accept {
-                        localization.get("duel.cancel", lang)
-                    } else {
-                        localization.get("duel.accept", lang)
-                    };
-                    left_parent
-                        .spawn((
+                    // Row for Accept and Decline buttons
+                    left_parent.spawn(Node {
+                        flex_direction: FlexDirection::Row,
+                        column_gap: Val::Px(12.),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        margin: UiRect::top(Val::Px(8.)),
+                        ..default()
+                    }).with_children(|buttons_row| {
+                        // Accept button
+                        let accept_label = if duel.my_accept {
+                            localization.get("duel.start_duel", lang)
+                        } else {
+                            localization.get("duel.accept", lang)
+                        };
+                        buttons_row.spawn((
                             Node {
-                                align_self: AlignSelf::Center,
                                 padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
                                 border: UiRect::all(Val::Px(1.)),
-                                margin: UiRect::top(Val::Px(8.)),
                                 ..default()
                             },
                             BackgroundColor(NORMAL_BUTTON_COLOR),
@@ -723,13 +925,41 @@ mod native {
                         .observe(cursor::<Over>(SystemCursorIcon::Pointer))
                         .observe(cursor::<Out>(SystemCursorIcon::Default))
                         .observe(on_accept_click);
+
+                        // Decline button
+                        let decline_label = localization.get_opt("duel.decline", lang).unwrap_or_else(|| "Decline".to_string());
+                        buttons_row.spawn((
+                            Node {
+                                padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
+                                border: UiRect::all(Val::Px(1.)),
+                                ..default()
+                            },
+                            BackgroundColor(NORMAL_BUTTON_COLOR),
+                            BorderColor::all(BUTTON_BORDER_COLOR),
+                            Button,
+                            Interaction::default(),
+                            Pickable::default(),
+                            DuelCancelHostBtn,
+                            children![(
+                                add_text(decline_label, "bold", 2.0, assets),
+                                TextColor(BUTTON_TEXT_COLOR),
+                            )],
+                        ))
+                        .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                        .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                        .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+                        .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+                        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                        .observe(cursor::<Out>(SystemCursorIcon::Default))
+                        .observe(on_cancel_host_click);
+                    });
                 });
 
-                // RIGHT SIDE: Large Opponent Portrait (height of panel minus padding, keeps 1.0 aspect ratio)
+                // RIGHT SIDE: Large Opponent Portrait (height of panel minus padding, keeps 0.88 aspect ratio)
                 row_parent.spawn((
                     Node {
                         height: percent(100.),
-                        aspect_ratio: Some(1.0),
+                        aspect_ratio: Some(0.88),
                         align_self: AlignSelf::Center,
                         position_type: PositionType::Relative,
                         border: UiRect::all(Val::Px(2.)),
@@ -761,14 +991,34 @@ mod native {
                         },
                     ).with_children(|overlay| {
                         overlay.spawn((
-                            add_text(opponent_name, "bold", 2.2, assets),
+                            add_text(opponent_name, "bold", 2.6, assets),
                             TextColor(Color::WHITE),
                         ));
                         overlay.spawn((
-                            add_text(format!("Lv. {}", opponent_level), "medium", 1.6, assets),
+                            add_text(format!("Lv. {}", opponent_level), "medium", 2.0, assets),
                             TextColor(Color::srgb_u8(240, 200, 80)),
                         ));
                     });
+
+                    // Large, slanted "ACCEPTED!" text overlaying the enemy image diagonally
+                    if duel.opp_accept {
+                        right_parent.spawn((
+                            Node {
+                                position_type: PositionType::Absolute,
+                                width: percent(100.),
+                                height: percent(100.),
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
+                                ..default()
+                            },
+                        )).with_children(|accepted_overlay| {
+                            accepted_overlay.spawn((
+                                add_text(localization.get("duel.accepted", lang).to_uppercase(), "bold", 4.5, assets),
+                                TextColor(Color::srgb_u8(120, 240, 120)),
+                                Transform::from_rotation(Quat::from_rotation_z(-25.0_f32.to_radians())),
+                            ));
+                        });
+                    }
                 });
             });
         });
@@ -882,6 +1132,30 @@ mod native {
         push_my_bet(&mut duel, play_audio_msg, server_send, client_send);
     }
 
+    fn on_selected_item_click(
+        event: On<Pointer<Click>>,
+        btn_q: Query<&DuelSelectedItemBtn>,
+        duel: Option<ResMut<DuelState>>,
+        play_audio_msg: MessageWriter<PlayAudioMsg>,
+        server_send: MessageWriter<ServerSendMsg>,
+        client_send: MessageWriter<ClientSendMsg>,
+    ) {
+        let Ok(btn) = btn_q.get(event.entity) else {
+            return;
+        };
+        let clicked_key = &btn.0;
+        let Some(mut duel) = duel else {
+            return;
+        };
+        if duel.phase != DuelPhase::Betting {
+            return;
+        }
+        if let Some(pos) = duel.my_item_bet.iter().position(|k| k == clicked_key) {
+            duel.my_item_bet.remove(pos);
+            push_my_bet(&mut duel, play_audio_msg, server_send, client_send);
+        }
+    }
+
     fn on_item_click(
         event: On<Pointer<Click>>,
         btn_q: Query<&DuelItemBtn>,
@@ -902,27 +1176,32 @@ mod native {
             return;
         }
 
-        // Reconstruct unequipped_items list
-        let mut unequipped_items = Vec::new();
-        let mut temp_equipped = player.equipped_consumables.clone();
-        for key in &player.inventory {
-            if let Some(pos) = temp_equipped.iter().position(|eq| eq == key) {
-                temp_equipped.remove(pos);
-            } else {
-                unequipped_items.push(key.clone());
-            }
-        }
+        // Get sorted bettable items (all wearables, weapons, and artifacts from inventory, sorted by price desc)
+        let mut bettable_items = player
+            .inventory
+            .iter()
+            .filter_map(|key| {
+                if let Some(eq) = get_equipment(key) {
+                    if !matches!(eq, Equipment::Consumable(_)) {
+                        return Some((key.clone(), eq.price()));
+                    }
+                }
+                None
+            })
+            .collect::<Vec<_>>();
+        bettable_items.sort_by(|a, b| b.1.cmp(&a.1));
+        let bettable_keys: Vec<String> = bettable_items.into_iter().map(|(key, _)| key).collect();
 
-        if clicked_idx >= unequipped_items.len() {
+        if clicked_idx >= bettable_keys.len() {
             return;
         }
-        let clicked_key = &unequipped_items[clicked_idx];
+        let clicked_key = &bettable_keys[clicked_idx];
 
         // Determine currently selected indices
         let mut temp_selected_indices = Vec::new();
         for key in &duel.my_item_bet {
             let mut found_idx = None;
-            for (idx, item_key) in unequipped_items.iter().enumerate() {
+            for (idx, item_key) in bettable_keys.iter().enumerate() {
                 if item_key == key && !temp_selected_indices.contains(&idx) {
                     found_idx = Some(idx);
                     break;
@@ -953,12 +1232,19 @@ mod native {
         mut commands: Commands,
         duel: Option<Res<DuelState>>,
         mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+        mut server_send: MessageWriter<ServerSendMsg>,
+        mut client_send: MessageWriter<ClientSendMsg>,
     ) {
-        if duel.is_none() {
+        let Some(ref d) = duel else {
             return;
-        }
+        };
         play_audio_msg.write(PlayAudioMsg::new("button"));
-        teardown_duel(&mut commands);
+        if d.is_host() {
+            server_send.write(ServerSendMsg::new(ServerMessage::Decline, None));
+        } else {
+            client_send.write(ClientSendMsg::new(ClientMessage::Decline));
+        }
+        commands.insert_resource(DeclinePending);
     }
 
     fn on_accept_click(

@@ -1,3 +1,5 @@
+set windows-shell := ["powershell", "-NoProfile", "-Command"]
+
 KTX_VERSION := "4.3.2"
 
 run:
@@ -11,7 +13,7 @@ build-release:
 
 [windows]
 install-ktx:
-    powershell -NoProfile -NonInteractive -Command '$ErrorActionPreference = "Stop"; $ZipPath = "KTX-Software-{{KTX_VERSION}}-Windows-x64.zip"; $ExtractPath = "C:\KTX-Software"; try { Invoke-WebRequest -Uri "https://github.com/KhronosGroup/KTX-Software/releases/download/v{{KTX_VERSION}}/KTX-Software-{{KTX_VERSION}}-Windows-x64.zip" -OutFile $ZipPath -ErrorAction Stop; Expand-Archive -Path $ZipPath -DestinationPath $ExtractPath -Force; Remove-Item $ZipPath; Write-Host "KTX-Software installed to $ExtractPath"; Write-Host "KTX_BIN_PATH=$ExtractPath/bin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append -ErrorAction SilentlyContinue; } catch { Write-Error "Failed to install KTX-Software: $_"; exit 1; }'
+    powershell -NoProfile -NonInteractive -Command '$ErrorActionPreference = "Stop"; $ExePath = "KTX-Software-{{KTX_VERSION}}-Windows-x64.exe"; $ExtractPath = "C:\KTX-Software"; try { Invoke-WebRequest -Uri "https://github.com/KhronosGroup/KTX-Software/releases/download/v{{KTX_VERSION}}/KTX-Software-{{KTX_VERSION}}-Windows-x64.exe" -OutFile $ExePath -ErrorAction Stop; $env:__compat_layer = "RunAsInvoker"; $process = Start-Process -FilePath $ExePath -ArgumentList "/S", "/D=$ExtractPath" -NoNewWindow -Wait -PassThru; Remove-Item $ExePath -Force; if ($process.ExitCode -ne 0) { throw "Installer exited with code $($process.ExitCode)"; } Write-Host "KTX-Software installed to $ExtractPath"; Write-Host "KTX_BIN_PATH=$ExtractPath/bin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append -ErrorAction SilentlyContinue; } catch { Write-Error "Failed to install KTX-Software: $_"; exit 1; }'
 
 [macos]
 install-ktx:

@@ -197,9 +197,14 @@ pub fn handle_playing_action_clicks(
     action_btn_q: Query<&ActionButton, Without<DisabledButton>>,
     _game_state: Res<State<GameState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut commands: Commands,
 ) {
     if let Ok(action_btn) = action_btn_q.get(event.entity) {
         let action = action_btn.0;
+
+        if action != Action::Duel {
+            crate::core::network::teardown_duel(&mut commands);
+        }
 
         let current_state = _game_state.get();
 

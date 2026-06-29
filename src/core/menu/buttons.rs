@@ -47,6 +47,8 @@ pub fn on_click_menu_button(
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut game_menu_origin: ResMut<GameMenuOrigin>,
     mut combat_menu_suspended: ResMut<CombatMenuSuspended>,
+    mut state: Option<ResMut<crate::core::combat::mechanics::CombatState>>,
+    duel_active: Option<Res<crate::core::combat::mechanics::DuelActive>>,
 ) {
     let (disabled, btn) = btn_q.get(event.entity).unwrap();
 
@@ -91,6 +93,11 @@ pub fn on_click_menu_button(
             let target = game_menu_origin.0.unwrap_or(GameState::Playing);
             combat_menu_suspended.0 = false;
             game_menu_origin.0 = None;
+            if duel_active.is_none() {
+                if let Some(s) = state.as_mut() {
+                    s.paused = false;
+                }
+            }
             next_game_state.set(target);
         },
         #[cfg(not(target_arch = "wasm32"))]

@@ -24,6 +24,8 @@ pub fn check_keys_menu(
     active_modal: Res<ActiveModal>,
     mut game_menu_origin: ResMut<GameMenuOrigin>,
     mut combat_menu_suspended: ResMut<CombatMenuSuspended>,
+    mut state: Option<ResMut<crate::core::combat::mechanics::CombatState>>,
+    duel_active: Option<Res<crate::core::combat::mechanics::DuelActive>>,
 ) {
     let cheat_level_up = *app_state.get() == AppState::Game
         && keyboard.just_released(KeyCode::ArrowUp)
@@ -70,6 +72,11 @@ pub fn check_keys_menu(
                 GameState::Combat => {
                     game_menu_origin.0 = Some(GameState::Combat);
                     combat_menu_suspended.0 = true;
+                    if duel_active.is_none() {
+                        if let Some(s) = state.as_mut() {
+                            s.paused = true;
+                        }
+                    }
                     next_game_state.set(GameState::GameMenu);
                 },
                 GameState::Shop
@@ -88,6 +95,11 @@ pub fn check_keys_menu(
                     let target = game_menu_origin.0.unwrap_or(GameState::Playing);
                     combat_menu_suspended.0 = false;
                     game_menu_origin.0 = None;
+                    if duel_active.is_none() {
+                        if let Some(s) = state.as_mut() {
+                            s.paused = false;
+                        }
+                    }
                     next_game_state.set(target);
                 },
                 GameState::EndGame => {
@@ -148,6 +160,11 @@ pub fn check_keys_menu(
                 GameState::Combat => {
                     game_menu_origin.0 = Some(GameState::Combat);
                     combat_menu_suspended.0 = true;
+                    if duel_active.is_none() {
+                        if let Some(s) = state.as_mut() {
+                            s.paused = true;
+                        }
+                    }
                     next_game_state.set(GameState::GameMenu);
                 },
                 GameState::EndGame => {
@@ -200,6 +217,11 @@ pub fn check_keys_menu(
                     let target = game_menu_origin.0.unwrap_or(GameState::Playing);
                     combat_menu_suspended.0 = false;
                     game_menu_origin.0 = None;
+                    if duel_active.is_none() {
+                        if let Some(s) = state.as_mut() {
+                            s.paused = false;
+                        }
+                    }
                     next_game_state.set(target);
                 },
                 _ => (),

@@ -1,6 +1,14 @@
 use bevy::prelude::*;
 
+#[cfg(not(target_arch = "wasm32"))]
 use crate::core::network::DuelState;
+
+#[cfg(target_arch = "wasm32")]
+#[derive(Resource)]
+pub struct DuelState {
+    pub opponent: Option<crate::core::player::Player>,
+}
+
 use crate::core::combat::mechanics::DuelActive;
 
 use crate::core::assets::WorldAssets;
@@ -145,21 +153,36 @@ pub fn setup_combat_ui(
                 });
 
             parent
-                .spawn(Node {
-                    position_type: PositionType::Absolute,
-                    right: Val::Px(24.),
-                    bottom: Val::Px(24.),
-                    flex_direction: FlexDirection::Row,
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(12.),
-                    ..default()
+                .spawn(if is_pvp {
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Percent(50.),
+                        margin: UiRect::left(Val::Vh(-9.0)),
+                        bottom: Val::Px(24.),
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(12.),
+                        ..default()
+                    }
+                } else {
+                    Node {
+                        position_type: PositionType::Absolute,
+                        right: Val::Px(24.),
+                        bottom: Val::Px(24.),
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(12.),
+                        ..default()
+                    }
                 })
                 .with_children(|parent| {
-                    parent.spawn((
-                        add_text(combat_speed.label(), "bold", LABEL_TEXT_SIZE, &assets),
-                        TextColor(Color::WHITE),
-                        crate::core::combat::mechanics::CombatSpeedText,
-                    ));
+                    if !is_pvp {
+                        parent.spawn((
+                            add_text(combat_speed.label(), "bold", LABEL_TEXT_SIZE, &assets),
+                            TextColor(Color::WHITE),
+                            crate::core::combat::mechanics::CombatSpeedText,
+                        ));
+                    }
                     parent
                         .spawn((
                             Node {
@@ -456,6 +479,101 @@ fn spawn_combat_pet_overlay(
                                 add_text("", "bold", 1.2, assets),
                                 TextColor(Color::WHITE),
                                 StatLabel(PlayingStat::PetHealth),
+                            ));
+                        });
+                });
+        });
+}
+
+fn spawn_combat_enemy_pet_overlay(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    pet: &Monster,
+) {
+    let ratio = if pet.max_health > 0 {
+        (pet.health as f32 / pet.max_health as f32).clamp(0.0, 1.0) * 100.0
+    } else {
+        100.0
+    };
+
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(3.),
+                bottom: Val::Px(3.),
+                width: percent(55.),
+                aspect_ratio: Some(0.92),
+                border: UiRect::all(Val::Px(2.)),
+                ..default()
+            },
+            BorderColor::all(BUTTON_BORDER_COLOR),
+            ImageNode::new(assets.image(pet_image_key(pet))).with_mode(NodeImageMode::Stretch),
+            Interaction::default(),
+            Pickable::default(),
+            InfoTooltip::Pet,
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn(Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(6.),
+                    top: Val::Px(6.),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text(capitalize_words(&pet.name), "bold", 2.2, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                    ));
+                });
+
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Percent(5.),
+                        right: Val::Percent(5.),
+                        bottom: Val::Px(4.),
+                        height: Val::Px(20.),
+                        border: UiRect::all(Val::Px(1.5)),
+                        ..default()
+                    },
+                    BackgroundColor(BAR_BG_COLOR),
+                    BorderColor::all(BUTTON_BORDER_COLOR),
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(0.),
+                            top: Val::Px(0.),
+                            width: percent(ratio),
+                            height: percent(100.),
+                            ..default()
+                        },
+                        BackgroundColor(HEALTH_COLOR),
+                    ));
+
+                    // Text overlay
+                    parent
+                        .spawn(Node {
+                            position_type: PositionType::Absolute,
+                            width: percent(100.),
+                            height: percent(100.),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            parent.spawn((
+                                add_text(
+                                    format!("{} / {}", pet.health, pet.max_health),
+                                    "bold",
+                                    1.2,
+                                    assets,
+                                ),
+                                TextColor(Color::WHITE),
                             ));
                         });
                 });
@@ -1076,6 +1194,7 @@ fn spawn_monster_panel(
                                 &monster_display_name(monster),
                                 monster.level,
                                 &monster.image,
+                                if is_pvp { opponent.and_then(|opp| opp.pet.as_ref()) } else { None },
                             );
                             spawn_monster_health_bar(parent, assets, localization, lang, monster);
                             if is_pvp {
@@ -1112,6 +1231,7 @@ fn spawn_monster_portrait(
     name: &str,
     level: u32,
     image_key: &str,
+    pet: Option<&Monster>,
 ) {
     parent
         .spawn((
@@ -1129,6 +1249,9 @@ fn spawn_monster_portrait(
         ))
         .with_children(|parent| {
             spawn_portrait_label(parent, assets, name, level, false);
+            if let Some(pet) = pet {
+                spawn_combat_enemy_pet_overlay(parent, assets, pet);
+            }
         });
 }
 
@@ -1267,7 +1390,7 @@ fn spawn_enemy_mana_bar(
                         localization.get("general.mana", lang)
                     ),
                     "bold",
-                    1.6,
+                    1.9,
                     assets,
                 ),
                 TextColor(Color::WHITE),

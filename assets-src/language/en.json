@@ -4050,8 +4050,11 @@
   "duel.waiting": "Waiting for opponent to connect...",
   "duel.waiting_for_host": "Waiting for host to start...",
   "duel.their_wager": "Their Wager",
+  "duel.your_wager": "Your Wager",
   "duel.accepted": "Accepted!",
   "duel.wager_items": "Wager Items:",
   "duel.cancel": "Cancel",
-  "duel.accept": "Accept"
+  "duel.accept": "Accept",
+  "duel.decline": "Decline",
+  "duel.start_duel": "Start Duel"
 }

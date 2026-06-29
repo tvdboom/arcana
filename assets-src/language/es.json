@@ -7765,8 +7765,11 @@
   "duel.waiting": "Esperando a que el enemigo se conecte...",
   "duel.waiting_for_host": "Esperando que el servidor inicie...",
   "duel.their_wager": "Su Apuesta",
+  "duel.your_wager": "Tu Apuesta",
   "duel.accepted": "¡Aceptado!",
   "duel.wager_items": "Objetos de Apuesta:",
   "duel.cancel": "Cancelar",
-  "duel.accept": "Aceptar"
+  "duel.accept": "Aceptar",
+  "duel.decline": "Rechazar",
+  "duel.start_duel": "Iniciar Duelo"
 }

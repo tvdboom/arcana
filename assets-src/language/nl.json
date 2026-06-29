@@ -7767,8 +7767,11 @@
   "duel.waiting": "Wachten op verbinding...",
   "duel.waiting_for_host": "Wachten op host om te starten...",
   "duel.their_wager": "Hun Inzet",
+  "duel.your_wager": "Jouw Inzet",
   "duel.accepted": "Geaccepteerd!",
   "duel.wager_items": "Inzet Items:",
   "duel.cancel": "Annuleren",
-  "duel.accept": "Accepteren"
+  "duel.accept": "Accepteren",
+  "duel.decline": "Afwijzen",
+  "duel.start_duel": "Duel Starten"
 }

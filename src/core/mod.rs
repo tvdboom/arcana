@@ -62,7 +62,7 @@ use crate::core::ui::dropdown::{shop_close_dropdown_on_outside_click, OpenDropdo
 use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpOverlayCmp};
 use crate::core::ui::modal::{modal_input_system, ActiveModal};
 use crate::core::ui::playing::*;
-use crate::core::ui::scrollbar::{scroll_system, update_scrollbar_system};
+use crate::core::ui::scrollbar::{scroll_system, update_scrollbar_system, update_scrollbar_x_system};
 use crate::core::ui::toast::{tick_gold_toasts, GoldToast};
 use crate::core::ui::utils::cleanup_panel_ui;
 use crate::core::utils::{despawn, reset_cursor};
@@ -192,6 +192,7 @@ impl Plugin for GamePlugin {
                     update_playing_screen.run_if(resource_changed::<Settings>),
                     scroll_system.before(update_scrollbar_system).run_if(in_state(AppState::Game)),
                     update_scrollbar_system.run_if(in_state(AppState::Game)),
+                    update_scrollbar_x_system.run_if(in_state(AppState::Game)),
                     reveal_menu_content_when_bg_ready
                         .run_if(in_state(AppState::MainMenu).or_else(in_state(AppState::Settings))),
                     animate_loading_text.run_if(in_state(AppState::Loading)),
@@ -415,7 +416,16 @@ impl Plugin for GamePlugin {
             )
             // Duel Systems
             .add_systems(OnEnter(GameState::Duel), setup_duel_ui)
-            .add_systems(OnExit(GameState::Duel), (cleanup_panel_ui, despawn::<TooltipNode>));
+            .add_systems(OnExit(GameState::Duel), (cleanup_panel_ui, despawn::<TooltipNode>))
+            .add_systems(
+                Update,
+                (
+                    tooltip_follow_cursor_system,
+                    right_column_tooltip_system,
+                    equip_slot_tooltip_system,
+                )
+                    .run_if(in_state(GameState::Duel)),
+            );
 
         #[cfg(not(target_arch = "wasm32"))]
         app.add_plugins(crate::core::network::NetworkPlugin);
