@@ -713,13 +713,6 @@ mod native {
                                     ));
                                 }
                             });
-
-                            if duel.opp_accept {
-                                opp_wager.spawn((
-                                    add_text(localization.get("duel.accepted", lang), "bold", 1.8, assets),
-                                    TextColor(Color::srgb_u8(120, 200, 120)),
-                                ));
-                            }
                         });
                     });
 
@@ -896,7 +889,7 @@ mod native {
                         ..default()
                     }).with_children(|buttons_row| {
                         // Accept button
-                        let accept_label = if duel.my_accept {
+                        let accept_label = if duel.opp_accept {
                             localization.get("duel.start_duel", lang)
                         } else {
                             localization.get("duel.accept", lang)
@@ -1011,6 +1004,8 @@ mod native {
                                 justify_content: JustifyContent::Center,
                                 ..default()
                             },
+                            Transform::default(),
+                            GlobalTransform::default(),
                         )).with_children(|accepted_overlay| {
                             accepted_overlay.spawn((
                                 add_text(localization.get("duel.accepted", lang).to_uppercase(), "bold", 4.5, assets),
@@ -1250,6 +1245,7 @@ mod native {
     fn on_accept_click(
         _event: On<Pointer<Click>>,
         duel: Option<ResMut<DuelState>>,
+        player: Res<Player>,
         mut play_audio_msg: MessageWriter<PlayAudioMsg>,
         mut server_send: MessageWriter<ServerSendMsg>,
         mut client_send: MessageWriter<ClientSendMsg>,
@@ -1265,7 +1261,10 @@ mod native {
         if duel.is_host() {
             broadcast_lobby(&duel, &mut server_send);
         } else {
-            client_send.write(ClientSendMsg::new(ClientMessage::Accept(duel.my_accept)));
+            client_send.write(ClientSendMsg::new(ClientMessage::Accept {
+                accept: duel.my_accept,
+                profile: player.clone(),
+            }));
         }
     }
 

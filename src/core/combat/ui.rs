@@ -1195,6 +1195,7 @@ fn spawn_monster_panel(
                                 monster.level,
                                 &monster.image,
                                 if is_pvp { opponent.and_then(|opp| opp.pet.as_ref()) } else { None },
+                                is_pvp,
                             );
                             spawn_monster_health_bar(parent, assets, localization, lang, monster);
                             if is_pvp {
@@ -1232,6 +1233,7 @@ fn spawn_monster_portrait(
     level: u32,
     image_key: &str,
     pet: Option<&Monster>,
+    is_pvp: bool,
 ) {
     parent
         .spawn((
@@ -1251,6 +1253,31 @@ fn spawn_monster_portrait(
             spawn_portrait_label(parent, assets, name, level, false);
             if let Some(pet) = pet {
                 spawn_combat_enemy_pet_overlay(parent, assets, pet);
+            }
+            if is_pvp {
+                spawn_equipment_slot_column(
+                    parent,
+                    assets,
+                    2.0,
+                    14.0,
+                    &[EquipSlot::Accessory, EquipSlot::Accessory2],
+                    true,
+                );
+                spawn_equipment_slot_column(
+                    parent,
+                    assets,
+                    2.0,
+                    2.0,
+                    &[
+                        EquipSlot::Helmet,
+                        EquipSlot::Chestplate,
+                        EquipSlot::WeaponLH,
+                        EquipSlot::WeaponRH,
+                        EquipSlot::Gloves,
+                        EquipSlot::Boots,
+                    ],
+                    false,
+                );
             }
         });
 }

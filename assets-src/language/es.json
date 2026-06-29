@@ -7771,5 +7771,6 @@
   "duel.cancel": "Cancelar",
   "duel.accept": "Aceptar",
   "duel.decline": "Rechazar",
-  "duel.start_duel": "Iniciar Duelo"
+  "duel.start_duel": "Iniciar Duelo",
+  "duel.declined_toast": "El oponente rechazó el duelo"
 }

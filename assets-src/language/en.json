@@ -4056,5 +4056,6 @@
   "duel.cancel": "Cancel",
   "duel.accept": "Accept",
   "duel.decline": "Decline",
-  "duel.start_duel": "Start Duel"
+  "duel.start_duel": "Start Duel",
+  "duel.declined_toast": "The opponent declined the duel"
 }

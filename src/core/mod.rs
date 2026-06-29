@@ -12,6 +12,19 @@ mod menu;
 mod monsters;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod network;
+
+#[cfg(target_arch = "wasm32")]
+pub mod network {
+    use bevy::prelude::*;
+    use crate::core::player::Player;
+
+    #[derive(Resource)]
+    pub struct DuelState {
+        pub opponent: Option<Player>,
+    }
+
+    pub fn teardown_duel(_commands: &mut Commands) {}
+}
 #[cfg(not(target_arch = "wasm32"))]
 mod persistence;
 mod player;
@@ -43,8 +56,8 @@ use crate::core::camera::*;
 use crate::core::combat::mechanics::{
     animate_death_skulls, animate_floating_text, cleanup_any_combat_artifacts,
     cleanup_combat_on_exit, combat_input, combat_tick, setup_combat_state, sync_consumable_cards,
-    update_combat_pause_indicator, update_combat_speed_label, update_combat_visuals, CombatSpeed,
-    DuelActive,
+    update_combat_pause_indicator, update_combat_speed_label, update_combat_visuals,
+    update_combat_equipment_slots, CombatSpeed, DuelActive,
 };
 use crate::core::combat::ui::setup_combat_ui;
 use crate::core::game_state::ShopUiState;
@@ -388,6 +401,7 @@ impl Plugin for GamePlugin {
                     combat_input.run_if(not(resource_exists::<DuelActive>)),
                     combat_tick.run_if(not(resource_exists::<DuelActive>)),
                     update_combat_visuals,
+                    update_combat_equipment_slots,
                     update_combat_pause_indicator,
                     update_combat_speed_label,
                     animate_death_skulls,

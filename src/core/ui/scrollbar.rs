@@ -109,6 +109,10 @@ pub fn update_scrollbar_system(
         let content_height = scroll_node.content_size().y;
         let max_scroll = (content_height - viewport_height).max(0.0);
 
+        if viewport_height <= 0.0 {
+            continue;
+        }
+
         if max_scroll <= 1.0 || content_height <= viewport_height {
             scroll.y = 0.0;
             if *track_visibility != Visibility::Hidden {
@@ -207,6 +211,10 @@ pub fn update_scrollbar_x_system(
         let viewport_width = scroll_node.size().x;
         let content_width = scroll_node.content_size().x;
         let max_scroll = (content_width - viewport_width).max(0.0);
+
+        if viewport_width <= 0.0 {
+            continue;
+        }
 
         if max_scroll <= 1.0 || content_width <= viewport_width {
             scroll.x = 0.0;

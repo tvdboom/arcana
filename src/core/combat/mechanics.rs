@@ -2389,6 +2389,134 @@ pub fn cleanup_any_combat_artifacts(
     combat_menu_suspended.0 = false;
 }
 
+pub fn update_combat_equipment_slots(
+    player: Res<Player>,
+    duel_state: Option<Res<crate::core::network::DuelState>>,
+    assets: Res<crate::core::assets::WorldAssets>,
+    player_portrait_q: Query<Entity, With<crate::core::combat::ui::CombatPlayerPortrait>>,
+    enemy_portrait_q: Query<Entity, With<crate::core::combat::ui::CombatEnemyPortrait>>,
+    mut slot_q: Query<(Entity, &ChildOf, &crate::core::ui::playing::EquipSlot, &mut ImageNode, &mut Visibility)>,
+    parent_q: Query<&ChildOf>,
+) {
+    let player_portrait = player_portrait_q.iter().next();
+    let enemy_portrait = enemy_portrait_q.iter().next();
+
+    let opponent = duel_state.as_ref().and_then(|d| d.opponent.as_ref());
+
+    let is_p_lh_two_hand = player
+        .weapon_lh
+        .as_deref()
+        .and_then(get_equipment)
+        .map(|eq| match eq {
+            Equipment::Weapon(w) => w.hand == crate::core::catalog::weapons::Hand::TwoHand,
+            _ => false,
+        })
+        .unwrap_or(false);
+
+    let is_e_lh_two_hand = opponent
+        .and_then(|opp| opp.weapon_lh.as_deref())
+        .and_then(get_equipment)
+        .map(|eq| match eq {
+            Equipment::Weapon(w) => w.hand == crate::core::catalog::weapons::Hand::TwoHand,
+            _ => false,
+        })
+        .unwrap_or(false);
+
+    for (_entity, parent, slot, mut image, mut vis) in &mut slot_q {
+        let mut is_player_slot = true;
+        if let Ok(grandparent) = parent_q.get(parent.0) {
+            if Some(grandparent.0) == enemy_portrait {
+                is_player_slot = false;
+            } else if Some(grandparent.0) == player_portrait {
+                is_player_slot = true;
+            } else if let Ok(greatgrandparent) = parent_q.get(grandparent.0) {
+                if Some(greatgrandparent.0) == enemy_portrait {
+                    is_player_slot = false;
+                } else if Some(greatgrandparent.0) == player_portrait {
+                    is_player_slot = true;
+                }
+            }
+        }
+
+        if is_player_slot {
+            let equipped_key = match slot {
+                crate::core::ui::playing::EquipSlot::Helmet => player.helmet.as_deref(),
+                crate::core::ui::playing::EquipSlot::Accessory => player.accessory.as_deref(),
+                crate::core::ui::playing::EquipSlot::Accessory2 => player.accessory2.as_deref(),
+                crate::core::ui::playing::EquipSlot::WeaponLH => player.weapon_lh.as_deref(),
+                crate::core::ui::playing::EquipSlot::WeaponRH => player.weapon_rh.as_deref(),
+                crate::core::ui::playing::EquipSlot::Chestplate => player.armor.as_deref(),
+                crate::core::ui::playing::EquipSlot::Boots => player.boots.as_deref(),
+                crate::core::ui::playing::EquipSlot::Gloves => player.gloves.as_deref(),
+            };
+
+            let img_handle = match equipped_key {
+                Some(key) => assets.image(format!("build_{}", key)),
+                None => assets.image("stone"),
+            };
+            if image.image != img_handle {
+                image.image = img_handle;
+            }
+
+            let visible = match slot {
+                crate::core::ui::playing::EquipSlot::Helmet => player.helmet.is_some(),
+                crate::core::ui::playing::EquipSlot::Accessory => player.accessory.is_some(),
+                crate::core::ui::playing::EquipSlot::Accessory2 => player.accessory2.is_some(),
+                crate::core::ui::playing::EquipSlot::WeaponLH => player.weapon_lh.is_some(),
+                crate::core::ui::playing::EquipSlot::WeaponRH => player.weapon_rh.is_some() && !is_p_lh_two_hand,
+                crate::core::ui::playing::EquipSlot::Chestplate => player.armor.is_some(),
+                crate::core::ui::playing::EquipSlot::Boots => player.boots.is_some(),
+                crate::core::ui::playing::EquipSlot::Gloves => player.gloves.is_some(),
+            };
+
+            let target_vis = if visible { Visibility::Visible } else { Visibility::Hidden };
+            if *vis != target_vis {
+                *vis = target_vis;
+            }
+        } else if let Some(opp) = opponent {
+            let equipped_key = match slot {
+                crate::core::ui::playing::EquipSlot::Helmet => opp.helmet.as_deref(),
+                crate::core::ui::playing::EquipSlot::Accessory => opp.accessory.as_deref(),
+                crate::core::ui::playing::EquipSlot::Accessory2 => opp.accessory2.as_deref(),
+                crate::core::ui::playing::EquipSlot::WeaponLH => opp.weapon_lh.as_deref(),
+                crate::core::ui::playing::EquipSlot::WeaponRH => opp.weapon_rh.as_deref(),
+                crate::core::ui::playing::EquipSlot::Chestplate => opp.armor.as_deref(),
+                crate::core::ui::playing::EquipSlot::Boots => opp.boots.as_deref(),
+                crate::core::ui::playing::EquipSlot::Gloves => opp.gloves.as_deref(),
+            };
+
+            let img_handle = match equipped_key {
+                Some(key) => assets.image(format!("build_{}", key)),
+                None => assets.image("stone"),
+            };
+            if image.image != img_handle {
+                image.image = img_handle;
+            }
+
+            let visible = match slot {
+                crate::core::ui::playing::EquipSlot::Helmet => opp.helmet.is_some(),
+                crate::core::ui::playing::EquipSlot::Accessory => opp.accessory.is_some(),
+                crate::core::ui::playing::EquipSlot::Accessory2 => opp.accessory2.is_some(),
+                crate::core::ui::playing::EquipSlot::WeaponLH => opp.weapon_lh.is_some(),
+                crate::core::ui::playing::EquipSlot::WeaponRH => opp.weapon_rh.is_some() && !is_e_lh_two_hand,
+                crate::core::ui::playing::EquipSlot::Chestplate => opp.armor.is_some(),
+                crate::core::ui::playing::EquipSlot::Boots => opp.boots.is_some(),
+                crate::core::ui::playing::EquipSlot::Gloves => opp.gloves.is_some(),
+            };
+
+            let target_vis = if visible { Visibility::Visible } else { Visibility::Hidden };
+            if *vis != target_vis {
+                *vis = target_vis;
+            }
+        } else {
+            let target_vis = Visibility::Hidden;
+            if *vis != target_vis {
+                *vis = target_vis;
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

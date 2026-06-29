@@ -31,6 +31,10 @@ use crate::core::player::Player;
 use crate::core::states::GameState;
 use crate::core::ui::creation::SelectionItem;
 use crate::core::ui::level_up::LevelUpPending;
+use crate::core::assets::WorldAssets;
+use crate::core::localization::Localization;
+use crate::core::settings::Settings;
+use crate::core::ui::toast::{spawn_toast, ToastContainer};
 
 const PROTOCOL_ID: u64 = 0xA2C4_0DEF_0001; // arbitrary but stable
 const DUEL_PORT: u16 = 5001;
@@ -158,7 +162,7 @@ pub enum ServerMessage {
         client_accept: bool,
     },
     /// Both players accepted: enter combat.
-    StartCombat,
+    StartCombat(Player),
     /// Authoritative combat state (sent every tick).
     Snapshot(DuelSnapshot),
     /// Combat finished. Tells the client what it won (or lost).
@@ -198,7 +202,10 @@ pub enum ClientMessage {
         items: Vec<String>,
     },
     /// Client toggles its accept flag.
-    Accept(bool),
+    Accept {
+        accept: bool,
+        profile: Player,
+    },
     /// Combat input: cast the ability with the given key.
     CastAbility(String),
     /// Combat input: use the consumable with the given key.
@@ -396,7 +403,11 @@ pub fn leave_duel_lobby(_commands: Commands, _duel: Option<Res<DuelState>>) {
 /// Reset the duel lobby back to the betting phase when leaving combat.
 pub fn leave_duel_combat(
     mut commands: Commands,
+    combat_menu_suspended: Res<crate::core::menu::systems::CombatMenuSuspended>,
 ) {
+    if combat_menu_suspended.0 {
+        return;
+    }
     teardown_duel(&mut commands);
 }
 
@@ -495,6 +506,10 @@ pub fn server_lobby_recv(
     mut state: Option<ResMut<CombatState>>,
     mut server_send: MessageWriter<ServerSendMsg>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
     let Some(duel) = duel.as_mut() else {
         return;
@@ -519,8 +534,12 @@ pub fn server_lobby_recv(
                     duel.my_accept = false;
                     broadcast_lobby(duel, &mut server_send);
                 },
-                ClientMessage::Accept(a) => {
-                    duel.opp_accept = a;
+                ClientMessage::Accept {
+                    accept,
+                    profile,
+                } => {
+                    duel.opp_accept = accept;
+                    duel.opponent = Some(profile);
                     broadcast_lobby(duel, &mut server_send);
                 },
                 ClientMessage::CastAbility(key) => {
@@ -539,6 +558,20 @@ pub fn server_lobby_recv(
                     }
                 },
                 ClientMessage::Decline => {
+                    let lang = settings.language;
+                    let msg = localization.get_opt("duel.declined_toast", lang).unwrap_or_else(|| "The opponent declined the duel".to_string());
+                    if let Some(toast) = toast_container_q.iter().next() {
+                        spawn_toast(
+                            &mut commands,
+                            &assets,
+                            msg,
+                            Color::srgba(0.20, 0.05, 0.05, 0.93),
+                            Color::srgb(0.85, 0.20, 0.20),
+                            Color::srgb(1.0, 0.80, 0.80),
+                            toast,
+                        );
+                    }
+                    play_audio_msg.write(PlayAudioMsg::new("error"));
                     teardown_duel(&mut commands);
                 },
             }
@@ -555,6 +588,10 @@ pub fn client_lobby_recv(
     mut level_up: ResMut<LevelUpPending>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
     let Some(duel) = duel.as_mut() else {
         return;
@@ -595,12 +632,11 @@ pub fn client_lobby_recv(
                         duel.my_accept = client_accept;
                     }
                 },
-                ServerMessage::StartCombat => {
-                    if let Some(opponent) = duel.opponent.clone() {
-                        duel.phase = DuelPhase::Combat;
-                        duel.resolved = false;
-                        start_duel_combat(&mut commands, &opponent, &mut next_game_state);
-                    }
+                ServerMessage::StartCombat(host_profile) => {
+                    duel.opponent = Some(host_profile.clone());
+                    duel.phase = DuelPhase::Combat;
+                    duel.resolved = false;
+                    start_duel_combat(&mut commands, &host_profile, &mut next_game_state);
                 },
                 ServerMessage::Snapshot(snap) => {
                     if let Some(s) = state.as_mut() {
@@ -649,6 +685,20 @@ pub fn client_lobby_recv(
                     };
                 },
                 ServerMessage::Decline => {
+                    let lang = settings.language;
+                    let msg = localization.get_opt("duel.declined_toast", lang).unwrap_or_else(|| "The opponent declined the duel".to_string());
+                    if let Some(toast) = toast_container_q.iter().next() {
+                        spawn_toast(
+                            &mut commands,
+                            &assets,
+                            msg,
+                            Color::srgba(0.20, 0.05, 0.05, 0.93),
+                            Color::srgb(0.85, 0.20, 0.20),
+                            Color::srgb(1.0, 0.80, 0.80),
+                            toast,
+                        );
+                    }
+                    play_audio_msg.write(PlayAudioMsg::new("error"));
                     teardown_duel(&mut commands);
                 },
             }
@@ -660,6 +710,7 @@ pub fn client_lobby_recv(
 pub fn host_check_start(
     mut commands: Commands,
     mut duel: Option<ResMut<DuelState>>,
+    player: Res<Player>,
     mut server_send: MessageWriter<ServerSendMsg>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
@@ -674,7 +725,7 @@ pub fn host_check_start(
         let opponent = duel.opponent.clone().unwrap();
         duel.phase = DuelPhase::Combat;
         duel.resolved = false;
-        server_send.write(ServerSendMsg::new(ServerMessage::StartCombat, None));
+        server_send.write(ServerSendMsg::new(ServerMessage::StartCombat(player.clone()), None));
         start_duel_combat(&mut commands, &opponent, &mut next_game_state);
     }
 }

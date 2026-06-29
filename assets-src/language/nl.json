@@ -7773,5 +7773,6 @@
   "duel.cancel": "Annuleren",
   "duel.accept": "Accepteren",
   "duel.decline": "Afwijzen",
-  "duel.start_duel": "Duel Starten"
+  "duel.start_duel": "Duel Starten",
+  "duel.declined_toast": "De tegenstander heeft het duel afgewezen"
 }
