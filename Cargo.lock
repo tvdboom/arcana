@@ -241,17 +241,20 @@ checksum = "c3d036a3c4ab069c7b410a2ce876bd74808d2d0888a82667669f8e783a898bf1"
 name = "arcana"
 version = "0.1.0"
 dependencies = [
+ "async-lock",
  "bevy",
  "bevy_kira_audio",
  "bevy_renet",
  "bimap",
  "bincode",
+ "futures-lite",
  "getrandom 0.2.17",
  "getrandom 0.4.1",
  "gpu-allocator",
  "image",
  "indicatif",
  "itertools 0.15.0",
+ "js-sys",
  "rand 0.10.1",
  "regex",
  "rfd",
@@ -260,6 +263,9 @@ dependencies = [
  "serde_json",
  "strum",
  "strum_macros",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
  "winit",
 ]
 

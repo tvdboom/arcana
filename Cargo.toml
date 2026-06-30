@@ -10,6 +10,11 @@ authors = ["Mavs"]
 name = "build-assets"
 path = "src/bin/build-assets.rs"
 
+# Bundles assets/ into a single assets.pak archive for shipping.
+[[bin]]
+name = "pack-assets"
+path = "src/bin/pack_assets.rs"
+
 # Feature flags for the build pipeline
 # process-assets: copy assets-src/ → assets/ and convert PNG → KTX2 (requires toktx)
 # generate-catalogs: regenerate inventory RON files when catalog_gen.rs / build images change
@@ -44,6 +49,7 @@ bevy = { version = "0.19.0", default-features = false, features = [
     "zstd_rust",
 ]}
 bevy_kira_audio = "0.26.0"
+futures-lite = "2.6.1"
 gpu-allocator = "0.28.0"
 itertools = "0.15.0"
 indicatif = "0.18.4"
@@ -71,6 +77,19 @@ rfd = "0.17.2"
 # https://docs.rs/getrandom/latest/getrandom/#webassembly-support
 getrandom_v2 = { package = "getrandom", version = "0.2.17", features = ["js"] }
 getrandom_v4 = { package = "getrandom", version = "0.4.1", features = ["wasm_js"] }
+
+# Used by the PakAssetReader to fetch byte ranges from assets.pak over HTTP.
+async-lock = "3.4.2"
+js-sys = "0.3.85"
+wasm-bindgen = "0.2.108"
+wasm-bindgen-futures = "0.4.58"
+web-sys = { version = "0.3.85", features = [
+    "Headers",
+    "Request",
+    "Response",
+    "Window",
+    "WorkerGlobalScope",
+] }
 
 [build-dependencies]
 indicatif = "0.18.4"

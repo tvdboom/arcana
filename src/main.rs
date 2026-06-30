@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod asset_pak;
 mod core;
 mod utils;
 
@@ -36,6 +37,10 @@ fn main() {
     ensure_inventory_catalogs();
 
     let mut app = App::new();
+
+    // Serve assets from the bundled `assets.pak` archive. Must run before
+    // `AssetPlugin` (added via `DefaultPlugins`) registers the default source.
+    asset_pak::register(&mut app);
 
     app.add_plugins(
         DefaultPlugins

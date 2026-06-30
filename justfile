@@ -11,6 +11,10 @@ build:
 build-release:
     cargo build --release
 
+# Bundle assets/ into a single assets.pak archive (ships one file instead of 25k+).
+pack-assets:
+    cargo run --release --bin pack-assets
+
 [windows]
 install-ktx:
     $ErrorActionPreference = 'Stop'; $ExePath = 'KTX-Software-{{KTX_VERSION}}-Windows-x64.exe'; $ExtractPath = 'C:\KTX-Software'; try { Invoke-WebRequest -Uri 'https://github.com/KhronosGroup/KTX-Software/releases/download/v{{KTX_VERSION}}/KTX-Software-{{KTX_VERSION}}-Windows-x64.exe' -OutFile $ExePath -ErrorAction Stop; $env:__compat_layer = 'RunAsInvoker'; $process = Start-Process -FilePath $ExePath -ArgumentList '/S', ('/D=' + $ExtractPath) -NoNewWindow -Wait -PassThru; Remove-Item $ExePath -Force; if ($process.ExitCode -ne 0) { throw ('Installer exited with code ' + $process.ExitCode); } Write-Host ('KTX-Software installed to ' + $ExtractPath); Write-Host ('KTX_BIN_PATH=' + $ExtractPath + '/bin') | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append -ErrorAction SilentlyContinue; } catch { Write-Error ('Failed to install KTX-Software: ' + $_); exit 1; }

@@ -43,7 +43,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p output
-          cp -r assets output/assets
+          just pack-assets
+          cp assets.pak output/assets.pak
           cp target/release/${{ env.GAME_NAME }}.exe output/
           cd output
           7z a ../${{ env.GAME_NAME }}-windows.zip .
@@ -104,8 +105,11 @@ jobs:
       - name: Build WASM
         run: just build-wasm
 
-      - name: Copy assets
-        run: cp -r $GITHUB_WORKSPACE/assets/ docs/assets
+      - name: Bundle assets into assets.pak
+        run: just pack-assets
+
+      - name: Copy assets archive
+        run: cp assets.pak docs/assets.pak
 
       - name: Configure GitHub Pages
         id: pages
