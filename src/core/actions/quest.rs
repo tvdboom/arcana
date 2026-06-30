@@ -721,7 +721,14 @@ pub fn handle_quest_card_clicks(
     }
 
     if xp_gain > 0 && !combat_triggered {
-        gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
+        gain_xp(
+            &mut player,
+            xp_gain,
+            &mut level_up,
+            &mut play_audio_msg,
+            &mut next_game_state,
+            true,
+        );
         spawn_toast(
             &mut commands,
             &assets,
@@ -853,7 +860,14 @@ pub fn handle_quest_card_clicks(
             );
         }
         if xp_gain > 0 {
-            gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
+            gain_xp(
+                &mut player,
+                xp_gain,
+                &mut level_up,
+                &mut play_audio_msg,
+                &mut next_game_state,
+                true,
+            );
             spawn_toast(
                 &mut commands,
                 &assets,

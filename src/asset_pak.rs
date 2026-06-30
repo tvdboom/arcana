@@ -155,20 +155,17 @@ impl PakInner {
             std::io::Error::new(std::io::ErrorKind::InvalidData, "assets.pak index is invalid")
         })?;
 
-        Ok(Self { pak_path, index })
+        Ok(Self {
+            pak_path,
+            index,
+        })
     }
 
-    async fn read_entry(
-        &self,
-        key: &str,
-        path: &Path,
-    ) -> Result<VecReader, AssetReaderError> {
+    async fn read_entry(&self, key: &str, path: &Path) -> Result<VecReader, AssetReaderError> {
         use std::io::{Read, Seek, SeekFrom};
 
-        let (offset, length) = *self
-            .index
-            .get(key)
-            .ok_or_else(|| AssetReaderError::NotFound(path.to_path_buf()))?;
+        let (offset, length) =
+            *self.index.get(key).ok_or_else(|| AssetReaderError::NotFound(path.to_path_buf()))?;
 
         if length == 0 {
             return Ok(VecReader::new(Vec::new()));
@@ -227,11 +224,7 @@ impl PakInner {
             .await
     }
 
-    async fn read_entry(
-        &self,
-        key: &str,
-        path: &Path,
-    ) -> Result<VecReader, AssetReaderError> {
+    async fn read_entry(&self, key: &str, path: &Path) -> Result<VecReader, AssetReaderError> {
         let (offset, length) = *self
             .index()
             .await?
@@ -278,12 +271,8 @@ async fn fetch_range(url: &str, req: RangeReq) -> Result<Vec<u8>, AssetReaderErr
         RangeReq::Suffix(len) => format!("bytes=-{len}"),
     };
 
-    let request =
-        Request::new_with_str(url).map_err(|e| js_err("create request", e))?;
-    request
-        .headers()
-        .set("Range", &header)
-        .map_err(|e| js_err("set Range header", e))?;
+    let request = Request::new_with_str(url).map_err(|e| js_err("create request", e))?;
+    request.headers().set("Range", &header).map_err(|e| js_err("set Range header", e))?;
 
     // Resolve the global scope (window or worker) to call `fetch` on.
     let global = js_sys::global();
@@ -298,15 +287,14 @@ async fn fetch_range(url: &str, req: RangeReq) -> Result<Vec<u8>, AssetReaderErr
     };
 
     let resp_value = JsFuture::from(promise).await.map_err(|e| js_err("fetch path", e))?;
-    let resp: Response = resp_value.dyn_into().map_err(|e: JsValue| js_err("convert Response", e))?;
+    let resp: Response =
+        resp_value.dyn_into().map_err(|e: JsValue| js_err("convert Response", e))?;
 
     match resp.status() {
         200 | 206 => {
-            let buffer = JsFuture::from(
-                resp.array_buffer().map_err(|e| js_err("read body", e))?,
-            )
-            .await
-            .map_err(|e| js_err("await body", e))?;
+            let buffer = JsFuture::from(resp.array_buffer().map_err(|e| js_err("read body", e))?)
+                .await
+                .map_err(|e| js_err("await body", e))?;
             let all = Uint8Array::new(&buffer).to_vec();
 
             // 206 already contains exactly the requested range; 200 returns the whole
@@ -319,15 +307,15 @@ async fn fetch_range(url: &str, req: RangeReq) -> Result<Vec<u8>, AssetReaderErr
                         let start = start as usize;
                         let end = (start + len as usize).min(all.len());
                         all.get(start..end).unwrap_or(&[]).to_vec()
-                    }
+                    },
                     RangeReq::Suffix(len) => {
                         let start = all.len().saturating_sub(len as usize);
                         all[start..].to_vec()
-                    }
+                    },
                 };
                 Ok(bytes)
             }
-        }
+        },
         // itch.io's CDN returns 403 for missing files.
         403 | 404 => Err(AssetReaderError::NotFound(url.into())),
         status => Err(AssetReaderError::HttpError(status)),
@@ -381,11 +369,7 @@ mod tests {
         let music: Vec<u8> = (0u8..50).collect();
         write_pak(
             &pak,
-            &[
-                ("audio/music.ogg", &music),
-                ("empty.bin", &[]),
-                ("images/icons/gold.ktx2", &gold),
-            ],
+            &[("audio/music.ogg", &music), ("empty.bin", &[]), ("images/icons/gold.ktx2", &gold)],
         );
 
         let inner = PakInner::new_file(pak).unwrap();
@@ -411,7 +395,11 @@ pub fn register(app: &mut App) {
         let inner = Arc::new(PakInner::new_http(PAK_PATH.to_string()));
         app.register_asset_source(
             AssetSourceId::Default,
-            AssetSourceBuilder::new(move || Box::new(PakAssetReader { inner: inner.clone() })),
+            AssetSourceBuilder::new(move || {
+                Box::new(PakAssetReader {
+                    inner: inner.clone(),
+                })
+            }),
         );
     }
 
@@ -429,13 +417,17 @@ pub fn register(app: &mut App) {
                 app.register_asset_source(
                     AssetSourceId::Default,
                     AssetSourceBuilder::new(move || {
-                        Box::new(PakAssetReader { inner: inner.clone() })
+                        Box::new(PakAssetReader {
+                            inner: inner.clone(),
+                        })
                     }),
                 );
-            }
+            },
             Err(err) => {
-                error!("Failed to open '{PAK_PATH}' ({err}); falling back to the 'assets/' folder.");
-            }
+                error!(
+                    "Failed to open '{PAK_PATH}' ({err}); falling back to the 'assets/' folder."
+                );
+            },
         }
     }
 }

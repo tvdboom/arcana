@@ -2151,8 +2151,18 @@ pub struct RebuildPlayingListsQueries<'w, 's> {
     pub abil_q: Query<'w, 's, Entity, With<AbilitiesList>>,
     pub perk_q: Query<'w, 's, Entity, With<PerksList>>,
     pub artifact_q: Query<'w, 's, Entity, With<ArtifactsList>>,
-    pub slot_q: Query<'w, 's, (&'static EquipSlot, &'static mut ImageNode), Without<crate::core::combat::mechanics::CombatSlot>>,
-    pub slot_vis_q: Query<'w, 's, (&'static EquipSlot, &'static mut Visibility), Without<crate::core::combat::mechanics::CombatSlot>>,
+    pub slot_q: Query<
+        'w,
+        's,
+        (&'static EquipSlot, &'static mut ImageNode),
+        Without<crate::core::combat::mechanics::CombatSlot>,
+    >,
+    pub slot_vis_q: Query<
+        'w,
+        's,
+        (&'static EquipSlot, &'static mut Visibility),
+        Without<crate::core::combat::mechanics::CombatSlot>,
+    >,
     pub children_q: Query<'w, 's, &'static Children>,
     pub equip_wrap_q: Query<
         'w,

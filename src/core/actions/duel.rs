@@ -51,15 +51,16 @@ pub fn setup_duel_ui(
 mod native {
     use super::*;
     use crate::core::audio::PlayAudioMsg;
-    use crate::core::constants::*;
     use crate::core::catalog::catalog::get_equipment;
     use crate::core::catalog::equipment::Equipment;
-    use crate::core::ui::scrollbar::{
-        ScrollableContainer, ScrollbarTrackX, ScrollbarThumbX, on_scrollbar_thumb_drag_x,
-    };
+    use crate::core::constants::*;
     use crate::core::network::{
-            broadcast_lobby, is_valid_ip, local_ip, portrait_key, start_client, start_host,
-            ClientMessage, ClientSendMsg, DeclinePending, DuelPhase, DuelRole, DuelState, Ip, ServerMessage, ServerSendMsg, MAX_BET_ITEMS,
+        broadcast_lobby, is_valid_ip, local_ip, portrait_key, start_client, start_host,
+        ClientMessage, ClientSendMsg, DeclinePending, DuelPhase, DuelRole, DuelState, Ip,
+        ServerMessage, ServerSendMsg, MAX_BET_ITEMS,
+    };
+    use crate::core::ui::scrollbar::{
+        on_scrollbar_thumb_drag_x, ScrollableContainer, ScrollbarThumbX, ScrollbarTrackX,
     };
 
     /// Marker on the container whose children are rebuilt when the lobby changes.
@@ -276,12 +277,24 @@ mod native {
             Some(d) if d.phase == DuelPhase::Connecting => {
                 build_waiting_view(&mut commands, content, &assets, &localization, lang, d)
             },
-            Some(d) if d.opponent.is_some() => {
-                build_betting_view(&mut commands, content, &assets, &localization, lang, &player, d, cached_scroll_x)
-            },
-            Some(_) => {
-                build_waiting_view(&mut commands, content, &assets, &localization, lang, &duel.unwrap())
-            },
+            Some(d) if d.opponent.is_some() => build_betting_view(
+                &mut commands,
+                content,
+                &assets,
+                &localization,
+                lang,
+                &player,
+                d,
+                cached_scroll_x,
+            ),
+            Some(_) => build_waiting_view(
+                &mut commands,
+                content,
+                &assets,
+                &localization,
+                lang,
+                &duel.unwrap(),
+            ),
         }
     }
 
@@ -302,133 +315,135 @@ mod native {
         let is_host_ip = valid && ip.trim() == my_ip;
 
         commands.entity(content).with_children(|parent| {
-            parent.spawn(Node {
-                width: percent(100.),
-                height: percent(100.),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                row_gap: Val::Px(20.),
-                ..default()
-            }).with_children(|center_parent| {
-                center_parent.spawn((
-                    add_text(localization.get("duel.enter_ip", lang), "bold", 2.6, assets),
-                    TextColor(BUTTON_TEXT_COLOR),
-                ));
+            parent
+                .spawn(Node {
+                    width: percent(100.),
+                    height: percent(100.),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    row_gap: Val::Px(20.),
+                    ..default()
+                })
+                .with_children(|center_parent| {
+                    center_parent.spawn((
+                        add_text(localization.get("duel.enter_ip", lang), "bold", 2.6, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                    ));
 
-                // IP textbox.
-                center_parent.spawn((
-                    Node {
-                        min_width: Val::Px(240.),
-                        padding: UiRect::axes(Val::Px(18.), Val::Px(10.)),
-                        border: UiRect::all(Val::Px(1.)),
-                        justify_content: JustifyContent::Center,
-                        ..default()
-                    },
-                    BackgroundColor(NORMAL_BUTTON_COLOR),
-                    BorderColor::all(BUTTON_BORDER_COLOR),
-                    children![(
-                        add_text(ip.to_string(), "medium", 2.4, assets),
-                        TextColor(Color::WHITE),
-                    )],
-                ));
+                    // IP textbox.
+                    center_parent.spawn((
+                        Node {
+                            min_width: Val::Px(240.),
+                            padding: UiRect::axes(Val::Px(18.), Val::Px(10.)),
+                            border: UiRect::all(Val::Px(1.)),
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        },
+                        BackgroundColor(NORMAL_BUTTON_COLOR),
+                        BorderColor::all(BUTTON_BORDER_COLOR),
+                        children![(
+                            add_text(ip.to_string(), "medium", 2.4, assets),
+                            TextColor(Color::WHITE),
+                        )],
+                    ));
 
-                // Host and Connect buttons container
-                center_parent
-                    .spawn(Node {
-                        flex_direction: FlexDirection::Row,
-                        column_gap: Val::Px(12.),
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        margin: UiRect::top(Val::Px(12.)),
-                        ..default()
-                    })
-                    .with_children(|parent| {
-                        // Host button (disabled when IP is not the same as local IP)
-                        let host_disabled = !is_host_ip;
-                        let (host_bg, host_border) = if is_host_ip {
-                            (NORMAL_BUTTON_COLOR, BUTTON_BORDER_COLOR)
-                        } else {
-                            (DISABLED_BUTTON_COLOR, DISABLED_BORDER_COLOR)
-                        };
-                        let mut host_btn = parent.spawn((
-                            Node {
-                                align_self: AlignSelf::Center,
-                                padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
-                                border: UiRect::all(Val::Px(1.)),
-                                ..default()
-                            },
-                            BackgroundColor(host_bg),
-                            BorderColor::all(host_border),
-                            Button,
-                            Interaction::default(),
-                            Pickable::default(),
-                            DuelHostBtn,
-                            children![(
-                                add_text(
-                                    localization.get("duel.host", lang),
-                                    "bold",
-                                    2.0,
-                                    assets
-                                ),
-                                TextColor(BUTTON_TEXT_COLOR),
-                            )],
-                        ));
-                        if host_disabled {
-                            host_btn.insert(crate::core::menu::buttons::DisabledButton);
-                        }
-                        host_btn
-                            .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                            .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
-                            .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
-                            .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
-                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                            .observe(cursor::<Out>(SystemCursorIcon::Default))
-                            .observe(on_host_click);
+                    // Host and Connect buttons container
+                    center_parent
+                        .spawn(Node {
+                            flex_direction: FlexDirection::Row,
+                            column_gap: Val::Px(12.),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            margin: UiRect::top(Val::Px(12.)),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            // Host button (disabled when IP is not the same as local IP)
+                            let host_disabled = !is_host_ip;
+                            let (host_bg, host_border) = if is_host_ip {
+                                (NORMAL_BUTTON_COLOR, BUTTON_BORDER_COLOR)
+                            } else {
+                                (DISABLED_BUTTON_COLOR, DISABLED_BORDER_COLOR)
+                            };
+                            let mut host_btn = parent.spawn((
+                                Node {
+                                    align_self: AlignSelf::Center,
+                                    padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
+                                    border: UiRect::all(Val::Px(1.)),
+                                    ..default()
+                                },
+                                BackgroundColor(host_bg),
+                                BorderColor::all(host_border),
+                                Button,
+                                Interaction::default(),
+                                Pickable::default(),
+                                DuelHostBtn,
+                                children![(
+                                    add_text(
+                                        localization.get("duel.host", lang),
+                                        "bold",
+                                        2.0,
+                                        assets
+                                    ),
+                                    TextColor(BUTTON_TEXT_COLOR),
+                                )],
+                            ));
+                            if host_disabled {
+                                host_btn.insert(crate::core::menu::buttons::DisabledButton);
+                            }
+                            host_btn
+                                .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                                .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                                .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+                                .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                .observe(on_host_click);
 
-                        // Connect button (enabled for all valid IPs)
-                        let connect_disabled = !valid;
-                        let (connect_bg, connect_border) = if valid {
-                            (NORMAL_BUTTON_COLOR, BUTTON_BORDER_COLOR)
-                        } else {
-                            (DISABLED_BUTTON_COLOR, DISABLED_BORDER_COLOR)
-                        };
-                        let mut connect_btn = parent.spawn((
-                            Node {
-                                align_self: AlignSelf::Center,
-                                padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
-                                border: UiRect::all(Val::Px(1.)),
-                                ..default()
-                            },
-                            BackgroundColor(connect_bg),
-                            BorderColor::all(connect_border),
-                            Button,
-                            Interaction::default(),
-                            Pickable::default(),
-                            DuelConnectBtn,
-                            children![(
-                                add_text(
-                                    localization.get("duel.connect", lang),
-                                    "bold",
-                                    2.0,
-                                    assets
-                                ),
-                                TextColor(BUTTON_TEXT_COLOR),
-                            )],
-                        ));
-                        if connect_disabled {
-                            connect_btn.insert(crate::core::menu::buttons::DisabledButton);
-                        }
-                        connect_btn
-                            .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                            .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
-                            .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
-                            .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
-                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                            .observe(cursor::<Out>(SystemCursorIcon::Default))
-                            .observe(on_connect_click);
-                    });
-            });
+                            // Connect button (enabled for all valid IPs)
+                            let connect_disabled = !valid;
+                            let (connect_bg, connect_border) = if valid {
+                                (NORMAL_BUTTON_COLOR, BUTTON_BORDER_COLOR)
+                            } else {
+                                (DISABLED_BUTTON_COLOR, DISABLED_BORDER_COLOR)
+                            };
+                            let mut connect_btn = parent.spawn((
+                                Node {
+                                    align_self: AlignSelf::Center,
+                                    padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
+                                    border: UiRect::all(Val::Px(1.)),
+                                    ..default()
+                                },
+                                BackgroundColor(connect_bg),
+                                BorderColor::all(connect_border),
+                                Button,
+                                Interaction::default(),
+                                Pickable::default(),
+                                DuelConnectBtn,
+                                children![(
+                                    add_text(
+                                        localization.get("duel.connect", lang),
+                                        "bold",
+                                        2.0,
+                                        assets
+                                    ),
+                                    TextColor(BUTTON_TEXT_COLOR),
+                                )],
+                            ));
+                            if connect_disabled {
+                                connect_btn.insert(crate::core::menu::buttons::DisabledButton);
+                            }
+                            connect_btn
+                                .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                                .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                                .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+                                .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                .observe(on_connect_click);
+                        });
+                });
         });
     }
 
@@ -445,58 +460,60 @@ mod native {
         use bevy::window::SystemCursorIcon;
 
         commands.entity(content).with_children(|parent| {
-            parent.spawn(Node {
-            width: percent(100.),
-            height: percent(100.),
-            flex_direction: FlexDirection::Column,
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            row_gap: Val::Px(20.),
-            ..default()
-            }).with_children(|center_parent| {
-                let waiting_text = if duel.role == DuelRole::Host {
-                    localization.get("duel.waiting", lang)
-                } else {
-                    localization.get("duel.waiting_for_host", lang)
-                };
-                center_parent.spawn((
-                    add_text(waiting_text, "medium", 2.4, assets),
-                    TextColor(Color::WHITE),
-                ));
+            parent
+                .spawn(Node {
+                    width: percent(100.),
+                    height: percent(100.),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    row_gap: Val::Px(20.),
+                    ..default()
+                })
+                .with_children(|center_parent| {
+                    let waiting_text = if duel.role == DuelRole::Host {
+                        localization.get("duel.waiting", lang)
+                    } else {
+                        localization.get("duel.waiting_for_host", lang)
+                    };
+                    center_parent.spawn((
+                        add_text(waiting_text, "medium", 2.4, assets),
+                        TextColor(Color::WHITE),
+                    ));
 
-                center_parent
-                    .spawn((
-                        Node {
-                            align_self: AlignSelf::Center,
-                            padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
-                            border: UiRect::all(Val::Px(1.)),
-                            margin: UiRect::top(Val::Px(12.)),
-                            ..default()
-                        },
-                        BackgroundColor(NORMAL_BUTTON_COLOR),
-                        BorderColor::all(BUTTON_BORDER_COLOR),
-                        Button,
-                        Interaction::default(),
-                        Pickable::default(),
-                        DuelCancelHostBtn,
-                        children![(
-                            add_text(
-                                localization.get("duel.cancel", lang),
-                                "bold",
-                                2.0,
-                                assets
-                            ),
-                            TextColor(BUTTON_TEXT_COLOR),
-                        )],
-                    ))
-                    .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
-                    .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
-                    .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
-                    .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
-                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                    .observe(cursor::<Out>(SystemCursorIcon::Default))
-                    .observe(on_cancel_host_click);
-            });
+                    center_parent
+                        .spawn((
+                            Node {
+                                align_self: AlignSelf::Center,
+                                padding: UiRect::axes(Val::Px(32.), Val::Px(10.)),
+                                border: UiRect::all(Val::Px(1.)),
+                                margin: UiRect::top(Val::Px(12.)),
+                                ..default()
+                            },
+                            BackgroundColor(NORMAL_BUTTON_COLOR),
+                            BorderColor::all(BUTTON_BORDER_COLOR),
+                            Button,
+                            Interaction::default(),
+                            Pickable::default(),
+                            DuelCancelHostBtn,
+                            children![(
+                                add_text(
+                                    localization.get("duel.cancel", lang),
+                                    "bold",
+                                    2.0,
+                                    assets
+                                ),
+                                TextColor(BUTTON_TEXT_COLOR),
+                            )],
+                        ))
+                        .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                        .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                        .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+                        .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+                        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                        .observe(cursor::<Out>(SystemCursorIcon::Default))
+                        .observe(on_cancel_host_click);
+                });
         });
     }
 
@@ -1075,7 +1092,9 @@ mod native {
         }
         play_audio_msg.write(PlayAudioMsg::new("button"));
         start_host(&mut commands);
-        commands.entity(*window_e).insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
+        commands
+            .entity(*window_e)
+            .insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
     }
 
     fn on_connect_click(
@@ -1095,7 +1114,9 @@ mod native {
         }
         play_audio_msg.write(PlayAudioMsg::new("button"));
         start_client(&mut commands, &ip_str);
-        commands.entity(*window_e).insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
+        commands
+            .entity(*window_e)
+            .insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
     }
 
     fn on_gold_click(

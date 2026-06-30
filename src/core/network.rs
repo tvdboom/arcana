@@ -18,6 +18,7 @@ use bincode::serde::{decode_from_slice, encode_to_vec};
 use serde::{Deserialize, Serialize};
 
 use crate::core::actions::gain_xp;
+use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::equipment::Equipment;
 use crate::core::classes::Class;
@@ -26,14 +27,13 @@ use crate::core::combat::mechanics::{
     try_use_consumable, CombatCard, CombatFx, CombatSpeed, CombatState, CombatStatus, Fighter,
     FxSide, ABILITY_HOTKEYS, CONSUMABLE_HOTKEYS,
 };
+use crate::core::localization::Localization;
 use crate::core::monsters::{ActiveMonster, Monster, MonsterKind};
 use crate::core::player::Player;
+use crate::core::settings::Settings;
 use crate::core::states::GameState;
 use crate::core::ui::creation::SelectionItem;
 use crate::core::ui::level_up::LevelUpPending;
-use crate::core::assets::WorldAssets;
-use crate::core::localization::Localization;
-use crate::core::settings::Settings;
 use crate::core::ui::toast::{spawn_toast, ToastContainer};
 
 const PROTOCOL_ID: u64 = 0xA2C4_0DEF_0001; // arbitrary but stable
@@ -142,6 +142,10 @@ pub struct DuelSnapshot {
     /// Floating-text events to show over each side this frame.
     pub fx_host: Vec<String>,
     pub fx_client: Vec<String>,
+    /// Remaining cooldowns for the host's active abilities.
+    pub host_ability_remaining: Vec<f32>,
+    /// Remaining cooldowns for the client's active abilities.
+    pub client_ability_remaining: Vec<f32>,
 }
 
 // ---------------------------------------------------------------------------
@@ -325,10 +329,7 @@ pub fn new_renet_server() -> (RenetServer, NetcodeServerTransport) {
 #[derive(Resource)]
 pub struct DeclinePending;
 
-pub fn handle_decline_pending(
-    mut commands: Commands,
-    pending: Option<Res<DeclinePending>>,
-) {
+pub fn handle_decline_pending(mut commands: Commands, pending: Option<Res<DeclinePending>>) {
     if pending.is_some() {
         commands.remove_resource::<DeclinePending>();
         teardown_duel(&mut commands);
@@ -559,7 +560,9 @@ pub fn server_lobby_recv(
                 },
                 ClientMessage::Decline => {
                     let lang = settings.language;
-                    let msg = localization.get_opt("duel.declined_toast", lang).unwrap_or_else(|| "The opponent declined the duel".to_string());
+                    let msg = localization
+                        .get_opt("duel.declined_toast", lang)
+                        .unwrap_or_else(|| "The opponent declined the duel".to_string());
                     if let Some(toast) = toast_container_q.iter().next() {
                         spawn_toast(
                             &mut commands,
@@ -686,7 +689,9 @@ pub fn client_lobby_recv(
                 },
                 ServerMessage::Decline => {
                     let lang = settings.language;
-                    let msg = localization.get_opt("duel.declined_toast", lang).unwrap_or_else(|| "The opponent declined the duel".to_string());
+                    let msg = localization
+                        .get_opt("duel.declined_toast", lang)
+                        .unwrap_or_else(|| "The opponent declined the duel".to_string());
                     if let Some(toast) = toast_container_q.iter().next() {
                         spawn_toast(
                             &mut commands,
@@ -803,6 +808,12 @@ fn apply_snapshot(state: &mut CombatState, snap: &DuelSnapshot) {
     // Client perspective: local player == snap.client, enemy == snap.host.
     apply_fighter(&mut state.player, &snap.client);
     apply_fighter(&mut state.enemy, &snap.host);
+    for (index, slot) in state.abilities.iter_mut().enumerate() {
+        slot.remaining = snap.client_ability_remaining.get(index).copied().unwrap_or(0.0);
+    }
+    for (index, slot) in state.enemy_abilities.iter_mut().enumerate() {
+        slot.remaining = snap.host_ability_remaining.get(index).copied().unwrap_or(0.0);
+    }
     if snap.over {
         state.status = CombatStatus::Over;
         state.player_won = !snap.host_won;
@@ -1006,6 +1017,8 @@ pub fn duel_host_combat(
         host_won: state.player_won,
         fx_host,
         fx_client,
+        host_ability_remaining: state.abilities.iter().map(|slot| slot.remaining).collect(),
+        client_ability_remaining: state.enemy_abilities.iter().map(|slot| slot.remaining).collect(),
     };
     server_send.write(ServerSendMsg::new(ServerMessage::Snapshot(snap), None));
 }
@@ -1037,6 +1050,12 @@ fn resolve_host_result(
             host_won,
             fx_host: Vec::new(),
             fx_client: Vec::new(),
+            host_ability_remaining: state.abilities.iter().map(|slot| slot.remaining).collect(),
+            client_ability_remaining: state
+                .enemy_abilities
+                .iter()
+                .map(|slot| slot.remaining)
+                .collect(),
         };
         server_send.write(ServerSendMsg::new(ServerMessage::Snapshot(snap), None));
 

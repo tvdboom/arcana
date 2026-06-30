@@ -15,8 +15,8 @@ pub mod network;
 
 #[cfg(target_arch = "wasm32")]
 pub mod network {
-    use bevy::prelude::*;
     use crate::core::player::Player;
+    use bevy::prelude::*;
 
     #[derive(Resource)]
     pub struct DuelState {
@@ -56,8 +56,8 @@ use crate::core::camera::*;
 use crate::core::combat::mechanics::{
     animate_death_skulls, animate_floating_text, cleanup_any_combat_artifacts,
     cleanup_combat_on_exit, combat_input, combat_tick, setup_combat_state, sync_consumable_cards,
-    update_combat_pause_indicator, update_combat_speed_label, update_combat_visuals,
-    update_combat_equipment_slots, CombatSpeed, DuelActive,
+    update_combat_equipment_slots, update_combat_pause_indicator, update_combat_speed_label,
+    update_combat_visuals, CombatSpeed, DuelActive,
 };
 use crate::core::combat::ui::setup_combat_ui;
 use crate::core::game_state::ShopUiState;
@@ -75,7 +75,9 @@ use crate::core::ui::dropdown::{shop_close_dropdown_on_outside_click, OpenDropdo
 use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpOverlayCmp};
 use crate::core::ui::modal::{modal_input_system, ActiveModal};
 use crate::core::ui::playing::*;
-use crate::core::ui::scrollbar::{scroll_system, update_scrollbar_system, update_scrollbar_x_system};
+use crate::core::ui::scrollbar::{
+    scroll_system, update_scrollbar_system, update_scrollbar_x_system,
+};
 use crate::core::ui::toast::{tick_gold_toasts, GoldToast};
 use crate::core::ui::utils::cleanup_panel_ui;
 use crate::core::utils::{despawn, reset_cursor};

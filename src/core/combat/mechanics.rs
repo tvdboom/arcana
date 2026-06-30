@@ -8,7 +8,9 @@ use crate::core::catalog::effects::Effect;
 use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::equipment::Kind;
 use crate::core::catalog::weapons::{Category, Weapon};
-use crate::core::combat::ui::{CombatCmp, CombatPortraitName, CombatPortraitLevel, CombatStatLabel, CombatPetName};
+use crate::core::combat::ui::{
+    CombatCmp, CombatPetName, CombatPortraitLevel, CombatPortraitName, CombatStatLabel,
+};
 use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin};
 use crate::core::monsters::ActiveMonster;
 use crate::core::player::Player;
@@ -100,6 +102,7 @@ pub enum CombatCard {
 #[derive(Component)]
 pub struct AbilityCooldownOverlay {
     pub slot: usize,
+    pub is_player: bool,
 }
 
 /// Root node of a consumable card, tagged with its catalog key for despawn/sync.
@@ -119,6 +122,7 @@ pub struct CombatSlot {
 #[derive(Component)]
 pub struct AbilityCooldownText {
     pub slot: usize,
+    pub is_player: bool,
 }
 
 /// Marker for the bottom combat button (forfeit / continue).
@@ -467,6 +471,7 @@ pub struct CombatState {
     pub pet: Option<Fighter>,
     pub enemy: Fighter,
     pub abilities: Vec<AbilitySlot>,
+    pub enemy_abilities: Vec<AbilitySlot>,
     pub status: CombatStatus,
     pub player_won: bool,
     pub player_level: u32,
@@ -713,29 +718,37 @@ pub fn setup_combat_state(
         }],
     };
 
-    let abilities = player
-        .active_abilities
-        .iter()
-        .map(|opt| {
-            let (cooldown, mana_cost) = opt
-                .as_deref()
-                .and_then(get_ability)
-                .map(|a| (a.cooldown, a.mana_cost))
-                .unwrap_or((0.0, 0));
-            AbilitySlot {
-                key: opt.clone(),
-                cooldown,
-                remaining: 0.0,
-                mana_cost: mana_cost.saturating_mul(ABILITY_MANA_COST_MULTIPLIER),
-            }
-        })
-        .collect();
+    let build_ability_slots = |active_abilities: &[Option<String>]| {
+        active_abilities
+            .iter()
+            .map(|opt| {
+                let (cooldown, mana_cost) = opt
+                    .as_deref()
+                    .and_then(get_ability)
+                    .map(|a| (a.cooldown, a.mana_cost))
+                    .unwrap_or((0.0, 0));
+                AbilitySlot {
+                    key: opt.clone(),
+                    cooldown,
+                    remaining: 0.0,
+                    mana_cost: mana_cost.saturating_mul(ABILITY_MANA_COST_MULTIPLIER),
+                }
+            })
+            .collect::<Vec<_>>()
+    };
+    let abilities = build_ability_slots(&player.active_abilities);
+    let enemy_abilities = duel_state
+        .as_ref()
+        .and_then(|duel| duel.opponent.as_ref())
+        .map(|opp| build_ability_slots(&opp.active_abilities))
+        .unwrap_or_default();
 
     commands.insert_resource(CombatState {
         player: player_fighter,
         pet: pet_fighter,
         enemy: enemy_fighter,
         abilities,
+        enemy_abilities,
         status: CombatStatus::Ongoing,
         player_won: false,
         player_level: player.level(),
@@ -1309,9 +1322,11 @@ pub fn step_combat(
     }
 
     // Ability cooldowns.
-    for slot in state.abilities.iter_mut() {
-        if slot.remaining > 0.0 {
-            slot.remaining = (slot.remaining - dt).max(0.0);
+    for slots in [&mut state.abilities, &mut state.enemy_abilities] {
+        for slot in slots.iter_mut() {
+            if slot.remaining > 0.0 {
+                slot.remaining = (slot.remaining - dt).max(0.0);
+            }
         }
     }
 
@@ -1392,7 +1407,9 @@ pub fn step_combat(
                     play_audio_msg.write(PlayAudioMsg::new(key));
                 }
 
-                if let Some((style, outcome)) = resolve_basic_attack(state, attacker, defender, weapon_index) {
+                if let Some((style, outcome)) =
+                    resolve_basic_attack(state, attacker, defender, weapon_index)
+                {
                     match outcome {
                         AttackOutcome::Hit => {
                             play_audio_msg.write(PlayAudioMsg::new(on_attack_hit_sound(style)));
@@ -1414,7 +1431,8 @@ pub fn step_combat(
     let enemy_dead = !state.enemy.alive || state.enemy.display_health.round() as i32 <= 0;
     if enemy_dead || player_side_dead {
         state.status = CombatStatus::Over;
-        state.player_won = enemy_dead && (state.player.alive && state.player.display_health.round() as i32 > 0);
+        state.player_won =
+            enemy_dead && (state.player.alive && state.player.display_health.round() as i32 > 0);
         if state.player_won {
             play_audio_msg.write(PlayAudioMsg::new("levelup").volume(-10.));
             let xp_reward = state.xp_reward();
@@ -1625,6 +1643,14 @@ pub fn enemy_cast_ability(
     let Some(ability) = get_ability(key) else {
         return;
     };
+    if let Some(slot) =
+        state.enemy_abilities.iter_mut().find(|slot| slot.key.as_deref() == Some(key))
+    {
+        if slot.cooldown <= 0.0 {
+            slot.cooldown = ability.cooldown;
+        }
+        slot.remaining = slot.cooldown;
+    }
 
     // The host player can dodge offensive effects.
     let has_offensive = ability.effects.iter().any(|e| !effect_targets_self(e));
@@ -1843,12 +1869,83 @@ pub fn update_combat_speed_label(
 
 #[derive(bevy::ecs::system::SystemParam)]
 pub struct CombatTranslationParams<'w, 's> {
-    pub name_q: Query<'w, 's, (&'static mut Text, &'static CombatPortraitName), (Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>)>,
-    pub level_q: Query<'w, 's, (&'static mut Text, &'static CombatPortraitLevel), (Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>)>,
-    pub stat_label_q: Query<'w, 's, (&'static mut Text, &'static CombatStatLabel), (Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>)>,
-    pub pet_name_q: Query<'w, 's, &'static mut Text, (With<CombatPetName>, Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>, Without<CombatStatLabel>)>,
-    pub enemy_mana_label_q: Query<'w, 's, &'static mut Text, (With<crate::core::combat::ui::CombatEnemyManaText>, Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>, Without<CombatStatLabel>, Without<CombatPetName>)>,
-    pub cooldown_text_q: Query<'w, 's, (&'static AbilityCooldownText, &'static mut Text, &'static mut Visibility), (Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>, Without<CombatStatLabel>, Without<CombatPetName>, Without<crate::core::combat::ui::CombatEnemyManaText>)>,
+    pub name_q: Query<
+        'w,
+        's,
+        (&'static mut Text, &'static CombatPortraitName),
+        (
+            Without<crate::core::ui::playing::StatLabel>,
+            Without<crate::core::combat::ui::CombatMonsterHealthText>,
+            Without<CombatEndButtonText>,
+        ),
+    >,
+    pub level_q: Query<
+        'w,
+        's,
+        (&'static mut Text, &'static CombatPortraitLevel),
+        (
+            Without<crate::core::ui::playing::StatLabel>,
+            Without<crate::core::combat::ui::CombatMonsterHealthText>,
+            Without<CombatEndButtonText>,
+            Without<CombatPortraitName>,
+        ),
+    >,
+    pub stat_label_q: Query<
+        'w,
+        's,
+        (&'static mut Text, &'static CombatStatLabel),
+        (
+            Without<crate::core::ui::playing::StatLabel>,
+            Without<crate::core::combat::ui::CombatMonsterHealthText>,
+            Without<CombatEndButtonText>,
+            Without<CombatPortraitName>,
+            Without<CombatPortraitLevel>,
+        ),
+    >,
+    pub pet_name_q: Query<
+        'w,
+        's,
+        &'static mut Text,
+        (
+            With<CombatPetName>,
+            Without<crate::core::ui::playing::StatLabel>,
+            Without<crate::core::combat::ui::CombatMonsterHealthText>,
+            Without<CombatEndButtonText>,
+            Without<CombatPortraitName>,
+            Without<CombatPortraitLevel>,
+            Without<CombatStatLabel>,
+        ),
+    >,
+    pub enemy_mana_label_q: Query<
+        'w,
+        's,
+        &'static mut Text,
+        (
+            With<crate::core::combat::ui::CombatEnemyManaText>,
+            Without<crate::core::ui::playing::StatLabel>,
+            Without<crate::core::combat::ui::CombatMonsterHealthText>,
+            Without<CombatEndButtonText>,
+            Without<CombatPortraitName>,
+            Without<CombatPortraitLevel>,
+            Without<CombatStatLabel>,
+            Without<CombatPetName>,
+        ),
+    >,
+    pub cooldown_text_q: Query<
+        'w,
+        's,
+        (&'static AbilityCooldownText, &'static mut Text, &'static mut Visibility),
+        (
+            Without<crate::core::ui::playing::StatLabel>,
+            Without<crate::core::combat::ui::CombatMonsterHealthText>,
+            Without<CombatEndButtonText>,
+            Without<CombatPortraitName>,
+            Without<CombatPortraitLevel>,
+            Without<CombatStatLabel>,
+            Without<CombatPetName>,
+            Without<crate::core::combat::ui::CombatEnemyManaText>,
+        ),
+    >,
 }
 
 pub fn localize_monster_name(
@@ -1870,11 +1967,13 @@ pub fn localize_monster_name(
             let color_loc = localization.get_opt(&color_key, lang).unwrap_or_else(|| {
                 localization.get_opt(color, lang).unwrap_or_else(|| color.to_string())
             });
-            let dragon_loc = localization.get_opt("Dragon", lang).unwrap_or_else(|| "Dragon".to_string());
+            let dragon_loc =
+                localization.get_opt("Dragon", lang).unwrap_or_else(|| "Dragon".to_string());
             if stage.is_empty() {
                 return format!("{} {}", color_loc, dragon_loc);
             } else {
-                let stage_loc = localization.get_opt(&stage, lang).unwrap_or_else(|| stage.to_string());
+                let stage_loc =
+                    localization.get_opt(&stage, lang).unwrap_or_else(|| stage.to_string());
                 return format!("{} {} ({})", color_loc, dragon_loc, stage_loc);
             }
         }
@@ -1972,7 +2071,9 @@ pub fn update_combat_visuals(
 
     if let Some(ref pet) = player.pet {
         if let Ok(mut text) = translation_params.pet_name_q.single_mut() {
-            let pet_name = localization.get_opt(&pet.name, lang).unwrap_or_else(|| crate::utils::capitalize_words(&pet.name));
+            let pet_name = localization
+                .get_opt(&pet.name, lang)
+                .unwrap_or_else(|| crate::utils::capitalize_words(&pet.name));
             if text.0 != pet_name {
                 text.0 = pet_name;
             }
@@ -2087,8 +2188,12 @@ pub fn update_combat_visuals(
 
     // Ability cooldown / disabled overlays.
     for (overlay, mut node) in &mut overlay_q {
-        let frac = state
-            .abilities
+        let slots = if overlay.is_player {
+            &state.abilities
+        } else {
+            &state.enemy_abilities
+        };
+        let frac = slots
             .get(overlay.slot)
             .map(|slot| {
                 if slot.key.is_none() {
@@ -2105,13 +2210,14 @@ pub fn update_combat_visuals(
 
     // Cooldown text overlays.
     for (cooldown_text, mut text, mut vis) in &mut translation_params.cooldown_text_q {
-        let remaining = state
-            .abilities
-            .get(cooldown_text.slot)
-            .map(|slot| slot.remaining)
-            .unwrap_or(0.0);
+        let slots = if cooldown_text.is_player {
+            &state.abilities
+        } else {
+            &state.enemy_abilities
+        };
+        let remaining = slots.get(cooldown_text.slot).map(|slot| slot.remaining).unwrap_or(0.0);
         if remaining > 0.0 {
-            text.0 = format!("{:.1}", remaining);
+            text.0 = format!("{:.1}s", remaining);
             *vis = Visibility::Visible;
         } else {
             text.0 = "".to_string();
@@ -2337,7 +2443,11 @@ pub fn animate_floating_text(
         let frac = (fct.timer / fct.life).clamp(0.0, 1.0);
         // Centered XP text barely drifts so it stays over the portrait; hit
         // numbers float upward more noticeably.
-        let drift = if fct.centered { 4.0 } else { 10.0 };
+        let drift = if fct.centered {
+            4.0
+        } else {
+            10.0
+        };
         node.top = Val::Percent(fct.start_top - frac * drift);
         let alpha = (1.0 - frac).clamp(0.0, 1.0);
         color.0 = color.0.with_alpha(alpha);
@@ -2429,7 +2539,12 @@ pub fn update_combat_equipment_slots(
     player: Res<Player>,
     duel_state: Option<Res<crate::core::network::DuelState>>,
     assets: Res<crate::core::assets::WorldAssets>,
-    mut slot_q: Query<(&CombatSlot, &crate::core::ui::playing::EquipSlot, &mut ImageNode, &mut Visibility)>,
+    mut slot_q: Query<(
+        &CombatSlot,
+        &crate::core::ui::playing::EquipSlot,
+        &mut ImageNode,
+        &mut Visibility,
+    )>,
 ) {
     let opponent = duel_state.as_ref().and_then(|d| d.opponent.as_ref());
 
@@ -2478,13 +2593,19 @@ pub fn update_combat_equipment_slots(
                 crate::core::ui::playing::EquipSlot::Accessory => player.accessory.is_some(),
                 crate::core::ui::playing::EquipSlot::Accessory2 => player.accessory2.is_some(),
                 crate::core::ui::playing::EquipSlot::WeaponLH => player.weapon_lh.is_some(),
-                crate::core::ui::playing::EquipSlot::WeaponRH => player.weapon_rh.is_some() && !is_p_lh_two_hand,
+                crate::core::ui::playing::EquipSlot::WeaponRH => {
+                    player.weapon_rh.is_some() && !is_p_lh_two_hand
+                },
                 crate::core::ui::playing::EquipSlot::Chestplate => player.armor.is_some(),
                 crate::core::ui::playing::EquipSlot::Boots => player.boots.is_some(),
                 crate::core::ui::playing::EquipSlot::Gloves => player.gloves.is_some(),
             };
 
-            let target_vis = if visible { Visibility::Visible } else { Visibility::Hidden };
+            let target_vis = if visible {
+                Visibility::Visible
+            } else {
+                Visibility::Hidden
+            };
             if *vis != target_vis {
                 *vis = target_vis;
             }
@@ -2513,13 +2634,19 @@ pub fn update_combat_equipment_slots(
                 crate::core::ui::playing::EquipSlot::Accessory => opp.accessory.is_some(),
                 crate::core::ui::playing::EquipSlot::Accessory2 => opp.accessory2.is_some(),
                 crate::core::ui::playing::EquipSlot::WeaponLH => opp.weapon_lh.is_some(),
-                crate::core::ui::playing::EquipSlot::WeaponRH => opp.weapon_rh.is_some() && !is_e_lh_two_hand,
+                crate::core::ui::playing::EquipSlot::WeaponRH => {
+                    opp.weapon_rh.is_some() && !is_e_lh_two_hand
+                },
                 crate::core::ui::playing::EquipSlot::Chestplate => opp.armor.is_some(),
                 crate::core::ui::playing::EquipSlot::Boots => opp.boots.is_some(),
                 crate::core::ui::playing::EquipSlot::Gloves => opp.gloves.is_some(),
             };
 
-            let target_vis = if visible { Visibility::Visible } else { Visibility::Hidden };
+            let target_vis = if visible {
+                Visibility::Visible
+            } else {
+                Visibility::Hidden
+            };
             if *vis != target_vis {
                 *vis = target_vis;
             }

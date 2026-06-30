@@ -382,7 +382,7 @@ pub fn handle_volume_keyboard_input(
     mut text_q: Query<&mut Text, With<VolumeSliderText>>,
 ) {
     let mut changed = false;
-    
+
     if keyboard.just_pressed(KeyCode::ArrowUp) {
         settings.volume = (settings.volume + 0.1).min(1.0);
         changed = true;
@@ -390,7 +390,7 @@ pub fn handle_volume_keyboard_input(
         settings.volume = (settings.volume - 0.1).max(0.0);
         changed = true;
     }
-    
+
     if changed {
         set_volume_visuals(settings.volume, &mut settings, &mut handle_q, &mut fill_q, &mut text_q);
     }

@@ -149,7 +149,15 @@ pub fn setup_combat_ui(
                 })
                 .with_children(|parent| {
                     spawn_player_panel(parent, &assets, &localization, lang, &player);
-                    spawn_monster_panel(parent, &assets, &localization, lang, monster, is_pvp, opponent);
+                    spawn_monster_panel(
+                        parent,
+                        &assets,
+                        &localization,
+                        lang,
+                        monster,
+                        is_pvp,
+                        opponent,
+                    );
                 });
 
             parent
@@ -603,12 +611,16 @@ fn spawn_portrait_label(
             parent.spawn((
                 add_text(capitalize_words(name), "bold", 2.8, assets),
                 TextColor(BUTTON_TEXT_COLOR),
-                CombatPortraitName { is_player },
+                CombatPortraitName {
+                    is_player,
+                },
             ));
             parent.spawn((
                 add_text(format!("Level {}", level), "medium", 2.2, assets),
                 TextColor(Color::WHITE),
-                CombatPortraitLevel { is_player },
+                CombatPortraitLevel {
+                    is_player,
+                },
             ));
         });
 }
@@ -888,7 +900,9 @@ fn spawn_equipment_slot_column(
                         Button,
                         Pickable::default(),
                         *slot,
-                        crate::core::combat::mechanics::CombatSlot { is_player },
+                        crate::core::combat::mechanics::CombatSlot {
+                            is_player,
+                        },
                     ))
                     .observe(crate::core::utils::cursor::<Over>(SystemCursorIcon::Pointer))
                     .observe(crate::core::utils::cursor::<Out>(SystemCursorIcon::Default))
@@ -936,6 +950,7 @@ fn spawn_active_abilities(
                             ability_key.map(|key| RightColumnTooltip::Ability(key.to_string())),
                             COMBAT_ABILITY_CARD_SIZE,
                             false,
+                            Some(index),
                             Some(crate::core::combat::mechanics::CombatCard::Ability(index)),
                             true,
                         );
@@ -989,6 +1004,7 @@ fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, pl
                             Some(RightColumnTooltip::Equipment(key.clone())),
                             COMBAT_CONSUMABLE_CARD_SIZE,
                             true,
+                            None,
                             Some(crate::core::combat::mechanics::CombatCard::Consumable(
                                 key.clone(),
                             )),
@@ -1010,6 +1026,7 @@ fn spawn_hover_card(
     tooltip: Option<RightColumnTooltip>,
     card_size: f32,
     dark_background: bool,
+    ability_overlay_slot: Option<usize>,
     combat_card: Option<crate::core::combat::mechanics::CombatCard>,
     is_player: bool,
 ) {
@@ -1075,7 +1092,7 @@ fn spawn_hover_card(
 
     cmd.with_children(|parent| {
         // Cooldown / disabled dark overlay for abilities (driven by combat state).
-        if let Some(CombatCard::Ability(slot)) = combat_card.clone() {
+        if let Some(slot) = ability_overlay_slot {
             parent.spawn((
                 Node {
                     position_type: PositionType::Absolute,
@@ -1090,31 +1107,35 @@ fn spawn_hover_card(
                 Pickable::IGNORE,
                 AbilityCooldownOverlay {
                     slot,
+                    is_player,
                 },
             ));
 
             // Cooldown remaining text overlay
-            parent.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(0.),
-                    right: Val::Px(0.),
-                    top: Val::Px(0.),
-                    bottom: Val::Px(0.),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                Pickable::IGNORE,
-            )).with_children(|parent| {
-                parent.spawn((
-                    add_text("", "bold", 2.2, assets),
-                    TextColor(Color::WHITE),
-                    crate::core::combat::mechanics::AbilityCooldownText {
-                        slot,
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(0.),
+                        right: Val::Px(0.),
+                        top: Val::Px(0.),
+                        bottom: Val::Px(0.),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        ..default()
                     },
-                ));
-            });
+                    Pickable::IGNORE,
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text("", "bold", 2.2, assets),
+                        TextColor(Color::WHITE),
+                        crate::core::combat::mechanics::AbilityCooldownText {
+                            slot,
+                            is_player,
+                        },
+                    ));
+                });
         }
         if show_hotkey {
             parent
@@ -1227,7 +1248,11 @@ fn spawn_monster_panel(
                                 &monster_display_name(monster),
                                 monster.level,
                                 &monster.image,
-                                if is_pvp { opponent.and_then(|opp| opp.pet.as_ref()) } else { None },
+                                if is_pvp {
+                                    opponent.and_then(|opp| opp.pet.as_ref())
+                                } else {
+                                    None
+                                },
                                 is_pvp,
                             );
                             spawn_monster_health_bar(parent, assets, localization, lang, monster);
@@ -1502,6 +1527,7 @@ fn spawn_enemy_active_abilities(
                             ability_key.map(|key| RightColumnTooltip::Ability(key.to_string())),
                             COMBAT_ABILITY_CARD_SIZE,
                             false,
+                            Some(index),
                             None,
                             false,
                         );
@@ -1559,6 +1585,7 @@ fn spawn_enemy_consumables(
                             Some(RightColumnTooltip::Equipment(key.clone())),
                             COMBAT_CONSUMABLE_CARD_SIZE,
                             true,
+                            None,
                             None,
                             false,
                         );
