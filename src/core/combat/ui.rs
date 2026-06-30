@@ -372,6 +372,7 @@ fn spawn_character_portrait(
                 14.0,
                 &[EquipSlot::Accessory, EquipSlot::Accessory2],
                 true,
+                true,
             );
             spawn_equipment_slot_column(
                 parent,
@@ -387,6 +388,7 @@ fn spawn_character_portrait(
                     EquipSlot::Boots,
                 ],
                 false,
+                true,
             );
         });
 }
@@ -840,6 +842,7 @@ fn spawn_equipment_slot_column(
     top: f32,
     slots: &[EquipSlot],
     is_left_column: bool,
+    is_player: bool,
 ) {
     let (width, height) = if is_left_column {
         (16.0, 30.0)
@@ -885,6 +888,7 @@ fn spawn_equipment_slot_column(
                         Button,
                         Pickable::default(),
                         *slot,
+                        crate::core::combat::mechanics::CombatSlot { is_player },
                     ))
                     .observe(crate::core::utils::cursor::<Over>(SystemCursorIcon::Pointer))
                     .observe(crate::core::utils::cursor::<Out>(SystemCursorIcon::Default))
@@ -933,6 +937,7 @@ fn spawn_active_abilities(
                             COMBAT_ABILITY_CARD_SIZE,
                             false,
                             Some(crate::core::combat::mechanics::CombatCard::Ability(index)),
+                            true,
                         );
                     }
                 });
@@ -987,6 +992,7 @@ fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, pl
                             Some(crate::core::combat::mechanics::CombatCard::Consumable(
                                 key.clone(),
                             )),
+                            true,
                         );
                     }
                 });
@@ -1005,6 +1011,7 @@ fn spawn_hover_card(
     card_size: f32,
     dark_background: bool,
     combat_card: Option<crate::core::combat::mechanics::CombatCard>,
+    is_player: bool,
 ) {
     use crate::core::combat::mechanics::{
         handle_combat_card_click, AbilityCooldownOverlay, CombatCard, ConsumableCardRoot,
@@ -1059,7 +1066,10 @@ fn spawn_hover_card(
             });
         }
         if let CombatCard::Consumable(key) = &card {
-            cmd.insert(ConsumableCardRoot(key.clone()));
+            cmd.insert(ConsumableCardRoot {
+                key: key.clone(),
+                is_player,
+            });
         }
     }
 
@@ -1076,12 +1086,35 @@ fn spawn_hover_card(
                     height: percent(0.),
                     ..default()
                 },
-                BackgroundColor(Color::srgba(0., 0., 0., 0.9)),
+                BackgroundColor(Color::srgba(0., 0., 0., 0.95)),
                 Pickable::IGNORE,
                 AbilityCooldownOverlay {
                     slot,
                 },
             ));
+
+            // Cooldown remaining text overlay
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.),
+                    right: Val::Px(0.),
+                    top: Val::Px(0.),
+                    bottom: Val::Px(0.),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                Pickable::IGNORE,
+            )).with_children(|parent| {
+                parent.spawn((
+                    add_text("", "bold", 2.2, assets),
+                    TextColor(Color::WHITE),
+                    crate::core::combat::mechanics::AbilityCooldownText {
+                        slot,
+                    },
+                ));
+            });
         }
         if show_hotkey {
             parent
@@ -1262,6 +1295,7 @@ fn spawn_monster_portrait(
                     14.0,
                     &[EquipSlot::Accessory, EquipSlot::Accessory2],
                     true,
+                    false,
                 );
                 spawn_equipment_slot_column(
                     parent,
@@ -1276,6 +1310,7 @@ fn spawn_monster_portrait(
                         EquipSlot::Gloves,
                         EquipSlot::Boots,
                     ],
+                    false,
                     false,
                 );
             }
@@ -1398,31 +1433,33 @@ fn spawn_enemy_mana_bar(
                 CombatEnemyManaFill,
             ));
 
-            parent.spawn((
-                Node {
+            parent
+                .spawn(Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(0.),
-                    top: Val::Px(0.),
                     width: percent(100.),
                     height: percent(100.),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     ..default()
-                },
-                add_text(
-                    format!(
-                        "{} / {} {}",
-                        mana.round() as i32,
-                        max_mana.round() as i32,
-                        localization.get("general.mana", lang)
-                    ),
-                    "bold",
-                    1.9,
-                    assets,
-                ),
-                TextColor(Color::WHITE),
-                CombatEnemyManaText,
-            ));
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text(
+                            format!(
+                                "{} / {} (+{}) {}",
+                                mana.round() as i32,
+                                max_mana.round() as i32,
+                                opponent.map(|o| o.mana_regen() as i32).unwrap_or(0),
+                                localization.get("general.mana", lang)
+                            ),
+                            "bold",
+                            1.9,
+                            assets,
+                        ),
+                        TextColor(Color::WHITE),
+                        CombatEnemyManaText,
+                    ));
+                });
         });
 }
 
@@ -1466,6 +1503,7 @@ fn spawn_enemy_active_abilities(
                             COMBAT_ABILITY_CARD_SIZE,
                             false,
                             None,
+                            false,
                         );
                     }
                 });
@@ -1522,6 +1560,7 @@ fn spawn_enemy_consumables(
                             COMBAT_CONSUMABLE_CARD_SIZE,
                             true,
                             None,
+                            false,
                         );
                     }
                 });

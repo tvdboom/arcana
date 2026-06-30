@@ -995,7 +995,7 @@ mod native {
 
                     // Large, slanted "ACCEPTED!" text overlaying the enemy image diagonally
                     if duel.opp_accept {
-                        right_parent.spawn((
+                        right_parent.spawn(
                             Node {
                                 position_type: PositionType::Absolute,
                                 width: percent(100.),
@@ -1004,13 +1004,11 @@ mod native {
                                 justify_content: JustifyContent::Center,
                                 ..default()
                             },
-                            Transform::default(),
-                            GlobalTransform::default(),
-                        )).with_children(|accepted_overlay| {
+                        ).with_children(|accepted_overlay| {
                             accepted_overlay.spawn((
                                 add_text(localization.get("duel.accepted", lang).to_uppercase(), "bold", 4.5, assets),
                                 TextColor(Color::srgb_u8(120, 240, 120)),
-                                Transform::from_rotation(Quat::from_rotation_z(-25.0_f32.to_radians())),
+                                UiTransform::from_rotation(Rot2::degrees(-25.0)),
                             ));
                         });
                     }

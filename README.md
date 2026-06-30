@@ -8,10 +8,12 @@
 <br><br>
 </div>
 
-<img src="https://github.com/tvdboom/arcana/blob/master/assets/images/bg/scenery1.png?raw=true" alt="scenery1">
-<img src="https://github.com/tvdboom/arcana/blob/master/assets/images/bg/scenery2.png?raw=true" alt="scenery2">
-<img src="https://github.com/tvdboom/arcana/blob/master/assets/images/bg/scenery3.png?raw=true" alt="scenery3">
-<img src="https://github.com/tvdboom/arcana/blob/master/assets/images/bg/scenery4.png?raw=true" alt="scenery4">
+<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s1.png?raw=true" alt="scenery1">
+<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s2.png?raw=true" alt="scenery2">
+<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s3.png?raw=true" alt="scenery3">
+<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s4.png?raw=true" alt="scenery4">
+<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s5.png?raw=true" alt="scenery4">
+<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s6.png?raw=true" alt="scenery4">
 
 <br>
 
@@ -105,4 +107,3 @@ $$\text{Final Damage} = \text{Base Damage} \times \text{Variance} \times \text{I
 * **Lifesteal**: Heals the attacker by $\text{Final Damage} \times \sum (\text{Lifesteal\_pct} / 100.0)$.
 * **Thorns**: Reflects damage back to the attacker, hitting them for $\text{Final Damage} \times \sum (\text{Thorns\_damage\_reflected\_pct} / 100.0)$.
 * **Weapon Effects**: Applies active weapons' on-hit effect chains (e.g. Poison, Burn, Pierce) to the defender, and defensive weapon/shield on-being-hit effect chains back to the attacker.
-

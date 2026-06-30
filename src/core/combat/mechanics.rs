@@ -104,7 +104,22 @@ pub struct AbilityCooldownOverlay {
 
 /// Root node of a consumable card, tagged with its catalog key for despawn/sync.
 #[derive(Component)]
-pub struct ConsumableCardRoot(pub String);
+pub struct ConsumableCardRoot {
+    pub key: String,
+    pub is_player: bool,
+}
+
+/// Identifies whether an equipment slot is for player or opponent/enemy.
+#[derive(Component)]
+pub struct CombatSlot {
+    pub is_player: bool,
+}
+
+/// Remaining cooldown seconds overlay text child of an ability card.
+#[derive(Component)]
+pub struct AbilityCooldownText {
+    pub slot: usize,
+}
 
 /// Marker for the bottom combat button (forfeit / continue).
 #[derive(Component)]
@@ -1833,6 +1848,7 @@ pub struct CombatTranslationParams<'w, 's> {
     pub stat_label_q: Query<'w, 's, (&'static mut Text, &'static CombatStatLabel), (Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>)>,
     pub pet_name_q: Query<'w, 's, &'static mut Text, (With<CombatPetName>, Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>, Without<CombatStatLabel>)>,
     pub enemy_mana_label_q: Query<'w, 's, &'static mut Text, (With<crate::core::combat::ui::CombatEnemyManaText>, Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>, Without<CombatStatLabel>, Without<CombatPetName>)>,
+    pub cooldown_text_q: Query<'w, 's, (&'static AbilityCooldownText, &'static mut Text, &'static mut Visibility), (Without<crate::core::ui::playing::StatLabel>, Without<crate::core::combat::ui::CombatMonsterHealthText>, Without<CombatEndButtonText>, Without<CombatPortraitName>, Without<CombatPortraitLevel>, Without<CombatStatLabel>, Without<CombatPetName>, Without<crate::core::combat::ui::CombatEnemyManaText>)>,
 }
 
 pub fn localize_monster_name(
@@ -2061,9 +2077,10 @@ pub fn update_combat_visuals(
     }
     if let Ok(mut text) = translation_params.enemy_mana_label_q.single_mut() {
         text.0 = format!(
-            "{} / {} {}",
+            "{} / {} (+{}) {}",
             state.enemy.mana.round().max(0.0) as i32,
             state.enemy.max_mana.round() as i32,
+            state.enemy.mana_regen.round() as i32,
             mana_word
         );
     }
@@ -2084,6 +2101,22 @@ pub fn update_combat_visuals(
             })
             .unwrap_or(0.0);
         node.height = Val::Percent(frac * 100.0);
+    }
+
+    // Cooldown text overlays.
+    for (cooldown_text, mut text, mut vis) in &mut translation_params.cooldown_text_q {
+        let remaining = state
+            .abilities
+            .get(cooldown_text.slot)
+            .map(|slot| slot.remaining)
+            .unwrap_or(0.0);
+        if remaining > 0.0 {
+            text.0 = format!("{:.1}", remaining);
+            *vis = Visibility::Visible;
+        } else {
+            text.0 = "".to_string();
+            *vis = Visibility::Hidden;
+        }
     }
     for (ability, mut image) in &mut ability_image_q {
         let out_of_mana = state
@@ -2324,8 +2357,11 @@ pub fn sync_consumable_cards(
         return;
     }
     for (entity, card) in &q {
-        let available = player.inventory.iter().any(|k| *k == card.0)
-            && player.equipped_consumables.iter().any(|k| *k == card.0);
+        if !card.is_player {
+            continue;
+        }
+        let available = player.inventory.iter().any(|k| *k == card.key)
+            && player.equipped_consumables.iter().any(|k| *k == card.key);
         if !available {
             commands.entity(entity).despawn();
         }
@@ -2393,14 +2429,8 @@ pub fn update_combat_equipment_slots(
     player: Res<Player>,
     duel_state: Option<Res<crate::core::network::DuelState>>,
     assets: Res<crate::core::assets::WorldAssets>,
-    player_portrait_q: Query<Entity, With<crate::core::combat::ui::CombatPlayerPortrait>>,
-    enemy_portrait_q: Query<Entity, With<crate::core::combat::ui::CombatEnemyPortrait>>,
-    mut slot_q: Query<(Entity, &ChildOf, &crate::core::ui::playing::EquipSlot, &mut ImageNode, &mut Visibility)>,
-    parent_q: Query<&ChildOf>,
+    mut slot_q: Query<(&CombatSlot, &crate::core::ui::playing::EquipSlot, &mut ImageNode, &mut Visibility)>,
 ) {
-    let player_portrait = player_portrait_q.iter().next();
-    let enemy_portrait = enemy_portrait_q.iter().next();
-
     let opponent = duel_state.as_ref().and_then(|d| d.opponent.as_ref());
 
     let is_p_lh_two_hand = player
@@ -2422,23 +2452,8 @@ pub fn update_combat_equipment_slots(
         })
         .unwrap_or(false);
 
-    for (_entity, parent, slot, mut image, mut vis) in &mut slot_q {
-        let mut is_player_slot = true;
-        if let Ok(grandparent) = parent_q.get(parent.0) {
-            if Some(grandparent.0) == enemy_portrait {
-                is_player_slot = false;
-            } else if Some(grandparent.0) == player_portrait {
-                is_player_slot = true;
-            } else if let Ok(greatgrandparent) = parent_q.get(grandparent.0) {
-                if Some(greatgrandparent.0) == enemy_portrait {
-                    is_player_slot = false;
-                } else if Some(greatgrandparent.0) == player_portrait {
-                    is_player_slot = true;
-                }
-            }
-        }
-
-        if is_player_slot {
+    for (combat_slot, slot, mut image, mut vis) in &mut slot_q {
+        if combat_slot.is_player {
             let equipped_key = match slot {
                 crate::core::ui::playing::EquipSlot::Helmet => player.helmet.as_deref(),
                 crate::core::ui::playing::EquipSlot::Accessory => player.accessory.as_deref(),
