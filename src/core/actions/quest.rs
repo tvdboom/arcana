@@ -64,7 +64,7 @@ pub fn apply_pending_quest_xp(
 
     let amount = pending_quest_xp.amount;
     pending_quest_xp.amount = 0;
-    gain_xp(&mut player, amount, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
+    gain_xp(&mut player, amount, &mut level_up, &mut play_audio_msg, &mut next_game_state);
 }
 
 pub fn apply_pending_quest_rewards(
@@ -727,7 +727,6 @@ pub fn handle_quest_card_clicks(
             &mut level_up,
             &mut play_audio_msg,
             &mut next_game_state,
-            true,
         );
         spawn_toast(
             &mut commands,
@@ -866,7 +865,6 @@ pub fn handle_quest_card_clicks(
                 &mut level_up,
                 &mut play_audio_msg,
                 &mut next_game_state,
-                true,
             );
             spawn_toast(
                 &mut commands,

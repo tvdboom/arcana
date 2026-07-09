@@ -51,8 +51,8 @@ duration (in seconds) between basic auto-attacks:
 $$\text{Attack Period} = \text{clamp}\left(\frac{2.0}{\text{Effective Attack Speed}}, 0.2, 10.0\right)$$
 
 * **Effective Attack Speed** is modified by active effects:
-  * `Freeze`: Multiplies speed by $1.0 + \text{attack\_speed\_pct} / 100.0$ (capped at $0.1$ minimum).
-  * `BeastFrenzy`: Multiplies speed by $1.0 + \text{attack\_speed\_pct} / 100.0$.
+  * `Freeze`: Multiplies speed by $1.0 + \text{attack speed pct} / 100.0$ (capped at $0.1$ minimum).
+  * `BeastFrenzy`: Multiplies speed by $1.0 + \text{attack speed pct} / 100.0$.
 
 ---
 
@@ -62,7 +62,7 @@ When an attack triggers, it undergoes a sequential resolution process:
 
 #### **Step A: Miss Chance**
 An attack may miss entirely if the attacker is afflicted with **Blind**:
-$$\text{Miss Chance} = \text{clamp}\left(\sum \frac{\text{Blind miss\_pct}}{100.0}, 0.0, 0.90\right)$$
+$$\text{Miss Chance} = \text{clamp}\left(\sum \frac{\text{Blind miss pct}}{100.0}, 0.0, 0.90\right)$$
 If a random roll is below the miss chance, the attack fails.
 
 #### **Step B: Dodge Chance**
@@ -70,12 +70,12 @@ If the attacker does not miss, and the defender is able to move (not `Immobilize
 $$\text{Dodge Chance} = \text{clamp}\left(0.18 + (\text{Defender Initiative} - \text{Attacker Initiative}) \times 0.018, 0.08, 0.70\right)$$
 
 * **Effective Initiative** ($I$) is modified by:
-  * `Haste`: Multiplies initiative by $1.0 + \text{initiative\_pct} / 100.0$.
-  * `Paranoia`: Multiplies initiative by $(1.0 - \text{initiative\_pct} / 100.0)$ (capped at $0.0$ minimum).
+  * `Haste`: Multiplies initiative by $1.0 + \text{initiative pct} / 100.0$.
+  * `Paranoia`: Multiplies initiative by $(1.0 - \text{initiative pct} / 100.0)$ (capped at $0.0$ minimum).
 
 #### **Step C: Critical Strike Roll**
 An attack has a chance to land a critical strike (inflicting double damage):
-$$\text{Total Crit Chance} = \text{clamp}\left(\text{Base Crit} + \sum \frac{\text{Focus crit\_chance\_pct}}{100.0}, 0.0, 1.0\right)$$
+$$\text{Total Crit Chance} = \text{clamp}\left(\text{Base Crit} + \sum \frac{\text{Focus crit chance pct}}{100.0}, 0.0, 1.0\right)$$
 
 ---
 
@@ -91,11 +91,11 @@ $$\text{Final Damage} = \text{Base Damage} \times \text{Variance} \times \text{I
 * **Effective Attack**:
   * `Berserk`, `Empower`, and `BeastFrenzy` each apply $(1.0 + \text{percentage} / 100.0)$ multipliers.
 * **Effective Defense**:
-  * `Fortify` applies $(1.0 + \text{defense\_pct} / 100.0)$ multiplier.
+  * `Fortify` applies $(1.0 + \text{defense pct} / 100.0)$ multiplier.
 * **Incoming Multiplier**:
-  * `Vulnerability` multiplies incoming damage by $1.0 + \text{damage\_pct} / 100.0$.
+  * `Vulnerability` multiplies incoming damage by $1.0 + \text{damage pct} / 100.0$.
 * **Bleed Multiplier**:
-  * If a one-shot `Bleed` effect is present on the attacker, it is consumed to multiply damage by $1.0 + \text{bleed\_damage\_pct} / 100.0$.
+  * If a one-shot `Bleed` effect is present on the attacker, it is consumed to multiply damage by $1.0 + \text{bleed damage pct} / 100.0$.
 * **Critical Multiplier**:
   * Equals $2.0$ on a critical hit, and $1.0$ otherwise.
 * **Minimum Damage**: Final damage is clamped to a minimum of $1.0$.
@@ -104,6 +104,6 @@ $$\text{Final Damage} = \text{Base Damage} \times \text{Variance} \times \text{I
 
 ### 4. On-Hit and Reflection Effects
 
-* **Lifesteal**: Heals the attacker by $\text{Final Damage} \times \sum (\text{Lifesteal\_pct} / 100.0)$.
-* **Thorns**: Reflects damage back to the attacker, hitting them for $\text{Final Damage} \times \sum (\text{Thorns\_damage\_reflected\_pct} / 100.0)$.
+* **Lifesteal**: Heals the attacker by $\text{Final Damage} \times \sum (\text{Lifesteal pct} / 100.0)$.
+* **Thorns**: Reflects damage back to the attacker, hitting them for $\text{Final Damage} \times \sum (\text{Thorns damage reflected pct} / 100.0)$.
 * **Weapon Effects**: Applies active weapons' on-hit effect chains (e.g. Poison, Burn, Pierce) to the defender, and defensive weapon/shield on-being-hit effect chains back to the attacker.

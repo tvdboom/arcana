@@ -259,7 +259,7 @@ pub fn build_rest_content_inner(
 
             // Card 3: Grand Accommodation (Costs 3 AP + 50 * level Gold)
             let title3 = localization.get("grand_accommodation", lang);
-            let max_bonus = 10 * (level as i32 + player.constitution_mod()).max(10);
+            let max_bonus = 10 * (level as i32 + player.constitution_mod()).max(1);
             let desc3 = localization
                 .get("grand_accommodation_desc", lang)
                 .replace("{min_bonus}", &0.to_string())
@@ -571,7 +571,7 @@ pub fn handle_rest_card_clicks(
                 // Grand Accommodation: returns full health and mana back and also between
                 // 1-(10 * player level * constitution mod) extra max health and max mana
                 let bonus =
-                    10 * rng.random_range(1..=(level as i32 + player.constitution_mod())) as u32;
+                    10 * rng.random_range(1..=(level as i32 + player.constitution_mod()).max(1)) as u32;
 
                 player.bonus_max_health += bonus;
                 player.bonus_max_mana += bonus;

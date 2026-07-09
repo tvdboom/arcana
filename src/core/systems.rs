@@ -26,14 +26,19 @@ pub fn check_keys_menu(
     mut combat_menu_suspended: ResMut<CombatMenuSuspended>,
     mut state: Option<ResMut<crate::core::combat::mechanics::CombatState>>,
     duel_active: Option<Res<crate::core::combat::mechanics::DuelActive>>,
+    context: Option<Res<crate::core::ui::defeat::DefeatContext>>,
 ) {
+    if context.is_some() {
+        return;
+    }
+
     let cheat_level_up = *app_state.get() == AppState::Game
         && keyboard.just_released(KeyCode::ArrowUp)
         && (keyboard.pressed(KeyCode::ControlLeft) || keyboard.pressed(KeyCode::ControlRight))
         && (keyboard.pressed(KeyCode::ShiftLeft) || keyboard.pressed(KeyCode::ShiftRight));
     if cheat_level_up {
         let old_level = player.level();
-        gain_xp(&mut player, 10, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
+        gain_xp(&mut player, 10, &mut level_up, &mut play_audio_msg, &mut next_game_state);
         if player.level() > old_level && level_up.active {
             let mut rng = rng();
             while level_up.points_remaining > 0 {

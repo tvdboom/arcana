@@ -1800,8 +1800,8 @@ pub fn info_tooltip_system(
                 vec![localization.get("general.gold_desc", lang)],
             ),
             InfoTooltip::ActionPoints => (
-                localization.get("general.active_points", lang),
-                vec![localization.get("general.active_points_desc", lang)],
+                localization.get("general.action_points", lang),
+                vec![localization.get("general.action_points_desc", lang)],
             ),
             InfoTooltip::Xp => (
                 localization.get("general.xp", lang),
@@ -3508,7 +3508,7 @@ pub fn spawn_equipment_card<'a>(
 }
 
 pub fn update_action_buttons(
-    _player: Res<Player>,
+    player: Res<Player>,
     mut commands: Commands,
     mut btn_q: Query<(
         Entity,
@@ -3519,8 +3519,19 @@ pub fn update_action_buttons(
         Option<&DisabledButton>,
     )>,
 ) {
-    for (entity, _action_btn, mut bg, mut border, mut img, disabled) in &mut btn_q {
-        if disabled.is_some() {
+    // When the player is defeated (0 health, e.g. after losing a combat), lock
+    // every action except Rest so they must recover before doing anything else.
+    let defeated = player.health() == 0;
+    for (entity, action_btn, mut bg, mut border, mut img, disabled) in &mut btn_q {
+        let should_disable = defeated && action_btn.0 != Action::Rest;
+        if should_disable {
+            if disabled.is_none() {
+                commands.entity(entity).insert(DisabledButton);
+            }
+            bg.0 = DISABLED_BUTTON_COLOR;
+            *border = BorderColor::all(DISABLED_BORDER_COLOR);
+            img.color = Color::srgba(1.0, 1.0, 1.0, 0.3);
+        } else if disabled.is_some() {
             commands.entity(entity).remove::<DisabledButton>();
             bg.0 = NORMAL_BUTTON_COLOR;
             *border = BorderColor::all(BUTTON_BORDER_COLOR);

@@ -13,7 +13,7 @@ use crate::core::combat::ui::{
 };
 use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin};
 use crate::core::monsters::ActiveMonster;
-use crate::core::player::Player;
+use crate::core::player::{Attribute, Player};
 use crate::core::states::GameState;
 use crate::core::ui::playing::TooltipNode;
 
@@ -45,6 +45,8 @@ const DEATH_SKULL_END_SIZE: f32 = 50.0;
 /// Scales down health/mana regeneration during combat so fights don't drag on
 /// when regen would otherwise outpace incoming damage.
 const COMBAT_REGEN_MULTIPLIER: f32 = 0.3;
+/// Action points added as a penalty when a (non-duel) combat is lost.
+const LOST_COMBAT_AP_PENALTY: u32 = 5;
 /// Bounds and step for the adjustable combat speed.
 const COMBAT_SPEED_MIN: f32 = 0.25;
 const COMBAT_SPEED_MAX: f32 = 8.0;
@@ -274,7 +276,47 @@ impl Fighter {
                 _ => {},
             }
         }
+        v += self.stat_boost_bonus(&[Attribute::Strength, Attribute::Intelligence]);
         v.max(0.0)
+    }
+
+    /// Sums the flat combat bonus granted by active `StatBoost` effects whose
+    /// attribute governs the requested combat stat.
+    fn stat_boost_bonus(&self, attrs: &[Attribute]) -> f32 {
+        let mut bonus = 0.0;
+        for te in &self.effects {
+            if let Effect::StatBoost {
+                attribute,
+                amount,
+                ..
+            } = &te.effect
+            {
+                if attrs.contains(attribute) {
+                    bonus += *amount as f32;
+                }
+            }
+        }
+        bonus
+    }
+
+    /// Fraction by which active `Clearcasting` effects reduce ability mana cost.
+    fn clearcasting_reduction(&self) -> f32 {
+        let mut r = 0.0;
+        for te in &self.effects {
+            if let Effect::Clearcasting {
+                reduction_pct,
+                ..
+            } = &te.effect
+            {
+                r += reduction_pct / 100.0;
+            }
+        }
+        r.clamp(0.0, 0.9)
+    }
+
+    /// Whether an active `Taunt` is forcing enemies to strike this fighter's pet.
+    fn has_taunt(&self) -> bool {
+        self.effects.iter().any(|te| matches!(te.effect, Effect::Taunt { .. }))
     }
 
     #[allow(dead_code)]
@@ -338,6 +380,7 @@ impl Fighter {
                 v *= 1.0 + defense_pct / 100.0;
             }
         }
+        v += self.stat_boost_bonus(&[Attribute::Constitution, Attribute::Wisdom]);
         v.max(0.0)
     }
 
@@ -356,6 +399,7 @@ impl Fighter {
                 _ => {},
             }
         }
+        v += self.stat_boost_bonus(&[Attribute::Dexterity, Attribute::Charisma]);
         v.max(0.0)
     }
 
@@ -977,16 +1021,28 @@ fn resolve_basic_attack(
     // single hit by skipping on-hit effect chains for enemy auto-attacks.
     if !matches!(attacker, Who::Enemy) {
         for we in weapon_effects.iter().filter(|w| w.on_hit) {
-            apply_effect(state, attacker, defender, &we.effect);
+            // Self-buffs (Bleed, Clearcasting, Lifesteal, ManaFlow, Thorns, ...)
+            // belong on the wielder; offensive effects hit the target.
+            let tgt = if effect_targets_self(&we.effect) {
+                attacker
+            } else {
+                defender
+            };
+            apply_effect(state, attacker, tgt, &we.effect);
         }
     }
-    // Apply the defender's on-being-hit weapon effects back to the attacker.
+    // Apply the defender's on-being-hit weapon effects (shields/books).
     let def_when_hit: Vec<Effect> = state
         .get(defender)
         .map(|d| d.weapon_effects.iter().filter(|w| !w.on_hit).map(|w| w.effect.clone()).collect())
         .unwrap_or_default();
     for e in def_when_hit {
-        apply_effect(state, defender, attacker, &e);
+        let tgt = if effect_targets_self(&e) {
+            defender
+        } else {
+            attacker
+        };
+        apply_effect(state, defender, tgt, &e);
     }
     Some((attack_style, AttackOutcome::Hit))
 }
@@ -1064,6 +1120,27 @@ fn apply_effect(state: &mut CombatState, source: Who, target: Who, effect: &Effe
                 t.effects.retain(|te| is_positive(&te.effect));
             }
         },
+        Effect::Cleave {
+            damage_pct,
+            ..
+        } => {
+            // A cleaving strike: deal a percentage of the source's attack as
+            // immediate damage to the target, mitigated by its defense.
+            let atk = state.get(source).map(|s| s.eff_attack_for(s.base_attack)).unwrap_or(0.0);
+            let (def, incoming) = state
+                .get(target)
+                .map(|t| (t.eff_defense(), t.incoming_multiplier()))
+                .unwrap_or((0.0, 1.0));
+            let dmg = compute_damage(atk * (damage_pct / 100.0), def, false, incoming);
+            if let Some(t) = state.get_mut(target) {
+                t.take_damage(dmg);
+            }
+            state.fx.push(CombatFx {
+                side: side_of(target),
+                text: format!("-{}", dmg.round() as i32),
+                color: Color::srgb(1.0, 0.6, 0.2),
+            });
+        },
         // Timed buffs / debuffs / damage-over-time / heal-over-time.
         _ => push_timed(state, target, effect.clone()),
     }
@@ -1109,7 +1186,6 @@ fn effect_targets_self(effect: &Effect) -> bool {
             | Effect::Berserk { .. }
             | Effect::Bleed { .. }
             | Effect::Clearcasting { .. }
-            | Effect::Cleave { .. }
             | Effect::EchoStruck { .. }
             | Effect::Empower { .. }
             | Effect::Focus { .. }
@@ -1358,9 +1434,17 @@ pub fn step_combat(
         }
     }
 
-    // Basic attacks paced by attack speed.
+    // Basic attacks paced by attack speed. A Taunt on the player's side forces
+    // the enemy to strike the pet instead of the player (only while it lives).
+    let enemy_target = if state.pet.as_ref().map(|p| p.alive).unwrap_or(false)
+        && (state.player.has_taunt() || state.pet.as_ref().map(|p| p.has_taunt()).unwrap_or(false))
+    {
+        Who::Pet
+    } else {
+        Who::Player
+    };
     for (attacker, defender) in
-        [(Who::Player, Who::Enemy), (Who::Pet, Who::Enemy), (Who::Enemy, Who::Player)]
+        [(Who::Player, Who::Enemy), (Who::Pet, Who::Enemy), (Who::Enemy, enemy_target)]
     {
         let num_weapons = {
             let Some(f) = state.get(attacker) else {
@@ -1434,7 +1518,7 @@ pub fn step_combat(
         state.player_won =
             enemy_dead && (state.player.alive && state.player.display_health.round() as i32 > 0);
         if state.player_won {
-            play_audio_msg.write(PlayAudioMsg::new("levelup").volume(-10.));
+            play_audio_msg.write(PlayAudioMsg::new("victory").volume(-10.));
             let xp_reward = state.xp_reward();
             let xp_word = state.xp_word.clone();
             state.fx.push(CombatFx {
@@ -1468,6 +1552,14 @@ pub fn combat_tick(
     let dt = time.delta_secs() * combat_speed.0;
 
     step_combat(state, dt, &mut play_audio_msg);
+
+    // Losing a combat applies a 5 action-point penalty. `combat_tick` only runs
+    // outside networked duels (see its `run_if` in the schedule), so PvP duels
+    // are naturally excluded. This fires exactly once: on the frame the fight is
+    // decided, later frames early-return above once the status is `Over`.
+    if state.status == CombatStatus::Over && !state.player_won {
+        player.ap += LOST_COMBAT_AP_PENALTY;
+    }
 
     // Sync working values back to the Player / pet / monster resources so other
     // displays stay coherent and combat results persist after leaving. Only write
@@ -1514,11 +1606,13 @@ pub fn try_cast_ability(
     let Some(key) = slot.key.clone() else {
         return;
     };
+    let effective_cost =
+        (slot.mana_cost as f32 * (1.0 - state.player.clearcasting_reduction())).round();
     if slot.remaining > 0.0 || !state.player.can_cast() {
         play_audio_msg.write(PlayAudioMsg::new("error"));
         return;
     }
-    if state.player.mana < slot.mana_cost as f32 {
+    if state.player.mana < effective_cost {
         play_audio_msg.write(PlayAudioMsg::new("error"));
         return;
     }
@@ -1526,7 +1620,7 @@ pub fn try_cast_ability(
         return;
     };
 
-    state.player.mana -= slot.mana_cost as f32;
+    state.player.mana -= effective_cost;
 
     // Allies that beneficial effects land on (self, plus the pet when AoE).
     let mut allies = vec![Who::Player];
@@ -1725,7 +1819,9 @@ pub fn enemy_use_consumable(
 
 pub fn handle_combat_card_click(
     event: On<Pointer<Click>>,
+    mut commands: Commands,
     card_q: Query<&CombatCard>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
     mut state: Option<ResMut<CombatState>>,
     mut player: ResMut<Player>,
     duel: Option<Res<DuelActive>>,
@@ -1744,7 +1840,13 @@ pub fn handle_combat_card_click(
     match card.clone() {
         CombatCard::Ability(index) => try_cast_ability(state, index, &mut play_audio_msg),
         CombatCard::Consumable(key) => {
-            try_use_consumable(state, &mut player, &key, &mut play_audio_msg)
+            try_use_consumable(state, &mut player, &key, &mut play_audio_msg);
+            // Using a consumable can despawn its card (stock exhausted) before the
+            // hover system emits an interaction change, leaving the tooltip stuck
+            // open. Clear any open tooltip so it disappears on use.
+            for entity in &tooltip_q {
+                commands.entity(entity).try_despawn();
+            }
         },
     }
 }
@@ -2462,10 +2564,12 @@ pub fn sync_consumable_cards(
     mut commands: Commands,
     player: Res<Player>,
     q: Query<(Entity, &ConsumableCardRoot)>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
 ) {
     if !player.is_changed() {
         return;
     }
+    let mut despawned_any = false;
     for (entity, card) in &q {
         if !card.is_player {
             continue;
@@ -2474,6 +2578,13 @@ pub fn sync_consumable_cards(
             && player.equipped_consumables.iter().any(|k| *k == card.key);
         if !available {
             commands.entity(entity).despawn();
+            despawned_any = true;
+        }
+    }
+    // A despawned card can leave its hover tooltip stuck open; clear it.
+    if despawned_any {
+        for entity in &tooltip_q {
+            commands.entity(entity).try_despawn();
         }
     }
 }
@@ -2482,6 +2593,7 @@ pub fn sync_consumable_cards(
 /// continue once combat is over).
 pub fn handle_combat_end_button_click(
     _event: On<Pointer<Click>>,
+    mut commands: Commands,
     state: Option<Res<CombatState>>,
     duel: Option<Res<DuelActive>>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
@@ -2492,6 +2604,23 @@ pub fn handle_combat_end_button_click(
         if s.status == CombatStatus::Over {
             if duel.is_none() {
                 pending_hunt_xp.amount = s.xp_reward();
+            }
+            // A lost combat leaves the player severely injured: show the defeat
+            // screen overlay on top of the playing page.
+            if !s.player_won {
+                commands.insert_resource(crate::core::ui::defeat::DefeatContext {
+                    was_pvp: duel.is_some(),
+                });
+                // Clear any pending hunt / quest rewards/XP on loss so no XP is gained!
+                // "dying means no xp gain at all."
+                commands.insert_resource(crate::core::actions::hunt::PendingHuntXp::default());
+                commands.insert_resource(crate::core::actions::hunt::PendingHuntLoot::default());
+                commands.insert_resource(crate::core::actions::quest::PendingQuestXp::default());
+                commands.insert_resource(crate::core::actions::quest::PendingQuestRewards::default());
+
+                play_audio_msg.write(PlayAudioMsg::new("button"));
+                next_game_state.set(GameState::Playing);
+                return;
             }
         } else if duel.is_some() {
             // During a networked duel, we cannot forfeit/leave combat mid-fight.

@@ -1792,10 +1792,10 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     for (filename, level) in creatures_files.iter() {
         let name = capitalize_words(&clean_name(filename));
         let img = img_name(filename, img_ext);
-        let max_hp = 30 + *level * 10;
-        let attack = 5 + *level * 2;
-        let defense = 5 + *level * 2;
-        let initiative = 5 + *level * 2;
+        let max_hp = 40 + *level * 13;
+        let attack = 7 + *level * 3;
+        let defense = 6 + *level * 2;
+        let initiative = 6 + *level * 2;
         let modifiers = monster_modifiers(&name, *level, "Creature");
         let effects = monster_effects(&name, *level);
 
@@ -1860,10 +1860,10 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             let level = start_level + age_idx as u32 * 2;
             let name = format!("{} {}", color, age_display);
             let img = format!("{}_{}.{}", color.to_lowercase(), file_suffix, img_ext);
-            let max_hp = 30 + level * 10;
-            let attack = 5 + level * 2;
-            let defense = 5 + level * 2;
-            let initiative = 5 + level * 2;
+            let max_hp = 40 + level * 13;
+            let attack = 7 + level * 3;
+            let defense = 6 + level * 2;
+            let initiative = 6 + level * 2;
             let modifiers = monster_modifiers(&name, level, "Dragon");
             let effects = monster_effects(&name, level);
 

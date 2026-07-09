@@ -1,5 +1,6 @@
 pub mod button;
 pub mod creation;
+pub mod defeat;
 pub mod dropdown;
 pub mod level_up;
 pub mod modal;

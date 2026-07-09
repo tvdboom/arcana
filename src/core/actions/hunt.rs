@@ -44,7 +44,7 @@ pub fn apply_pending_hunt_xp(
 
     let amount = pending_hunt_xp.amount;
     pending_hunt_xp.amount = 0;
-    gain_xp(&mut player, amount, &mut level_up, &mut play_audio_msg, &mut next_game_state, false);
+    gain_xp(&mut player, amount, &mut level_up, &mut play_audio_msg, &mut next_game_state);
 }
 
 pub fn apply_pending_hunt_loot(
@@ -509,7 +509,7 @@ pub fn handle_hunt_card_clicks(
         player.add_inventory_item(artifact_name.clone());
     }
 
-    gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state, true);
+    gain_xp(&mut player, xp_gain, &mut level_up, &mut play_audio_msg, &mut next_game_state);
     play_audio_msg.write(PlayAudioMsg::new("hunt"));
 
     if let Some(artifact_name) = loot_found {

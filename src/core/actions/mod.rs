@@ -68,7 +68,6 @@ pub fn trigger_level_up(
     level_up: &mut LevelUpPending,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
     next_game_state: &mut NextState<GameState>,
-    play_levelup_sound: bool,
 ) {
     next_game_state.set(GameState::Playing);
     let mut rng = rng();
@@ -140,6 +139,7 @@ pub fn trigger_level_up(
         if perk_pool.is_empty() {
             break;
         }
+
         let idx = rng.random_range(0..perk_pool.len());
         perk_choices.push(perk_pool[idx].name.to_string());
         perk_pool.remove(idx);
@@ -167,27 +167,22 @@ pub fn trigger_level_up(
         perk_chosen,
     };
 
-    if play_levelup_sound {
-        play_audio_msg.write(PlayAudioMsg::new("levelup").volume(-10.));
-    }
+    play_audio_msg.write(PlayAudioMsg::new("levelup").volume(-10.));
 }
 
 // Reusable XP gain helper that triggers level up.
-// `play_levelup_sound` should be `false` when the XP is awarded right after a
-// combat win, because winning combat already plays the victory (level-up) jingle.
 pub fn gain_xp(
     player: &mut Player,
     amount: u32,
     level_up: &mut LevelUpPending,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
     next_game_state: &mut NextState<GameState>,
-    play_levelup_sound: bool,
 ) {
     let old_level = player.level();
     player.xp += amount;
     let new_level = player.level();
     if new_level > old_level {
-        trigger_level_up(player, level_up, play_audio_msg, next_game_state, play_levelup_sound);
+        trigger_level_up(player, level_up, play_audio_msg, next_game_state);
     }
 }
 

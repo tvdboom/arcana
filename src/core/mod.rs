@@ -145,6 +145,7 @@ impl Plugin for GamePlugin {
             .init_resource::<CombatSpeed>()
             .init_resource::<GameMenuOrigin>()
             .init_resource::<CombatMenuSuspended>()
+            .init_resource::<crate::core::ui::defeat::PendingAutoRest>()
             .init_resource::<RightTabScroll>();
 
         // Sets
@@ -251,6 +252,17 @@ impl Plugin for GamePlugin {
             .add_systems(
                 OnExit(GameState::Playing),
                 (despawn::<TooltipNode>, despawn::<GoldToast>, despawn::<LevelUpOverlayCmp>),
+            )
+            .add_systems(
+                OnEnter(GameState::Playing),
+                crate::core::ui::defeat::auto_open_rest_after_defeat.after(setup_playing_screen),
+            )
+            .add_systems(
+                Update,
+                (
+                    crate::core::ui::defeat::manage_defeat_overlay,
+                    crate::core::ui::defeat::handle_defeat_keyboard_input,
+                ).run_if(in_state(GameState::Playing)),
             )
             .add_systems(
                 OnExit(AppState::Game),

@@ -885,8 +885,8 @@ fn apply_local_rewards(
         for it in items_won {
             player.add_inventory_item(it.clone());
         }
-        gain_xp(player, xp_won, level_up, play_audio_msg, next_game_state, false);
-        play_audio_msg.write(PlayAudioMsg::new("levelup").volume(-10.));
+        gain_xp(player, xp_won, level_up, play_audio_msg, next_game_state);
+        play_audio_msg.write(PlayAudioMsg::new("victory").volume(-10.));
     } else {
         player.gold = player.gold.saturating_sub(my_gold_bet);
         for it in my_item_bet {
@@ -1065,7 +1065,7 @@ fn resolve_host_result(
                 player.add_inventory_item(it);
             }
             let xp = level_diff_xp(host_level, opp_level);
-            gain_xp(player, xp, level_up, play_audio_msg, next_game_state, false);
+            gain_xp(player, xp, level_up, play_audio_msg, next_game_state);
         } else {
             player.gold = player.gold.saturating_sub(duel.my_gold_bet);
             for it in &duel.my_item_bet {
@@ -1216,7 +1216,9 @@ pub fn duel_client_combat(
 /// Card clicks during a duel: host applies locally, client forwards to host.
 pub fn duel_combat_card_click(
     event: On<Pointer<Click>>,
+    mut commands: Commands,
     card_q: Query<&CombatCard>,
+    tooltip_q: Query<Entity, With<crate::core::ui::playing::TooltipNode>>,
     duel: Option<Res<DuelState>>,
     mut state: Option<ResMut<CombatState>>,
     mut player: ResMut<Player>,
@@ -1255,6 +1257,10 @@ pub fn duel_combat_card_click(
                 client_send.write(ClientSendMsg::new(ClientMessage::UseConsumable(key.clone())));
                 consume_one(&mut player, &key);
                 play_audio_msg.write(PlayAudioMsg::new("drink"));
+            }
+            // Clear any open tooltip so it disappears on use.
+            for entity in &tooltip_q {
+                commands.entity(entity).try_despawn();
             }
         },
     }
