@@ -605,7 +605,7 @@ fn monster_effects(name: &str, level: u32) -> Vec<String> {
         .iter()
         .any(|x| name_lower.contains(x))
     {
-        effs.push(format!("Pierce(damage: {})", level * 3 + 3));
+        effs.push(format!("Cleave(damage_pct: {}, duration: {})", level * 5, 5.0));
     } else if ["unicorn", "pegasus", "empyrean", "gold", "angel"]
         .iter()
         .any(|x| name_lower.contains(x))

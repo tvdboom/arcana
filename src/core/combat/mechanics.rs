@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::{rng, RngExt};
 
-use crate::core::actions::hunt::PendingHuntXp;
+use crate::core::actions::hunt::{hunt_pet_chance, PendingHuntPet, PendingHuntXp};
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::{get_ability, get_equipment};
 use crate::core::catalog::effects::Effect;
@@ -9,13 +9,15 @@ use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::equipment::Kind;
 use crate::core::catalog::weapons::{Category, Weapon};
 use crate::core::combat::ui::{
-    CombatCmp, CombatPetName, CombatPortraitLevel, CombatPortraitName, CombatStatLabel,
+    CombatCmp, CombatContinueWithPetButton, CombatContinueWithPetSlot, CombatEffectIcon,
+    CombatPetName, CombatPortraitLevel, CombatPortraitName, CombatStatLabel,
 };
 use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin};
 use crate::core::monsters::ActiveMonster;
 use crate::core::player::{Attribute, Player};
 use crate::core::states::GameState;
 use crate::core::ui::playing::TooltipNode;
+use crate::core::ui::utils::despawn_descendants_manual;
 
 /// Hotkeys used to trigger the 5 active abilities (must match combat::ui).
 pub const ABILITY_HOTKEYS: [KeyCode; 5] =
@@ -149,6 +151,7 @@ pub struct FloatingCombatText {
 pub enum DeathSkullSide {
     Player,
     Enemy,
+    Pet,
 }
 
 #[derive(Component)]
@@ -894,6 +897,7 @@ fn resolve_basic_attack(
     attacker: Who,
     defender: Who,
     weapon_index: usize,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
 ) -> Option<(AttackStyle, AttackOutcome)> {
     let (atk, atk_init, crit_chance, extra_crit, miss, weapon_effects, lifesteal, attack_style) = {
         let a = match state.get(attacker) {
@@ -1028,7 +1032,7 @@ fn resolve_basic_attack(
             } else {
                 defender
             };
-            apply_effect(state, attacker, tgt, &we.effect);
+            apply_effect(state, attacker, tgt, &we.effect, play_audio_msg);
         }
     }
     // Apply the defender's on-being-hit weapon effects (shields/books).
@@ -1042,7 +1046,7 @@ fn resolve_basic_attack(
         } else {
             attacker
         };
-        apply_effect(state, defender, tgt, &e);
+        apply_effect(state, defender, tgt, &e, play_audio_msg);
     }
     Some((attack_style, AttackOutcome::Hit))
 }
@@ -1055,7 +1059,16 @@ fn side_of(who: Who) -> FxSide {
 }
 
 /// Applies a single effect from `source` onto `target`.
-fn apply_effect(state: &mut CombatState, source: Who, target: Who, effect: &Effect) {
+fn apply_effect(
+    state: &mut CombatState,
+    source: Who,
+    target: Who,
+    effect: &Effect,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) {
+    if matches!(target, Who::Player) && effect.debuff_icon().is_some() {
+        play_audio_msg.write(PlayAudioMsg::new("curse"));
+    }
     match effect {
         Effect::Heal {
             heal_pct,
@@ -1078,16 +1091,20 @@ fn apply_effect(state: &mut CombatState, source: Who, target: Who, effect: &Effe
         } => {
             // Pierce is instant; Burn/Poison handled as DoT below too, but their
             // initial application also lands an instant tick for responsiveness.
-            if matches!(effect, Effect::Pierce { .. }) {
-                if let Some(t) = state.get_mut(target) {
-                    t.take_damage(*damage as f32);
-                }
-                state.fx.push(CombatFx {
-                    side: side_of(target),
-                    text: format!("-{}", damage),
-                    color: Color::srgb(1.0, 0.5, 0.3),
-                });
+            if let Some(t) = state.get_mut(target) {
+                t.take_damage(*damage as f32);
             }
+            let color = match effect {
+                Effect::Pierce { .. } => Color::srgb(1.0, 0.5, 0.3),
+                Effect::Burn { .. } => Color::srgb(1.0, 0.3, 0.1),
+                Effect::Poison { .. } => Color::srgb(0.2, 0.8, 0.2),
+                _ => Color::WHITE,
+            };
+            state.fx.push(CombatFx {
+                side: side_of(target),
+                text: format!("-{}", damage),
+                color,
+            });
             push_timed(state, target, effect.clone());
         },
         Effect::InstantMana {
@@ -1492,7 +1509,7 @@ pub fn step_combat(
                 }
 
                 if let Some((style, outcome)) =
-                    resolve_basic_attack(state, attacker, defender, weapon_index)
+                    resolve_basic_attack(state, attacker, defender, weapon_index, play_audio_msg)
                 {
                     match outcome {
                         AttackOutcome::Hit => {
@@ -1538,6 +1555,7 @@ pub fn combat_tick(
     mut state: Option<ResMut<CombatState>>,
     mut player: ResMut<Player>,
     active_monster: Option<ResMut<ActiveMonster>>,
+    mut pending_hunt_pet: Option<ResMut<PendingHuntPet>>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
     let Some(state) = state.as_mut() else {
@@ -1559,6 +1577,17 @@ pub fn combat_tick(
     // decided, later frames early-return above once the status is `Over`.
     if state.status == CombatStatus::Over && !state.player_won {
         player.ap += LOST_COMBAT_AP_PENALTY;
+    }
+
+    if state.status == CombatStatus::Over && state.player_won {
+        if let Some(pending_hunt_pet) = pending_hunt_pet.as_mut() {
+            if !pending_hunt_pet.offer_available {
+                let mut rng = rng();
+                if rng.random_bool(hunt_pet_chance(&player) as f64) {
+                    pending_hunt_pet.offer_available = true;
+                }
+            }
+        }
     }
 
     // Sync working values back to the Player / pet / monster resources so other
@@ -1655,11 +1684,11 @@ pub fn try_cast_ability(
         if effect_targets_self(effect) {
             for &ally in &allies {
                 if state.get(ally).is_some() {
-                    apply_effect(state, Who::Player, ally, effect);
+                    apply_effect(state, Who::Player, ally, effect, play_audio_msg);
                 }
             }
         } else if !enemy_dodged && state.enemy.alive {
-            apply_effect(state, Who::Player, Who::Enemy, effect);
+            apply_effect(state, Who::Player, Who::Enemy, effect, play_audio_msg);
         }
     }
 
@@ -1699,9 +1728,9 @@ pub fn try_use_consumable(
         // Beneficial effects buff the player; any offensive effect is thrown at
         // the enemy so a consumable never debuffs its own user.
         if effect_targets_self(effect) {
-            apply_effect(state, Who::Player, Who::Player, effect);
+            apply_effect(state, Who::Player, Who::Player, effect, play_audio_msg);
         } else if state.enemy.alive {
-            apply_effect(state, Who::Player, Who::Enemy, effect);
+            apply_effect(state, Who::Player, Who::Enemy, effect, play_audio_msg);
         }
     }
 
@@ -1769,9 +1798,9 @@ pub fn enemy_cast_ability(
 
     for effect in &ability.effects {
         if effect_targets_self(effect) {
-            apply_effect(state, Who::Enemy, Who::Enemy, effect);
+            apply_effect(state, Who::Enemy, Who::Enemy, effect, play_audio_msg);
         } else if !player_dodged && state.player.alive {
-            apply_effect(state, Who::Enemy, Who::Player, effect);
+            apply_effect(state, Who::Enemy, Who::Player, effect, play_audio_msg);
         }
     }
 
@@ -1803,9 +1832,9 @@ pub fn enemy_use_consumable(
 
     for effect in &consumable.effects {
         if effect_targets_self(effect) {
-            apply_effect(state, Who::Enemy, Who::Enemy, effect);
+            apply_effect(state, Who::Enemy, Who::Enemy, effect, play_audio_msg);
         } else if state.player.alive {
-            apply_effect(state, Who::Enemy, Who::Player, effect);
+            apply_effect(state, Who::Enemy, Who::Player, effect, play_audio_msg);
         }
     }
 
@@ -2056,10 +2085,6 @@ pub fn localize_monster_name(
     localization: &crate::core::localization::Localization,
     lang: crate::core::settings::Language,
 ) -> String {
-    if let Some(loc_name) = localization.get_opt(name, lang) {
-        return loc_name;
-    }
-
     if kind == crate::core::monsters::MonsterKind::Dragon {
         let name_cap = crate::utils::capitalize_words(name);
         let mut parts = name_cap.split_whitespace();
@@ -2070,7 +2095,7 @@ pub fn localize_monster_name(
                 localization.get_opt(color, lang).unwrap_or_else(|| color.to_string())
             });
             let dragon_loc =
-                localization.get_opt("Dragon", lang).unwrap_or_else(|| "Dragon".to_string());
+                localization.get_opt("general.dragon", lang).unwrap_or_else(|| "Dragon".to_string());
             if stage.is_empty() {
                 return format!("{} {}", color_loc, dragon_loc);
             } else {
@@ -2079,6 +2104,10 @@ pub fn localize_monster_name(
                 return format!("{} {} ({})", color_loc, dragon_loc, stage_loc);
             }
         }
+    }
+
+    if let Some(loc_name) = localization.get_opt(name, lang) {
+        return loc_name;
     }
 
     crate::utils::capitalize_words(name)
@@ -2451,8 +2480,10 @@ pub fn animate_death_skulls(
     mut commands: Commands,
     state: Option<Res<CombatState>>,
     assets: Res<crate::core::assets::WorldAssets>,
+    pending_hunt_pet: Option<Res<PendingHuntPet>>,
     player_portrait_q: Query<Entity, With<crate::core::combat::ui::CombatPlayerPortrait>>,
     enemy_portrait_q: Query<Entity, With<crate::core::combat::ui::CombatEnemyPortrait>>,
+    pet_portrait_q: Query<Entity, With<crate::core::combat::ui::CombatPetPortrait>>,
     mut skull_q: Query<(&mut DeathSkullOverlay, &mut Node, &mut ImageNode)>,
 ) {
     let Some(state) = state else {
@@ -2462,10 +2493,12 @@ pub fn animate_death_skulls(
 
     let mut player_skull_exists = false;
     let mut enemy_skull_exists = false;
+    let mut pet_skull_exists = false;
     for (mut skull, mut node, mut image) in &mut skull_q {
         match skull.side {
             DeathSkullSide::Player => player_skull_exists = true,
             DeathSkullSide::Enemy => enemy_skull_exists = true,
+            DeathSkullSide::Pet => pet_skull_exists = true,
         }
         skull.timer = (skull.timer + dt).min(DEATH_SKULL_ANIM_DURATION);
         let frac = (skull.timer / DEATH_SKULL_ANIM_DURATION).clamp(0.0, 1.0);
@@ -2505,7 +2538,44 @@ pub fn animate_death_skulls(
         }
     }
     if !state.enemy.alive && !enemy_skull_exists {
+        // When the defeated enemy can be captured as a pet, show the capture
+        // image over it instead of the death skull.
+        let capture_available =
+            pending_hunt_pet.as_ref().map(|pending| pending.offer_available).unwrap_or(false);
+        let overlay_image = if capture_available {
+            "capture"
+        } else {
+            "skull"
+        };
         if let Ok(entity) = enemy_portrait_q.single() {
+            commands.entity(entity).with_children(|parent| {
+                parent.spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Percent(50.0 - DEATH_SKULL_START_SIZE / 2.0),
+                        top: Val::Percent(50.0 - DEATH_SKULL_START_SIZE / 2.0),
+                        width: Val::Percent(DEATH_SKULL_START_SIZE),
+                        height: Val::Percent(DEATH_SKULL_START_SIZE),
+                        ..default()
+                    },
+                    ImageNode {
+                        image: assets.image(overlay_image),
+                        image_mode: NodeImageMode::Stretch,
+                        color: Color::srgba(1.0, 1.0, 1.0, 0.15),
+                        ..default()
+                    },
+                    Pickable::IGNORE,
+                    DeathSkullOverlay {
+                        side: DeathSkullSide::Enemy,
+                        timer: 0.0,
+                    },
+                ));
+            });
+        }
+    }
+    // A dead pet keeps its portrait but gains a death skull; combat continues.
+    if state.pet.as_ref().map(|pet| !pet.alive).unwrap_or(false) && !pet_skull_exists {
+        if let Ok(entity) = pet_portrait_q.single() {
             commands.entity(entity).with_children(|parent| {
                 parent.spawn((
                     Node {
@@ -2524,7 +2594,7 @@ pub fn animate_death_skulls(
                     },
                     Pickable::IGNORE,
                     DeathSkullOverlay {
-                        side: DeathSkullSide::Enemy,
+                        side: DeathSkullSide::Pet,
                         timer: 0.0,
                     },
                 ));
@@ -2595,6 +2665,7 @@ pub fn handle_combat_end_button_click(
     _event: On<Pointer<Click>>,
     mut commands: Commands,
     state: Option<Res<CombatState>>,
+    mut player: ResMut<Player>,
     duel: Option<Res<DuelActive>>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut next_game_state: ResMut<NextState<GameState>>,
@@ -2616,20 +2687,60 @@ pub fn handle_combat_end_button_click(
                 commands.insert_resource(crate::core::actions::hunt::PendingHuntXp::default());
                 commands.insert_resource(crate::core::actions::hunt::PendingHuntLoot::default());
                 commands.insert_resource(crate::core::actions::quest::PendingQuestXp::default());
-                commands.insert_resource(crate::core::actions::quest::PendingQuestRewards::default());
+                commands
+                    .insert_resource(crate::core::actions::quest::PendingQuestRewards::default());
 
                 play_audio_msg.write(PlayAudioMsg::new("button"));
                 next_game_state.set(GameState::Playing);
                 return;
             }
-        } else if duel.is_some() {
-            // During a networked duel, we cannot forfeit/leave combat mid-fight.
+        } else {
+            // Forfeiting active combat counts as a loss: reduce health to zero and transition
+            player.set_health(0);
+            commands.insert_resource(crate::core::ui::defeat::DefeatContext {
+                was_pvp: duel.is_some(),
+            });
+            commands.insert_resource(crate::core::actions::hunt::PendingHuntXp::default());
+            commands.insert_resource(crate::core::actions::hunt::PendingHuntLoot::default());
+            commands.insert_resource(crate::core::actions::quest::PendingQuestXp::default());
+            commands.insert_resource(crate::core::actions::quest::PendingQuestRewards::default());
+
+            play_audio_msg.write(PlayAudioMsg::new("button"));
+            next_game_state.set(GameState::Playing);
             return;
         }
     } else if duel.is_some() {
         return;
     }
 
+    play_audio_msg.write(PlayAudioMsg::new("button"));
+    next_game_state.set(GameState::Playing);
+}
+
+pub fn handle_continue_with_pet_button_click(
+    _event: On<Pointer<Click>>,
+    mut commands: Commands,
+    state: Option<Res<CombatState>>,
+    mut player: ResMut<Player>,
+    pending_hunt_pet: Option<Res<PendingHuntPet>>,
+    mut pending_hunt_xp: ResMut<PendingHuntXp>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    let Some(pending_hunt_pet) = pending_hunt_pet else {
+        return;
+    };
+    let Some(state) = state else {
+        return;
+    };
+    if state.status != CombatStatus::Over || !state.player_won || !pending_hunt_pet.offer_available
+    {
+        return;
+    }
+
+    pending_hunt_xp.amount = state.xp_reward();
+    player.set_pet(pending_hunt_pet.monster.clone());
+    commands.remove_resource::<PendingHuntPet>();
     play_audio_msg.write(PlayAudioMsg::new("button"));
     next_game_state.set(GameState::Playing);
 }
@@ -2650,6 +2761,7 @@ pub fn cleanup_combat_on_exit(
         commands.entity(entity).try_despawn();
     }
     commands.remove_resource::<CombatState>();
+    commands.remove_resource::<PendingHuntPet>();
 }
 
 pub fn cleanup_any_combat_artifacts(
@@ -2661,7 +2773,223 @@ pub fn cleanup_any_combat_artifacts(
         commands.entity(entity).try_despawn();
     }
     commands.remove_resource::<CombatState>();
+    commands.remove_resource::<PendingHuntPet>();
     combat_menu_suspended.0 = false;
+}
+
+pub fn sync_combat_continue_with_pet_button(
+    mut commands: Commands,
+    state: Option<Res<CombatState>>,
+    pending_hunt_pet: Option<Res<PendingHuntPet>>,
+    assets: Res<crate::core::assets::WorldAssets>,
+    localization: Res<crate::core::localization::Localization>,
+    settings: Res<crate::core::settings::Settings>,
+    mut slot_q: Query<(Entity, &mut Node), With<CombatContinueWithPetSlot>>,
+    pet_btn_q: Query<Entity, With<CombatContinueWithPetButton>>,
+    children_q: Query<&Children>,
+) {
+    let Some(state) = state else {
+        return;
+    };
+    let should_show_pet_button = state.status == CombatStatus::Over
+        && pending_hunt_pet.as_ref().map(|pending| pending.offer_available).unwrap_or(false);
+    let Some((slot_entity, mut slot_node)) = slot_q.iter_mut().next() else {
+        return;
+    };
+
+    let pet_button_exists = pet_btn_q.iter().next().is_some();
+    if should_show_pet_button {
+        slot_node.display = Display::Flex;
+        if !pet_button_exists {
+            spawn_continue_with_pet_button(
+                &mut commands,
+                slot_entity,
+                &assets,
+                &localization,
+                settings.language,
+            );
+        }
+    } else {
+        slot_node.display = Display::None;
+        if pet_button_exists {
+            despawn_descendants_manual(&mut commands, slot_entity, &children_q);
+        }
+    }
+}
+
+fn spawn_continue_with_pet_button(
+    commands: &mut Commands,
+    parent: Entity,
+    assets: &crate::core::assets::WorldAssets,
+    localization: &crate::core::localization::Localization,
+    lang: crate::core::settings::Language,
+) {
+    commands.entity(parent).with_children(|parent| {
+        parent
+            .spawn((
+                Node {
+                    width: Val::Vh(26.0),
+                    height: Val::Vh(5.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    border: UiRect::all(Val::Vh(0.22)),
+                    border_radius: BorderRadius::all(Val::Vh(0.44)),
+                    ..default()
+                },
+                BackgroundColor(crate::core::constants::NORMAL_BUTTON_COLOR),
+                BorderColor::all(crate::core::constants::BUTTON_BORDER_COLOR),
+                Button,
+                Interaction::default(),
+                Pickable::default(),
+                CombatContinueWithPetButton,
+            ))
+            .observe(crate::core::menu::utils::recolor::<Over>(
+                crate::core::constants::HOVERED_BUTTON_COLOR,
+            ))
+            .observe(crate::core::menu::utils::recolor::<Out>(
+                crate::core::constants::NORMAL_BUTTON_COLOR,
+            ))
+            .observe(crate::core::menu::utils::recolor::<Press>(
+                crate::core::constants::PRESSED_BUTTON_COLOR,
+            ))
+            .observe(crate::core::menu::utils::recolor::<Release>(
+                crate::core::constants::HOVERED_BUTTON_COLOR,
+            ))
+            .observe(crate::core::utils::cursor::<Over>(bevy::window::SystemCursorIcon::Pointer))
+            .observe(crate::core::utils::cursor::<Out>(bevy::window::SystemCursorIcon::Default))
+            .observe(crate::core::utils::cursor::<Release>(bevy::window::SystemCursorIcon::Default))
+            .observe(handle_continue_with_pet_button_click)
+            .with_children(|parent| {
+                parent.spawn((
+                    crate::core::menu::utils::add_text(
+                        localization.get("general.continue_with_pet", lang),
+                        "bold",
+                        2.2,
+                        assets,
+                    ),
+                    TextColor(crate::core::constants::BUTTON_TEXT_COLOR),
+                ));
+            });
+    });
+}
+
+/// Keeps the portraits' debuff icon bars in sync with the active negative combat
+/// effects. Shows one icon per distinct debuff currently affecting the fighter.
+pub fn sync_combat_effect_icons(
+    mut commands: Commands,
+    state: Option<Res<CombatState>>,
+    assets: Res<crate::core::assets::WorldAssets>,
+    bar_q: Query<(Entity, &crate::core::combat::ui::CombatEffectsBar)>,
+    icon_q: Query<&CombatEffectIcon>,
+    children_q: Query<&Children>,
+) {
+    let Some(state) = state else {
+        return;
+    };
+
+    for (bar_entity, bar) in &bar_q {
+        let effects_opt = match bar.side {
+            crate::core::combat::ui::CombatEffectsBarSide::Player => Some(&state.player.effects),
+            crate::core::combat::ui::CombatEffectsBarSide::Enemy => Some(&state.enemy.effects),
+            crate::core::combat::ui::CombatEffectsBarSide::Pet => state.pet.as_ref().map(|p| &p.effects),
+        };
+
+        // Distinct debuff effects currently on the target, preserving order.
+        let mut desired: Vec<Effect> = Vec::new();
+        let mut desired_keys: Vec<&'static str> = Vec::new();
+        if let Some(effects) = effects_opt {
+            for te in effects {
+                if let Some(key) = te.effect.debuff_icon() {
+                    if !desired_keys.contains(&key) {
+                        desired_keys.push(key);
+                        desired.push(te.effect.clone());
+                    }
+                }
+            }
+        }
+
+        // Icon keys already rendered, in child order.
+        let mut existing_keys: Vec<&'static str> = Vec::new();
+        if let Ok(children) = children_q.get(bar_entity) {
+            for child in children.iter() {
+                if let Ok(icon) = icon_q.get(child) {
+                    if let Some(key) = icon.effect.debuff_icon() {
+                        existing_keys.push(key);
+                    }
+                }
+            }
+        }
+
+        if existing_keys == desired_keys {
+            continue;
+        }
+
+        despawn_descendants_manual(&mut commands, bar_entity, &children_q);
+
+        commands.entity(bar_entity).with_children(|parent| {
+            for effect in &desired {
+                let Some(key) = effect.debuff_icon() else {
+                    continue;
+                };
+                parent.spawn((
+                    Node {
+                        width: Val::Vh(5.5),
+                        height: Val::Vh(5.5),
+                        ..default()
+                    },
+                    ImageNode::new(assets.image(key)).with_mode(NodeImageMode::Stretch),
+                    Interaction::default(),
+                    Pickable::default(),
+                    CombatEffectIcon {
+                        effect: effect.clone(),
+                    },
+                ));
+            }
+        });
+    }
+}
+
+/// Shows a tooltip (effect name + description) when hovering a debuff icon on
+/// the player's portrait during combat.
+pub fn combat_effect_tooltip_system(
+    mut commands: Commands,
+    assets: Res<crate::core::assets::WorldAssets>,
+    localization: Res<crate::core::localization::Localization>,
+    settings: Res<crate::core::settings::Settings>,
+    icon_q: Query<(&Interaction, &CombatEffectIcon)>,
+    changed_q: Query<(), (With<CombatEffectIcon>, Changed<Interaction>)>,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
+    windows: Query<&Window>,
+) {
+    if changed_q.is_empty() {
+        return;
+    }
+
+    let mut hovered: Option<&Effect> = None;
+    for (interaction, icon) in &icon_q {
+        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
+            hovered = Some(&icon.effect);
+            break;
+        }
+    }
+
+    for entity in tooltip_q.iter() {
+        commands.entity(entity).try_despawn();
+    }
+
+    if let Some(effect) = hovered {
+        let (title, desc) = effect.title_and_description(settings.language, &localization);
+        crate::core::ui::tooltip::spawn_item_tooltip(
+            &mut commands,
+            &assets,
+            title,
+            vec![desc],
+            &windows,
+            None,
+            None,
+            0.0,
+        );
+    }
 }
 
 pub fn update_combat_equipment_slots(

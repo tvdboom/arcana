@@ -414,6 +414,11 @@ impl Player {
         self.auto_equip_consumable_if_possible(&key);
     }
 
+    pub fn set_pet(&mut self, mut pet: Monster) {
+        pet.health = pet.max_health;
+        self.pet = Some(pet);
+    }
+
     fn auto_equip_consumable_if_possible(&mut self, key: &str) {
         if self.is_consumable_equipped(key) {
             return;

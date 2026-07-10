@@ -196,11 +196,6 @@ fn class_line(player: &Player, localization: &Localization, lang: Language) -> S
 }
 
 fn playing_title(player: &Player) -> String {
-    if let Some(ref pet) = player.pet {
-        if !pet.name.trim().is_empty() {
-            return format!("{} & {}", player.name, pet.name);
-        }
-    }
     player.name.clone()
 }
 

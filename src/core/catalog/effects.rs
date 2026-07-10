@@ -201,6 +201,39 @@ pub enum Effect {
 }
 
 impl Effect {
+    /// Asset key of the icon shown for negative (debuff) effects during combat,
+    /// or `None` for effects that are not rendered as combat debuff icons.
+    pub fn debuff_icon(&self) -> Option<&'static str> {
+        Some(match self {
+            Self::Blind { .. } => "blind",
+            Self::Burn { .. } => "burn",
+            Self::Curse { .. } => "curse",
+            Self::Freeze { .. } => "freeze",
+            Self::Immobilize { .. } => "immobilize",
+            Self::Poison { .. } => "poison",
+            Self::Paranoia { .. } => "paranoia",
+            Self::Silence { .. } => "silence",
+            Self::Stun { .. } => "stun",
+            Self::Taunt { .. } => "taunt",
+            Self::Vulnerability { .. } => "vulnerability",
+            _ => return None,
+        })
+    }
+
+    /// Splits the localized description into its title (the effect name) and the
+    /// remaining description text, e.g. "Blind: 30% chance..." -> ("Blind", "30% chance...").
+    pub fn title_and_description(
+        &self,
+        language: Language,
+        localization: &Localization,
+    ) -> (String, String) {
+        let full = self.description(language, localization);
+        match full.split_once(": ") {
+            Some((title, rest)) => (title.to_string(), rest.to_string()),
+            None => (full, String::new()),
+        }
+    }
+
     pub fn description(&self, language: Language, localization: &Localization) -> String {
         let template =
             localization.get(format!("effect.{}", self.to_string().to_lowercase()), language);

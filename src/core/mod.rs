@@ -55,9 +55,10 @@ use crate::core::audio::*;
 use crate::core::camera::*;
 use crate::core::combat::mechanics::{
     animate_death_skulls, animate_floating_text, cleanup_any_combat_artifacts,
-    cleanup_combat_on_exit, combat_input, combat_tick, setup_combat_state, sync_consumable_cards,
-    update_combat_equipment_slots, update_combat_pause_indicator, update_combat_speed_label,
-    update_combat_visuals, CombatSpeed, DuelActive,
+    cleanup_combat_on_exit, combat_effect_tooltip_system, combat_input, combat_tick,
+    setup_combat_state, sync_combat_continue_with_pet_button, sync_combat_effect_icons,
+    sync_consumable_cards, update_combat_equipment_slots, update_combat_pause_indicator,
+    update_combat_speed_label, update_combat_visuals, CombatSpeed, DuelActive,
 };
 use crate::core::combat::ui::setup_combat_ui;
 use crate::core::game_state::ShopUiState;
@@ -236,7 +237,6 @@ impl Plugin for GamePlugin {
             .add_systems(OnExit(GameState::ChooseClass), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::ChooseSubClass), setup_subclass_selection)
             .add_systems(OnExit(GameState::ChooseSubClass), despawn::<MenuCmp>)
-            .add_systems(Update, handle_pet_name_input.run_if(in_state(GameState::ChooseSubClass)))
             .add_systems(
                 OnEnter(GameState::Playing),
                 (
@@ -262,7 +262,8 @@ impl Plugin for GamePlugin {
                 (
                     crate::core::ui::defeat::manage_defeat_overlay,
                     crate::core::ui::defeat::handle_defeat_keyboard_input,
-                ).run_if(in_state(GameState::Playing)),
+                )
+                    .run_if(in_state(GameState::Playing)),
             )
             .add_systems(
                 OnExit(AppState::Game),
@@ -415,11 +416,14 @@ impl Plugin for GamePlugin {
                     combat_input.run_if(not(resource_exists::<DuelActive>)),
                     combat_tick.run_if(not(resource_exists::<DuelActive>)),
                     update_combat_visuals,
+                    sync_combat_continue_with_pet_button,
                     update_combat_equipment_slots,
                     update_combat_pause_indicator,
                     update_combat_speed_label,
                     animate_death_skulls,
                     animate_floating_text,
+                    sync_combat_effect_icons,
+                    combat_effect_tooltip_system,
                     sync_consumable_cards,
                     tooltip_follow_cursor_system,
                     right_column_tooltip_system,

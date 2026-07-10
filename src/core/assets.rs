@@ -111,6 +111,7 @@ impl FromWorld for WorldAssets {
             ("hunt", assets.load("audio/hunt.ogg")),
             ("quest", assets.load("audio/quest.ogg")),
             ("poof", assets.load("audio/poof.ogg")),
+            ("curse", assets.load("audio/curse.ogg")),
         ]);
 
         let fonts = HashMap::from([
@@ -128,6 +129,7 @@ impl FromWorld for WorldAssets {
             ("initiative", assets.load("images/icons/initiative.ktx2")),
             ("gold", assets.load("images/icons/gold.ktx2")),
             ("skull", assets.load("images/icons/skull.ktx2")),
+            ("capture", assets.load("images/icons/capture.ktx2")),
             ("action_hunt", load_linear(assets, "images/icons/action_hunt.ktx2")),
             ("action_shop", load_linear(assets, "images/icons/action_shop.ktx2")),
             ("action_quest", load_linear(assets, "images/icons/action_quest.ktx2")),
@@ -174,6 +176,18 @@ impl FromWorld for WorldAssets {
             ("charisma", assets.load("images/icons/charisma.ktx2")),
             ("training", assets.load("images/icons/training.ktx2")),
             ("assassin", assets.load("images/icons/assassin.ktx2")),
+            // Effects
+            ("blind", assets.load("images/icons/blind.ktx2")),
+            ("burn", assets.load("images/icons/burn.ktx2")),
+            ("curse", assets.load("images/icons/curse.ktx2")),
+            ("freeze", assets.load("images/icons/freeze.ktx2")),
+            ("immobilize", assets.load("images/icons/immobilize.ktx2")),
+            ("poison", assets.load("images/icons/poison.ktx2")),
+            ("paranoia", assets.load("images/icons/paranoia.ktx2")),
+            ("silence", assets.load("images/icons/silence.ktx2")),
+            ("stun", assets.load("images/icons/stun.ktx2")),
+            ("taunt", assets.load("images/icons/taunt.ktx2")),
+            ("vulnerability", assets.load("images/icons/vulnerability.ktx2")),
             // Background
             ("bg", assets.load("images/bg/bg.ktx2")),
             ("bg2", assets.load("images/bg/bg2.ktx2")),

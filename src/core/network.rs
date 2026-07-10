@@ -1326,10 +1326,8 @@ impl Plugin for NetworkPlugin {
                 host_check_start.run_if(resource_exists::<RenetServer>),
                 // Authoritative / mirrored combat.
                 duel_host_combat
-                    .before(crate::core::combat::mechanics::update_combat_visuals)
                     .run_if(in_state(GameState::Combat).and_then(resource_exists::<DuelActive>)),
                 duel_client_combat
-                    .before(crate::core::combat::mechanics::update_combat_visuals)
                     .run_if(in_state(GameState::Combat).and_then(resource_exists::<DuelActive>)),
             ),
         )

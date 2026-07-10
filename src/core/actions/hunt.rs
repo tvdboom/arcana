@@ -2,8 +2,10 @@ use crate::core::actions::gain_xp;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::all_artifacts;
+use crate::core::classes::Class;
 use crate::core::localization::Localization;
 use crate::core::menu::utils::add_text;
+use crate::core::monsters::Monster;
 use crate::core::player::Player;
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
@@ -29,6 +31,20 @@ pub struct PendingHuntXp {
 #[derive(Resource, Default)]
 pub struct PendingHuntLoot {
     pub artifacts: Vec<String>,
+}
+
+#[derive(Resource, Clone)]
+pub struct PendingHuntPet {
+    pub monster: Monster,
+    pub offer_available: bool,
+}
+
+pub fn hunt_pet_chance(player: &Player) -> f64 {
+    let mut chance = 5 + player.charisma_mod();
+    if matches!(player.class, Class::Druid) {
+        chance += 5;
+    }
+    chance.clamp(0, 100) as f64 / 100.0
 }
 
 pub fn apply_pending_hunt_xp(
@@ -497,6 +513,10 @@ pub fn handle_hunt_card_clicks(
             }
             let idx = rng.random_range(0..possible.len());
             let selected = possible[idx].clone();
+            commands.insert_resource(PendingHuntPet {
+                monster: selected.clone(),
+                offer_available: false,
+            });
             commands.insert_resource(crate::core::monsters::ActiveMonster {
                 monster: selected,
             });

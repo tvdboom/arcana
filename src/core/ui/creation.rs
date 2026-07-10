@@ -22,7 +22,6 @@ use crate::utils::NameFromEnum;
 use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::window::SystemCursorIcon;
 use rand::prelude::IteratorRandom;
-use rand::seq::IndexedRandom;
 use rand::{rng, RngExt};
 
 const AGE_SLIDER_WIDTH: f32 = 280.0;
@@ -63,9 +62,6 @@ pub struct AgeValueNode;
 
 #[derive(Component, Clone, Copy)]
 pub struct AgeStageButton(pub u32);
-
-#[derive(Component)]
-pub struct PetNameText;
 
 fn creation_attribute_value(player: &Player, attr: Attribute) -> u32 {
     let value = match attr {
@@ -200,47 +196,6 @@ pub fn handle_name_input(
     }
 }
 
-pub fn handle_pet_name_input(
-    mut events: MessageReader<KeyboardInput>,
-    mut player: ResMut<Player>,
-    mut text_q: Query<&mut Text, With<PetNameText>>,
-) {
-    let mut changed = false;
-    for event in events.read() {
-        if event.state != ButtonState::Pressed {
-            continue;
-        }
-
-        if let Some(ref mut pet) = player.pet {
-            match &event.logical_key {
-                Key::Character(c) => {
-                    if pet.name.len() < 16 && c.chars().all(|ch| ch.is_alphanumeric() || ch == ' ')
-                    {
-                        pet.name.push_str(c);
-                        changed = true;
-                    }
-                },
-                Key::Backspace => {
-                    pet.name.pop();
-                    changed = true;
-                },
-                Key::Space if pet.name.len() < 16 => {
-                    pet.name.push(' ');
-                    changed = true;
-                },
-                _ => {},
-            }
-        }
-    }
-
-    if changed {
-        if let Some(ref pet) = player.pet {
-            for mut text in &mut text_q {
-                text.0 = pet.name.clone();
-            }
-        }
-    }
-}
 
 fn on_attribute_button_click(
     event: On<Pointer<Click>>,
@@ -1451,19 +1406,13 @@ impl SelectionItem for PetChoice {
     }
 
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
-        let pet_name = if let Some(ref pet) = player.pet {
-            pet.name.clone()
-        } else {
-            PET_NAMES.choose(&mut rng()).copied().unwrap().to_string()
-        };
         let monster_name = match self {
             PetChoice::Rat => "Rat",
             PetChoice::Owl => "Owl",
             PetChoice::Snake => "Snake",
             PetChoice::Weasel => "Weasel",
         };
-        if let Some(mut pet_monster) = crate::core::catalog::catalog::get_monster(monster_name) {
-            pet_monster.name = pet_name;
+        if let Some(pet_monster) = crate::core::catalog::catalog::get_monster(monster_name) {
             player.pet = Some(pet_monster);
         }
         next_game_state.set(GameState::Playing);
@@ -1518,7 +1467,7 @@ pub fn setup_selection_screen<T: SelectionItem>(
             parent.spawn(Node {
                 margin: UiRect {
                     top: percent(3.),
-                    bottom: if title_key == "choose pet" { percent(1.) } else { percent(3.) },
+                    bottom: percent(3.),
                     ..default()
                 },
                 ..default()
@@ -1530,49 +1479,13 @@ pub fn setup_selection_screen<T: SelectionItem>(
                 ));
             });
 
-            if title_key == "choose pet" {
-                parent
-                    .spawn(Node {
-                        width: percent(42.),
-                        flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::Center,
-                        margin: UiRect::bottom(percent(1.5)),
-                        ..default()
-                    })
-                    .with_children(|parent| {
-                        parent
-                            .spawn((
-                                Node {
-                                    width: percent(75.),
-                                    height: Val::Px(46.),
-                                    align_items: AlignItems::Center,
-                                    justify_content: JustifyContent::Center,
-                                    margin: UiRect::vertical(Val::Px(6.)),
-                                    border: UiRect::all(Val::Px(2.)),
-                                    border_radius: BorderRadius::all(Val::Px(6.)),
-                                    ..default()
-                                },
-                                BackgroundColor(NORMAL_BUTTON_COLOR),
-                                BorderColor::all(BUTTON_BORDER_COLOR),
-                            ))
-                            .with_children(|parent| {
-                                let pet_name = player.pet.as_ref().map(|p| p.name.clone()).unwrap_or_default();
-                                parent.spawn((
-                                    add_text(pet_name, "medium", BUTTON_TEXT_SIZE, &assets),
-                                    TextColor(Color::WHITE),
-                                    PetNameText,
-                                ));
-                            });
-                    });
-            }
-
             // Container for the cards
             parent
                 .spawn(Node {
                     width: percent(96.),
-                    height: if title_key == "choose pet" { percent(64.) } else { percent(70.) },
+                    height: percent(70.),
                     flex_direction: FlexDirection::Row,
-                    flex_wrap: if title_key == "choose pet" { FlexWrap::Wrap } else { FlexWrap::NoWrap },
+                    flex_wrap: FlexWrap::NoWrap,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
@@ -1593,7 +1506,6 @@ pub fn setup_selection_screen<T: SelectionItem>(
                         };
                         let item_name = localization.get(&item_key, lang);
 
-                        // Card
                         parent
                             .spawn((
                                 Node {
@@ -1606,66 +1518,64 @@ pub fn setup_selection_screen<T: SelectionItem>(
                                 BackgroundColor(NORMAL_BUTTON_COLOR),
                             ))
                             .with_children(|parent| {
-                                // Content container (padded so text/illustration are nicely inset)
-                                parent.spawn(Node {
-                                    width: percent(100.),
-                                    height: percent(100.),
-                                    flex_direction: FlexDirection::Column,
-                                    align_items: AlignItems::Center,
-                                    justify_content: JustifyContent::FlexStart,
-                                    padding: UiRect::all(percent(1.5)),
-                                    ..default()
-                                }).with_children(|parent| {
-                                    // Illustration image
-                                    parent.spawn((
-                                        Node {
-                                            width: percent(100.),
-                                            height: percent(50.),
-                                            ..default()
-                                        },
-                                        ImageNode::new(assets.image(item.get_image_key(player))).with_mode(NodeImageMode::Stretch),
-                                    ));
-
-                                    // Stone background container for Name and Description
-                                    parent
-                                        .spawn((
+                                parent
+                                    .spawn(Node {
+                                        width: percent(100.),
+                                        height: percent(100.),
+                                        flex_direction: FlexDirection::Column,
+                                        align_items: AlignItems::Center,
+                                        justify_content: JustifyContent::FlexStart,
+                                        padding: UiRect::all(percent(1.5)),
+                                        ..default()
+                                    })
+                                    .with_children(|parent| {
+                                        parent.spawn((
                                             Node {
                                                 width: percent(100.),
                                                 height: percent(50.),
-                                                flex_direction: FlexDirection::Column,
-                                                align_items: AlignItems::Center,
-                                                justify_content: JustifyContent::FlexStart,
                                                 ..default()
                                             },
-                                            ImageNode::new(assets.image("stone")).with_mode(NodeImageMode::Stretch),
-                                        ))
-                                        .with_children(|parent| {
-                                            // Name
-                                            parent.spawn((
+                                            ImageNode::new(assets.image(item.get_image_key(player)))
+                                                .with_mode(NodeImageMode::Stretch),
+                                        ));
+
+                                        parent
+                                            .spawn((
                                                 Node {
-                                                    margin: UiRect::vertical(percent(4.5)),
+                                                    width: percent(100.),
+                                                    height: percent(50.),
+                                                    flex_direction: FlexDirection::Column,
+                                                    align_items: AlignItems::Center,
+                                                    justify_content: JustifyContent::FlexStart,
                                                     ..default()
                                                 },
-                                                add_text(item_name, "bold", SUBTITLE_TEXT_SIZE, &assets),
-                                                TextColor(BUTTON_TEXT_COLOR),
-                                                LocalizedText(item_key.clone()),
-                                            ));
+                                                ImageNode::new(assets.image("stone"))
+                                                    .with_mode(NodeImageMode::Stretch),
+                                            ))
+                                            .with_children(|parent| {
+                                                parent.spawn((
+                                                    Node {
+                                                        margin: UiRect::vertical(percent(4.5)),
+                                                        ..default()
+                                                    },
+                                                    add_text(item_name, "bold", SUBTITLE_TEXT_SIZE, &assets),
+                                                    TextColor(BUTTON_TEXT_COLOR),
+                                                    LocalizedText(item_key.clone()),
+                                                ));
 
-                                            // Description
-                                            parent.spawn((
-                                                Node {
-                                                    width: percent(85.),
-                                                    margin: UiRect::horizontal(percent(7.5)),
-                                                    ..default()
-                                                },
-                                                add_text(item.get_description(lang, &localization), "medium", 1.8, &assets),
-                                                TextColor(Color::WHITE),
-                                                item.create_desc_component(),
-                                            ));
-                                        });
-                                });
+                                                parent.spawn((
+                                                    Node {
+                                                        width: percent(85.),
+                                                        margin: UiRect::horizontal(percent(7.5)),
+                                                        ..default()
+                                                    },
+                                                    add_text(item.get_description(lang, &localization), "medium", 1.8, &assets),
+                                                    TextColor(Color::WHITE),
+                                                    item.create_desc_component(),
+                                                ));
+                                            });
+                                    });
 
-                                // Border Overlay (absolutely positioned on top and covering the card perfectly)
                                 parent
                                     .spawn((
                                         Node {
@@ -1676,7 +1586,8 @@ pub fn setup_selection_screen<T: SelectionItem>(
                                             top: percent(-5.),
                                             ..default()
                                         },
-                                        ImageNode::new(assets.image("border")).with_mode(NodeImageMode::Stretch),
+                                        ImageNode::new(assets.image("border"))
+                                            .with_mode(NodeImageMode::Stretch),
                                     ))
                                     .observe(reimage::<Over>(assets.image("border_hover")))
                                     .observe(reimage::<Out>(assets.image("border")))
@@ -1769,10 +1680,7 @@ pub fn setup_subclass_selection(
         },
         Class::Druid => {
             if player.pet.is_none() {
-                let pet_name =
-                    PET_NAMES.choose(&mut rand::rng()).copied().unwrap_or("Ash").to_string();
-                if let Some(mut pet_monster) = crate::core::catalog::catalog::get_monster("Wolf") {
-                    pet_monster.name = pet_name;
+                if let Some(pet_monster) = crate::core::catalog::catalog::get_monster("Wolf") {
                     player.pet = Some(pet_monster);
                 }
             }

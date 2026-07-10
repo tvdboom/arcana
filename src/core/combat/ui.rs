@@ -11,6 +11,7 @@ pub struct DuelState {
 
 use crate::core::combat::mechanics::DuelActive;
 
+use crate::core::actions::hunt::PendingHuntPet;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::get_equipment;
@@ -93,12 +94,39 @@ pub struct CombatStatLabel {
 #[derive(Component)]
 pub struct CombatPetName;
 
+#[derive(Component)]
+pub struct CombatPetPortrait;
+
+#[derive(Component, Clone, Copy, PartialEq, Eq)]
+pub enum CombatEffectsBarSide {
+    Player,
+    Pet,
+    Enemy,
+}
+
+#[derive(Component)]
+pub struct CombatEffectsBar {
+    pub side: CombatEffectsBarSide,
+}
+
+#[derive(Component)]
+pub struct CombatEffectIcon {
+    pub effect: crate::core::catalog::effects::Effect,
+}
+
+#[derive(Component)]
+pub struct CombatContinueWithPetSlot;
+
+#[derive(Component)]
+pub struct CombatContinueWithPetButton;
+
 pub fn setup_combat_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
     settings: Res<Settings>,
     player: Res<Player>,
+    pending_hunt_pet: Option<Res<PendingHuntPet>>,
     active_monster: Option<Res<ActiveMonster>>,
     combat_speed: Res<crate::core::combat::mechanics::CombatSpeed>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
@@ -191,6 +219,13 @@ pub fn setup_combat_ui(
                             crate::core::combat::mechanics::CombatSpeedText,
                         ));
                     }
+                    parent.spawn((
+                        Node {
+                            display: Display::None,
+                            ..default()
+                        },
+                        CombatContinueWithPetSlot,
+                    ));
                     parent
                         .spawn((
                             Node {
@@ -229,6 +264,13 @@ pub fn setup_combat_ui(
                                 crate::core::combat::mechanics::CombatEndButtonText,
                             ));
                         });
+                    if pending_hunt_pet
+                        .as_ref()
+                        .map(|pending| pending.offer_available)
+                        .unwrap_or(false)
+                    {
+                        spawn_continue_with_pet_button(parent, &assets, &localization, lang);
+                    }
                 });
 
             parent
@@ -255,6 +297,51 @@ pub fn setup_combat_ui(
                         LocalizedText("general.paused".to_string()),
                     ));
                 });
+        });
+}
+
+fn spawn_continue_with_pet_button(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    localization: &Localization,
+    lang: crate::core::settings::Language,
+) {
+    parent
+        .spawn((
+            Node {
+                width: Val::Vh(26.0),
+                height: Val::Vh(5.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                border: UiRect::all(Val::Vh(0.22)),
+                border_radius: BorderRadius::all(Val::Vh(0.44)),
+                ..default()
+            },
+            BackgroundColor(NORMAL_BUTTON_COLOR),
+            BorderColor::all(BUTTON_BORDER_COLOR),
+            Button,
+            Interaction::default(),
+            Pickable::default(),
+            CombatContinueWithPetButton,
+        ))
+        .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+        .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+        .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+        .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+        .observe(crate::core::utils::cursor::<Over>(SystemCursorIcon::Pointer))
+        .observe(crate::core::utils::cursor::<Out>(SystemCursorIcon::Default))
+        .observe(crate::core::utils::cursor::<Release>(SystemCursorIcon::Default))
+        .observe(crate::core::combat::mechanics::handle_continue_with_pet_button_click)
+        .with_children(|parent| {
+            parent.spawn((
+                add_text(
+                    localization.get("general.continue_with_pet", lang),
+                    "bold",
+                    BUTTON_TEXT_SIZE,
+                    assets,
+                ),
+                TextColor(BUTTON_TEXT_COLOR),
+            ));
         });
 }
 
@@ -302,6 +389,8 @@ fn spawn_player_panel(
                                 player.level(),
                                 &player_image_key(player),
                                 player.pet.as_ref(),
+                                &localization,
+                                lang,
                             );
                             spawn_combat_resource_bar(parent, assets, true, true);
                             spawn_combat_resource_bar(parent, assets, false, true);
@@ -352,6 +441,8 @@ fn spawn_character_portrait(
     level: u32,
     portrait_key: &str,
     pet: Option<&Monster>,
+    localization: &Localization,
+    lang: crate::core::settings::Language,
 ) {
     parent
         .spawn((
@@ -370,8 +461,24 @@ fn spawn_character_portrait(
         ))
         .with_children(|parent| {
             spawn_portrait_label(parent, assets, name, level, true);
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(28.),
+                    left: Val::Px(0.),
+                    right: Val::Px(0.),
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    column_gap: Val::Px(4.),
+                    ..default()
+                },
+                CombatEffectsBar {
+                    side: CombatEffectsBarSide::Player,
+                },
+            ));
             if let Some(pet) = pet {
-                spawn_combat_pet_overlay(parent, assets, pet);
+                spawn_combat_pet_overlay(parent, assets, pet, localization, lang);
             }
             spawn_equipment_slot_column(
                 parent,
@@ -413,6 +520,8 @@ fn spawn_combat_pet_overlay(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
     pet: &Monster,
+    localization: &Localization,
+    lang: crate::core::settings::Language,
 ) {
     parent
         .spawn((
@@ -430,8 +539,25 @@ fn spawn_combat_pet_overlay(
             Interaction::default(),
             Pickable::default(),
             InfoTooltip::Pet,
+            CombatPetPortrait,
         ))
         .with_children(|parent| {
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(28.),
+                    left: Val::Px(0.),
+                    right: Val::Px(0.),
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    column_gap: Val::Px(4.),
+                    ..default()
+                },
+                CombatEffectsBar {
+                    side: CombatEffectsBarSide::Pet,
+                },
+            ));
             parent
                 .spawn(Node {
                     position_type: PositionType::Absolute,
@@ -441,7 +567,17 @@ fn spawn_combat_pet_overlay(
                 })
                 .with_children(|parent| {
                     parent.spawn((
-                        add_text(capitalize_words(&pet.name), "bold", 2.2, assets),
+                        add_text(
+                            crate::core::combat::mechanics::localize_monster_name(
+                                &pet.name,
+                                pet.kind,
+                                localization,
+                                lang,
+                            ),
+                            "bold",
+                            2.2,
+                            assets,
+                        ),
                         TextColor(BUTTON_TEXT_COLOR),
                         CombatPetName,
                     ));
@@ -499,6 +635,8 @@ fn spawn_combat_enemy_pet_overlay(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
     pet: &Monster,
+    localization: &Localization,
+    lang: crate::core::settings::Language,
 ) {
     let ratio = if pet.max_health > 0 {
         (pet.health as f32 / pet.max_health as f32).clamp(0.0, 1.0) * 100.0
@@ -533,7 +671,17 @@ fn spawn_combat_enemy_pet_overlay(
                 })
                 .with_children(|parent| {
                     parent.spawn((
-                        add_text(capitalize_words(&pet.name), "bold", 2.2, assets),
+                        add_text(
+                            crate::core::combat::mechanics::localize_monster_name(
+                                &pet.name,
+                                pet.kind,
+                                localization,
+                                lang,
+                            ),
+                            "bold",
+                            2.2,
+                            assets,
+                        ),
                         TextColor(BUTTON_TEXT_COLOR),
                     ));
                 });
@@ -1230,6 +1378,13 @@ fn spawn_monster_panel(
                                 monster.initiative,
                                 false,
                             );
+                            if is_pvp {
+                                if let Some(opp) = opponent {
+                                    if let Some(pet) = &opp.pet {
+                                        spawn_pet_stats(parent, assets, localization, lang, pet);
+                                    }
+                                }
+                            }
                         });
 
                     parent
@@ -1253,6 +1408,8 @@ fn spawn_monster_panel(
                                 } else {
                                     None
                                 },
+                                localization,
+                                lang,
                                 is_pvp,
                             );
                             spawn_monster_health_bar(parent, assets, localization, lang, monster);
@@ -1291,6 +1448,8 @@ fn spawn_monster_portrait(
     level: u32,
     image_key: &str,
     pet: Option<&Monster>,
+    localization: &Localization,
+    lang: crate::core::settings::Language,
     is_pvp: bool,
 ) {
     parent
@@ -1309,8 +1468,24 @@ fn spawn_monster_portrait(
         ))
         .with_children(|parent| {
             spawn_portrait_label(parent, assets, name, level, false);
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(28.),
+                    left: Val::Px(0.),
+                    right: Val::Px(0.),
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    column_gap: Val::Px(4.),
+                    ..default()
+                },
+                CombatEffectsBar {
+                    side: CombatEffectsBarSide::Enemy,
+                },
+            ));
             if let Some(pet) = pet {
-                spawn_combat_enemy_pet_overlay(parent, assets, pet);
+                spawn_combat_enemy_pet_overlay(parent, assets, pet, &localization, lang);
             }
             if is_pvp {
                 spawn_equipment_slot_column(
