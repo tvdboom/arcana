@@ -4,11 +4,6 @@ mod asset_pak;
 mod core;
 mod utils;
 
-#[cfg(feature = "generate-catalogs")]
-mod catalog_gen {
-    include!("bin/generate_catalogs.rs");
-}
-
 use bevy::asset::AssetMetaCheck;
 use bevy::ecs::system::NonSendMarker;
 use bevy::prelude::*;
@@ -18,7 +13,6 @@ use bevy_kira_audio::AudioPlugin;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::panic;
-use std::path::Path;
 use std::sync::Mutex;
 
 use crate::core::GamePlugin;
@@ -32,9 +26,6 @@ static LOG_FILE: Mutex<Option<File>> = Mutex::new(None);
 fn main() {
     #[cfg(not(debug_assertions))]
     init_panic_logger();
-
-    #[cfg(feature = "generate-catalogs")]
-    ensure_inventory_catalogs();
 
     let mut app = App::new();
 
@@ -76,20 +67,6 @@ fn main() {
     app.run();
 }
 
-#[cfg(feature = "generate-catalogs")]
-fn ensure_inventory_catalogs() {
-    if Path::new("assets/catalog/monsters.ron").exists() {
-        return;
-    }
-
-    let img_ext = if cfg!(feature = "process-assets") {
-        "ktx2"
-    } else {
-        "png"
-    };
-    catalog_gen::run("assets-src/images", "assets/catalog", img_ext);
-}
-
 #[allow(dead_code)]
 fn init_panic_logger() {
     panic::set_hook(Box::new(|info| {
@@ -115,11 +92,14 @@ fn init_panic_logger() {
 fn set_window_icon(_: NonSendMarker) {
     use winit::window::Icon;
 
-    let image = image::open("assets/images/icons/favicon.png").unwrap().into_rgba8();
+    let image = image::load_from_memory(include_bytes!("../assets-src/images/icons/favicon.png"))
+        .expect("embedded window icon must be a valid image")
+        .into_rgba8();
     let (width, height) = image.dimensions();
     let rgba = image.into_raw();
 
-    let icon = Icon::from_rgba(rgba, width, height).unwrap();
+    let icon =
+        Icon::from_rgba(rgba, width, height).expect("embedded window icon must be valid RGBA");
 
     WINIT_WINDOWS.with_borrow(|windows| {
         for window in windows.windows.values() {

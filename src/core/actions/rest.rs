@@ -570,8 +570,9 @@ pub fn handle_rest_card_clicks(
             2 => {
                 // Grand Accommodation: returns full health and mana back and also between
                 // 1-(10 * player level * constitution mod) extra max health and max mana
-                let bonus =
-                    10 * rng.random_range(1..=(level as i32 + player.constitution_mod()).max(1)) as u32;
+                let bonus = 10
+                    * rng.random_range(1..=(level as i32 + player.constitution_mod()).max(1))
+                        as u32;
 
                 player.bonus_max_health += bonus;
                 player.bonus_max_mana += bonus;

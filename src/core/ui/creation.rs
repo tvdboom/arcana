@@ -196,7 +196,6 @@ pub fn handle_name_input(
     }
 }
 
-
 fn on_attribute_button_click(
     event: On<Pointer<Click>>,
     btn_q: Query<(Option<&DisabledButton>, &AttributeAction)>,
@@ -1464,20 +1463,27 @@ pub fn setup_selection_screen<T: SelectionItem>(
         ))
         .with_children(|parent| {
             // Title container
-            parent.spawn(Node {
-                margin: UiRect {
-                    top: percent(3.),
-                    bottom: percent(3.),
+            parent
+                .spawn(Node {
+                    margin: UiRect {
+                        top: percent(3.),
+                        bottom: percent(3.),
+                        ..default()
+                    },
                     ..default()
-                },
-                ..default()
-            }).with_children(|parent| {
-                parent.spawn((
-                    add_text(localization.get(title_key, lang), "bold", TITLE_TEXT_SIZE, &assets),
-                    TextColor(BUTTON_TEXT_COLOR),
-                    LocalizedText(title_key.to_string()),
-                ));
-            });
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text(
+                            localization.get(title_key, lang),
+                            "bold",
+                            TITLE_TEXT_SIZE,
+                            &assets,
+                        ),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        LocalizedText(title_key.to_string()),
+                    ));
+                });
 
             // Container for the cards
             parent
@@ -1535,8 +1541,10 @@ pub fn setup_selection_screen<T: SelectionItem>(
                                                 height: percent(50.),
                                                 ..default()
                                             },
-                                            ImageNode::new(assets.image(item.get_image_key(player)))
-                                                .with_mode(NodeImageMode::Stretch),
+                                            ImageNode::new(
+                                                assets.image(item.get_image_key(player)),
+                                            )
+                                            .with_mode(NodeImageMode::Stretch),
                                         ));
 
                                         parent
@@ -1558,7 +1566,12 @@ pub fn setup_selection_screen<T: SelectionItem>(
                                                         margin: UiRect::vertical(percent(4.5)),
                                                         ..default()
                                                     },
-                                                    add_text(item_name, "bold", SUBTITLE_TEXT_SIZE, &assets),
+                                                    add_text(
+                                                        item_name,
+                                                        "bold",
+                                                        SUBTITLE_TEXT_SIZE,
+                                                        &assets,
+                                                    ),
                                                     TextColor(BUTTON_TEXT_COLOR),
                                                     LocalizedText(item_key.clone()),
                                                 ));
@@ -1569,7 +1582,12 @@ pub fn setup_selection_screen<T: SelectionItem>(
                                                         margin: UiRect::horizontal(percent(7.5)),
                                                         ..default()
                                                     },
-                                                    add_text(item.get_description(lang, &localization), "medium", 1.8, &assets),
+                                                    add_text(
+                                                        item.get_description(lang, &localization),
+                                                        "medium",
+                                                        1.8,
+                                                        &assets,
+                                                    ),
                                                     TextColor(Color::WHITE),
                                                     item.create_desc_component(),
                                                 ));

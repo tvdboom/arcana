@@ -349,7 +349,12 @@ pub fn spawn_pet_tooltip(
     let Some(ref pet) = player.pet else {
         return;
     };
-    let title = crate::core::combat::mechanics::localize_monster_name(&pet.name, pet.kind, localization, lang);
+    let title = crate::core::combat::mechanics::localize_monster_name(
+        &pet.name,
+        pet.kind,
+        localization,
+        lang,
+    );
 
     let content = TooltipContent {
         title,

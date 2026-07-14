@@ -1,19 +1,20 @@
-//! Runtime [`AssetReader`] that serves individual files out of the single
-//! `assets.pak` archive produced by the `pack-assets` binary.
+//! Runtime [`AssetReader`] that serves individual files out of the sharded
+//! archives produced by the `pack-assets` binary.
 //!
 //! Shipping 25k+ loose asset files breaks itch.io's HTML channel (~1000 file
-//! limit), so we bundle everything into one archive and read files back out:
-//!   * native  -> open the file once and `seek` + `read` each requested range.
+//! limit), so we bundle everything into a small set of archives and read files back out:
+//!   * native  -> seek and read the requested range from its shard.
 //!   * wasm    -> fetch the small index once, then issue an HTTP `Range` request
-//!                per asset (the ~5 GB archive never lives in memory at once).
+//!                against the relevant shard.
 //!
 //! ## Format (keep in sync with `src/bin/pack_assets.rs`)
 //! ```text
-//! [ data blob 0 ][ data blob 1 ] ... [ index ][ footer (24 bytes) ]
+//! `assets.pak`: `[ index ][ footer (24 bytes) ]`
+//! Data shards: `assets-000.pak`, `assets-001.pak`, ...
 //! ```
-//! Footer (last 24 bytes): index_offset:u64 LE, index_length:u64 LE, magic b"ARCPAK01".
+//! Footer (last 24 bytes): index_offset:u64 LE, index_length:u64 LE, magic b"ARCPAK02".
 //! Index: entry_count:u32 LE, then per entry:
-//!   path_len:u16 LE, path bytes (UTF-8, '/'-separated), data_offset:u64 LE, data_length:u64 LE.
+//!   path_len:u16 LE, path bytes, shard:u16 LE, data_offset:u64 LE, data_length:u64 LE.
 
 use std::collections::HashMap;
 use std::path::Path;
@@ -29,14 +30,21 @@ use bevy::prelude::*;
 use futures_lite::Stream;
 
 /// Magic marker stored at the very end of the archive.
-const MAGIC: &[u8; 8] = b"ARCPAK01";
+const MAGIC: &[u8; 8] = b"ARCPAK02";
 /// Size of the fixed footer: index_offset (8) + index_length (8) + magic (8).
 const FOOTER_LEN: usize = 24;
 /// Default archive location (relative to the working dir / served alongside the wasm bundle).
 const PAK_PATH: &str = "assets.pak";
 
-/// Maps a normalized asset path to its `(offset, length)` within the archive.
-type PakIndex = HashMap<String, (u64, u64)>;
+#[derive(Clone, Copy)]
+struct PakLocation {
+    shard: u16,
+    offset: u64,
+    length: u64,
+}
+
+/// Maps a normalized asset path to its location within a data shard.
+type PakIndex = HashMap<String, PakLocation>;
 
 /// Parses the 24-byte footer, returning `(index_offset, index_length)`.
 fn parse_footer(footer: &[u8]) -> Option<(u64, u64)> {
@@ -62,9 +70,17 @@ fn parse_index(bytes: &[u8]) -> Option<PakIndex> {
     for _ in 0..count {
         let path_len = u16::from_le_bytes(read(&mut cursor, 2)?.try_into().ok()?) as usize;
         let path = String::from_utf8(read(&mut cursor, path_len)?.to_vec()).ok()?;
+        let shard = u16::from_le_bytes(read(&mut cursor, 2)?.try_into().ok()?);
         let offset = u64::from_le_bytes(read(&mut cursor, 8)?.try_into().ok()?);
         let length = u64::from_le_bytes(read(&mut cursor, 8)?.try_into().ok()?);
-        index.insert(path, (offset, length));
+        index.insert(
+            path,
+            PakLocation {
+                shard,
+                offset,
+                length,
+            },
+        );
     }
     Some(index)
 }
@@ -164,19 +180,26 @@ impl PakInner {
     async fn read_entry(&self, key: &str, path: &Path) -> Result<VecReader, AssetReaderError> {
         use std::io::{Read, Seek, SeekFrom};
 
-        let (offset, length) =
+        let location =
             *self.index.get(key).ok_or_else(|| AssetReaderError::NotFound(path.to_path_buf()))?;
 
-        if length == 0 {
+        if location.length == 0 {
             return Ok(VecReader::new(Vec::new()));
         }
 
-        let mut file = std::fs::File::open(&self.pak_path).map_err(AssetReaderError::from)?;
-        file.seek(SeekFrom::Start(offset)).map_err(AssetReaderError::from)?;
-        let mut bytes = vec![0u8; length as usize];
+        let mut file = std::fs::File::open(shard_path(&self.pak_path, location.shard))
+            .map_err(AssetReaderError::from)?;
+        file.seek(SeekFrom::Start(location.offset)).map_err(AssetReaderError::from)?;
+        let mut bytes = vec![0u8; location.length as usize];
         file.read_exact(&mut bytes).map_err(AssetReaderError::from)?;
         Ok(VecReader::new(bytes))
     }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn shard_path(pak_path: &Path, shard: u16) -> std::path::PathBuf {
+    let stem = pak_path.file_stem().and_then(|value| value.to_str()).unwrap_or("assets");
+    pak_path.with_file_name(format!("{stem}-{shard:03}.pak"))
 }
 
 // --- Wasm backend: HTTP range requests against the served archive ----------------------------
@@ -225,17 +248,24 @@ impl PakInner {
     }
 
     async fn read_entry(&self, key: &str, path: &Path) -> Result<VecReader, AssetReaderError> {
-        let (offset, length) = *self
+        let location = *self
             .index()
             .await?
             .get(key)
             .ok_or_else(|| AssetReaderError::NotFound(path.to_path_buf()))?;
-        if length == 0 {
+        if location.length == 0 {
             return Ok(VecReader::new(Vec::new()));
         }
-        let bytes = fetch_range(&self.url, RangeReq::Range(offset, length)).await?;
+        let url = shard_url(&self.url, location.shard);
+        let bytes = fetch_range(&url, RangeReq::Range(location.offset, location.length)).await?;
         Ok(VecReader::new(bytes))
     }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn shard_url(pak_url: &str, shard: u16) -> String {
+    let base = pak_url.strip_suffix(".pak").unwrap_or(pak_url);
+    format!("{base}-{shard:03}.pak")
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -327,29 +357,33 @@ mod tests {
     use super::*;
     use futures_lite::future::block_on;
 
-    /// Writes a minimal archive in the on-disk format (mirrors `pack_assets.rs`).
+    /// Writes a minimal sharded archive in the on-disk format.
     fn write_pak(path: &Path, files: &[(&str, &[u8])]) {
         use std::io::Write;
 
-        let mut data = Vec::new();
+        let mut shard_data = [Vec::new(), Vec::new()];
         let mut index = Vec::new();
         index.extend_from_slice(&(files.len() as u32).to_le_bytes());
-        for (name, bytes) in files {
+        for (position, (name, bytes)) in files.iter().enumerate() {
+            let shard = (position % shard_data.len()) as u16;
+            let data = &mut shard_data[shard as usize];
             let offset = data.len() as u64;
             data.extend_from_slice(bytes);
             index.extend_from_slice(&(name.len() as u16).to_le_bytes());
             index.extend_from_slice(name.as_bytes());
+            index.extend_from_slice(&shard.to_le_bytes());
             index.extend_from_slice(&offset.to_le_bytes());
             index.extend_from_slice(&(bytes.len() as u64).to_le_bytes());
         }
-        let index_offset = data.len() as u64;
-        data.extend_from_slice(&index);
-        data.extend_from_slice(&index_offset.to_le_bytes());
-        data.extend_from_slice(&(index.len() as u64).to_le_bytes());
-        data.extend_from_slice(MAGIC);
 
         let mut file = std::fs::File::create(path).unwrap();
-        file.write_all(&data).unwrap();
+        file.write_all(&index).unwrap();
+        file.write_all(&0u64.to_le_bytes()).unwrap();
+        file.write_all(&(index.len() as u64).to_le_bytes()).unwrap();
+        file.write_all(MAGIC).unwrap();
+        for (shard, data) in shard_data.iter().enumerate() {
+            std::fs::File::create(shard_path(path, shard as u16)).unwrap().write_all(data).unwrap();
+        }
     }
 
     async fn read_all(inner: &PakInner, key: &str) -> Result<Vec<u8>, AssetReaderError> {

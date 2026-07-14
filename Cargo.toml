@@ -10,7 +10,7 @@ authors = ["Mavs"]
 name = "build-assets"
 path = "src/bin/build-assets.rs"
 
-# Bundles assets/ into a single assets.pak archive for shipping.
+# Bundles assets/ into sharded .pak archives for shipping.
 [[bin]]
 name = "pack-assets"
 path = "src/bin/pack_assets.rs"

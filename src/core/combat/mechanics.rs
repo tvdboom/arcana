@@ -52,6 +52,10 @@ const LOST_COMBAT_AP_PENALTY: u32 = 5;
 /// Bounds and step for the adjustable combat speed.
 const COMBAT_SPEED_MIN: f32 = 0.25;
 const COMBAT_SPEED_MAX: f32 = 8.0;
+const DODGE_BASE_CHANCE: f32 = 0.18;
+const DODGE_POINT_MULTIPLIER: f32 = 0.018;
+const DODGE_CHANCE_MIN: f32 = 0.08;
+const DODGE_CHANCE_MAX: f32 = 0.70;
 
 /// Adjustable time multiplier for combat, persisted across battles. Controlled
 /// with Ctrl+Shift+Left/Right and applied to every time-driven combat system.
@@ -230,6 +234,7 @@ pub struct Fighter {
     pub effects: Vec<TimedEffect>,
     pub weapon_effects: Vec<WeaponEffect>,
     pub attack_style: AttackStyle,
+    pub intelligence_mod: f32,
     pub alive: bool,
     pub weapons: Vec<CombatWeapon>,
 }
@@ -663,6 +668,7 @@ pub fn setup_combat_state(
         effects: Vec::new(),
         weapon_effects: player_weapon_effects(&player),
         attack_style: player_attack_style(&player),
+        intelligence_mod: player.intelligence_mod() as f32,
         alive: true,
         weapons: player_weapons,
     };
@@ -692,6 +698,7 @@ pub fn setup_combat_state(
             })
             .collect(),
         attack_style: AttackStyle::Other,
+        intelligence_mod: 0.0,
         alive: true,
         weapons: vec![CombatWeapon {
             name: "Basic Attack".to_string(),
@@ -746,6 +753,11 @@ pub fn setup_combat_state(
             })
             .collect(),
         attack_style: AttackStyle::Other,
+        intelligence_mod: duel_state
+            .as_ref()
+            .and_then(|duel| duel.opponent.as_ref())
+            .map(|opponent| opponent.intelligence_mod() as f32)
+            .unwrap_or(0.0),
         alive: true,
         weapons: vec![CombatWeapon {
             name: "Basic Attack".to_string(),
@@ -813,7 +825,18 @@ pub fn setup_combat_state(
 // ---------------------------------------------------------------------------
 
 fn dodge_chance(attacker_init: f32, defender_init: f32) -> f32 {
-    (0.18 + (defender_init - attacker_init) * 0.018).clamp(0.08, 0.70)
+    (DODGE_BASE_CHANCE + (defender_init - attacker_init) * DODGE_POINT_MULTIPLIER)
+        .clamp(DODGE_CHANCE_MIN, DODGE_CHANCE_MAX)
+}
+
+fn ability_dodge_chance(
+    attacker_init: f32,
+    defender_init: f32,
+    caster_intelligence_mod: f32,
+) -> f32 {
+    (DODGE_BASE_CHANCE + (defender_init - attacker_init) * DODGE_POINT_MULTIPLIER
+        - caster_intelligence_mod * DODGE_POINT_MULTIPLIER)
+        .clamp(DODGE_CHANCE_MIN, DODGE_CHANCE_MAX)
 }
 
 fn compute_damage(attack: f32, defense: f32, crit: bool, incoming_mult: f32) -> f32 {
@@ -1095,9 +1118,15 @@ fn apply_effect(
                 t.take_damage(*damage as f32);
             }
             let color = match effect {
-                Effect::Pierce { .. } => Color::srgb(1.0, 0.5, 0.3),
-                Effect::Burn { .. } => Color::srgb(1.0, 0.3, 0.1),
-                Effect::Poison { .. } => Color::srgb(0.2, 0.8, 0.2),
+                Effect::Pierce {
+                    ..
+                } => Color::srgb(1.0, 0.5, 0.3),
+                Effect::Burn {
+                    ..
+                } => Color::srgb(1.0, 0.3, 0.1),
+                Effect::Poison {
+                    ..
+                } => Color::srgb(0.2, 0.8, 0.2),
                 _ => Color::WHITE,
             };
             state.fx.push(CombatFx {
@@ -1662,9 +1691,10 @@ pub fn try_cast_ability(
     let enemy_dodged = if has_offensive {
         let mut rng = rng();
         state.enemy.can_dodge()
-            && rng.random_bool(dodge_chance(
+            && rng.random_bool(ability_dodge_chance(
                 state.player.eff_initiative(),
                 state.enemy.eff_initiative(),
+                state.player.intelligence_mod,
             ) as f64)
     } else {
         false
@@ -1780,9 +1810,10 @@ pub fn enemy_cast_ability(
     let player_dodged = if has_offensive {
         let mut rng = rng();
         state.player.can_dodge()
-            && rng.random_bool(dodge_chance(
+            && rng.random_bool(ability_dodge_chance(
                 state.enemy.eff_initiative(),
                 state.player.eff_initiative(),
+                state.enemy.intelligence_mod,
             ) as f64)
     } else {
         false
@@ -2094,8 +2125,9 @@ pub fn localize_monster_name(
             let color_loc = localization.get_opt(&color_key, lang).unwrap_or_else(|| {
                 localization.get_opt(color, lang).unwrap_or_else(|| color.to_string())
             });
-            let dragon_loc =
-                localization.get_opt("general.dragon", lang).unwrap_or_else(|| "Dragon".to_string());
+            let dragon_loc = localization
+                .get_opt("general.dragon", lang)
+                .unwrap_or_else(|| "Dragon".to_string());
             if stage.is_empty() {
                 return format!("{} {}", color_loc, dragon_loc);
             } else {
@@ -2891,7 +2923,9 @@ pub fn sync_combat_effect_icons(
         let effects_opt = match bar.side {
             crate::core::combat::ui::CombatEffectsBarSide::Player => Some(&state.player.effects),
             crate::core::combat::ui::CombatEffectsBarSide::Enemy => Some(&state.enemy.effects),
-            crate::core::combat::ui::CombatEffectsBarSide::Pet => state.pet.as_ref().map(|p| &p.effects),
+            crate::core::combat::ui::CombatEffectsBarSide::Pet => {
+                state.pet.as_ref().map(|p| &p.effects)
+            },
         };
 
         // Distinct debuff effects currently on the target, preserving order.
@@ -3140,6 +3174,7 @@ mod tests {
             effects: Vec::new(),
             weapon_effects: Vec::new(),
             attack_style: AttackStyle::Melee,
+            intelligence_mod: 0.0,
             alive: true,
             weapons: Vec::new(),
         };
@@ -3153,5 +3188,15 @@ mod tests {
         // Test eff_attack_for with a base attack of 15.0
         let attack = fighter.eff_attack_for(15.0);
         assert_eq!(attack, 15.0);
+    }
+
+    #[test]
+    fn test_ability_dodge_chance_uses_caster_intelligence() {
+        let without_intelligence = ability_dodge_chance(10.0, 14.0, 0.0);
+        let with_intelligence = ability_dodge_chance(10.0, 14.0, 5.0);
+
+        assert!(with_intelligence < without_intelligence);
+        assert!((without_intelligence - 0.252).abs() < 0.0001);
+        assert!((with_intelligence - 0.162).abs() < 0.0001);
     }
 }

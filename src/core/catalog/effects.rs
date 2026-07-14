@@ -205,17 +205,39 @@ impl Effect {
     /// or `None` for effects that are not rendered as combat debuff icons.
     pub fn debuff_icon(&self) -> Option<&'static str> {
         Some(match self {
-            Self::Blind { .. } => "blind",
-            Self::Burn { .. } => "burn",
-            Self::Curse { .. } => "curse",
-            Self::Freeze { .. } => "freeze",
-            Self::Immobilize { .. } => "immobilize",
-            Self::Poison { .. } => "poison",
-            Self::Paranoia { .. } => "paranoia",
-            Self::Silence { .. } => "silence",
-            Self::Stun { .. } => "stun",
-            Self::Taunt { .. } => "taunt",
-            Self::Vulnerability { .. } => "vulnerability",
+            Self::Blind {
+                ..
+            } => "blind",
+            Self::Burn {
+                ..
+            } => "burn",
+            Self::Curse {
+                ..
+            } => "curse",
+            Self::Freeze {
+                ..
+            } => "freeze",
+            Self::Immobilize {
+                ..
+            } => "immobilize",
+            Self::Poison {
+                ..
+            } => "poison",
+            Self::Paranoia {
+                ..
+            } => "paranoia",
+            Self::Silence {
+                ..
+            } => "silence",
+            Self::Stun {
+                ..
+            } => "stun",
+            Self::Taunt {
+                ..
+            } => "taunt",
+            Self::Vulnerability {
+                ..
+            } => "vulnerability",
             _ => return None,
         })
     }

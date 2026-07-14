@@ -11,7 +11,7 @@ build:
 build-release:
     cargo build --release
 
-# Bundle assets/ into a single assets.pak archive (ships one file instead of 25k+).
+# Bundle assets/ into sub-200 MiB archives instead of shipping 25k+ loose files.
 pack-assets:
     cargo run --release --bin pack-assets
 

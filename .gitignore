@@ -8,6 +8,6 @@ target/
 # Generated assets (processed from assets-src/)
 assets/
 
-# Bundled asset archive (generated from assets/)
-assets.pak
-docs/assets.pak
+# Bundled asset archives (generated from assets/)
+assets*.pak
+docs/assets*.pak

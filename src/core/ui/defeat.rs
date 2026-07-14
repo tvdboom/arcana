@@ -204,4 +204,3 @@ pub fn auto_open_rest_after_defeat(
         next_game_state.set(GameState::Rest);
     }
 }
-

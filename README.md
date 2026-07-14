@@ -37,6 +37,62 @@ Step into the void, forge your legend, and claim your place in the Arcana.
 
 <br>
 
+## 🎮 How to Play
+
+Arcana is built around a simple loop: **improve your character outside combat, then cash
+that build in during fights**. You use actions like **Rest**, **Study**, **Work**, **Train**,
+**Craft**, **Shop**, **Hunt**, and **Quest** to grow your character, collect gear, and
+prepare for **Duels**.
+
+### Action Points (AP)
+
+AP is not a stamina bar that refills. It is a permanent progress counter that goes up as
+you take actions, and it never resets. Most actions cost AP. AP is a measure of your 
+character's progress. Decide with another player up to how much AP you want to play to
+subsequently fight in a duel.
+
+Most actions add AP:
+
+| Action   |             AP  | What it does                                                                                                            |
+|----------|----------------:|-------------------------------------------------------------------------------------------------------------------------|
+| Rest     |       1 / 2 / 3 | Recover health and mana; better rest options heal more, and the best one can permanently raise max health and max mana. |
+| Study    |       1 / 2 / 3 | Learn a new ability, learn a new perk, or gain attributes. Higher intensity leans toward higher-level rewards.          |
+| Work     |       1 / 2 / 3 | Earn gold or artifacts. Harder jobs pay more, but some cost mana or health.                                             |
+| Train    |               1 | Improve **attack**, **defense**, or **initiative** training for **melee**, **finesse**, or **ranged** weapons.          |
+| Craft    | ceil(items / 2) | Turn artifacts into equipment, spending mana and some gold.                                                             |
+| Hunt     |       1 / 2 / 3 | Gain XP, possibly trigger combat, and possibly find artifacts.                                                          |
+| Quest    |       1 / 2 / 3 | Gain gold, equipment, consumables, and artifacts, with a chance to trigger combat.                                      |
+| Shop     |               0 | Buy and sell gear, consumables, and artifacts.                                                                          |
+| Duel     |               0 | Fight another player with the build you prepared. Losing adds 5 AP and forces you to recover before continuing.         |
+
+### Player Attributes
+
+All six core attributes start from a baseline of **10**. Your effective value is then
+modified by things like race, age/sex bonuses, equipped gear, and perks. When an item
+says `+Strength`, `+Wisdom`, and so on, it changes the effective stat below and everything
+that depends on it.
+
+| Attribute        | What it affects                                                                                                                                                                                   |
+|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Strength**     | Flat **Attack** bonus. More Strength means harder basic hits.                                                                                                                                     |
+| **Dexterity**    | Flat **Initiative** bonus. Higher Initiative improves turn timing and dodge chances in combat calculations.                                                                                       |
+| **Constitution** | **Max Health**, **Health Regen**, and flat **Defense**. It also improves how much **Rough Rest** can recover and how much **Grand Accommodation** can permanently boost your max health and mana. |
+| **Intelligence** | **Study** success chance and lower enemy dodge chance against your offensive abilities.                                                                                                           |
+| **Wisdom**       | **Max Mana**, **Mana Regen**, and lower **Craft** gold costs.                                                                                                                                     |
+| **Charisma**     | Better **Work** rewards, better **sell prices**, and a higher chance to come away from a **Hunt** with a pet offer.                                                                               |
+
+### Items
+
+| Item type       | What it does                                                                                                                                                              |
+|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Weapons**     | Determine your basic attack profile: **attack**, **attack speed**, **crit chance**, **kind**, and **category**. They can also grant passive modifiers and combat effects. |
+| **Wearables**   | Helmets, chestplates, gloves, boots, and accessories. These mostly add passive modifiers, and some also trigger effects when you are hit.                                 |
+| **Perks**       | Permanent passive bonuses. They do not need to be equipped.                                                                                                               |
+| **Abilities**   | Active combat skills with a **mana cost** and **cooldown**. Some target you, some target the enemy, and some also affect your pet.                                        |
+| **Consumables** | Usable combat items such as potions. They apply self-buffs or recovery effects, are consumed on use, and you can have up to **8 consumable types** equipped at once.      |
+| **Artifacts**   | Crafting materials and valuables. You can find them through work, hunts, quests, and the shop, then **craft with them or sell them**.                                     |
+
+
 ## ⚔️ Combat Mechanics
 
 Combat in Arcana is a real-time simulation driven by stats, timing, and active effects.
@@ -72,6 +128,10 @@ $$\text{Dodge Chance} = \text{clamp}\left(0.18 + (\text{Defender Initiative} - \
 * **Effective Initiative** ($I$) is modified by:
   * `Haste`: Multiplies initiative by $1.0 + \text{initiative pct} / 100.0$.
   * `Paranoia`: Multiplies initiative by $(1.0 - \text{initiative pct} / 100.0)$ (capped at $0.0$ minimum).
+
+#### **Step B2: Ability Dodge Chance**
+Offensive abilities use the same base dodge roll, but the caster's Intelligence modifier reduces the defender's chance to evade:
+$$\text{Ability Dodge Chance} = \text{clamp}\left(0.18 + (\text{Defender Initiative} - \text{Attacker Initiative}) \times 0.018 - \text{Caster Intelligence Mod} \times 0.018, 0.08, 0.70\right)$$
 
 #### **Step C: Critical Strike Roll**
 An attack has a chance to land a critical strike (inflicting double damage):
