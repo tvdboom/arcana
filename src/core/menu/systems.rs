@@ -1,3 +1,4 @@
+use bevy::asset::LoadState;
 use bevy::prelude::*;
 
 use crate::core::assets::WorldAssets;
@@ -208,6 +209,9 @@ pub fn animate_loading_text(time: Res<Time>, mut text_q: Query<&mut Text, With<L
     let dot_count = ((time.elapsed_secs() * 3.0) as usize) % 4;
     let dots = ".".repeat(dot_count);
     for mut text in &mut text_q {
+        if text.0.starts_with("Failed to load") {
+            continue;
+        }
         text.0 = format!("Loading{dots}");
     }
 }
@@ -221,6 +225,7 @@ pub fn complete_loading_when_ready(
     asset_server: Res<AssetServer>,
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut loading_text: Query<&mut Text, With<LoadingText>>,
 ) {
     let Some(pending) = pending else {
         return;
@@ -233,15 +238,35 @@ pub fn complete_loading_when_ready(
         }
     }
 
-    let images_ready =
-        assets.images.values().all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
-    let fonts_ready =
-        assets.fonts.values().all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
-    let audio_ready =
-        assets.audio.values().all(|handle| asset_server.is_loaded_with_dependencies(handle.id()));
+    let image_keys: &[&str] = match pending.target_game_state {
+        GameState::CreateCharacter => &["bg2", "stone", "border", "border_hover"],
+        _ => &["bg"],
+    };
+    let mut required_ids = image_keys
+        .iter()
+        .map(|key| assets.image(*key).id().untyped())
+        .chain(assets.fonts.values().map(|handle| handle.id().untyped()));
 
-    if !(images_ready && fonts_ready && audio_ready) {
-        return;
+    for id in &mut required_ids {
+        let path =
+            asset_server.get_path(id).map_or_else(|| format!("{id:?}"), |path| path.to_string());
+        if let Some(LoadState::Failed(err)) = asset_server.get_load_state(id) {
+            let message = format!("Failed to load {path}");
+            let mut changed = false;
+            for mut text in &mut loading_text {
+                if text.0 != message {
+                    text.0.clone_from(&message);
+                    changed = true;
+                }
+            }
+            if changed {
+                error!("{message}: {err:?}");
+            }
+            return;
+        }
+        if !asset_server.is_loaded_with_dependencies(id) {
+            return;
+        }
     }
 
     next_game_state.set(pending.target_game_state);

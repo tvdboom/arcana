@@ -208,6 +208,7 @@ fn shard_path(pak_path: &Path, shard: u16) -> std::path::PathBuf {
 struct PakInner {
     url: String,
     index: async_lock::OnceCell<PakIndex>,
+    shards: async_lock::Mutex<HashMap<u16, Arc<async_lock::OnceCell<ShardMode>>>>,
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -216,6 +217,7 @@ impl PakInner {
         Self {
             url,
             index: async_lock::OnceCell::new(),
+            shards: async_lock::Mutex::new(HashMap::new()),
         }
     }
 
@@ -257,7 +259,37 @@ impl PakInner {
             return Ok(VecReader::new(Vec::new()));
         }
         let url = shard_url(&self.url, location.shard);
-        let bytes = fetch_range(&url, RangeReq::Range(location.offset, location.length)).await?;
+        let request = RangeReq::Range(location.offset, location.length);
+        let shard = {
+            let mut shards = self.shards.lock().await;
+            shards
+                .entry(location.shard)
+                .or_insert_with(|| Arc::new(async_lock::OnceCell::new()))
+                .clone()
+        };
+        let mode = shard
+            .get_or_try_init(|| async {
+                match fetch_range_response(&url, request).await? {
+                    RangeResponse::Partial(bytes) => Ok::<_, AssetReaderError>(ShardMode::Ranged(
+                        async_lock::Mutex::new(Some((request, bytes))),
+                    )),
+                    RangeResponse::Full(bytes) => Ok(ShardMode::Full(bytes)),
+                }
+            })
+            .await?;
+        let bytes = match mode {
+            ShardMode::Ranged(initial) => {
+                let mut initial = initial.lock().await;
+                if initial.as_ref().is_some_and(|(initial_request, _)| *initial_request == request)
+                {
+                    initial.take().expect("initial shard response exists").1
+                } else {
+                    drop(initial);
+                    fetch_range(&url, request).await?
+                }
+            },
+            ShardMode::Full(bytes) => slice_full_response(bytes, request)?,
+        };
         Ok(VecReader::new(bytes))
     }
 }
@@ -269,12 +301,24 @@ fn shard_url(pak_url: &str, shard: u16) -> String {
 }
 
 #[cfg(target_arch = "wasm32")]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 enum RangeReq {
     /// Bytes `[start, start + len)`.
     Range(u64, u64),
     /// The final `len` bytes of the resource.
     Suffix(u64),
+}
+
+#[cfg(target_arch = "wasm32")]
+enum ShardMode {
+    Ranged(async_lock::Mutex<Option<(RangeReq, Vec<u8>)>>),
+    Full(Vec<u8>),
+}
+
+#[cfg(target_arch = "wasm32")]
+enum RangeResponse {
+    Partial(Vec<u8>),
+    Full(Vec<u8>),
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -291,6 +335,68 @@ fn js_err(context: &str, value: wasm_bindgen::JsValue) -> AssetReaderError {
 /// server ignores the `Range` header (so correctness never depends on range support).
 #[cfg(target_arch = "wasm32")]
 async fn fetch_range(url: &str, req: RangeReq) -> Result<Vec<u8>, AssetReaderError> {
+    match fetch_range_response(url, req).await? {
+        RangeResponse::Partial(bytes) => Ok(bytes),
+        RangeResponse::Full(bytes) => slice_full_response(&bytes, req),
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn slice_full_response(bytes: &[u8], req: RangeReq) -> Result<Vec<u8>, AssetReaderError> {
+    let range = match req {
+        RangeReq::Range(start, len) => {
+            let start = usize::try_from(start).map_err(|_| {
+                AssetReaderError::Io(
+                    std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        "asset offset is too large",
+                    )
+                    .into(),
+                )
+            })?;
+            let len = usize::try_from(len).map_err(|_| {
+                AssetReaderError::Io(
+                    std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        "asset length is too large",
+                    )
+                    .into(),
+                )
+            })?;
+            let end = start.checked_add(len).ok_or_else(|| {
+                AssetReaderError::Io(
+                    std::io::Error::new(std::io::ErrorKind::InvalidData, "asset range overflow")
+                        .into(),
+                )
+            })?;
+            bytes.get(start..end)
+        },
+        RangeReq::Suffix(len) => {
+            let len = usize::try_from(len).map_err(|_| {
+                AssetReaderError::Io(
+                    std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        "suffix length is too large",
+                    )
+                    .into(),
+                )
+            })?;
+            bytes.get(bytes.len().saturating_sub(len)..)
+        },
+    };
+    range.map(<[u8]>::to_vec).ok_or_else(|| {
+        AssetReaderError::Io(
+            std::io::Error::new(
+                std::io::ErrorKind::UnexpectedEof,
+                "asset range exceeds shard length",
+            )
+            .into(),
+        )
+    })
+}
+
+#[cfg(target_arch = "wasm32")]
+async fn fetch_range_response(url: &str, req: RangeReq) -> Result<RangeResponse, AssetReaderError> {
     use js_sys::Uint8Array;
     use wasm_bindgen::{JsCast, JsValue};
     use wasm_bindgen_futures::JsFuture;
@@ -327,23 +433,10 @@ async fn fetch_range(url: &str, req: RangeReq) -> Result<Vec<u8>, AssetReaderErr
                 .map_err(|e| js_err("await body", e))?;
             let all = Uint8Array::new(&buffer).to_vec();
 
-            // 206 already contains exactly the requested range; 200 returns the whole
-            // resource, so slice out the part we asked for.
             if resp.status() == 206 {
-                Ok(all)
+                Ok(RangeResponse::Partial(all))
             } else {
-                let bytes = match req {
-                    RangeReq::Range(start, len) => {
-                        let start = start as usize;
-                        let end = (start + len as usize).min(all.len());
-                        all.get(start..end).unwrap_or(&[]).to_vec()
-                    },
-                    RangeReq::Suffix(len) => {
-                        let start = all.len().saturating_sub(len as usize);
-                        all[start..].to_vec()
-                    },
-                };
-                Ok(bytes)
+                Ok(RangeResponse::Full(all))
             }
         },
         // itch.io's CDN returns 403 for missing files.

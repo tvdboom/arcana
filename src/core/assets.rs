@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use bevy_kira_audio::AudioSource;
 use std::collections::HashMap;
 use std::path::Path;
+use std::sync::Mutex;
 
 /// Forces linear (smooth) filtering for an image, overriding the global
 /// `ImagePlugin::default_nearest()` setting. Used for painted/photographic art
@@ -26,12 +27,12 @@ fn leak_str(value: String) -> &'static str {
 }
 
 fn insert_image_aliases(
-    images: &mut HashMap<&'static str, Handle<Image>>,
-    image: &Handle<Image>,
+    image_paths: &mut HashMap<&'static str, String>,
+    image_path: &str,
     aliases: impl IntoIterator<Item = String>,
 ) {
     for alias in aliases {
-        images.entry(leak_str(alias)).or_insert_with(|| image.clone());
+        image_paths.entry(leak_str(alias)).or_insert_with(|| image_path.to_string());
     }
 }
 
@@ -48,6 +49,9 @@ pub struct WorldAssets {
     pub audio: HashMap<&'static str, Handle<AudioSource>>,
     pub fonts: HashMap<&'static str, Handle<Font>>,
     pub images: HashMap<&'static str, Handle<Image>>,
+    asset_server: AssetServer,
+    image_paths: HashMap<&'static str, String>,
+    lazy_images: Mutex<HashMap<String, Handle<Image>>>,
 }
 
 impl WorldAssets {
@@ -70,13 +74,27 @@ impl WorldAssets {
     }
 
     pub fn image(&self, name: impl Into<String>) -> Handle<Image> {
-        self.get_asset(&self.images, name, "image").clone()
+        let name = name.into();
+        if let Some(image) = self.images.get(name.as_str()) {
+            return image.clone();
+        }
+
+        let path = self
+            .image_paths
+            .get(name.as_str())
+            .unwrap_or_else(|| panic!("No asset for image {name}."));
+        let mut lazy_images = self.lazy_images.lock().expect("lazy image cache poisoned");
+        lazy_images
+            .entry(path.clone())
+            .or_insert_with(|| load_linear(&self.asset_server, path.clone()))
+            .clone()
     }
 }
 
 impl FromWorld for WorldAssets {
     fn from_world(world: &mut World) -> Self {
-        let assets = world.get_resource::<AssetServer>().unwrap();
+        let asset_server = world.get_resource::<AssetServer>().unwrap().clone();
+        let assets = &asset_server;
 
         let audio = HashMap::from([
             ("music", assets.load("audio/music.ogg")),
@@ -119,7 +137,7 @@ impl FromWorld for WorldAssets {
             ("medium", assets.load("fonts/FiraMono-Medium.ttf")),
         ]);
 
-        let mut images: HashMap<&'static str, Handle<Image>> = HashMap::from([
+        let images: HashMap<&'static str, Handle<Image>> = HashMap::from([
             // Icons
             ("mute", assets.load("images/icons/mute.webp")),
             ("sound", assets.load("images/icons/sound.webp")),
@@ -311,65 +329,60 @@ impl FromWorld for WorldAssets {
             ("action_odyssey", load_linear(assets, "images/actions/odyssey.webp")),
         ]);
 
+        let mut image_paths = HashMap::new();
+
         for ability in all_abilities() {
-            let image = load_linear(assets, ability.image.clone());
             insert_image_aliases(
-                &mut images,
-                &image,
+                &mut image_paths,
+                &ability.image,
                 catalog_image_aliases(&ability.name, &ability.image),
             );
         }
 
         for perk in all_perks() {
-            let image = load_linear(assets, perk.image.clone());
             insert_image_aliases(
-                &mut images,
-                &image,
+                &mut image_paths,
+                &perk.image,
                 catalog_image_aliases(&perk.name, &perk.image),
             );
         }
 
         for weapon in all_weapons() {
-            let image = load_linear(assets, weapon.image.clone());
             insert_image_aliases(
-                &mut images,
-                &image,
+                &mut image_paths,
+                &weapon.image,
                 catalog_image_aliases(&weapon.name, &weapon.image),
             );
         }
 
         for wearable in all_wearables() {
-            let image = load_linear(assets, wearable.image.clone());
             insert_image_aliases(
-                &mut images,
-                &image,
+                &mut image_paths,
+                &wearable.image,
                 catalog_image_aliases(&wearable.name, &wearable.image),
             );
         }
 
         for consumable in all_consumables() {
-            let image = load_linear(assets, consumable.image.clone());
             insert_image_aliases(
-                &mut images,
-                &image,
+                &mut image_paths,
+                &consumable.image,
                 catalog_image_aliases(&consumable.name, &consumable.image),
             );
         }
 
         for artifact in all_artifacts() {
-            let image = load_linear(assets, artifact.image.clone());
             insert_image_aliases(
-                &mut images,
-                &image,
+                &mut image_paths,
+                &artifact.image,
                 catalog_image_aliases(&artifact.name, &artifact.image),
             );
         }
 
         for monster in all_monsters() {
-            let image = load_linear(assets, monster.image.clone());
             insert_image_aliases(
-                &mut images,
-                &image,
+                &mut image_paths,
+                &monster.image,
                 [
                     monster.name.to_lowercase(),
                     monster.name.to_lowercase().replace(" ", "_"),
@@ -387,6 +400,9 @@ impl FromWorld for WorldAssets {
             audio,
             fonts,
             images,
+            asset_server,
+            image_paths,
+            lazy_images: Mutex::new(HashMap::new()),
         }
     }
 }
