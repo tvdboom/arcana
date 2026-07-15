@@ -94,6 +94,44 @@ Combat in Arcana is a real-time simulation driven by stats, timing, and active e
 Each fighter attacks automatically at an interval determined by their attack speed, while
 active abilities can be cast at the cost of mana and cooldowns.
 
+### Ability and Weapon Kinds
+
+Abilities and weapons both have a **kind**, which identifies their combat school or theme.
+
+| Kind           | Meaning and progression                                                                                                       |
+|----------------|-------------------------------------------------------------------------------------------------------------------------------|
+| **Physical**   | The only non-magical kind. Warriors and Assassins are more likely to receive Physical abilities when gaining ability choices. |
+| **Fire**       | A magical kind associated with Red Mages. Red Mages begin with and are more likely to receive Fire abilities.                 |
+| **Ice**        | A magical kind associated with White Mages. White Mages begin with and are more likely to receive Ice abilities.              |
+| **Nature**     | A magical kind associated with Green Mages. Green Mages begin with and are more likely to receive Nature abilities.           |
+| **Holy**       | A magical kind commonly used for radiant, protective, and restorative abilities.                                              |
+| **Shadow**     | A magical kind associated with Black Mages. Black Mages begin with and are more likely to receive Shadow abilities.           |
+
+Druids and Mages are more likely to receive abilities of any magical kind. A Mage receives an
+additional preference for the kind associated with their Ajah.
+
+Kind is a classification, not an automatic status effect. A Fire weapon does not automatically
+apply `Burn`, and an Ice ability does not automatically apply `Freeze`. Actual damage, healing,
+buffs, debuffs, and status effects come from the ability or weapon's explicit **effects** list.
+Likewise, kind alone does not change the basic damage formula.
+
+#### Weapon Categories
+
+Every weapon also has one category:
+
+| Category    | Combat role                                                                                                                    |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------|
+| **Melee**   | An attacking weapon using the Melee training profile.                                                                          |
+| **Finesse** | An attacking weapon using the Finesse training profile.                                                                        |
+| **Range**   | An attacking weapon using the Ranged training profile.                                                                         |
+| **Magical** | An attacking magical implement. Mages and Druids can begin with this category.                                                 |
+| **Shield**  | A support-hand item. It does not perform basic attacks; its effects trigger defensively when its wielder is hit.               |
+| **Book**    | A support-hand magical item. Like a shield, it does not perform basic attacks and applies its effects when its wielder is hit. |
+
+**Hand** is separate from both kind and category. One-handed attacking weapons can fill either
+weapon hand, Shield and Book items use the support hand, and a two-handed weapon requires both
+hands to be free.
+
 ### 1. Attack Interval and Timing
 
 Every entity's attack timing is dictated by their **Attack Period**, which represents the

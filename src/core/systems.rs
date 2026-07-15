@@ -50,7 +50,7 @@ pub fn check_keys_menu(
             }
             apply_level_up_msg.write(ApplyLevelUpMsg);
         }
-        player.gold = player.gold.saturating_add(1000);
+        player.gold = player.gold.saturating_add(10000);
         return;
     }
 
