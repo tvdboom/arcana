@@ -16,7 +16,7 @@ name = "pack-assets"
 path = "src/bin/pack_assets.rs"
 
 # Feature flags for the build pipeline
-# process-assets: copy assets-src/ → assets/ and convert PNG → KTX2 (requires toktx)
+# process-assets: copy assets-src/ → assets/ and convert PNG → WebP
 # generate-catalogs: regenerate inventory RON files when catalog_gen.rs / build images change
 [features]
 default = ["process-assets", "generate-catalogs"]
@@ -39,15 +39,14 @@ bevy = { version = "0.19.0", default-features = false, features = [
     "bevy_winit",
     "debug",
     "default_font",
-    "ktx2",
     "png",
     "serialize",
     "sprite_picking",
     "ui_picking",
     "webgl2",
+    "webp",
     "x11",
-    "zstd_rust",
-]}
+] }
 bevy_kira_audio = "0.26.0"
 futures-lite = "2.6.1"
 gpu-allocator = "0.28.0"
@@ -62,7 +61,6 @@ strum = "0.28.0"
 strum_macros = "0.28.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-image = "0.25.9"
 winit = "0.30.12"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
@@ -71,6 +69,9 @@ bevy_renet = "5.0.0"
 bimap = "0.6.3"
 bincode = { version = "2.0.1", features = ["serde"] }
 rfd = "0.17.2"
+image = { version = "0.25.9", default-features = false, features = ["png"] }
+libwebp-sys = { version = "0.9.6", features = ["sse41"] }
+webp = "0.3.1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # Used by many dependencies and require feature flag for wasm
@@ -93,6 +94,9 @@ web-sys = { version = "0.3.85", features = [
 
 [build-dependencies]
 indicatif = "0.18.4"
+image = { version = "0.25.9", default-features = false, features = ["png"] }
+libwebp-sys = { version = "0.9.6", features = ["sse41"] }
+webp = "0.3.1"
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]

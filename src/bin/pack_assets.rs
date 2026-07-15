@@ -32,7 +32,7 @@ const MAGIC: &[u8; 8] = b"ARCPAK02";
 const SHARD_LIMIT: u64 = 190 * 1024 * 1024;
 
 struct Entry {
-    /// Forward-slash path relative to the source root (e.g. `images/icons/gold.ktx2`).
+    /// Forward-slash path relative to the source root (e.g. `images/icons/gold.webp`).
     path: String,
     shard: u16,
     offset: u64,

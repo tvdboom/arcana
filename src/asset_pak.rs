@@ -403,12 +403,12 @@ mod tests {
         let music: Vec<u8> = (0u8..50).collect();
         write_pak(
             &pak,
-            &[("audio/music.ogg", &music), ("empty.bin", &[]), ("images/icons/gold.ktx2", &gold)],
+            &[("audio/music.ogg", &music), ("empty.bin", &[]), ("images/icons/gold.webp", &gold)],
         );
 
         let inner = PakInner::new_file(pak).unwrap();
 
-        assert_eq!(block_on(read_all(&inner, "images/icons/gold.ktx2")).unwrap(), gold);
+        assert_eq!(block_on(read_all(&inner, "images/icons/gold.webp")).unwrap(), gold);
         assert_eq!(block_on(read_all(&inner, "audio/music.ogg")).unwrap(), music);
         assert_eq!(block_on(read_all(&inner, "empty.bin")).unwrap(), Vec::<u8>::new());
         assert!(matches!(

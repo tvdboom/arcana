@@ -772,7 +772,7 @@ fn monster_pet_level(name: &str) -> u32 {
 /// Generate all inventory RON catalogs.
 /// - `src_images`:    path to `assets-src/images`
 /// - `out_inventory`: path to output directory (e.g. `assets/catalog`)
-/// - `img_ext`:       image extension used in RON references (`"ktx2"` or `"png"`)
+/// - `img_ext`:       image extension used in RON references (`"webp"` or `"png"`)
 pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     fs::create_dir_all(out_inventory).unwrap();
 
@@ -1893,7 +1893,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
 #[allow(dead_code)]
 fn main() {
     #[cfg(feature = "process-assets")]
-    let img_ext = "ktx2";
+    let img_ext = "webp";
     #[cfg(not(feature = "process-assets"))]
     let img_ext = "png";
 

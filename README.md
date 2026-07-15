@@ -39,19 +39,15 @@ Step into the void, forge your legend, and claim your place in the Arcana.
 
 ## 🎮 How to Play
 
-Arcana is built around a simple loop: **improve your character outside combat, then cash
-that build in during fights**. You use actions like **Rest**, **Study**, **Work**, **Train**,
-**Craft**, **Shop**, **Hunt**, and **Quest** to grow your character, collect gear, and
-prepare for **Duels**.
+Arcana is built around a simple loop: improve your character outside combat, then cash
+that build in during fights. You use actions like Rest, Study, Work, Train, Craft, Shop,
+Hunt, and Quest to grow your character, collect gear, and prepare for Duels.
 
 ### Action Points (AP)
 
-AP is not a stamina bar that refills. It is a permanent progress counter that goes up as
-you take actions, and it never resets. Most actions cost AP. AP is a measure of your 
-character's progress. Decide with another player up to how much AP you want to play to
-subsequently fight in a duel.
-
-Most actions add AP:
+Action points (AP) are a permanent progress counter that goes up as you take actions, and
+it never resets. Most actions cost AP. AP is a measure of your character's progress. Decide
+with another player up to how much AP you want to play, and fight in a duel when ready.
 
 | Action   |             AP  | What it does                                                                                                            |
 |----------|----------------:|-------------------------------------------------------------------------------------------------------------------------|
@@ -60,17 +56,15 @@ Most actions add AP:
 | Work     |       1 / 2 / 3 | Earn gold or artifacts. Harder jobs pay more, but some cost mana or health.                                             |
 | Train    |               1 | Improve **attack**, **defense**, or **initiative** training for **melee**, **finesse**, or **ranged** weapons.          |
 | Craft    | ceil(items / 2) | Turn artifacts into equipment, spending mana and some gold.                                                             |
+| Shop     |               0 | Buy and sell gear, consumables, and artifacts.                                                                          |
 | Hunt     |       1 / 2 / 3 | Gain XP, possibly trigger combat, and possibly find artifacts.                                                          |
 | Quest    |       1 / 2 / 3 | Gain gold, equipment, consumables, and artifacts, with a chance to trigger combat.                                      |
-| Shop     |               0 | Buy and sell gear, consumables, and artifacts.                                                                          |
-| Duel     |               0 | Fight another player with the build you prepared. Losing adds 5 AP and forces you to recover before continuing.         |
+| Duel     |               0 | Fight another player for gold or gear. Losing adds 5 AP and forces you to recover before continuing.                    |
 
 ### Player Attributes
 
 All six core attributes start from a baseline of **10**. Your effective value is then
-modified by things like race, age/sex bonuses, equipped gear, and perks. When an item
-says `+Strength`, `+Wisdom`, and so on, it changes the effective stat below and everything
-that depends on it.
+modified by things like race, age, sex, equipped gear, and perks.
 
 | Attribute        | What it affects                                                                                                                                                                                   |
 |------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -88,10 +82,11 @@ that depends on it.
 | **Weapons**     | Determine your basic attack profile: **attack**, **attack speed**, **crit chance**, **kind**, and **category**. They can also grant passive modifiers and combat effects. |
 | **Wearables**   | Helmets, chestplates, gloves, boots, and accessories. These mostly add passive modifiers, and some also trigger effects when you are hit.                                 |
 | **Perks**       | Permanent passive bonuses. They do not need to be equipped.                                                                                                               |
-| **Abilities**   | Active combat skills with a **mana cost** and **cooldown**. Some target you, some target the enemy, and some also affect your pet.                                        |
-| **Consumables** | Usable combat items such as potions. They apply self-buffs or recovery effects, are consumed on use, and you can have up to **8 consumable types** equipped at once.      |
+| **Abilities**   | Active combat skills with a **mana cost** and **cooldown**. Some target you, some target the enemy.                                                                       |
+| **Consumables** | Usable combat items such as potions. They apply self-buffs or recovery effects and are consumed on use. You can have up to **8 consumable types** equipped at once.       |
 | **Artifacts**   | Crafting materials and valuables. You can find them through work, hunts, quests, and the shop, then **craft with them or sell them**.                                     |
 
+<br>
 
 ## ⚔️ Combat Mechanics
 

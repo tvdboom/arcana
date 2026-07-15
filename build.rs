@@ -4,7 +4,7 @@
 /// build script, but as a standalone command:
 ///
 ///   cargo run --bin build-assets                 (uses feature flags compiled in)
-///   cargo run --bin build-assets --no-default-features   (copy-only, no KTX2)
+///   cargo run --bin build-assets --no-default-features   (copy-only, no WebP)
 ///
 /// The root `build.rs` Cargo build script includes these same implementation
 /// files so that `cargo build` also runs everything automatically.
@@ -50,7 +50,7 @@ fn main() {
     let gen_catalogs = cfg!(feature = "generate-catalogs");
 
     if process_assets {
-        println!("Processing assets: assets-src/ → assets/ (PNG → KTX2)…");
+        println!("Processing assets: assets-src/ → assets/ (PNG → WebP)…");
         convert_to_ktx2::run("assets-src", "assets");
     } else {
         println!("Copying assets: assets-src/ → assets/ (no conversion)…");
@@ -58,7 +58,7 @@ fn main() {
     }
 
     if gen_catalogs {
-        println!("Generating catalogs (img_ext=ktx2…");
-        catalog_gen::run("assets-src/images", "assets/catalog", "ktx2");
+        println!("Generating catalogs (img_ext=webp)…");
+        catalog_gen::run("assets-src/images", "assets/catalog", "webp");
     }
 }
