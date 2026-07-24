@@ -1,3 +1,5 @@
+//! Shared visual, balance, naming, and layout constants.
+
 use bevy::prelude::{Color, Val};
 
 /// UI

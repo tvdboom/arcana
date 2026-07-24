@@ -1,8 +1,8 @@
+//! Asset-processing pipeline that copies source assets and converts PNG images to WebP.
+//!
+//! The implementation is shared by its standalone binary and the build orchestrators.
+
 use indicatif::{ProgressBar, ProgressStyle};
-/// Asset-processing logic: copy assets-src/ → assets/, converting PNG → WebP.
-/// This file is used in two ways:
-///   1. As the `convert_to_ktx2` binary  (`cargo run --bin convert_to_ktx2`)
-///   2. Included via `include!()` in both `src/bin/build.rs` and the root `build.rs`
 use std::collections::VecDeque;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -11,10 +11,12 @@ use std::time::SystemTime;
 
 const IMAGE_SETTINGS_VERSION: &str = "webp-q82-v1";
 
+/// Performs the mtime operation.
 fn mtime(path: &Path) -> Option<SystemTime> {
     fs::metadata(path).ok().and_then(|m| m.modified().ok())
 }
 
+/// Returns whether update.
 fn needs_update(src: &Path, dst: &Path) -> bool {
     if let Ok(metadata) = fs::metadata(dst) {
         if metadata.len() == 0 {
@@ -31,6 +33,7 @@ fn needs_update(src: &Path, dst: &Path) -> bool {
     }
 }
 
+/// Collects files.
 fn collect_files(dir: &Path) -> Vec<PathBuf> {
     let mut files = Vec::new();
     let Ok(entries) = fs::read_dir(dir) else {
@@ -47,6 +50,7 @@ fn collect_files(dir: &Path) -> Vec<PathBuf> {
     files
 }
 
+/// Removes stale images.
 fn remove_stale_images(src_root: &Path, dst_root: &Path, keep_converted: bool) {
     let src_images = src_root.join("images");
     let dst_images = dst_root.join("images");
@@ -75,6 +79,7 @@ fn remove_stale_images(src_root: &Path, dst_root: &Path, keep_converted: bool) {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
+/// Converts single.
 fn convert_single(src: &Path, dst: &Path) {
     let image =
         image::open(src).unwrap_or_else(|err| panic!("decode {:?}: {err}", src)).into_rgba8();
@@ -84,6 +89,7 @@ fn convert_single(src: &Path, dst: &Path) {
 }
 
 #[cfg(target_arch = "wasm32")]
+/// Converts single.
 fn convert_single(_src: &Path, _dst: &Path) {
     panic!("asset conversion tools cannot run as WebAssembly");
 }
@@ -99,6 +105,7 @@ enum AssetTask {
     },
 }
 
+/// Performs the log status operation.
 fn log_status(msg: &str) {
     if std::env::var("OUT_DIR").is_ok() {
         println!("cargo:info={}", msg);
@@ -276,6 +283,7 @@ pub fn copy_only(src_root: &str, dst_root: &str) {
     pb.finish_with_message("Done!");
 }
 
+/// Runs the convert-to-ktx2 entry point.
 fn main() {
     run("assets-src", "assets");
 }

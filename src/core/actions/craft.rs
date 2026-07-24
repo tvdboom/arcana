@@ -1,3 +1,5 @@
+//! Crafting interface and deterministic equipment and artifact creation logic.
+
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::{all_equipment, get_artifact, get_equipment};
@@ -69,6 +71,7 @@ pub struct CraftSeed {
     pub artifacts: Vec<String>,
 }
 
+/// Sets up craft ui.
 pub fn setup_craft_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -109,6 +112,7 @@ pub fn setup_craft_ui(
     }
 }
 
+/// Updates craft ui.
 pub fn update_craft_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -161,6 +165,7 @@ pub fn update_craft_ui(
     }
 }
 
+/// Builds craft content.
 pub fn build_craft_content(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -224,6 +229,7 @@ pub fn build_craft_content(
         });
 }
 
+/// Builds craft content inner.
 pub fn build_craft_content_inner(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1458,6 +1464,7 @@ pub fn build_craft_content_inner(
             });
         });
 }
+/// Returns whether empty slot for.
 fn has_empty_slot_for(player: &Player, equipment: &Equipment) -> bool {
     match equipment {
         Equipment::Wearable(w) => match w.slot {
@@ -1490,6 +1497,7 @@ fn has_empty_slot_for(player: &Player, equipment: &Equipment) -> bool {
     }
 }
 
+/// Handles left artifact click.
 pub fn handle_left_artifact_click(
     event: On<Pointer<Click>>,
     mut selection: ResMut<CraftSelection>,
@@ -1502,6 +1510,7 @@ pub fn handle_left_artifact_click(
     }
 }
 
+/// Handles middle artifact click.
 pub fn handle_middle_artifact_click(
     event: On<Pointer<Click>>,
     mut selection: ResMut<CraftSelection>,
@@ -1516,6 +1525,7 @@ pub fn handle_middle_artifact_click(
     }
 }
 
+/// Handles craft item select.
 pub fn handle_craft_item_select(
     event: On<Pointer<Click>>,
     player: Res<Player>,
@@ -1569,6 +1579,7 @@ pub fn handle_craft_item_select(
     }
 }
 
+/// Handles craft all click.
 pub fn handle_craft_all_click(
     _event: On<Pointer<Click>>,
     mut player: ResMut<Player>,

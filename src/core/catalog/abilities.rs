@@ -1,3 +1,5 @@
+//! Ability catalog records, targeting requirements, and localized presentation.
+
 use crate::core::catalog::effects::Effect;
 use crate::core::catalog::equipment::Kind;
 use crate::core::localization::Localization;
@@ -37,6 +39,7 @@ pub struct Ability {
 }
 
 impl Ability {
+    /// Performs the description operation.
     pub fn description(&self, _language: Language, _localization: &Localization) -> String {
         let mut parts = vec![
             format!("[level]{}", self.level),
@@ -50,6 +53,7 @@ impl Ability {
         parts.join(" ")
     }
 
+    /// Performs the full description operation.
     pub fn full_description(&self, language: Language, localization: &Localization) -> Vec<String> {
         let mut lines = Vec::new();
         let level_label = localization.get("general.level", language);

@@ -1,3 +1,5 @@
+//! Serializable language, audio, display, and gameplay preferences.
+
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
@@ -27,11 +29,13 @@ pub struct Settings {
     pub volume: f32,
 }
 
+/// Performs the default volume operation.
 fn default_volume() -> f32 {
     1.0
 }
 
 impl Default for Settings {
+    /// Returns the default value.
     fn default() -> Self {
         Self {
             language: Language::default(),

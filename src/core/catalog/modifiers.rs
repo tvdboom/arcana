@@ -1,3 +1,5 @@
+//! Stat modifier definitions used by equipment, effects, and combat calculations.
+
 use crate::core::catalog::equipment::Kind;
 use crate::core::catalog::weapons::Category;
 use crate::core::localization::Localization;
@@ -43,6 +45,7 @@ pub enum Modifier {
 }
 
 impl Modifier {
+    /// Performs the description operation.
     pub fn description(&self, language: Language, localization: &Localization) -> String {
         match self {
             Self::AttributeModifier(attr, amount) => {

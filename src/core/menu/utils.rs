@@ -1,3 +1,5 @@
+//! Reusable menu builders for text, roots, images, and interaction styling.
+
 use crate::core::menu::buttons::DisabledButton;
 use std::fmt::Debug;
 
@@ -71,6 +73,7 @@ pub fn reimage<E: Debug + Clone + Reflect>(
     }
 }
 
+/// Spawns rich text row.
 pub fn spawn_rich_text_row(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,

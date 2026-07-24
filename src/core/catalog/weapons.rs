@@ -1,3 +1,5 @@
+//! Weapon catalog records, categories, handedness, and attack properties.
+
 use crate::core::catalog::effects::Effect;
 use crate::core::catalog::equipment::Kind;
 use crate::core::catalog::modifiers::Modifier;
@@ -63,6 +65,7 @@ pub struct Weapon {
 }
 
 impl Weapon {
+    /// Performs the description operation.
     pub fn description(&self, _language: Language, _localization: &Localization) -> String {
         let mut parts = vec![format!("[level]{}", self.level)];
         if self.attack > 0 {
@@ -85,6 +88,7 @@ impl Weapon {
         parts.join(" ")
     }
 
+    /// Performs the full description operation.
     pub fn full_description(&self, language: Language, localization: &Localization) -> Vec<String> {
         let mut lines = Vec::new();
         let level_label = localization.get("general.level", language);

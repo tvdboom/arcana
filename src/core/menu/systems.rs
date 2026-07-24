@@ -1,3 +1,5 @@
+//! Menu lifecycle, navigation, loading, saving, and character-start systems.
+
 use bevy::asset::LoadState;
 use bevy::prelude::*;
 
@@ -39,6 +41,7 @@ pub struct LoadingCmp;
 #[derive(Component)]
 pub struct LoadingText;
 
+/// Sets up menu.
 pub fn setup_menu(
     mut commands: Commands,
     app_state: Res<State<AppState>>,
@@ -165,6 +168,7 @@ pub fn setup_menu(
         });
 }
 
+/// Performs the reveal menu content when bg ready operation.
 pub fn reveal_menu_content_when_bg_ready(
     asset_server: Res<AssetServer>,
     assets: Res<WorldAssets>,
@@ -178,6 +182,7 @@ pub fn reveal_menu_content_when_bg_ready(
     }
 }
 
+/// Sets up loading screen.
 pub fn setup_loading_screen(mut commands: Commands, assets: Res<WorldAssets>) {
     commands.insert_resource(LoadingDelay(Timer::from_seconds(0.35, TimerMode::Once)));
     commands
@@ -205,6 +210,7 @@ pub fn setup_loading_screen(mut commands: Commands, assets: Res<WorldAssets>) {
         });
 }
 
+/// Performs the animate loading text operation.
 pub fn animate_loading_text(time: Res<Time>, mut text_q: Query<&mut Text, With<LoadingText>>) {
     let dot_count = ((time.elapsed_secs() * 3.0) as usize) % 4;
     let dots = ".".repeat(dot_count);
@@ -216,6 +222,7 @@ pub fn animate_loading_text(time: Res<Time>, mut text_q: Query<&mut Text, With<L
     }
 }
 
+/// Performs the complete loading when ready operation.
 pub fn complete_loading_when_ready(
     mut commands: Commands,
     time: Res<Time>,
@@ -275,14 +282,16 @@ pub fn complete_loading_when_ready(
     commands.remove_resource::<LoadingDelay>();
 }
 
+/// Sets up game menu.
 pub fn setup_game_menu(
     mut commands: Commands,
     settings: Res<Settings>,
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
-    menu_origin: Res<GameMenuOrigin>,
+    #[cfg(not(target_arch = "wasm32"))] menu_origin: Res<GameMenuOrigin>,
 ) {
     let lang = settings.language;
+    #[cfg(not(target_arch = "wasm32"))]
     let from_combat = menu_origin.0 == Some(GameState::Combat);
     let (root_node, mut pickable) = add_root_node(true);
     pickable.is_hoverable = true;
@@ -364,6 +373,7 @@ pub fn close_game_menu_on_outside_click(
     next_game_state.set(target);
 }
 
+/// Sets up game settings.
 pub fn setup_game_settings(
     mut commands: Commands,
     settings: Res<Settings>,
@@ -430,6 +440,7 @@ pub fn setup_game_settings(
         });
 }
 
+/// Starts new game message.
 pub fn start_new_game_message(
     mut commands: Commands,
     mut start_new_char_msg: MessageReader<StartNewCharacterMsg>,

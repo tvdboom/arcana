@@ -1,3 +1,5 @@
+//! Core game modules and the plugin that registers Arcana's gameplay systems.
+
 pub mod actions;
 mod assets;
 mod audio;
@@ -23,6 +25,7 @@ pub mod network {
         pub opponent: Option<Player>,
     }
 
+    /// Performs the teardown duel operation.
     pub fn teardown_duel(_commands: &mut Commands) {}
 }
 #[cfg(not(target_arch = "wasm32"))]
@@ -83,7 +86,9 @@ use crate::core::ui::toast::{tick_gold_toasts, GoldToast};
 use crate::core::ui::utils::cleanup_panel_ui;
 use crate::core::utils::{despawn, reset_cursor};
 use bevy::prelude::*;
+#[cfg(not(target_arch = "wasm32"))]
 use bevy::time::common_conditions::on_timer;
+#[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
 use strum::IntoEnumIterator;
 
@@ -109,6 +114,7 @@ macro_rules! configure_stages {
 }
 
 impl Plugin for GamePlugin {
+    /// Registers this plugin with the Bevy application.
     fn build(&self, app: &mut App) {
         app
             // States

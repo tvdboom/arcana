@@ -1,3 +1,5 @@
+//! Defeat screen presentation and its return-to-menu interaction.
+
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
 
@@ -33,6 +35,7 @@ pub struct DefeatContext {
 #[derive(Resource, Default)]
 pub struct PendingAutoRest(pub bool);
 
+/// Performs the manage defeat overlay operation.
 pub fn manage_defeat_overlay(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -52,6 +55,7 @@ pub fn manage_defeat_overlay(
     }
 }
 
+/// Sets up defeat screen inner.
 fn setup_defeat_screen_inner(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -154,6 +158,7 @@ fn setup_defeat_screen_inner(
         });
 }
 
+/// Handles defeat continue click.
 pub fn handle_defeat_continue_click(
     _event: On<Pointer<Click>>,
     mut commands: Commands,

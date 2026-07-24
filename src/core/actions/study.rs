@@ -1,3 +1,5 @@
+//! Study choices and intensity controls for improving magical attributes.
+
 use crate::core::assets::WorldAssets;
 use crate::core::localization::Localization;
 use crate::core::menu::utils::add_text;
@@ -24,6 +26,7 @@ pub struct StudySliderValueText;
 #[derive(Component)]
 pub struct StudySliderStageButton(pub u32);
 impl From<u32> for StudySliderStageButton {
+    /// Constructs this value from the supplied input.
     fn from(val: u32) -> Self {
         Self(val)
     }
@@ -32,6 +35,7 @@ impl From<u32> for StudySliderStageButton {
 #[derive(Component)]
 pub struct StudyCardMarker(pub u32); // 0 = Apprenticeship, 1 = Mentorship, 2 = Conditioning
 
+/// Sets up study ui.
 pub fn setup_study_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -83,6 +87,7 @@ pub fn setup_study_ui(
     }
 }
 
+/// Updates study ui.
 pub fn update_study_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -132,6 +137,7 @@ pub fn update_study_ui(
     }
 }
 
+/// Builds study content.
 pub fn build_study_content(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -170,6 +176,7 @@ pub fn build_study_content(
     (track_ent, stage_ents, handle_ent, card_ents)
 }
 
+/// Builds study content inner.
 pub fn build_study_content_inner(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -369,6 +376,7 @@ pub fn build_study_content_inner(
 }
 
 // Handle study slider interaction
+/// Handles study slider clicks.
 pub fn handle_study_slider_clicks(
     event: On<Pointer<Click>>,
     stage_q: Query<&StudySliderStageButton>,
@@ -379,6 +387,7 @@ pub fn handle_study_slider_clicks(
     }
 }
 
+/// Handles study slider clicks track.
 pub fn handle_study_slider_clicks_track(
     _event: On<Pointer<Click>>,
     track_q: Query<&GlobalTransform, With<StudySliderTrack>>,
@@ -400,6 +409,7 @@ pub fn handle_study_slider_clicks_track(
     slider_state.0 = stage;
 }
 
+/// Handles study slider drag.
 pub fn handle_study_slider_drag(
     ev: On<Pointer<Drag>>,
     localization: Res<Localization>,
@@ -433,6 +443,7 @@ pub fn handle_study_slider_drag(
     }
 }
 
+/// Handles study slider release.
 pub fn handle_study_slider_release(
     _ev: On<Pointer<DragEnd>>,
     handle_q: Query<&Node, (With<StudySliderHandle>, Without<StudySliderTrack>)>,

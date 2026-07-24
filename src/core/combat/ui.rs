@@ -1,3 +1,5 @@
+//! Combat HUD construction and synchronization with the active battle state.
+
 use bevy::prelude::*;
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -120,6 +122,7 @@ pub struct CombatContinueWithPetSlot;
 #[derive(Component)]
 pub struct CombatContinueWithPetButton;
 
+/// Sets up combat ui.
 pub fn setup_combat_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -300,6 +303,7 @@ pub fn setup_combat_ui(
         });
 }
 
+/// Spawns continue with pet button.
 fn spawn_continue_with_pet_button(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -345,6 +349,7 @@ fn spawn_continue_with_pet_button(
         });
 }
 
+/// Spawns player panel.
 fn spawn_player_panel(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -389,7 +394,7 @@ fn spawn_player_panel(
                                 player.level(),
                                 &player_image_key(player),
                                 player.pet.as_ref(),
-                                &localization,
+                                localization,
                                 lang,
                             );
                             spawn_combat_resource_bar(parent, assets, true, true);
@@ -427,6 +432,7 @@ fn spawn_player_panel(
         });
 }
 
+/// Performs the player image key operation.
 fn player_image_key(player: &Player) -> String {
     match player.class {
         Class::Mage(ajah) => ajah.get_image_key(player),
@@ -434,6 +440,7 @@ fn player_image_key(player: &Player) -> String {
     }
 }
 
+/// Spawns character portrait.
 fn spawn_character_portrait(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -508,6 +515,7 @@ fn spawn_character_portrait(
         });
 }
 
+/// Performs the pet image key operation.
 fn pet_image_key(pet: &Monster) -> String {
     std::path::Path::new(&pet.image)
         .file_stem()
@@ -516,6 +524,7 @@ fn pet_image_key(pet: &Monster) -> String {
         .to_lowercase()
 }
 
+/// Spawns combat pet overlay.
 fn spawn_combat_pet_overlay(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -631,6 +640,7 @@ fn spawn_combat_pet_overlay(
         });
 }
 
+/// Spawns combat enemy pet overlay.
 fn spawn_combat_enemy_pet_overlay(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -738,6 +748,7 @@ fn spawn_combat_enemy_pet_overlay(
         });
 }
 
+/// Spawns portrait label.
 fn spawn_portrait_label(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -773,6 +784,7 @@ fn spawn_portrait_label(
         });
 }
 
+/// Spawns combat stats.
 fn spawn_combat_stats(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -843,6 +855,7 @@ fn spawn_combat_stats(
         });
 }
 
+/// Spawns pet stats.
 fn spawn_pet_stats(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -911,6 +924,7 @@ fn spawn_pet_stats(
         });
 }
 
+/// Spawns combat stat row.
 fn spawn_combat_stat_row(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -995,6 +1009,7 @@ fn spawn_combat_stat_row(
     });
 }
 
+/// Spawns equipment slot column.
 fn spawn_equipment_slot_column(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1059,6 +1074,7 @@ fn spawn_equipment_slot_column(
         });
 }
 
+/// Spawns active abilities.
 fn spawn_active_abilities(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1092,7 +1108,7 @@ fn spawn_active_abilities(
                             ability_key
                                 .map(|key| format!("build_{key}"))
                                 .unwrap_or_else(|| "stone".to_string()),
-                            *hotkey,
+                            hotkey,
                             ability_key.is_some(),
                             true,
                             ability_key.map(|key| RightColumnTooltip::Ability(key.to_string())),
@@ -1107,6 +1123,7 @@ fn spawn_active_abilities(
         });
 }
 
+/// Spawns consumables.
 fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, player: &Player) {
     let mut consumables: Vec<_> = player
         .equipped_consumables
@@ -1163,6 +1180,7 @@ fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, pl
         });
 }
 
+/// Spawns hover card.
 fn spawn_hover_card(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1300,7 +1318,7 @@ fn spawn_hover_card(
                 ))
                 .with_children(|parent| {
                     parent.spawn((
-                        add_text(label, "bold", 1.4, &assets),
+                        add_text(label, "bold", 1.4, assets),
                         TextColor(BUTTON_TEXT_COLOR),
                         Pickable::IGNORE,
                     ));
@@ -1319,7 +1337,7 @@ fn spawn_hover_card(
                 ))
                 .with_children(|parent| {
                     parent.spawn((
-                        add_text(capitalize_words(label), "medium", 1.4, &assets),
+                        add_text(capitalize_words(label), "medium", 1.4, assets),
                         TextColor(BUTTON_TEXT_COLOR),
                         Pickable::IGNORE,
                     ));
@@ -1328,6 +1346,7 @@ fn spawn_hover_card(
     });
 }
 
+/// Spawns monster panel.
 fn spawn_monster_panel(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1425,6 +1444,7 @@ fn spawn_monster_panel(
         });
 }
 
+/// Performs the monster display name operation.
 fn monster_display_name(monster: &Monster) -> String {
     let name = capitalize_words(&monster.name);
     if monster.kind != MonsterKind::Dragon {
@@ -1441,6 +1461,7 @@ fn monster_display_name(monster: &Monster) -> String {
     }
 }
 
+/// Spawns monster portrait.
 fn spawn_monster_portrait(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1485,7 +1506,7 @@ fn spawn_monster_portrait(
                 },
             ));
             if let Some(pet) = pet {
-                spawn_combat_enemy_pet_overlay(parent, assets, pet, &localization, lang);
+                spawn_combat_enemy_pet_overlay(parent, assets, pet, localization, lang);
             }
             if is_pvp {
                 spawn_equipment_slot_column(
@@ -1517,6 +1538,7 @@ fn spawn_monster_portrait(
         });
 }
 
+/// Spawns monster health bar.
 fn spawn_monster_health_bar(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1588,6 +1610,7 @@ fn spawn_monster_health_bar(
         });
 }
 
+/// Spawns enemy mana bar.
 fn spawn_enemy_mana_bar(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1649,7 +1672,7 @@ fn spawn_enemy_mana_bar(
                                 "{} / {} (+{}) {}",
                                 mana.round() as i32,
                                 max_mana.round() as i32,
-                                opponent.map(|o| o.mana_regen() as i32).unwrap_or(0),
+                                opponent.map(|o| o.mana_regen()).unwrap_or(0),
                                 localization.get("general.mana", lang)
                             ),
                             "bold",
@@ -1663,6 +1686,7 @@ fn spawn_enemy_mana_bar(
         });
 }
 
+/// Spawns enemy active abilities.
 fn spawn_enemy_active_abilities(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1711,6 +1735,7 @@ fn spawn_enemy_active_abilities(
         });
 }
 
+/// Spawns enemy consumables.
 fn spawn_enemy_consumables(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -1746,9 +1771,7 @@ fn spawn_enemy_consumables(
                     ..default()
                 })
                 .with_children(|parent| {
-                    for (_index, (key, item)) in
-                        consumables.iter().take(CONSUMABLE_HOTKEYS.len()).enumerate()
-                    {
+                    for (key, item) in consumables.iter().take(CONSUMABLE_HOTKEYS.len()) {
                         spawn_hover_card(
                             parent,
                             assets,
@@ -1769,6 +1792,7 @@ fn spawn_enemy_consumables(
         });
 }
 
+/// Spawns combat resource bar.
 fn spawn_combat_resource_bar(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,

@@ -1,3 +1,5 @@
+//! Short-lived animated notifications for gold gains and similar rewards.
+
 use crate::core::assets::WorldAssets;
 use crate::core::menu::utils::add_text;
 use bevy::prelude::*;
@@ -10,6 +12,7 @@ pub struct GoldToast {
 #[derive(Component)]
 pub struct ToastContainer;
 
+/// Spawns toast.
 pub fn spawn_toast(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -41,6 +44,7 @@ pub fn spawn_toast(
     });
 }
 
+/// Advances gold toasts.
 pub fn tick_gold_toasts(
     mut commands: Commands,
     time: Res<Time>,

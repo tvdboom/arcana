@@ -3,9 +3,9 @@
 //!
 //! Shipping 25k+ loose asset files breaks itch.io's HTML channel (~1000 file
 //! limit), so we bundle everything into a small set of archives and read files back out:
-//!   * native  -> seek and read the requested range from its shard.
-//!   * wasm    -> fetch the small index once, then issue an HTTP `Range` request
-//!                against the relevant shard.
+//! - native: seek and read the requested range from its shard.
+//! - wasm: fetch the small index once, then issue an HTTP `Range` request
+//!   against the relevant shard.
 //!
 //! ## Format (keep in sync with `src/bin/pack_assets.rs`)
 //! ```text
@@ -96,6 +96,7 @@ struct EmptyPathStream;
 impl Stream for EmptyPathStream {
     type Item = std::path::PathBuf;
 
+    /// Polls next.
     fn poll_next(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         Poll::Ready(None)
     }
@@ -107,6 +108,7 @@ pub struct PakAssetReader {
 }
 
 impl PakAssetReader {
+    /// Reads path.
     async fn read_path<'a>(&'a self, path: &'a Path) -> Result<VecReader, AssetReaderError> {
         let key = normalize(path);
         self.inner.read_entry(&key, path).await
@@ -114,15 +116,18 @@ impl PakAssetReader {
 }
 
 impl AssetReader for PakAssetReader {
+    /// Performs the read operation.
     async fn read<'a>(&'a self, path: &'a Path) -> Result<impl Reader + 'a, AssetReaderError> {
         self.read_path(path).await
     }
 
+    /// Reads meta.
     async fn read_meta<'a>(&'a self, path: &'a Path) -> Result<impl Reader + 'a, AssetReaderError> {
         // Meta files are not bundled (the app sets `AssetMetaCheck::Never`).
         Err::<VecReader, _>(AssetReaderError::NotFound(path.to_path_buf()))
     }
 
+    /// Reads directory.
     async fn read_directory<'a>(
         &'a self,
         _path: &'a Path,
@@ -130,6 +135,7 @@ impl AssetReader for PakAssetReader {
         Ok(Box::new(EmptyPathStream))
     }
 
+    /// Returns whether directory.
     async fn is_directory<'a>(&'a self, _path: &'a Path) -> Result<bool, AssetReaderError> {
         Ok(false)
     }
@@ -145,6 +151,7 @@ struct PakInner {
 
 #[cfg(not(target_arch = "wasm32"))]
 impl PakInner {
+    /// Performs the new file operation.
     fn new_file(pak_path: std::path::PathBuf) -> std::io::Result<Self> {
         use std::io::{Read, Seek, SeekFrom};
 
@@ -177,6 +184,7 @@ impl PakInner {
         })
     }
 
+    /// Reads entry.
     async fn read_entry(&self, key: &str, path: &Path) -> Result<VecReader, AssetReaderError> {
         use std::io::{Read, Seek, SeekFrom};
 
@@ -197,6 +205,7 @@ impl PakInner {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
+/// Performs the shard path operation.
 fn shard_path(pak_path: &Path, shard: u16) -> std::path::PathBuf {
     let stem = pak_path.file_stem().and_then(|value| value.to_str()).unwrap_or("assets");
     pak_path.with_file_name(format!("{stem}-{shard:03}.pak"))
@@ -213,6 +222,7 @@ struct PakInner {
 
 #[cfg(target_arch = "wasm32")]
 impl PakInner {
+    /// Performs the new http operation.
     fn new_http(url: String) -> Self {
         Self {
             url,
@@ -221,6 +231,7 @@ impl PakInner {
         }
     }
 
+    /// Performs the index operation.
     async fn index(&self) -> Result<&PakIndex, AssetReaderError> {
         self.index
             .get_or_try_init(|| async {
@@ -249,6 +260,7 @@ impl PakInner {
             .await
     }
 
+    /// Reads entry.
     async fn read_entry(&self, key: &str, path: &Path) -> Result<VecReader, AssetReaderError> {
         let location = *self
             .index()
@@ -295,6 +307,7 @@ impl PakInner {
 }
 
 #[cfg(target_arch = "wasm32")]
+/// Performs the shard url operation.
 fn shard_url(pak_url: &str, shard: u16) -> String {
     let base = pak_url.strip_suffix(".pak").unwrap_or(pak_url);
     format!("{base}-{shard:03}.pak")
@@ -322,6 +335,7 @@ enum RangeResponse {
 }
 
 #[cfg(target_arch = "wasm32")]
+/// Performs the js err operation.
 fn js_err(context: &str, value: wasm_bindgen::JsValue) -> AssetReaderError {
     use js_sys::JSON;
     let message = JSON::stringify(&value)
@@ -342,6 +356,7 @@ async fn fetch_range(url: &str, req: RangeReq) -> Result<Vec<u8>, AssetReaderErr
 }
 
 #[cfg(target_arch = "wasm32")]
+/// Performs the slice full response operation.
 fn slice_full_response(bytes: &[u8], req: RangeReq) -> Result<Vec<u8>, AssetReaderError> {
     let range = match req {
         RangeReq::Range(start, len) => {
@@ -396,6 +411,7 @@ fn slice_full_response(bytes: &[u8], req: RangeReq) -> Result<Vec<u8>, AssetRead
 }
 
 #[cfg(target_arch = "wasm32")]
+/// Performs the fetch range response operation.
 async fn fetch_range_response(url: &str, req: RangeReq) -> Result<RangeResponse, AssetReaderError> {
     use js_sys::Uint8Array;
     use wasm_bindgen::{JsCast, JsValue};
@@ -479,6 +495,7 @@ mod tests {
         }
     }
 
+    /// Reads all.
     async fn read_all(inner: &PakInner, key: &str) -> Result<Vec<u8>, AssetReaderError> {
         let mut reader = inner.read_entry(key, Path::new(key)).await?;
         let mut out = Vec::new();
@@ -487,6 +504,7 @@ mod tests {
     }
 
     #[test]
+    /// Performs the native reader round trips operation.
     fn native_reader_round_trips() {
         let dir = std::env::temp_dir().join("arcana_pak_test");
         std::fs::create_dir_all(&dir).unwrap();

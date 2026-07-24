@@ -1,22 +1,14 @@
-/// Orchestrator build binary.
-///
-/// Calls the same asset-processing and catalog-generation logic as the Cargo
-/// build script, but as a standalone command:
-///
-///   cargo run --bin build-assets                 (uses feature flags compiled in)
-///   cargo run --bin build-assets --no-default-features   (copy-only, no WebP)
-///
-/// The root `build.rs` Cargo build script includes these same implementation
-/// files so that `cargo build` also runs everything automatically.
-#[allow(dead_code)]
-mod convert_to_ktx2 {
-    include!("src/bin/convert_to_ktx2.rs");
-}
+//! Cargo build script for processing source assets and generating game catalogs.
+//!
+//! It also registers the asset inputs that should trigger a rebuild.
 
 #[allow(dead_code)]
-mod catalog_gen {
-    include!("src/bin/generate_catalogs.rs");
-}
+#[path = "src/bin/convert_to_ktx2.rs"]
+mod convert_to_ktx2;
+
+#[allow(dead_code)]
+#[path = "src/bin/generate_catalogs.rs"]
+mod catalog_gen;
 
 use std::path::Path;
 
@@ -39,6 +31,7 @@ fn rerun_if_changed_recursive(path: &Path) {
     }
 }
 
+/// Runs the build entry point.
 fn main() {
     // Tell Cargo to rerun this build script if any assets or build files change
     println!("cargo:rerun-if-changed=build.rs");

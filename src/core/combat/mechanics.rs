@@ -1,3 +1,5 @@
+//! Pure combat rules and Bevy systems for attacks, abilities, effects, and victory.
+
 use bevy::prelude::*;
 use rand::{rng, RngExt};
 
@@ -69,16 +71,19 @@ pub struct CombatSpeed(pub f32);
 pub struct DuelActive;
 
 impl Default for CombatSpeed {
+    /// Returns the default value.
     fn default() -> Self {
         Self(1.0)
     }
 }
 
 impl CombatSpeed {
+    /// Performs the faster operation.
     pub fn faster(&mut self) {
         self.0 = (self.0 * 2.0).min(COMBAT_SPEED_MAX);
     }
 
+    /// Performs the slower operation.
     pub fn slower(&mut self) {
         self.0 = (self.0 / 2.0).max(COMBAT_SPEED_MIN);
     }
@@ -240,6 +245,7 @@ pub struct Fighter {
 }
 
 impl Fighter {
+    /// Performs the eff attack speed for operation.
     pub fn eff_attack_speed_for(&self, base_speed: f32) -> f32 {
         let mut v = base_speed;
         for te in &self.effects {
@@ -261,10 +267,12 @@ impl Fighter {
         v.max(0.1)
     }
 
+    /// Performs the attack period for operation.
     pub fn attack_period_for(&self, base_speed: f32) -> f32 {
         (ATTACK_PERIOD_MULTIPLIER / self.eff_attack_speed_for(base_speed)).clamp(0.2, 10.0)
     }
 
+    /// Performs the eff attack for operation.
     pub fn eff_attack_for(&self, base_attack: f32) -> f32 {
         let mut v = base_attack;
         for te in &self.effects {
@@ -328,11 +336,13 @@ impl Fighter {
     }
 
     #[allow(dead_code)]
+    /// Performs the attack period operation.
     fn attack_period(&self) -> f32 {
         (ATTACK_PERIOD_MULTIPLIER / self.eff_attack_speed()).clamp(0.2, 10.0)
     }
 
     #[allow(dead_code)]
+    /// Performs the eff attack speed operation.
     fn eff_attack_speed(&self) -> f32 {
         let mut v = self.base_attack_speed;
         for te in &self.effects {
@@ -355,6 +365,7 @@ impl Fighter {
     }
 
     #[allow(dead_code)]
+    /// Performs the eff attack operation.
     fn eff_attack(&self) -> f32 {
         let mut v = self.base_attack;
         for te in &self.effects {
@@ -377,6 +388,7 @@ impl Fighter {
         v.max(0.0)
     }
 
+    /// Performs the eff defense operation.
     fn eff_defense(&self) -> f32 {
         let mut v = self.base_defense;
         for te in &self.effects {
@@ -392,6 +404,7 @@ impl Fighter {
         v.max(0.0)
     }
 
+    /// Performs the eff initiative operation.
     fn eff_initiative(&self) -> f32 {
         let mut v = self.base_initiative;
         for te in &self.effects {
@@ -411,6 +424,7 @@ impl Fighter {
         v.max(0.0)
     }
 
+    /// Performs the miss chance operation.
     fn miss_chance(&self) -> f32 {
         let mut m = 0.0;
         for te in &self.effects {
@@ -425,6 +439,7 @@ impl Fighter {
         m.clamp(0.0, 0.9)
     }
 
+    /// Performs the extra crit operation.
     fn extra_crit(&self) -> f32 {
         let mut c = 0.0;
         for te in &self.effects {
@@ -439,6 +454,7 @@ impl Fighter {
         c
     }
 
+    /// Performs the incoming multiplier operation.
     fn incoming_multiplier(&self) -> f32 {
         let mut v = 1.0;
         for te in &self.effects {
@@ -453,10 +469,12 @@ impl Fighter {
         v
     }
 
+    /// Returns whether dodge.
     fn can_dodge(&self) -> bool {
         !self.effects.iter().any(|te| matches!(te.effect, Effect::Immobilize { .. }))
     }
 
+    /// Returns whether act.
     fn can_act(&self) -> bool {
         !self
             .effects
@@ -464,6 +482,7 @@ impl Fighter {
             .any(|te| matches!(te.effect, Effect::Stun { .. } | Effect::MonarchShield { .. }))
     }
 
+    /// Returns whether cast.
     fn can_cast(&self) -> bool {
         !self.effects.iter().any(|te| {
             matches!(
@@ -473,6 +492,7 @@ impl Fighter {
         })
     }
 
+    /// Performs the lifesteal operation.
     fn lifesteal(&self) -> f32 {
         let mut v = 0.0;
         for te in &self.effects {
@@ -487,6 +507,7 @@ impl Fighter {
         v
     }
 
+    /// Performs the take damage operation.
     fn take_damage(&mut self, dmg: f32) {
         self.health = (self.health - dmg).max(0.0);
         if self.health <= 0.0 {
@@ -494,10 +515,12 @@ impl Fighter {
         }
     }
 
+    /// Performs the heal operation.
     fn heal(&mut self, amount: f32) {
         self.health = (self.health + amount).min(self.max_health);
     }
 
+    /// Performs the restore mana operation.
     fn restore_mana(&mut self, amount: f32) {
         self.mana = (self.mana + amount).min(self.max_mana);
     }
@@ -536,6 +559,7 @@ pub struct CombatState {
 }
 
 impl CombatState {
+    /// Performs the xp reward operation.
     pub fn xp_reward(&self) -> u32 {
         if !self.player_won {
             return 0;
@@ -545,22 +569,28 @@ impl CombatState {
     }
 }
 
-fn player_weapon_effects(player: &Player) -> Vec<WeaponEffect> {
+/// Collects offensive weapon effects and defensive equipment effects for combat.
+fn player_equipment_effects(player: &Player) -> Vec<WeaponEffect> {
     let mut out = Vec::new();
     for eq in player.equipped_equipment() {
-        if let Equipment::Weapon(w) = eq {
-            let on_hit = !matches!(w.category, Category::Shield | Category::Book);
-            for e in &w.effects {
-                out.push(WeaponEffect {
-                    effect: e.clone(),
-                    on_hit,
-                });
-            }
+        let (effects, on_hit) = match eq {
+            Equipment::Weapon(weapon) => {
+                (weapon.effects, !matches!(weapon.category, Category::Shield | Category::Book))
+            },
+            Equipment::Wearable(wearable) => (wearable.effects, false),
+            Equipment::Consumable(_) | Equipment::Artifact(_) => continue,
+        };
+        for effect in effects {
+            out.push(WeaponEffect {
+                effect,
+                on_hit,
+            });
         }
     }
     out
 }
 
+/// Performs the player attack style operation.
 fn player_attack_style(player: &Player) -> AttackStyle {
     if player.has_equipped_range() {
         AttackStyle::Range
@@ -573,6 +603,10 @@ fn player_attack_style(player: &Player) -> AttackStyle {
     }
 }
 
+/// Builds the complete combat snapshot from the player, pet, monster, and optional duel.
+///
+/// Shared character attack is divided between two attacking weapons so dual-wielding adds
+/// weapon cadence and effects without counting the same base statistics twice.
 pub fn setup_combat_state(
     mut commands: Commands,
     player: Res<Player>,
@@ -610,6 +644,7 @@ pub fn setup_combat_state(
         let base_player_attack = (player.attack() as i32
             - player_equipped.iter().map(|eq| eq.attack()).sum::<i32>())
         .max(0) as f32;
+        let shared_attack_per_weapon = base_player_attack / attacking_weapons.len() as f32;
 
         attacking_weapons
             .into_iter()
@@ -624,7 +659,7 @@ pub fn setup_combat_state(
                     name: w.name.clone(),
                     attack_speed: w.attack_speed,
                     attack_timer: 0.0,
-                    attack: base_player_attack + w.attack as f32,
+                    attack: shared_attack_per_weapon + w.attack as f32,
                     crit_chance: w.crit_chance,
                     effects: w
                         .effects
@@ -645,7 +680,7 @@ pub fn setup_combat_state(
             attack_timer: 0.0,
             attack: player.attack() as f32,
             crit_chance: player.crit_chance(),
-            effects: player_weapon_effects(&player),
+            effects: player_equipment_effects(&player),
             attack_style: player_attack_style(&player),
         }]
     };
@@ -666,7 +701,7 @@ pub fn setup_combat_state(
         mana_regen: player.mana_regen() as f32,
         attack_timer: 0.0,
         effects: Vec::new(),
-        weapon_effects: player_weapon_effects(&player),
+        weapon_effects: player_equipment_effects(&player),
         attack_style: player_attack_style(&player),
         intelligence_mod: player.intelligence_mod() as f32,
         alive: true,
@@ -824,11 +859,13 @@ pub fn setup_combat_state(
 // Combat tick
 // ---------------------------------------------------------------------------
 
+/// Performs the dodge chance operation.
 fn dodge_chance(attacker_init: f32, defender_init: f32) -> f32 {
     (DODGE_BASE_CHANCE + (defender_init - attacker_init) * DODGE_POINT_MULTIPLIER)
         .clamp(DODGE_CHANCE_MIN, DODGE_CHANCE_MAX)
 }
 
+/// Performs the ability dodge chance operation.
 fn ability_dodge_chance(
     attacker_init: f32,
     defender_init: f32,
@@ -839,6 +876,7 @@ fn ability_dodge_chance(
         .clamp(DODGE_CHANCE_MIN, DODGE_CHANCE_MAX)
 }
 
+/// Computes damage.
 fn compute_damage(attack: f32, defense: f32, crit: bool, incoming_mult: f32) -> f32 {
     let base = (attack * attack) / (attack + defense).max(1.0);
     let mut rng = rng();
@@ -864,6 +902,7 @@ enum AttackOutcome {
     Hit,
 }
 
+/// Performs the random sword slice key operation.
 fn random_sword_slice_key() -> &'static str {
     let mut rng = rng();
     match rng.random_range(0..4) {
@@ -874,6 +913,7 @@ fn random_sword_slice_key() -> &'static str {
     }
 }
 
+/// Handles attack launch sound.
 fn on_attack_launch_sound(style: AttackStyle) -> Option<&'static str> {
     match style {
         AttackStyle::Range => Some("arrow_swish"),
@@ -881,6 +921,7 @@ fn on_attack_launch_sound(style: AttackStyle) -> Option<&'static str> {
     }
 }
 
+/// Handles attack hit sound.
 fn on_attack_hit_sound(style: AttackStyle) -> &'static str {
     match style {
         AttackStyle::Range => "arrow_impact",
@@ -889,6 +930,7 @@ fn on_attack_hit_sound(style: AttackStyle) -> &'static str {
     }
 }
 
+/// Handles attack dodge sound.
 fn on_attack_dodge_sound(style: AttackStyle) -> &'static str {
     match style {
         AttackStyle::Melee | AttackStyle::Finesse => "sword_clash",
@@ -897,6 +939,7 @@ fn on_attack_dodge_sound(style: AttackStyle) -> &'static str {
 }
 
 impl CombatState {
+    /// Performs the get operation.
     fn get(&self, who: Who) -> Option<&Fighter> {
         match who {
             Who::Player => Some(&self.player),
@@ -905,6 +948,7 @@ impl CombatState {
         }
     }
 
+    /// Returns mut.
     fn get_mut(&mut self, who: Who) -> Option<&mut Fighter> {
         match who {
             Who::Player => Some(&mut self.player),
@@ -914,7 +958,7 @@ impl CombatState {
     }
 }
 
-/// Resolves a basic attack from `attacker` to `defender`.
+/// Resolves one basic attack, including avoidance, damage, lifesteal, and equipment effects.
 fn resolve_basic_attack(
     state: &mut CombatState,
     attacker: Who,
@@ -927,10 +971,7 @@ fn resolve_basic_attack(
             Some(a) if a.alive => a,
             _ => return None,
         };
-        let weapon = match a.weapons.get(weapon_index) {
-            Some(w) => w,
-            None => return None,
-        };
+        let weapon = a.weapons.get(weapon_index)?;
         (
             a.eff_attack_for(weapon.attack),
             a.eff_initiative(),
@@ -944,10 +985,7 @@ fn resolve_basic_attack(
     };
 
     let (def, def_init, can_dodge, incoming_mult, def_alive) = {
-        let d = match state.get(defender) {
-            Some(d) => d,
-            None => return None,
-        };
+        let d = state.get(defender)?;
         (d.eff_defense(), d.eff_initiative(), d.can_dodge(), d.incoming_multiplier(), d.alive)
     };
     if !def_alive {
@@ -1044,19 +1082,15 @@ fn resolve_basic_attack(
         }
     }
 
-    // Monsters do not cast abilities in combat; keep their basic attack to a
-    // single hit by skipping on-hit effect chains for enemy auto-attacks.
-    if !matches!(attacker, Who::Enemy) {
-        for we in weapon_effects.iter().filter(|w| w.on_hit) {
-            // Self-buffs (Bleed, Clearcasting, Lifesteal, ManaFlow, Thorns, ...)
-            // belong on the wielder; offensive effects hit the target.
-            let tgt = if effect_targets_self(&we.effect) {
-                attacker
-            } else {
-                defender
-            };
-            apply_effect(state, attacker, tgt, &we.effect, play_audio_msg);
-        }
+    for we in weapon_effects.iter().filter(|w| w.on_hit) {
+        // Self-buffs (Bleed, Clearcasting, Lifesteal, ManaFlow, Thorns, ...)
+        // belong on the wielder; offensive effects hit the target.
+        let tgt = if effect_targets_self(&we.effect) {
+            attacker
+        } else {
+            defender
+        };
+        apply_effect(state, attacker, tgt, &we.effect, play_audio_msg);
     }
     // Apply the defender's on-being-hit weapon effects (shields/books).
     let def_when_hit: Vec<Effect> = state
@@ -1074,6 +1108,7 @@ fn resolve_basic_attack(
     Some((attack_style, AttackOutcome::Hit))
 }
 
+/// Performs the side of operation.
 fn side_of(who: Who) -> FxSide {
     match who {
         Who::Player | Who::Pet => FxSide::Player,
@@ -1192,9 +1227,20 @@ fn apply_effect(
     }
 }
 
+/// Adds a timed effect, refreshing non-stackable effects of the same variant.
 fn push_timed(state: &mut CombatState, target: Who, effect: Effect) {
     let duration = effect_duration(&effect);
     if let Some(t) = state.get_mut(target) {
+        let refresh_existing = !matches!(effect, Effect::Bleed { .. } | Effect::Curse { .. });
+        if refresh_existing {
+            if let Some(existing) = t.effects.iter_mut().find(|timed| {
+                std::mem::discriminant(&timed.effect) == std::mem::discriminant(&effect)
+            }) {
+                existing.effect = effect;
+                existing.remaining = existing.remaining.max(duration);
+                return;
+            }
+        }
         t.effects.push(TimedEffect {
             effect,
             remaining: duration,
@@ -1203,21 +1249,27 @@ fn push_timed(state: &mut CombatState, target: Who, effect: Effect) {
     }
 }
 
+/// Returns whether positive.
 fn is_positive(effect: &Effect) -> bool {
     matches!(
         effect,
-        Effect::Berserk { .. }
+        Effect::BeastFrenzy { .. }
+            | Effect::Berserk { .. }
+            | Effect::Bleed { .. }
+            | Effect::Clearcasting { .. }
+            | Effect::EchoStruck { .. }
             | Effect::Empower { .. }
+            | Effect::Focus { .. }
             | Effect::Fortify { .. }
             | Effect::Haste { .. }
-            | Effect::Focus { .. }
-            | Effect::Regen { .. }
-            | Effect::ManaFlow { .. }
             | Effect::Lifesteal { .. }
-            | Effect::Thorns { .. }
-            | Effect::BeastFrenzy { .. }
+            | Effect::ManaFlow { .. }
             | Effect::MonarchShield { .. }
-            | Effect::Clearcasting { .. }
+            | Effect::Regen { .. }
+            | Effect::SoulLink { .. }
+            | Effect::StatBoost { .. }
+            | Effect::Taunt { .. }
+            | Effect::Thorns { .. }
     )
 }
 
@@ -1251,6 +1303,7 @@ fn effect_targets_self(effect: &Effect) -> bool {
     )
 }
 
+/// Performs the effect duration operation.
 fn effect_duration(effect: &Effect) -> f32 {
     match effect {
         Effect::BeastFrenzy {
@@ -1386,6 +1439,7 @@ fn effect_per_second(effect: &Effect) -> (f32, f32) {
     }
 }
 
+/// Advances fighter effects.
 fn tick_fighter_effects(fighter: &mut Fighter, dt: f32) -> Vec<(FxSide, String, Color)> {
     let mut fx = Vec::new();
     let mut curse_damage = Vec::new();
@@ -1578,6 +1632,7 @@ pub fn step_combat(
     }
 }
 
+/// Performs the combat tick operation.
 pub fn combat_tick(
     time: Res<Time>,
     combat_speed: Res<CombatSpeed>,
@@ -1612,7 +1667,7 @@ pub fn combat_tick(
         if let Some(pending_hunt_pet) = pending_hunt_pet.as_mut() {
             if !pending_hunt_pet.offer_available {
                 let mut rng = rng();
-                if rng.random_bool(hunt_pet_chance(&player) as f64) {
+                if rng.random_bool(hunt_pet_chance(&player)) {
                     pending_hunt_pet.offer_available = true;
                 }
             }
@@ -1650,6 +1705,7 @@ pub fn combat_tick(
 // Casting abilities & using consumables
 // ---------------------------------------------------------------------------
 
+/// Performs the try cast ability operation.
 pub fn try_cast_ability(
     state: &mut CombatState,
     index: usize,
@@ -1738,6 +1794,7 @@ pub fn try_cast_ability(
     play_audio_msg.write(PlayAudioMsg::new(cast_sound));
 }
 
+/// Performs the try use consumable operation.
 pub fn try_use_consumable(
     state: &mut CombatState,
     player: &mut Player,
@@ -1782,6 +1839,7 @@ pub fn try_use_consumable(
 
 /// Apply an ability cast by the networked opponent (the `Enemy` side). Used by
 /// the duel host to fold a remote player's ability into the authoritative sim.
+#[cfg(not(target_arch = "wasm32"))]
 pub fn enemy_cast_ability(
     state: &mut CombatState,
     key: &str,
@@ -1849,6 +1907,7 @@ pub fn enemy_cast_ability(
 }
 
 /// Apply a consumable used by the networked opponent (the `Enemy` side).
+#[cfg(not(target_arch = "wasm32"))]
 pub fn enemy_use_consumable(
     state: &mut CombatState,
     key: &str,
@@ -1877,6 +1936,7 @@ pub fn enemy_use_consumable(
     play_audio_msg.write(PlayAudioMsg::new("drink"));
 }
 
+/// Handles combat card click.
 pub fn handle_combat_card_click(
     event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -1911,6 +1971,7 @@ pub fn handle_combat_card_click(
     }
 }
 
+/// Performs the combat input operation.
 pub fn combat_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut combat_speed: ResMut<CombatSpeed>,
@@ -2002,6 +2063,7 @@ pub fn consumable_card_order(player: &Player) -> Vec<String> {
 // Visuals: smooth bars, labels, cooldown overlays, monster bar, floating text
 // ---------------------------------------------------------------------------
 
+/// Updates combat pause indicator.
 pub fn update_combat_pause_indicator(
     state: Option<Res<CombatState>>,
     mut overlay_q: Query<&mut Visibility, With<crate::core::combat::ui::CombatPausedOverlay>>,
@@ -2110,6 +2172,7 @@ pub struct CombatTranslationParams<'w, 's> {
     >,
 }
 
+/// Localizes monster name.
 pub fn localize_monster_name(
     name: &str,
     kind: crate::core::monsters::MonsterKind,
@@ -2120,7 +2183,11 @@ pub fn localize_monster_name(
         let name_cap = crate::utils::capitalize_words(name);
         let mut parts = name_cap.split_whitespace();
         if let Some(color) = parts.next() {
-            let stage = parts.collect::<Vec<_>>().join(" ");
+            let mut stage_parts = parts.collect::<Vec<_>>();
+            if stage_parts.first().is_some_and(|part| part.eq_ignore_ascii_case("dragon")) {
+                stage_parts.remove(0);
+            }
+            let stage = stage_parts.join(" ");
             let color_key = format!("general.{}", color.to_lowercase());
             let color_loc = localization.get_opt(&color_key, lang).unwrap_or_else(|| {
                 localization.get_opt(color, lang).unwrap_or_else(|| color.to_string())
@@ -2145,6 +2212,7 @@ pub fn localize_monster_name(
     crate::utils::capitalize_words(name)
 }
 
+/// Updates combat visuals.
 pub fn update_combat_visuals(
     time: Res<Time>,
     mut commands: Commands,
@@ -2424,6 +2492,7 @@ pub fn update_combat_visuals(
     }
 }
 
+/// Spawns floating text.
 fn spawn_floating_text(
     commands: &mut Commands,
     assets: &crate::core::assets::WorldAssets,
@@ -2506,6 +2575,7 @@ fn spawn_floating_text(
     ));
 }
 
+/// Performs the animate death skulls operation.
 pub fn animate_death_skulls(
     time: Res<Time>,
     combat_speed: Res<CombatSpeed>,
@@ -2635,6 +2705,7 @@ pub fn animate_death_skulls(
     }
 }
 
+/// Performs the animate floating text operation.
 pub fn animate_floating_text(
     time: Res<Time>,
     combat_speed: Res<CombatSpeed>,
@@ -2676,8 +2747,8 @@ pub fn sync_consumable_cards(
         if !card.is_player {
             continue;
         }
-        let available = player.inventory.iter().any(|k| *k == card.key)
-            && player.equipped_consumables.iter().any(|k| *k == card.key);
+        let available =
+            player.inventory.contains(&card.key) && player.equipped_consumables.contains(&card.key);
         if !available {
             commands.entity(entity).despawn();
             despawned_any = true;
@@ -2749,6 +2820,7 @@ pub fn handle_combat_end_button_click(
     next_game_state.set(GameState::Playing);
 }
 
+/// Handles continue with pet button click.
 pub fn handle_continue_with_pet_button_click(
     _event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -2777,6 +2849,7 @@ pub fn handle_continue_with_pet_button_click(
     next_game_state.set(GameState::Playing);
 }
 
+/// Performs the cleanup combat on exit operation.
 pub fn cleanup_combat_on_exit(
     mut commands: Commands,
     combat_q: Query<Entity, With<CombatCmp>>,
@@ -2796,6 +2869,7 @@ pub fn cleanup_combat_on_exit(
     commands.remove_resource::<PendingHuntPet>();
 }
 
+/// Performs the cleanup any combat artifacts operation.
 pub fn cleanup_any_combat_artifacts(
     mut commands: Commands,
     combat_q: Query<Entity, With<CombatCmp>>,
@@ -2809,6 +2883,7 @@ pub fn cleanup_any_combat_artifacts(
     combat_menu_suspended.0 = false;
 }
 
+/// Synchronizes combat continue with pet button.
 pub fn sync_combat_continue_with_pet_button(
     mut commands: Commands,
     state: Option<Res<CombatState>>,
@@ -2849,6 +2924,7 @@ pub fn sync_combat_continue_with_pet_button(
     }
 }
 
+/// Spawns continue with pet button.
 fn spawn_continue_with_pet_button(
     commands: &mut Commands,
     parent: Entity,
@@ -3026,6 +3102,7 @@ pub fn combat_effect_tooltip_system(
     }
 }
 
+/// Updates combat equipment slots.
 pub fn update_combat_equipment_slots(
     player: Res<Player>,
     duel_state: Option<Res<crate::core::network::DuelState>>,
@@ -3153,10 +3230,12 @@ pub fn update_combat_equipment_slots(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::catalog::catalog::all_wearables;
+    use crate::core::catalog::wearables::WearableSlot;
 
-    #[test]
-    fn test_fighter_dual_wield_mechanics() {
-        let fighter = Fighter {
+    /// Returns a neutral fighter suitable for isolated combat-mechanics tests.
+    fn test_fighter() -> Fighter {
+        Fighter {
             max_health: 100.0,
             health: 100.0,
             display_health: 100.0,
@@ -3177,7 +3256,33 @@ mod tests {
             intelligence_mod: 0.0,
             alive: true,
             weapons: Vec::new(),
-        };
+        }
+    }
+
+    /// Returns a minimal two-fighter combat state for effect tests.
+    fn test_combat_state() -> CombatState {
+        CombatState {
+            player: test_fighter(),
+            pet: None,
+            enemy: test_fighter(),
+            abilities: Vec::new(),
+            enemy_abilities: Vec::new(),
+            status: CombatStatus::Ongoing,
+            player_won: false,
+            player_level: 1,
+            enemy_level: 1,
+            fx: Vec::new(),
+            paused: false,
+            dodge_word: "Dodge".to_string(),
+            miss_word: "Miss".to_string(),
+            xp_word: "XP".to_string(),
+        }
+    }
+
+    #[test]
+    /// Verifies that per-weapon attack and speed calculations remain stable.
+    fn test_fighter_dual_wield_mechanics() {
+        let fighter = test_fighter();
 
         // Test eff_attack_speed_for and attack_period_for with a base speed of 1.2
         let speed = fighter.eff_attack_speed_for(1.2);
@@ -3191,6 +3296,7 @@ mod tests {
     }
 
     #[test]
+    /// Verifies that ability dodge chance uses caster intelligence.
     fn test_ability_dodge_chance_uses_caster_intelligence() {
         let without_intelligence = ability_dodge_chance(10.0, 14.0, 0.0);
         let with_intelligence = ability_dodge_chance(10.0, 14.0, 5.0);
@@ -3198,5 +3304,63 @@ mod tests {
         assert!(with_intelligence < without_intelligence);
         assert!((without_intelligence - 0.252).abs() < 0.0001);
         assert!((with_intelligence - 0.162).abs() < 0.0001);
+    }
+
+    #[test]
+    /// Verifies that wearable passives are collected as on-being-hit effects.
+    fn wearable_effects_are_active_in_combat() {
+        let wearable = all_wearables()
+            .iter()
+            .find(|wearable| !wearable.effects.is_empty())
+            .expect("the generated wearable catalog should contain passive effects");
+        let mut player = Player::default();
+        match wearable.slot {
+            WearableSlot::Accessory => player.accessory = Some(wearable.name.clone()),
+            WearableSlot::Helmet => player.helmet = Some(wearable.name.clone()),
+            WearableSlot::Chestplate => player.armor = Some(wearable.name.clone()),
+            WearableSlot::Gloves => player.gloves = Some(wearable.name.clone()),
+            WearableSlot::Boots => player.boots = Some(wearable.name.clone()),
+        }
+
+        let collected = player_equipment_effects(&player);
+        for effect in &wearable.effects {
+            assert!(
+                collected.iter().any(|item| !item.on_hit && item.effect == *effect),
+                "{} passive is missing from combat",
+                wearable.name
+            );
+        }
+    }
+
+    #[test]
+    /// Verifies that repeated non-stackable effects refresh instead of multiplying.
+    fn timed_effects_refresh_without_stacking() {
+        let mut state = test_combat_state();
+        push_timed(
+            &mut state,
+            Who::Player,
+            Effect::Haste {
+                initiative_pct: 10.0,
+                duration: 5.0,
+            },
+        );
+        push_timed(
+            &mut state,
+            Who::Player,
+            Effect::Haste {
+                initiative_pct: 20.0,
+                duration: 3.0,
+            },
+        );
+
+        assert_eq!(state.player.effects.len(), 1);
+        assert_eq!(state.player.effects[0].remaining, 5.0);
+        assert!(matches!(
+            state.player.effects[0].effect,
+            Effect::Haste {
+                initiative_pct: 20.0,
+                ..
+            }
+        ));
     }
 }

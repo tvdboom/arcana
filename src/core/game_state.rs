@@ -1,3 +1,5 @@
+//! Persistent UI selections and transient resources for the active game session.
+
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -39,6 +41,7 @@ pub struct ShopTabState {
 }
 
 impl Default for ShopTabState {
+    /// Returns the default value.
     fn default() -> Self {
         Self {
             weapon_hand: None,
@@ -64,6 +67,7 @@ pub struct ShopUiState {
 }
 
 impl Default for ShopUiState {
+    /// Returns the default value.
     fn default() -> Self {
         Self {
             active_tab: ShopTab::Weapons,
@@ -80,6 +84,7 @@ impl Default for ShopUiState {
 }
 
 impl ShopUiState {
+    /// Performs the state for operation.
     pub fn state_for(&self, tab: ShopTab) -> &ShopTabState {
         match tab {
             ShopTab::Weapons => &self.weapons,
@@ -93,6 +98,7 @@ impl ShopUiState {
         }
     }
 
+    /// Performs the state for mut operation.
     pub fn state_for_mut(&mut self, tab: ShopTab) -> &mut ShopTabState {
         match tab {
             ShopTab::Weapons => &mut self.weapons,
@@ -106,6 +112,7 @@ impl ShopUiState {
         }
     }
 
+    /// Returns filters.
     pub fn current_filters(&self) -> ShopFilters {
         let state = self.state_for(self.active_tab);
         ShopFilters {

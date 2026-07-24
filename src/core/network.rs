@@ -90,6 +90,7 @@ pub struct DuelState {
 }
 
 impl DuelState {
+    /// Creates a new value with the supplied configuration.
     fn new(role: DuelRole) -> Self {
         Self {
             role,
@@ -108,6 +109,7 @@ impl DuelState {
         }
     }
 
+    /// Returns whether host.
     pub fn is_host(&self) -> bool {
         self.role == DuelRole::Host
     }
@@ -186,6 +188,7 @@ pub enum ServerMessage {
 }
 
 impl ServerMessage {
+    /// Performs the channel operation.
     pub fn channel(&self) -> DefaultChannel {
         match self {
             ServerMessage::Snapshot {
@@ -221,6 +224,7 @@ pub enum ClientMessage {
 }
 
 impl ClientMessage {
+    /// Performs the channel operation.
     pub fn channel(&self) -> DefaultChannel {
         DefaultChannel::ReliableOrdered
     }
@@ -237,6 +241,7 @@ pub struct ServerSendMsg {
 }
 
 impl ServerSendMsg {
+    /// Creates a new value with the supplied configuration.
     pub fn new(message: ServerMessage, client: Option<ClientId>) -> Self {
         Self {
             message,
@@ -251,6 +256,7 @@ pub struct ClientSendMsg {
 }
 
 impl ClientSendMsg {
+    /// Creates a new value with the supplied configuration.
     pub fn new(message: ClientMessage) -> Self {
         Self {
             message,
@@ -266,6 +272,7 @@ impl ClientSendMsg {
 pub struct Ip(pub String);
 
 impl Default for Ip {
+    /// Returns the default value.
     fn default() -> Self {
         Self(local_ip().to_string())
     }
@@ -290,6 +297,7 @@ pub fn is_valid_ip(ip: &str) -> bool {
     ip.trim().parse::<IpAddr>().is_ok()
 }
 
+/// Performs the new renet client operation.
 pub fn new_renet_client(ip: &str) -> (RenetClient, NetcodeClientTransport) {
     let server_addr = format!("{ip}:{DUEL_PORT}").parse().unwrap();
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
@@ -308,6 +316,7 @@ pub fn new_renet_client(ip: &str) -> (RenetClient, NetcodeClientTransport) {
     (client, transport)
 }
 
+/// Performs the new renet server operation.
 pub fn new_renet_server() -> (RenetServer, NetcodeServerTransport) {
     let public_addr = format!("0.0.0.0:{DUEL_PORT}").parse().unwrap();
     let socket = UdpSocket::bind(public_addr).expect("Duel port already in use.");
@@ -329,6 +338,7 @@ pub fn new_renet_server() -> (RenetServer, NetcodeServerTransport) {
 #[derive(Resource)]
 pub struct DeclinePending;
 
+/// Handles decline pending.
 pub fn handle_decline_pending(mut commands: Commands, pending: Option<Res<DeclinePending>>) {
     if pending.is_some() {
         commands.remove_resource::<DeclinePending>();
@@ -340,6 +350,7 @@ pub fn handle_decline_pending(mut commands: Commands, pending: Option<Res<Declin
 // Generic send systems (mirrors the reference design)
 // ---------------------------------------------------------------------------
 
+/// Performs the server send message operation.
 pub fn server_send_message(
     mut server_send_msg: MessageReader<ServerSendMsg>,
     mut server: ResMut<RenetServer>,
@@ -354,6 +365,7 @@ pub fn server_send_message(
     }
 }
 
+/// Performs the client send message operation.
 pub fn client_send_message(
     mut client_send_msg: MessageReader<ClientSendMsg>,
     mut client: ResMut<RenetClient>,
@@ -416,6 +428,7 @@ pub fn leave_duel_combat(
 // Connection events
 // ---------------------------------------------------------------------------
 
+/// Handles server event.
 pub fn on_server_event(
     event: On<RenetServerEvent>,
     mut commands: Commands,
@@ -470,6 +483,7 @@ pub fn client_on_connect(
     }
 }
 
+/// Performs the client check disconnect operation.
 pub fn client_check_disconnect(
     mut commands: Commands,
     client: Res<RenetClient>,
@@ -482,6 +496,7 @@ pub fn client_check_disconnect(
     }
 }
 
+/// Performs the broadcast lobby operation.
 pub fn broadcast_lobby(duel: &DuelState, server_send: &mut MessageWriter<ServerSendMsg>) {
     server_send.write(ServerSendMsg::new(
         ServerMessage::Lobby {
@@ -500,6 +515,7 @@ pub fn broadcast_lobby(duel: &DuelState, server_send: &mut MessageWriter<ServerS
 // Lobby message handling (betting handshake)
 // ---------------------------------------------------------------------------
 
+/// Performs the server lobby recv operation.
 pub fn server_lobby_recv(
     mut commands: Commands,
     mut server: ResMut<RenetServer>,
@@ -582,6 +598,7 @@ pub fn server_lobby_recv(
     }
 }
 
+/// Performs the client lobby recv operation.
 pub fn client_lobby_recv(
     mut commands: Commands,
     mut client: ResMut<RenetClient>,
@@ -773,6 +790,7 @@ fn player_to_monster(opponent: &Player) -> Monster {
     }
 }
 
+/// Starts duel combat.
 fn start_duel_combat(
     commands: &mut Commands,
     opponent: &Player,
@@ -786,6 +804,7 @@ fn start_duel_combat(
     next_game_state.set(GameState::Combat);
 }
 
+/// Performs the fighter snap operation.
 fn fighter_snap(f: &Fighter) -> FighterSnapshot {
     FighterSnapshot {
         health: f.health,
@@ -796,6 +815,7 @@ fn fighter_snap(f: &Fighter) -> FighterSnapshot {
     }
 }
 
+/// Applies fighter.
 fn apply_fighter(target: &mut Fighter, snap: &FighterSnapshot) {
     target.health = snap.health;
     target.max_health = snap.max_health;
@@ -804,6 +824,7 @@ fn apply_fighter(target: &mut Fighter, snap: &FighterSnapshot) {
     target.alive = snap.alive;
 }
 
+/// Applies snapshot.
 fn apply_snapshot(state: &mut CombatState, snap: &DuelSnapshot) {
     // Client perspective: local player == snap.client, enemy == snap.host.
     apply_fighter(&mut state.player, &snap.client);
@@ -863,11 +884,13 @@ fn set_pause(
     ));
 }
 
+/// Performs the level diff xp operation.
 fn level_diff_xp(winner_level: u32, loser_level: u32) -> u32 {
     (2 + loser_level as i32 - winner_level as i32).max(0) as u32
 }
 
 #[allow(clippy::too_many_arguments)]
+/// Applies local rewards.
 fn apply_local_rewards(
     player: &mut Player,
     won: bool,
@@ -904,6 +927,7 @@ fn apply_local_rewards(
 
 const SNAPSHOT_FX_CAP: usize = 8;
 
+/// Performs the duel host combat operation.
 pub fn duel_host_combat(
     time: Res<Time>,
     keyboard: Res<ButtonInput<KeyCode>>,
@@ -1024,6 +1048,7 @@ pub fn duel_host_combat(
 }
 
 #[allow(clippy::too_many_arguments)]
+/// Resolves host result.
 fn resolve_host_result(
     duel: &mut DuelState,
     state: &mut CombatState,
@@ -1105,6 +1130,7 @@ fn resolve_host_result(
     }
 }
 
+/// Performs the duel client combat operation.
 pub fn duel_client_combat(
     time: Res<Time>,
     keyboard: Res<ButtonInput<KeyCode>>,
@@ -1266,6 +1292,7 @@ pub fn duel_combat_card_click(
     }
 }
 
+/// Performs the consume one operation.
 fn consume_one(player: &mut Player, key: &str) {
     if let Some(pos) = player.inventory.iter().position(|k| k == key) {
         player.inventory.remove(pos);
@@ -1303,6 +1330,7 @@ fn collect_fx(state: &CombatState, from: usize) -> (Vec<String>, Vec<String>) {
 pub struct NetworkPlugin;
 
 impl Plugin for NetworkPlugin {
+    /// Registers this plugin with the Bevy application.
     fn build(&self, app: &mut App) {
         app.add_plugins((
             RenetServerPlugin,

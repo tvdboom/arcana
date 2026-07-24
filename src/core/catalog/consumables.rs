@@ -1,3 +1,5 @@
+//! Consumable catalog records and their restorative or temporary effects.
+
 use crate::core::catalog::effects::Effect;
 use crate::core::localization::Localization;
 use crate::core::settings::Language;
@@ -27,6 +29,7 @@ pub struct Consumable {
 }
 
 impl Consumable {
+    /// Performs the description operation.
     pub fn description(&self, _language: Language, _localization: &Localization) -> String {
         let mut parts = vec![format!("[level]{}", self.level)];
         if !self.effects.is_empty() {
@@ -35,6 +38,7 @@ impl Consumable {
         parts.join(" ")
     }
 
+    /// Performs the full description operation.
     pub fn full_description(&self, language: Language, localization: &Localization) -> Vec<String> {
         let mut lines = Vec::new();
         let level_label = localization.get("general.level", language);

@@ -1,3 +1,5 @@
+//! Shared gameplay UI builders, scroll behavior, and responsive layout helpers.
+
 use crate::core::assets::WorldAssets;
 use crate::core::localization::Localization;
 use crate::core::menu::utils::add_text;
@@ -20,6 +22,7 @@ pub const SLIDER_WIDTH: f32 = 280.0;
 pub const SLIDER_VALUE_WIDTH: f32 = 120.0;
 
 // Generic helper to despawn an entity and all its descendants manually
+/// Despawns recursive manual.
 pub fn despawn_recursive_manual(
     commands: &mut Commands,
     entity: Entity,
@@ -33,6 +36,7 @@ pub fn despawn_recursive_manual(
     commands.entity(entity).try_despawn();
 }
 
+/// Despawns descendants manual.
 pub fn despawn_descendants_manual(
     commands: &mut Commands,
     entity: Entity,
@@ -46,6 +50,7 @@ pub fn despawn_descendants_manual(
 }
 
 // System to cleanup any opened panel UI (used for OnExit of panel states)
+/// Performs the cleanup panel ui operation.
 pub fn cleanup_panel_ui(
     mut commands: Commands,
     panel_q: Query<Entity, With<PanelCmp>>,
@@ -60,6 +65,7 @@ pub fn cleanup_panel_ui(
     }
 }
 
+/// Performs the global click listener operation.
 pub fn global_click_listener(
     trigger: On<Pointer<Click>>,
     state: Res<State<GameState>>,
@@ -101,6 +107,7 @@ pub fn global_click_listener(
 }
 
 // Base panel spawning helper
+/// Spawns panel base.
 pub fn spawn_panel_base(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -140,6 +147,7 @@ pub fn spawn_panel_base(
 }
 
 // Slider calculations
+/// Performs the slider relative x from cursor operation.
 pub fn slider_relative_x_from_cursor(
     track_transform: &GlobalTransform,
     window: &Window,
@@ -150,11 +158,13 @@ pub fn slider_relative_x_from_cursor(
     (cursor_x - track_left).clamp(0., SLIDER_WIDTH)
 }
 
+/// Performs the slider stage from relative x operation.
 pub fn slider_stage_from_relative_x(relative_x: f32, stages_count: u32) -> u32 {
     let frac = relative_x / SLIDER_WIDTH;
     ((frac * (stages_count - 1) as f32).round() as u32).clamp(0, stages_count - 1)
 }
 
+/// Updates slider visuals.
 pub fn update_slider_visuals(relative_x: f32, handle_node: &mut Node, value_node: &mut Node) {
     let relative_x = relative_x.clamp(0., SLIDER_WIDTH);
     handle_node.left = Val::Px(relative_x - 12.);
@@ -164,6 +174,7 @@ pub fn update_slider_visuals(relative_x: f32, handle_node: &mut Node, value_node
 }
 
 // Spawns a generic 3-stage slider
+/// Spawns intensity slider.
 pub fn spawn_intensity_slider<
     T: Component,
     H: Component,
@@ -345,6 +356,7 @@ pub fn spawn_intensity_slider<
 }
 
 // Spawns a generic race/class style selection card and returns the border overlay entity for click observation
+/// Spawns card ui.
 pub fn spawn_card_ui<M: Component>(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,

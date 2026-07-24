@@ -1,3 +1,5 @@
+//! Hover tooltips for equipment, abilities, perks, effects, and combat statistics.
+
 use crate::core::assets::WorldAssets;
 use crate::core::constants::{BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, PLACEHOLDER_COLOR};
 use crate::core::localization::Localization;
@@ -32,6 +34,7 @@ pub struct TooltipContent {
     pub extra_width: f32,
 }
 
+/// Spawns tooltip.
 pub fn spawn_tooltip(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -338,6 +341,7 @@ pub fn spawn_tooltip(
         });
 }
 
+/// Spawns pet tooltip.
 pub fn spawn_pet_tooltip(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -384,6 +388,7 @@ pub fn spawn_pet_tooltip(
     spawn_tooltip(commands, assets, content, windows);
 }
 
+/// Spawns action tooltip.
 pub fn spawn_action_tooltip(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -404,6 +409,7 @@ pub fn spawn_action_tooltip(
     spawn_tooltip(commands, assets, content, windows);
 }
 
+/// Spawns item tooltip.
 pub fn spawn_item_tooltip(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -425,6 +431,7 @@ pub fn spawn_item_tooltip(
     spawn_tooltip(commands, assets, content, windows);
 }
 
+/// Performs the visual chars count operation.
 pub fn visual_chars_count(s: &str) -> usize {
     let mut count = 0;
     let mut in_brackets = false;
@@ -441,6 +448,7 @@ pub fn visual_chars_count(s: &str) -> usize {
     count
 }
 
+/// Performs the wrap tooltip line operation.
 pub fn wrap_tooltip_line(line: &str, max_chars: usize) -> Vec<String> {
     if visual_chars_count(line) <= max_chars {
         return vec![line.to_string()];
@@ -474,6 +482,7 @@ pub fn wrap_tooltip_line(line: &str, max_chars: usize) -> Vec<String> {
     lines
 }
 
+/// Performs the place tooltip operation.
 pub fn place_tooltip(
     cursor: Vec2,
     width: f32,
@@ -518,6 +527,7 @@ pub fn tooltip_follow_cursor_system(
     }
 }
 
+/// Spawns pet stat box.
 fn spawn_pet_stat_box(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,

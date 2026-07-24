@@ -1,3 +1,5 @@
+//! Work choices and effort controls for earning gold and experience.
+
 use crate::core::assets::WorldAssets;
 use crate::core::localization::Localization;
 use crate::core::menu::utils::add_text;
@@ -24,6 +26,7 @@ pub struct WorkSliderValueText;
 #[derive(Component)]
 pub struct WorkSliderStageButton(pub u32);
 impl From<u32> for WorkSliderStageButton {
+    /// Constructs this value from the supplied input.
     fn from(val: u32) -> Self {
         Self(val)
     }
@@ -44,6 +47,7 @@ pub struct WorkValues {
     pub manual_cost: u32,
 }
 
+/// Calculates work values.
 pub fn calculate_work_values(player: &Player, slider_val: u32) -> WorkValues {
     let slider_mult = [1.0, 2.5, 4.0][slider_val as usize];
     let charisma_factor = (1.0 + player.charisma_mod() as f32).max(1.0);
@@ -75,6 +79,7 @@ pub fn calculate_work_values(player: &Player, slider_val: u32) -> WorkValues {
     }
 }
 
+/// Sets up work ui.
 pub fn setup_work_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -126,6 +131,7 @@ pub fn setup_work_ui(
     }
 }
 
+/// Updates work ui.
 pub fn update_work_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -175,6 +181,7 @@ pub fn update_work_ui(
     }
 }
 
+/// Builds work content.
 pub fn build_work_content(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -213,6 +220,7 @@ pub fn build_work_content(
     (track_ent, stage_ents, handle_ent, card_ents)
 }
 
+/// Builds work content inner.
 pub fn build_work_content_inner(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -425,6 +433,7 @@ pub fn build_work_content_inner(
 }
 
 // Handle work slider interaction
+/// Handles work slider clicks.
 pub fn handle_work_slider_clicks(
     event: On<Pointer<Click>>,
     stage_q: Query<&WorkSliderStageButton>,
@@ -435,6 +444,7 @@ pub fn handle_work_slider_clicks(
     }
 }
 
+/// Handles work slider clicks track.
 pub fn handle_work_slider_clicks_track(
     _event: On<Pointer<Click>>,
     track_q: Query<&GlobalTransform, With<WorkSliderTrack>>,
@@ -456,6 +466,7 @@ pub fn handle_work_slider_clicks_track(
     slider_state.0 = stage;
 }
 
+/// Handles work slider drag.
 pub fn handle_work_slider_drag(
     ev: On<Pointer<Drag>>,
     localization: Res<Localization>,
@@ -489,6 +500,7 @@ pub fn handle_work_slider_drag(
     }
 }
 
+/// Handles work slider release.
 pub fn handle_work_slider_release(
     _ev: On<Pointer<DragEnd>>,
     handle_q: Query<&Node, (With<WorkSliderHandle>, Without<WorkSliderTrack>)>,

@@ -1,3 +1,5 @@
+//! Playable races and their attribute, aging, and descriptive properties.
+
 use crate::core::player::{AgeStage, Attribute};
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
@@ -22,6 +24,7 @@ impl Race {
         }
     }
 
+    /// Performs the age stage range operation.
     pub fn age_stage_range(&self, stage: AgeStage) -> (u32, u32) {
         let (min, max) = self.age_range();
         let span = max - min + 1;
@@ -40,6 +43,7 @@ impl Race {
         }
     }
 
+    /// Performs the characteristic mod operation.
     pub fn characteristic_mod(&self, attr: Attribute) -> i32 {
         match attr {
             Attribute::Strength => match self {

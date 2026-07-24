@@ -1,3 +1,5 @@
+//! Character and settings persistence for native builds and browser storage.
+
 use std::env::current_dir;
 use std::fs::File;
 use std::io;
@@ -28,26 +30,30 @@ pub struct LoadCharacterMsg;
 #[derive(Message)]
 pub struct SaveCharacterMsg(pub bool);
 
+/// Serializes a complete save to the requested native file.
 fn save_to_bin(file_path: &str, data: &SaveAll) -> io::Result<()> {
     let mut file = File::create(file_path)?;
 
-    let buffer = encode_to_vec(data, standard()).expect("Failed to serialize data.");
+    let buffer = encode_to_vec(data, standard()).map_err(io::Error::other)?;
     file.write_all(&buffer)?;
 
     Ok(())
 }
 
+/// Deserializes a complete save while reporting corrupt or incompatible data as I/O errors.
 fn load_from_bin(file_path: &str) -> io::Result<SaveAll> {
     let mut file = File::open(file_path)?;
 
     let mut buffer = vec![];
     file.read_to_end(&mut buffer)?;
 
-    let (data, _) = decode_from_slice(&buffer, standard()).expect("Failed to deserialize data.");
+    let (data, _) = decode_from_slice(&buffer, standard())
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
     Ok(data)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
+/// Loads game.
 pub fn load_game(
     mut commands: Commands,
     mut load_game_msg: MessageReader<LoadCharacterMsg>,
@@ -57,7 +63,13 @@ pub fn load_game(
     for _ in load_game_msg.read() {
         if let Some(file_path) = FileDialog::new().pick_file() {
             let file_path_str = file_path.to_string_lossy().to_string();
-            let data = load_from_bin(&file_path_str).expect("Failed to load the game.");
+            let data = match load_from_bin(&file_path_str) {
+                Ok(data) => data,
+                Err(error) => {
+                    error!("Failed to load save {}: {error}", file_path.display());
+                    continue;
+                },
+            };
 
             change_audio_msg.write(ChangeAudioMsg(Some(data.settings.audio)));
 
@@ -74,6 +86,7 @@ pub fn load_game(
 }
 
 #[cfg(not(target_arch = "wasm32"))]
+/// Saves game.
 pub fn save_game(
     mut save_game_msg: MessageReader<SaveCharacterMsg>,
     settings: Res<Settings>,
@@ -100,11 +113,14 @@ pub fn save_game(
                 shop_inventory: shop_inventory.clone(),
             };
 
-            save_to_bin(&file_path_str, &data).expect("Failed to save the game.");
+            if let Err(error) = save_to_bin(&file_path_str, &data) {
+                error!("Failed to save game to {}: {error}", file_path.display());
+            }
         }
     }
 }
 
+/// Performs the run autosave operation.
 pub fn run_autosave(settings: Res<Settings>, mut save_game_msg: MessageWriter<SaveCharacterMsg>) {
     if settings.autosave {
         save_game_msg.write(SaveCharacterMsg(true));

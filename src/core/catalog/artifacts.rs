@@ -1,3 +1,5 @@
+//! Artifact catalog records and their localized names and descriptions.
+
 use crate::core::catalog::equipment::Kind;
 use crate::core::localization::Localization;
 use crate::core::settings::Language;
@@ -13,10 +15,12 @@ pub struct Artifact {
 }
 
 impl Artifact {
+    /// Performs the description operation.
     pub fn description(&self, _language: Language, _localization: &Localization) -> String {
         format!("{}", self.kind)
     }
 
+    /// Performs the full description operation.
     pub fn full_description(
         &self,
         _language: Language,

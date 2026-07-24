@@ -1,3 +1,5 @@
+//! Level-up modal for applying attributes and selecting new abilities or perks.
+
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
 
@@ -47,6 +49,7 @@ pub struct LevelUpPerkChoiceBtn(pub usize);
 #[derive(Component)]
 pub struct LevelUpConfirmBtn;
 
+/// Performs the attr to idx operation.
 fn attr_to_idx(attr: Attribute) -> usize {
     match attr {
         Attribute::Strength => 0,
@@ -58,6 +61,7 @@ fn attr_to_idx(attr: Attribute) -> usize {
     }
 }
 
+/// Handles attr plus click.
 pub fn handle_attr_plus_click(
     event: On<Pointer<Click>>,
     btn_q: Query<&LevelUpAttrPlusBtn>,
@@ -74,6 +78,7 @@ pub fn handle_attr_plus_click(
     }
 }
 
+/// Handles attr minus click.
 pub fn handle_attr_minus_click(
     event: On<Pointer<Click>>,
     btn_q: Query<&LevelUpAttrMinusBtn>,
@@ -90,6 +95,7 @@ pub fn handle_attr_minus_click(
     }
 }
 
+/// Handles ability choice click.
 pub fn handle_ability_choice_click(
     event: On<Pointer<Click>>,
     btn_q: Query<&LevelUpAbilityChoiceBtn>,
@@ -102,6 +108,7 @@ pub fn handle_ability_choice_click(
     }
 }
 
+/// Handles perk choice click.
 pub fn handle_perk_choice_click(
     event: On<Pointer<Click>>,
     btn_q: Query<&LevelUpPerkChoiceBtn>,
@@ -114,6 +121,7 @@ pub fn handle_perk_choice_click(
     }
 }
 
+/// Handles level up confirm.
 pub fn handle_level_up_confirm(
     _event: On<Pointer<Click>>,
     mut apply_level_up_msg: MessageWriter<ApplyLevelUpMsg>,
@@ -121,6 +129,7 @@ pub fn handle_level_up_confirm(
     apply_level_up_msg.write(ApplyLevelUpMsg);
 }
 
+/// Applies level up system.
 pub fn apply_level_up_system(
     mut apply_level_up_msg: MessageReader<ApplyLevelUpMsg>,
     mut player: ResMut<Player>,
@@ -166,6 +175,7 @@ pub fn apply_level_up_system(
     }
 }
 
+/// Handles confirm over.
 pub fn handle_confirm_over(
     event: On<Pointer<Over>>,
     level_up: Res<LevelUpPending>,
@@ -191,6 +201,7 @@ pub fn handle_confirm_over(
     }
 }
 
+/// Handles confirm out.
 pub fn handle_confirm_out(
     event: On<Pointer<Out>>,
     level_up: Res<LevelUpPending>,
@@ -222,6 +233,7 @@ pub fn handle_confirm_out(
     }
 }
 
+/// Handles confirm press.
 pub fn handle_confirm_press(
     event: On<Pointer<Press>>,
     level_up: Res<LevelUpPending>,
@@ -247,6 +259,7 @@ pub fn handle_confirm_press(
     }
 }
 
+/// Handles confirm release.
 pub fn handle_confirm_release(
     event: On<Pointer<Release>>,
     level_up: Res<LevelUpPending>,
@@ -272,6 +285,7 @@ pub fn handle_confirm_release(
     }
 }
 
+/// Performs the manage level up overlay operation.
 pub fn manage_level_up_overlay(
     level_up: Res<LevelUpPending>,
     game_state: Res<State<crate::core::states::GameState>>,
@@ -321,6 +335,7 @@ pub fn manage_level_up_overlay(
     }
 }
 
+/// Spawns level up overlay.
 fn spawn_level_up_overlay(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -910,6 +925,7 @@ fn spawn_level_up_overlay(
         });
 }
 
+/// Spawns choice card.
 fn spawn_choice_card(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,

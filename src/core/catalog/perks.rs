@@ -1,3 +1,5 @@
+//! Perk catalog records and localized perk presentation.
+
 use crate::core::catalog::modifiers::Modifier;
 use crate::core::localization::Localization;
 use crate::core::settings::Language;
@@ -20,10 +22,12 @@ pub struct Perk {
 }
 
 impl Perk {
+    /// Performs the description operation.
     pub fn description(&self, _language: Language, _localization: &Localization) -> String {
         format!("[level]{} [modifier]{}", self.level, self.modifiers.len())
     }
 
+    /// Performs the full description operation.
     pub fn full_description(&self, language: Language, localization: &Localization) -> Vec<String> {
         let mut lines = Vec::new();
         let level_label = localization.get("general.level", language);

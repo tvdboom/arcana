@@ -1,3 +1,5 @@
+//! Unified equipment types and accessors over weapons, wearables, consumables, and artifacts.
+
 use crate::core::catalog::artifacts::Artifact;
 use crate::core::catalog::consumables::Consumable;
 use crate::core::catalog::modifiers::Modifier;
@@ -19,6 +21,7 @@ pub enum Kind {
 }
 
 impl Kind {
+    /// Returns whether magic.
     pub fn is_magic(&self) -> bool {
         self != &Kind::Physical
     }
@@ -33,6 +36,7 @@ pub enum Equipment {
 }
 
 impl Equipment {
+    /// Performs the description operation.
     pub fn description(&self, language: Language, localization: &Localization) -> String {
         match self {
             Equipment::Wearable(a) => a.description(language, localization),
@@ -42,6 +46,7 @@ impl Equipment {
         }
     }
 
+    /// Performs the full description operation.
     pub fn full_description(&self, language: Language, localization: &Localization) -> Vec<String> {
         match self {
             Equipment::Wearable(a) => a.full_description(language, localization),
@@ -51,6 +56,7 @@ impl Equipment {
         }
     }
 
+    /// Performs the kind operation.
     pub fn kind(&self) -> Kind {
         match self {
             Equipment::Weapon(w) => w.kind,
@@ -60,6 +66,7 @@ impl Equipment {
         }
     }
 
+    /// Performs the name operation.
     pub fn name(&self) -> &str {
         match self {
             Equipment::Wearable(a) => &a.name,
@@ -69,6 +76,7 @@ impl Equipment {
         }
     }
 
+    /// Performs the level operation.
     pub fn level(&self) -> u32 {
         match self {
             Equipment::Wearable(a) => a.level,
@@ -78,6 +86,7 @@ impl Equipment {
         }
     }
 
+    /// Performs the price operation.
     pub fn price(&self) -> u32 {
         match self {
             Equipment::Wearable(a) => a.price,
@@ -87,6 +96,7 @@ impl Equipment {
         }
     }
 
+    /// Sells price.
     pub fn sell_price(&self, modifier: i32) -> u32 {
         match self {
             Equipment::Wearable(a) => (a.price as f32 * (0.5 + 0.01 * modifier as f32)) as u32,
@@ -96,6 +106,7 @@ impl Equipment {
         }
     }
 
+    /// Performs the attack operation.
     pub fn attack(&self) -> i32 {
         let base = match self {
             Equipment::Weapon(w) => w.attack as i32,
@@ -110,6 +121,7 @@ impl Equipment {
         base + bonus
     }
 
+    /// Performs the defense operation.
     pub fn defense(&self) -> i32 {
         self.modifiers()
             .iter()
@@ -123,6 +135,7 @@ impl Equipment {
             .sum()
     }
 
+    /// Performs the initiative operation.
     pub fn initiative(&self) -> i32 {
         self.modifiers()
             .iter()
@@ -136,6 +149,7 @@ impl Equipment {
             .sum()
     }
 
+    /// Performs the modifiers operation.
     pub fn modifiers(&self) -> &[Modifier] {
         match self {
             Equipment::Wearable(a) => &a.modifiers,

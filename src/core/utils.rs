@@ -1,3 +1,5 @@
+//! Shared Bevy systems for cleanup, cursor updates, and interaction state.
+
 use crate::core::menu::buttons::DisabledButton;
 use bevy::prelude::*;
 use bevy::window::{CursorIcon, SystemCursorIcon};
@@ -10,6 +12,7 @@ pub fn despawn<T: Component>(mut commands: Commands, query_c: Query<Entity, With
     }
 }
 
+/// Resets cursor.
 pub fn reset_cursor(
     mut commands: Commands,
     window_e: Single<Entity, With<Window>>,

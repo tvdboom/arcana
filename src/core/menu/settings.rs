@@ -1,3 +1,5 @@
+//! Settings menu widgets and interactions for audio, language, and display options.
+
 use std::fmt::Debug;
 
 use crate::core::assets::WorldAssets;
@@ -40,6 +42,7 @@ pub struct VolumeSliderFill;
 #[derive(Component)]
 pub struct VolumeSliderText;
 
+/// Performs the match setting operation.
 fn match_setting(button: &SettingsBtn, settings: &Settings) -> bool {
     match button {
         SettingsBtn::English => settings.language == Language::English,
@@ -53,6 +56,7 @@ fn match_setting(button: &SettingsBtn, settings: &Settings) -> bool {
     }
 }
 
+/// Performs the recolor label operation.
 pub fn recolor_label<E: Debug + Clone + Reflect>(
     color: Color,
 ) -> impl Fn(On<Pointer<E>>, Query<(&mut BackgroundColor, &SettingsBtn)>, ResMut<Settings>) {
@@ -66,6 +70,7 @@ pub fn recolor_label<E: Debug + Clone + Reflect>(
     }
 }
 
+/// Handles click label button.
 pub fn on_click_label_button(
     event: On<Pointer<Click>>,
     mut btn_q: Query<(&mut BackgroundColor, &SettingsBtn)>,
@@ -73,8 +78,11 @@ pub fn on_click_label_button(
     mut change_audio_msg: MessageWriter<ChangeAudioMsg>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
+    let Ok((_, button)) = btn_q.get(event.entity) else {
+        return;
+    };
     play_audio_msg.write(PlayAudioMsg::new("button"));
-    match btn_q.get(event.entity).unwrap().1 {
+    match button {
         SettingsBtn::English => settings.language = Language::English,
         SettingsBtn::Spanish => settings.language = Language::Spanish,
         SettingsBtn::Dutch => settings.language = Language::Dutch,
@@ -102,6 +110,7 @@ pub fn on_click_label_button(
     }
 }
 
+/// Spawns label.
 pub fn spawn_label(
     parent: &mut ChildSpawnerCommands,
     key: &str,
@@ -299,6 +308,7 @@ pub fn spawn_volume_slider(
         });
 }
 
+/// Performs the set volume visuals operation.
 fn set_volume_visuals(
     frac: f32,
     settings: &mut Settings,
@@ -319,6 +329,7 @@ fn set_volume_visuals(
     }
 }
 
+/// Handles volume track click.
 pub fn handle_volume_track_click(
     ev: On<Pointer<Click>>,
     track_q: Query<&RelativeCursorPosition, With<VolumeSliderTrack>>,
@@ -337,6 +348,7 @@ pub fn handle_volume_track_click(
     set_volume_visuals(frac, &mut settings, &mut handle_q, &mut fill_q, &mut text_q);
 }
 
+/// Handles volume drag.
 pub fn handle_volume_drag(
     ev: On<Pointer<Drag>>,
     track_q: Query<&RelativeCursorPosition, With<VolumeSliderTrack>>,

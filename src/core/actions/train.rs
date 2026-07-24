@@ -1,3 +1,5 @@
+//! Training choices and focus controls for improving combat attributes.
+
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::localization::Localization;
@@ -29,6 +31,7 @@ pub struct TrainSliderValueText;
 #[derive(Component)]
 pub struct TrainSliderStageButton(pub u32);
 impl From<u32> for TrainSliderStageButton {
+    /// Constructs this value from the supplied input.
     fn from(val: u32) -> Self {
         Self(val)
     }
@@ -37,6 +40,7 @@ impl From<u32> for TrainSliderStageButton {
 #[derive(Component)]
 pub struct TrainCardMarker(pub u32); // 0 = Melee, 1 = Finesse, 2 = Range
 
+/// Sets up train ui.
 pub fn setup_train_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -88,6 +92,7 @@ pub fn setup_train_ui(
     }
 }
 
+/// Updates train ui.
 pub fn update_train_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -137,6 +142,7 @@ pub fn update_train_ui(
     }
 }
 
+/// Builds train content.
 pub fn build_train_content(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -175,6 +181,7 @@ pub fn build_train_content(
     (track_ent, stage_ents, handle_ent, card_ents)
 }
 
+/// Builds train content inner.
 pub fn build_train_content_inner(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -448,6 +455,7 @@ pub fn build_train_content_inner(
     (track_ent, stage_ents, handle_ent, card_ents)
 }
 
+/// Handles train slider clicks.
 pub fn handle_train_slider_clicks(
     event: On<Pointer<Click>>,
     stage_q: Query<&TrainSliderStageButton>,
@@ -458,6 +466,7 @@ pub fn handle_train_slider_clicks(
     }
 }
 
+/// Handles train slider clicks track.
 pub fn handle_train_slider_clicks_track(
     _event: On<Pointer<Click>>,
     track_q: Query<&GlobalTransform, With<TrainSliderTrack>>,
@@ -479,6 +488,7 @@ pub fn handle_train_slider_clicks_track(
     slider_state.0 = stage;
 }
 
+/// Handles train slider drag.
 pub fn handle_train_slider_drag(
     ev: On<Pointer<Drag>>,
     localization: Res<Localization>,
@@ -512,6 +522,7 @@ pub fn handle_train_slider_drag(
     }
 }
 
+/// Handles train slider release.
 pub fn handle_train_slider_release(
     _ev: On<Pointer<DragEnd>>,
     handle_q: Query<&Node, (With<TrainSliderHandle>, Without<TrainSliderTrack>)>,
@@ -528,6 +539,7 @@ pub fn handle_train_slider_release(
     slider_state.0 = stage;
 }
 
+/// Handles train card clicks.
 pub fn handle_train_card_clicks(
     event: On<Pointer<Click>>,
     mut commands: Commands,

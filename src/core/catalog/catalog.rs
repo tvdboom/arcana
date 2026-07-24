@@ -1,3 +1,5 @@
+//! Catalog asset collections, global lookup helpers, and content invariant tests.
+
 use crate::core::catalog::abilities::Ability;
 use crate::core::catalog::artifacts::Artifact;
 use crate::core::catalog::consumables::Consumable;
@@ -17,6 +19,7 @@ static EQUIPMENT: OnceLock<Vec<Equipment>> = OnceLock::new();
 static ARTIFACTS: OnceLock<Vec<Artifact>> = OnceLock::new();
 static MONSTERS: OnceLock<Vec<Monster>> = OnceLock::new();
 
+/// Performs the all monsters operation.
 pub fn all_monsters() -> &'static [Monster] {
     MONSTERS.get_or_init(|| {
         let ron_str = include_str!("../../../assets/catalog/monsters.ron");
@@ -24,6 +27,7 @@ pub fn all_monsters() -> &'static [Monster] {
     })
 }
 
+/// Performs the all abilities operation.
 pub fn all_abilities() -> &'static [Ability] {
     ABILITIES.get_or_init(|| {
         let ron_str = include_str!("../../../assets/catalog/abilities.ron");
@@ -31,6 +35,7 @@ pub fn all_abilities() -> &'static [Ability] {
     })
 }
 
+/// Performs the all perks operation.
 pub fn all_perks() -> &'static [Perk] {
     PERKS.get_or_init(|| {
         let ron_str = include_str!("../../../assets/catalog/perks.ron");
@@ -38,6 +43,7 @@ pub fn all_perks() -> &'static [Perk] {
     })
 }
 
+/// Performs the all weapons operation.
 pub fn all_weapons() -> &'static [Weapon] {
     WEAPONS.get_or_init(|| {
         let ron_str = include_str!("../../../assets/catalog/weapons.ron");
@@ -45,6 +51,7 @@ pub fn all_weapons() -> &'static [Weapon] {
     })
 }
 
+/// Performs the all wearables operation.
 pub fn all_wearables() -> &'static [Wearable] {
     WEARABLE.get_or_init(|| {
         let ron_str = include_str!("../../../assets/catalog/wearables.ron");
@@ -52,6 +59,7 @@ pub fn all_wearables() -> &'static [Wearable] {
     })
 }
 
+/// Performs the all consumables operation.
 pub fn all_consumables() -> &'static [Consumable] {
     CONSUMABLES.get_or_init(|| {
         let ron_str = include_str!("../../../assets/catalog/consumables.ron");
@@ -59,6 +67,7 @@ pub fn all_consumables() -> &'static [Consumable] {
     })
 }
 
+/// Performs the all artifacts operation.
 pub fn all_artifacts() -> &'static [Artifact] {
     ARTIFACTS.get_or_init(|| {
         let ron_str = include_str!("../../../assets/catalog/artifacts.ron");
@@ -66,6 +75,7 @@ pub fn all_artifacts() -> &'static [Artifact] {
     })
 }
 
+/// Performs the all equipment operation.
 pub fn all_equipment() -> &'static [Equipment] {
     EQUIPMENT.get_or_init(|| {
         let mut items = Vec::new();
@@ -85,22 +95,27 @@ pub fn all_equipment() -> &'static [Equipment] {
     })
 }
 
+/// Returns ability.
 pub fn get_ability(name: &str) -> Option<Ability> {
     all_abilities().iter().find(|a| a.name == name).cloned()
 }
 
+/// Returns perk.
 pub fn get_perk(name: &str) -> Option<Perk> {
     all_perks().iter().find(|p| p.name == name).cloned()
 }
 
+/// Returns artifact.
 pub fn get_artifact(name: &str) -> Option<Artifact> {
     all_artifacts().iter().find(|a| a.name == name).cloned()
 }
 
+/// Returns equipment.
 pub fn get_equipment(name: &str) -> Option<Equipment> {
     all_equipment().iter().find(|e| e.name() == name).cloned()
 }
 
+/// Returns monster.
 pub fn get_monster(name: &str) -> Option<Monster> {
     all_monsters().iter().find(|m| m.name == name).cloned()
 }
@@ -108,8 +123,183 @@ pub fn get_monster(name: &str) -> Option<Monster> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::catalog::effects::Effect;
+    use crate::core::catalog::equipment::Kind;
+    use crate::core::catalog::weapons::Category;
+    use std::collections::HashSet;
+    use std::path::Path;
+
+    /// Performs the effect duration operation.
+    fn effect_duration(effect: &Effect) -> f32 {
+        match effect {
+            Effect::BeastFrenzy {
+                duration,
+                ..
+            }
+            | Effect::Berserk {
+                duration,
+                ..
+            }
+            | Effect::Blind {
+                duration,
+                ..
+            }
+            | Effect::Burn {
+                duration,
+                ..
+            }
+            | Effect::Clearcasting {
+                duration,
+                ..
+            }
+            | Effect::Cleave {
+                duration,
+                ..
+            }
+            | Effect::Empower {
+                duration,
+                ..
+            }
+            | Effect::Focus {
+                duration,
+                ..
+            }
+            | Effect::Fortify {
+                duration,
+                ..
+            }
+            | Effect::Freeze {
+                duration,
+                ..
+            }
+            | Effect::Haste {
+                duration,
+                ..
+            }
+            | Effect::Immobilize {
+                duration,
+            }
+            | Effect::Lifesteal {
+                duration,
+                ..
+            }
+            | Effect::ManaFlow {
+                duration,
+                ..
+            }
+            | Effect::MonarchShield {
+                duration,
+            }
+            | Effect::Paranoia {
+                duration,
+                ..
+            }
+            | Effect::Poison {
+                duration,
+                ..
+            }
+            | Effect::Regen {
+                duration,
+                ..
+            }
+            | Effect::Silence {
+                duration,
+            }
+            | Effect::SoulLink {
+                duration,
+                ..
+            }
+            | Effect::StatBoost {
+                duration,
+                ..
+            }
+            | Effect::Stun {
+                duration,
+            }
+            | Effect::Taunt {
+                duration,
+            }
+            | Effect::Thorns {
+                duration,
+                ..
+            }
+            | Effect::Vulnerability {
+                duration,
+                ..
+            } => *duration,
+            Effect::Bleed {
+                ..
+            } => 12.0,
+            Effect::Curse {
+                timer,
+                ..
+            } => *timer as f32,
+            _ => 0.0,
+        }
+    }
+
+    /// Performs the targets self operation.
+    fn targets_self(effect: &Effect) -> bool {
+        matches!(
+            effect,
+            Effect::BeastFrenzy { .. }
+                | Effect::Berserk { .. }
+                | Effect::Bleed { .. }
+                | Effect::Clearcasting { .. }
+                | Effect::EchoStruck { .. }
+                | Effect::Empower { .. }
+                | Effect::Focus { .. }
+                | Effect::Fortify { .. }
+                | Effect::Haste { .. }
+                | Effect::Heal { .. }
+                | Effect::InstantMana { .. }
+                | Effect::Lifesteal { .. }
+                | Effect::ManaFlow { .. }
+                | Effect::MonarchShield { .. }
+                | Effect::Purge
+                | Effect::Regen { .. }
+                | Effect::SoulLink { .. }
+                | Effect::StatBoost { .. }
+                | Effect::Taunt { .. }
+                | Effect::Thorns { .. }
+        )
+    }
+
+    /// Asserts that a catalog does not contain duplicate display names.
+    fn assert_unique<'a>(catalog: &str, names: impl IntoIterator<Item = &'a str>) {
+        let mut seen = HashSet::new();
+        for name in names {
+            assert!(seen.insert(name), "duplicate {catalog} name: {name}");
+        }
+    }
+
+    /// Asserts that a catalog image resolves inside the generated asset tree.
+    fn assert_image_exists(image: &str) {
+        assert!(Path::new("assets").join(image).is_file(), "catalog image is missing: {image}");
+    }
+
+    /// Returns the arithmetic mean of a non-empty integer sequence.
+    fn average(values: impl Iterator<Item = u32>) -> f64 {
+        let values = values.collect::<Vec<_>>();
+        assert!(!values.is_empty(), "cannot average an empty balance band");
+        values.iter().map(|value| *value as f64).sum::<f64>() / values.len() as f64
+    }
+
+    /// Asserts that endgame items cost substantially more than starter items.
+    fn assert_price_scales(catalog: &str, entries: impl Iterator<Item = (u32, u32)>) {
+        let entries = entries.collect::<Vec<_>>();
+        let starter =
+            average(entries.iter().filter(|(level, _)| *level <= 5).map(|(_, price)| *price));
+        let endgame =
+            average(entries.iter().filter(|(level, _)| *level >= 16).map(|(_, price)| *price));
+        assert!(
+            endgame > starter * 2.0,
+            "{catalog} prices do not scale enough: {starter:.1} -> {endgame:.1}"
+        );
+    }
 
     #[test]
+    /// Verifies that load all catalogs.
     fn test_load_all_catalogs() {
         let mns = all_monsters();
         assert!(!mns.is_empty(), "Monsters catalog is empty");
@@ -131,5 +321,167 @@ mod tests {
 
         let art = all_artifacts();
         assert!(!art.is_empty(), "Artifact catalog is empty");
+    }
+
+    #[test]
+    /// Performs the catalog entries have unique names valid levels and images operation.
+    fn catalog_entries_have_unique_names_valid_levels_and_images() {
+        assert_unique("ability", all_abilities().iter().map(|item| item.name.as_str()));
+        assert_unique("perk", all_perks().iter().map(|item| item.name.as_str()));
+        assert_unique("monster", all_monsters().iter().map(|item| item.name.as_str()));
+        assert_unique("equipment", all_equipment().iter().map(Equipment::name));
+
+        for item in all_equipment() {
+            assert!((1..=20).contains(&item.level()), "{} has invalid level", item.name());
+            assert!(item.price() > 0, "{} has a zero price", item.name());
+            match item {
+                Equipment::Weapon(item) => assert_image_exists(&item.image),
+                Equipment::Wearable(item) => assert_image_exists(&item.image),
+                Equipment::Consumable(item) => assert_image_exists(&item.image),
+                Equipment::Artifact(item) => assert_image_exists(&item.image),
+            }
+        }
+        for ability in all_abilities() {
+            assert!((1..=20).contains(&ability.level), "{} has invalid level", ability.name);
+            assert_image_exists(&ability.image);
+        }
+        for perk in all_perks() {
+            assert!((1..=20).contains(&perk.level), "{} has invalid level", perk.name);
+            assert_image_exists(&perk.image);
+        }
+        for monster in all_monsters() {
+            assert!((1..=20).contains(&monster.level), "{} has invalid level", monster.name);
+            assert_eq!(
+                monster.health, monster.max_health,
+                "{} does not start at full health",
+                monster.name
+            );
+            assert!(
+                monster.max_health > 0 && monster.attack > 0,
+                "{} has invalid combat stats",
+                monster.name
+            );
+            assert!(monster.attack_speed > 0.0, "{} cannot attack", monster.name);
+            assert_image_exists(&monster.image);
+        }
+    }
+
+    #[test]
+    /// Verifies generated ability targeting, durations, and school distribution.
+    fn generated_abilities_respect_targeting_and_cooldown_rules() {
+        let physical_share =
+            all_abilities().iter().filter(|ability| ability.kind == Kind::Physical).count() as f64
+                / all_abilities().len() as f64;
+        assert!(
+            (0.35..=0.45).contains(&physical_share),
+            "physical abilities should be roughly 40% of the catalog, got {:.1}%",
+            physical_share * 100.0
+        );
+
+        for ability in all_abilities() {
+            assert!(!ability.effects.is_empty(), "{} has no effect", ability.name);
+            for effect in &ability.effects {
+                assert_eq!(
+                    targets_self(effect),
+                    ability.on_self,
+                    "{} mixes self and enemy targeting",
+                    ability.name
+                );
+                assert!(
+                    ability.cooldown > effect_duration(effect),
+                    "{} has cooldown {} but effect duration {}",
+                    ability.name,
+                    ability.cooldown,
+                    effect_duration(effect)
+                );
+            }
+        }
+    }
+
+    #[test]
+    /// Performs the generated items follow semantic balance rules operation.
+    fn generated_items_follow_semantic_balance_rules() {
+        let apple = get_artifact("Apple").expect("the apple artifact must exist");
+        assert_eq!(apple.level, 1);
+        assert!(apple.price <= 5, "a mundane apple should remain inexpensive");
+        assert!(
+            get_artifact("Dye Pigments").is_some(),
+            "tailoring dyes should be a crafting artifact"
+        );
+        assert!(
+            all_consumables().iter().all(|item| item.name != "Dye Pigments"),
+            "tailoring dyes must not be drinkable"
+        );
+
+        for weapon in all_weapons() {
+            if matches!(weapon.category, Category::Shield | Category::Book) {
+                assert_eq!(weapon.attack, 0, "{} should not deal basic attack damage", weapon.name);
+                assert_eq!(weapon.attack_speed, 0.0, "{} should not auto-attack", weapon.name);
+                assert_eq!(weapon.crit_chance, 0.0, "{} should not critically strike", weapon.name);
+            } else {
+                assert!(
+                    weapon.attack > 0 && weapon.attack_speed > 0.0,
+                    "{} cannot attack",
+                    weapon.name
+                );
+            }
+            if weapon.level >= 8 && weapon.kind != Kind::Physical {
+                assert!(!weapon.effects.is_empty(), "{} lacks its elemental effect", weapon.name);
+            }
+        }
+
+        for wearable in all_wearables() {
+            if wearable.kind == Kind::Nature {
+                assert!(
+                    !wearable.effects.iter().any(|effect| matches!(effect, Effect::Freeze { .. })),
+                    "{} applies an unrelated frost effect",
+                    wearable.name
+                );
+            }
+        }
+
+        for consumable in all_consumables() {
+            if consumable.name.to_lowercase().contains("venom") {
+                assert!(
+                    consumable
+                        .effects
+                        .iter()
+                        .any(|effect| matches!(effect, Effect::Empower { .. })),
+                    "{} should act as a weapon coating",
+                    consumable.name
+                );
+            }
+        }
+    }
+
+    #[test]
+    /// Verifies that item prices and monster strength scale across level bands.
+    fn generated_catalogs_scale_with_level() {
+        assert_price_scales("weapon", all_weapons().iter().map(|item| (item.level, item.price)));
+        assert_price_scales(
+            "wearable",
+            all_wearables().iter().map(|item| (item.level, item.price)),
+        );
+        assert_price_scales(
+            "consumable",
+            all_consumables().iter().map(|item| (item.level, item.price)),
+        );
+        assert_price_scales(
+            "artifact",
+            all_artifacts().iter().map(|item| (item.level, item.price)),
+        );
+
+        let starter_power =
+            average(all_monsters().iter().filter(|monster| monster.level <= 5).map(|monster| {
+                monster.max_health + monster.attack * 3 + monster.defense * 2 + monster.initiative
+            }));
+        let endgame_power =
+            average(all_monsters().iter().filter(|monster| monster.level >= 16).map(|monster| {
+                monster.max_health + monster.attack * 3 + monster.defense * 2 + monster.initiative
+            }));
+        assert!(
+            endgame_power > starter_power * 2.0,
+            "monster power does not scale enough: {starter_power:.1} -> {endgame_power:.1}"
+        );
     }
 }

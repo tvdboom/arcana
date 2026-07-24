@@ -1,3 +1,5 @@
+//! Serialized catalog models and the runtime API for game content.
+
 pub mod abilities;
 pub mod artifacts;
 #[allow(clippy::module_inception)]

@@ -1,7 +1,12 @@
+//! Duel preparation screen for configuring and starting player-versus-player combat.
+
 use crate::core::assets::WorldAssets;
+#[cfg(not(target_arch = "wasm32"))]
 use crate::core::localization::Localization;
 use crate::core::menu::utils::add_text;
+#[cfg(not(target_arch = "wasm32"))]
 use crate::core::player::Player;
+#[cfg(not(target_arch = "wasm32"))]
 use crate::core::settings::{Language, Settings};
 use crate::core::ui::utils::*;
 use bevy::prelude::*;
@@ -14,6 +19,7 @@ pub use native::*;
 // ---------------------------------------------------------------------------
 
 #[cfg(target_arch = "wasm32")]
+/// Sets up duel ui.
 pub fn setup_duel_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -95,6 +101,7 @@ mod native {
     #[derive(Component)]
     pub struct DuelAcceptBtn;
 
+    /// Sets up duel ui.
     pub fn setup_duel_ui(
         mut commands: Commands,
         assets: Res<WorldAssets>,
@@ -202,11 +209,7 @@ mod native {
                         ip.push('8')
                     }
                 },
-                KeyCode::Digit9 | KeyCode::Numpad9 => {
-                    if ip.len() < MAX_IP_LENGTH {
-                        ip.push('9')
-                    }
-                },
+                KeyCode::Digit9 | KeyCode::Numpad9 if ip.len() < MAX_IP_LENGTH => ip.push('9'),
                 _ => {},
             }
         }
@@ -287,17 +290,11 @@ mod native {
                 d,
                 cached_scroll_x,
             ),
-            Some(_) => build_waiting_view(
-                &mut commands,
-                content,
-                &assets,
-                &localization,
-                lang,
-                &duel.unwrap(),
-            ),
+            Some(d) => build_waiting_view(&mut commands, content, &assets, &localization, lang, d),
         }
     }
 
+    /// Builds connect view.
     fn build_connect_view(
         commands: &mut Commands,
         content: Entity,
@@ -447,6 +444,7 @@ mod native {
         });
     }
 
+    /// Builds waiting view.
     fn build_waiting_view(
         commands: &mut Commands,
         content: Entity,
@@ -517,6 +515,7 @@ mod native {
         });
     }
 
+    /// Builds betting view.
     fn build_betting_view(
         commands: &mut Commands,
         content: Entity,
@@ -746,7 +745,7 @@ mod native {
                             None
                         })
                         .collect::<Vec<_>>();
-                    bettable_items.sort_by(|a, b| b.1.cmp(&a.1));
+                    bettable_items.sort_by_key(|item| std::cmp::Reverse(item.1));
                     let bettable_keys: Vec<String> = bettable_items.into_iter().map(|(key, _)| key).collect();
 
                     // Build selected indices to highlight them correctly (avoiding duplicate highlighting bugs)
@@ -1034,6 +1033,7 @@ mod native {
         });
     }
 
+    /// Spawns step button.
     fn spawn_step_button(
         parent: &mut ChildSpawnerCommands,
         assets: &WorldAssets,
@@ -1072,6 +1072,7 @@ mod native {
     // Click handling
     // -----------------------------------------------------------------------
 
+    /// Handles host click.
     fn on_host_click(
         _event: On<Pointer<Click>>,
         mut commands: Commands,
@@ -1097,6 +1098,7 @@ mod native {
             .insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
     }
 
+    /// Handles connect click.
     fn on_connect_click(
         _event: On<Pointer<Click>>,
         mut commands: Commands,
@@ -1119,6 +1121,7 @@ mod native {
             .insert(bevy::window::CursorIcon::from(bevy::window::SystemCursorIcon::Default));
     }
 
+    /// Handles gold click.
     fn on_gold_click(
         event: On<Pointer<Click>>,
         btn_q: Query<&DuelGoldBtn>,
@@ -1146,6 +1149,7 @@ mod native {
         push_my_bet(&mut duel, play_audio_msg, server_send, client_send);
     }
 
+    /// Handles selected item click.
     fn on_selected_item_click(
         event: On<Pointer<Click>>,
         btn_q: Query<&DuelSelectedItemBtn>,
@@ -1170,6 +1174,7 @@ mod native {
         }
     }
 
+    /// Handles item click.
     fn on_item_click(
         event: On<Pointer<Click>>,
         btn_q: Query<&DuelItemBtn>,
@@ -1203,7 +1208,7 @@ mod native {
                 None
             })
             .collect::<Vec<_>>();
-        bettable_items.sort_by(|a, b| b.1.cmp(&a.1));
+        bettable_items.sort_by_key(|item| std::cmp::Reverse(item.1));
         let bettable_keys: Vec<String> = bettable_items.into_iter().map(|(key, _)| key).collect();
 
         if clicked_idx >= bettable_keys.len() {
@@ -1241,6 +1246,7 @@ mod native {
         push_my_bet(&mut duel, play_audio_msg, server_send, client_send);
     }
 
+    /// Handles cancel host click.
     fn on_cancel_host_click(
         _event: On<Pointer<Click>>,
         mut commands: Commands,
@@ -1261,6 +1267,7 @@ mod native {
         commands.insert_resource(DeclinePending);
     }
 
+    /// Handles accept click.
     fn on_accept_click(
         _event: On<Pointer<Click>>,
         duel: Option<ResMut<DuelState>>,

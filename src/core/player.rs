@@ -1,3 +1,5 @@
+//! Player state, attributes, inventory, equipment, and derived statistics.
+
 use crate::core::catalog::catalog::{get_equipment, get_perk};
 use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::modifiers::Modifier;
@@ -23,6 +25,7 @@ pub enum Sex {
 }
 
 impl Sex {
+    /// Performs the characteristic mod operation.
     pub fn characteristic_mod(&self, attr: Attribute) -> i32 {
         match attr {
             Attribute::Strength => match self {
@@ -49,6 +52,7 @@ pub enum AgeStage {
 }
 
 impl AgeStage {
+    /// Performs the from u32 operation.
     pub fn from_u32(u: u32) -> Self {
         match u {
             0 => Self::Youth,
@@ -60,6 +64,7 @@ impl AgeStage {
         }
     }
 
+    /// Performs the index operation.
     pub fn index(&self) -> u32 {
         match self {
             AgeStage::Youth => 0,
@@ -70,10 +75,12 @@ impl AgeStage {
         }
     }
 
+    /// Performs the frac operation.
     pub fn frac(&self) -> f32 {
         self.index() as f32 / (Self::iter().len() - 1) as f32
     }
 
+    /// Performs the characteristic mod operation.
     pub fn characteristic_mod(&self, attr: Attribute) -> i32 {
         match attr {
             Attribute::Constitution => match self {
@@ -159,6 +166,7 @@ pub struct Player {
 }
 
 impl Default for Player {
+    /// Returns the default value.
     fn default() -> Self {
         Self {
             name: NAMES.choose(&mut rng()).unwrap().to_string(),
@@ -202,6 +210,7 @@ impl Default for Player {
 impl Player {
     pub const MAX_EQUIPPED_CONSUMABLE_TYPES: usize = 8;
 
+    /// Applies combat bonus.
     fn apply_combat_bonus(base: u32, bonus: i32) -> u32 {
         if bonus >= 0 {
             base.saturating_add(bonus as u32)
@@ -210,35 +219,42 @@ impl Player {
         }
     }
 
+    /// Performs the level operation.
     pub fn level(&self) -> u32 {
         self.xp / 10
     }
 
+    /// Performs the health operation.
     pub fn health(&self) -> u32 {
         self.max_health().saturating_sub(self.missing_health)
     }
 
+    /// Performs the set health operation.
     pub fn set_health(&mut self, val: u32) {
         let max_hp = self.max_health();
         let val = val.min(max_hp);
         self.missing_health = max_hp.saturating_sub(val);
     }
 
+    /// Performs the mana operation.
     pub fn mana(&self) -> u32 {
         self.max_mana().saturating_sub(self.missing_mana)
     }
 
+    /// Performs the set mana operation.
     pub fn set_mana(&mut self, val: u32) {
         let max_mp = self.max_mana();
         let val = val.min(max_mp);
         self.missing_mana = max_mp.saturating_sub(val);
     }
 
+    /// Updates health mana.
     pub fn update_health_mana(&mut self, _old_max_hp: u32, _old_max_mp: u32) {
         self.missing_health = self.missing_health.min(self.max_health());
         self.missing_mana = self.missing_mana.min(self.max_mana());
     }
 
+    /// Performs the attribute perk mod operation.
     pub fn attribute_perk_mod(&self, attr: Attribute) -> i32 {
         let mut perk_mod = 0;
         for perk_key in &self.perks {
@@ -255,6 +271,7 @@ impl Player {
         perk_mod
     }
 
+    /// Performs the strength operation.
     pub fn strength(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Strength);
         let sex_mod = self.sex.characteristic_mod(Attribute::Strength);
@@ -270,10 +287,12 @@ impl Player {
         (self.strength as i32 + race_mod + sex_mod + equip_mod + perk_mod).max(0) as u32
     }
 
+    /// Performs the strength mod operation.
     pub fn strength_mod(&self) -> i32 {
         self.strength() as i32 - START_CHARACTERISTIC as i32
     }
 
+    /// Performs the dexterity operation.
     pub fn dexterity(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Dexterity);
         let mut equip_mod = 0;
@@ -288,10 +307,12 @@ impl Player {
         (self.dexterity as i32 + race_mod + equip_mod + perk_mod).max(0) as u32
     }
 
+    /// Performs the dexterity mod operation.
     pub fn dexterity_mod(&self) -> i32 {
         self.dexterity() as i32 - START_CHARACTERISTIC as i32
     }
 
+    /// Performs the constitution operation.
     pub fn constitution(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Constitution);
         let age_mod = self.stage.characteristic_mod(Attribute::Constitution);
@@ -307,10 +328,12 @@ impl Player {
         (self.constitution as i32 + race_mod + age_mod + equip_mod + perk_mod).max(0) as u32
     }
 
+    /// Performs the constitution mod operation.
     pub fn constitution_mod(&self) -> i32 {
         self.constitution() as i32 - START_CHARACTERISTIC as i32
     }
 
+    /// Performs the intelligence operation.
     pub fn intelligence(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Intelligence);
         let mut equip_mod = 0;
@@ -325,10 +348,12 @@ impl Player {
         (self.intelligence as i32 + race_mod + equip_mod + perk_mod).max(0) as u32
     }
 
+    /// Performs the intelligence mod operation.
     pub fn intelligence_mod(&self) -> i32 {
         self.intelligence() as i32 - START_CHARACTERISTIC as i32
     }
 
+    /// Performs the wisdom operation.
     pub fn wisdom(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Wisdom);
         let age_mod = self.stage.characteristic_mod(Attribute::Wisdom);
@@ -344,10 +369,12 @@ impl Player {
         (self.wisdom as i32 + race_mod + age_mod + equip_mod + perk_mod).max(0) as u32
     }
 
+    /// Performs the wisdom mod operation.
     pub fn wisdom_mod(&self) -> i32 {
         self.wisdom() as i32 - START_CHARACTERISTIC as i32
     }
 
+    /// Performs the charisma operation.
     pub fn charisma(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Charisma);
         let sex_mod = self.sex.characteristic_mod(Attribute::Charisma);
@@ -363,6 +390,7 @@ impl Player {
         (self.charisma as i32 + race_mod + sex_mod + equip_mod + perk_mod).max(0) as u32
     }
 
+    /// Performs the charisma mod operation.
     pub fn charisma_mod(&self) -> i32 {
         self.charisma() as i32 - START_CHARACTERISTIC as i32
     }
@@ -385,10 +413,12 @@ impl Player {
         .collect()
     }
 
+    /// Returns whether consumable equipped.
     pub fn is_consumable_equipped(&self, key: &str) -> bool {
         self.equipped_consumables.iter().any(|k| k == key)
     }
 
+    /// Toggles consumable equipped.
     pub fn toggle_consumable_equipped(&mut self, key: &str) -> bool {
         if self.is_consumable_equipped(key) {
             self.equipped_consumables.retain(|k| k != key);
@@ -409,16 +439,19 @@ impl Player {
         true
     }
 
+    /// Adds inventory item.
     pub fn add_inventory_item(&mut self, key: String) {
         self.inventory.push(key.clone());
         self.auto_equip_consumable_if_possible(&key);
     }
 
+    /// Performs the set pet operation.
     pub fn set_pet(&mut self, mut pet: Monster) {
         pet.health = pet.max_health;
         self.pet = Some(pet);
     }
 
+    /// Performs the auto equip consumable if possible operation.
     fn auto_equip_consumable_if_possible(&mut self, key: &str) {
         if self.is_consumable_equipped(key) {
             return;
@@ -431,6 +464,7 @@ impl Player {
         }
     }
 
+    /// Returns whether equipped melee.
     pub fn has_equipped_melee(&self) -> bool {
         self.equipped_equipment().iter().any(|eq| {
             if let Equipment::Weapon(w) = eq {
@@ -441,6 +475,7 @@ impl Player {
         })
     }
 
+    /// Returns whether equipped finesse.
     pub fn has_equipped_finesse(&self) -> bool {
         self.equipped_equipment().iter().any(|eq| {
             if let Equipment::Weapon(w) = eq {
@@ -451,6 +486,7 @@ impl Player {
         })
     }
 
+    /// Returns whether equipped range.
     pub fn has_equipped_range(&self) -> bool {
         self.equipped_equipment().iter().any(|eq| {
             if let Equipment::Weapon(w) = eq {
@@ -461,6 +497,7 @@ impl Player {
         })
     }
 
+    /// Performs the training bonus for skill operation.
     pub fn training_bonus_for_skill(&self, skill: &str) -> u32 {
         let mut total = 0;
         if self.has_equipped_melee() {
@@ -490,6 +527,7 @@ impl Player {
         total
     }
 
+    /// Performs the max health operation.
     pub fn max_health(&self) -> u32 {
         let base = 100 + 10 * self.constitution_mod();
         let class_mod = if self.class == Class::Warrior {
@@ -526,6 +564,7 @@ impl Player {
             .max(1) as u32
     }
 
+    /// Performs the max mana operation.
     pub fn max_mana(&self) -> u32 {
         let base = 100 + 10 * self.wisdom_mod();
         let class_mod = match self.class {
@@ -661,6 +700,7 @@ impl Player {
         chances.iter().cloned().fold(0.0_f32, f32::max)
     }
 
+    /// Performs the attack operation.
     pub fn attack(&self) -> u32 {
         let bonus = self.strength_mod()
             + self.training_bonus_for_skill("attack") as i32
@@ -681,6 +721,7 @@ impl Player {
         Self::apply_combat_bonus(5, bonus)
     }
 
+    /// Performs the defense operation.
     pub fn defense(&self) -> u32 {
         let bonus = self.constitution_mod()
             + self.training_bonus_for_skill("defense") as i32
@@ -701,6 +742,7 @@ impl Player {
         Self::apply_combat_bonus(5, bonus)
     }
 
+    /// Performs the initiative operation.
     pub fn initiative(&self) -> u32 {
         let bonus = self.dexterity_mod()
             + self.training_bonus_for_skill("initiative") as i32

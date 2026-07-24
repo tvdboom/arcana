@@ -1,3 +1,5 @@
+//! Player action definitions, shared progression logic, and action dispatch systems.
+
 pub mod craft;
 pub mod duel;
 pub mod hunt;
@@ -45,6 +47,7 @@ pub enum Action {
 }
 
 impl Action {
+    /// Performs the ap cost operation.
     pub fn ap_cost(&self) -> u32 {
         match self {
             Action::Shop
@@ -63,6 +66,7 @@ impl Action {
 pub struct ActionButton(pub Action);
 
 // Reusable level up helper
+/// Performs the trigger level up operation.
 pub fn trigger_level_up(
     player: &mut Player,
     level_up: &mut LevelUpPending,
@@ -171,6 +175,7 @@ pub fn trigger_level_up(
 }
 
 // Reusable XP gain helper that triggers level up.
+/// Performs the gain xp operation.
 pub fn gain_xp(
     player: &mut Player,
     amount: u32,
@@ -186,6 +191,7 @@ pub fn gain_xp(
     }
 }
 
+/// Handles playing action clicks.
 pub fn handle_playing_action_clicks(
     event: On<Pointer<Click>>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
@@ -270,6 +276,7 @@ pub fn handle_playing_action_clicks(
 }
 
 // System to handle click on work cards
+/// Handles work card clicks.
 pub fn handle_work_card_clicks(
     event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -595,6 +602,7 @@ pub fn handle_work_card_clicks(
 }
 
 // System to handle click on study cards
+/// Handles study card clicks.
 pub fn handle_study_card_clicks(
     event: On<Pointer<Click>>,
     mut commands: Commands,

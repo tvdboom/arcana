@@ -1,3 +1,5 @@
+//! General-purpose string, numeric, and enum helpers shared across the game.
+
 use std::fmt::Debug;
 
 use regex::Regex;
@@ -28,11 +30,14 @@ fn extract_variant_name(text: String) -> String {
 
 /// Trait to get the text of an enum variant
 pub trait NameFromEnum {
+    /// Converts this value to name.
     fn to_name(&self) -> String;
+    /// Converts this value to lowername.
     fn to_lowername(&self) -> String;
 }
 
 impl<T: Debug> NameFromEnum for T {
+    /// Converts this value to name.
     fn to_name(&self) -> String {
         let re = Regex::new(r"([a-z])([A-Z])").unwrap();
 
@@ -40,6 +45,7 @@ impl<T: Debug> NameFromEnum for T {
         re.replace_all(&text, "$1 $2").to_string()
     }
 
+    /// Converts this value to lowername.
     fn to_lowername(&self) -> String {
         self.to_name().to_lowercase()
     }

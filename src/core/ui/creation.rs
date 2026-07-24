@@ -1,3 +1,5 @@
+//! Character creation interface for identity, race, class, perks, and starting gear.
+
 use bevy::input::ButtonState;
 use bevy::prelude::*;
 use strum::IntoEnumIterator;
@@ -63,6 +65,7 @@ pub struct AgeValueNode;
 #[derive(Component, Clone, Copy)]
 pub struct AgeStageButton(pub u32);
 
+/// Performs the creation attribute value operation.
 fn creation_attribute_value(player: &Player, attr: Attribute) -> u32 {
     let value = match attr {
         Attribute::Strength => {
@@ -84,6 +87,7 @@ fn creation_attribute_value(player: &Player, attr: Attribute) -> u32 {
     value.max(0) as u32
 }
 
+/// Updates sex button colors.
 pub fn update_sex_button_colors(
     player: Res<Player>,
     mut btn_q: Query<(&SexButton, &Interaction, &mut BackgroundColor)>,
@@ -98,6 +102,7 @@ pub fn update_sex_button_colors(
     }
 }
 
+/// Spawns sex button.
 fn spawn_sex_button(
     parent: &mut ChildSpawnerCommands,
     sex: Sex,
@@ -135,6 +140,7 @@ fn spawn_sex_button(
         });
 }
 
+/// Handles sex button click.
 fn on_sex_button_click(
     event: On<Pointer<Click>>,
     btn_q: Query<&SexButton>,
@@ -155,6 +161,7 @@ fn on_sex_button_click(
     }
 }
 
+/// Handles name input.
 pub fn handle_name_input(
     mut events: MessageReader<KeyboardInput>,
     mut player: ResMut<Player>,
@@ -196,6 +203,7 @@ pub fn handle_name_input(
     }
 }
 
+/// Handles attribute button click.
 fn on_attribute_button_click(
     event: On<Pointer<Click>>,
     btn_q: Query<(Option<&DisabledButton>, &AttributeAction)>,
@@ -205,7 +213,9 @@ fn on_attribute_button_click(
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut text_q: Query<(&mut Text, Option<&AttributeValueText>, Option<&PointsRemainingText>)>,
 ) {
-    let (disabled, action) = btn_q.get(event.entity).unwrap();
+    let Ok((disabled, action)) = btn_q.get(event.entity) else {
+        return;
+    };
     if disabled.is_some() {
         return;
     }
@@ -273,6 +283,7 @@ fn on_attribute_button_click(
     }
 }
 
+/// Handles continue click.
 fn on_continue_click(
     _: On<Pointer<Click>>,
     player: Res<Player>,
@@ -292,6 +303,7 @@ fn on_continue_click(
     }
 }
 
+/// Updates character creation continue btn.
 pub fn update_character_creation_continue_btn(
     player: Res<Player>,
     mut btn_q: Query<
@@ -325,6 +337,7 @@ pub fn update_character_creation_continue_btn(
     }
 }
 
+/// Updates attribute buttons.
 pub fn update_attribute_buttons(
     player: Res<Player>,
     mut btn_q: Query<(
@@ -386,6 +399,7 @@ pub fn update_attribute_buttons(
     }
 }
 
+/// Spawns attribute button.
 fn spawn_attribute_button(
     parent: &mut ChildSpawnerCommands,
     action: AttributeAction,
@@ -422,6 +436,7 @@ fn spawn_attribute_button(
         });
 }
 
+/// Spawns continue button.
 fn spawn_continue_button(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -460,6 +475,7 @@ fn spawn_continue_button(
         });
 }
 
+/// Sets up character creation.
 pub fn setup_character_creation(
     mut commands: Commands,
     settings: Res<Settings>,
@@ -992,6 +1008,7 @@ pub fn setup_character_creation(
         });
 }
 
+/// Handles age slider drag.
 fn on_age_slider_drag(
     ev: On<Pointer<Drag>>,
     mut player: ResMut<Player>,
@@ -1038,6 +1055,7 @@ fn on_age_slider_drag(
     }
 }
 
+/// Handles age slider release.
 fn on_age_slider_release(
     _: On<Pointer<DragEnd>>,
     mut player: ResMut<Player>,
@@ -1073,6 +1091,7 @@ fn on_age_slider_release(
     );
 }
 
+/// Handles age slider click.
 fn on_age_slider_click(
     _: On<Pointer<Click>>,
     mut player: ResMut<Player>,
@@ -1111,6 +1130,7 @@ fn on_age_slider_click(
     );
 }
 
+/// Handles age stage click.
 fn on_age_stage_click(
     event: On<Pointer<Click>>,
     stage_q: Query<&AgeStageButton>,
@@ -1141,10 +1161,12 @@ fn on_age_stage_click(
     );
 }
 
+/// Performs the age stage from cursor operation.
 fn age_stage_from_cursor(track_transform: &GlobalTransform, window: &Window, cursor_x: f32) -> u32 {
     age_stage_from_relative_x(age_relative_x_from_cursor(track_transform, window, cursor_x))
 }
 
+/// Performs the age relative x from cursor operation.
 fn age_relative_x_from_cursor(
     track_transform: &GlobalTransform,
     window: &Window,
@@ -1157,12 +1179,14 @@ fn age_relative_x_from_cursor(
     (cursor_x - track_left).clamp(0., AGE_SLIDER_WIDTH)
 }
 
+/// Performs the age stage from relative x operation.
 fn age_stage_from_relative_x(relative_x: f32) -> u32 {
     // Snap to nearest of 5 positions.
     let frac = relative_x / AGE_SLIDER_WIDTH;
     ((frac * 4.0).round() as u32).clamp(0, 4)
 }
 
+/// Performs the set age slider position operation.
 fn set_age_slider_position(
     handle_q: &mut Query<&mut Node, (With<AgeSliderHandle>, Without<AgeSliderTrack>)>,
     value_node_q: &mut Query<
@@ -1178,6 +1202,7 @@ fn set_age_slider_position(
     set_age_value_position(value_node_q, relative_x);
 }
 
+/// Performs the set age value position operation.
 fn set_age_value_position(
     value_node_q: &mut Query<
         &mut Node,
@@ -1191,6 +1216,7 @@ fn set_age_value_position(
     }
 }
 
+/// Applies age stage.
 fn apply_age_stage(
     stage: u32,
     player: &mut Player,
@@ -1230,12 +1256,17 @@ pub trait SelectionItem:
     'static + NameFromEnum + Copy + Clone + Send + Sync + IntoEnumIterator
 {
     type DescComponent: Component;
+    /// Returns description.
     fn get_description(&self, lang: Language, localization: &Localization) -> String;
+    /// Creates desc component.
     fn create_desc_component(&self) -> Self::DescComponent;
+    /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>);
+    /// Returns image key.
     fn get_image_key(&self, _player: &Player) -> String {
         self.to_lowername()
     }
+    /// Performs the items operation.
     fn items() -> Vec<Self>
     where
         Self: Sized,
@@ -1247,14 +1278,17 @@ pub trait SelectionItem:
 impl SelectionItem for Race {
     type DescComponent = LocalizedRaceDesc;
 
+    /// Returns description.
     fn get_description(&self, lang: Language, localization: &Localization) -> String {
         format_race_description(*self, lang, localization)
     }
 
+    /// Creates desc component.
     fn create_desc_component(&self) -> Self::DescComponent {
         LocalizedRaceDesc(*self)
     }
 
+    /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         let stage = player.stage;
         player.race = *self;
@@ -1263,6 +1297,7 @@ impl SelectionItem for Race {
         next_game_state.set(GameState::ChooseClass);
     }
 
+    /// Returns image key.
     fn get_image_key(&self, player: &Player) -> String {
         format!("{}_{}", self.to_lowername(), player.sex.to_lowername())
     }
@@ -1271,14 +1306,17 @@ impl SelectionItem for Race {
 impl SelectionItem for Class {
     type DescComponent = LocalizedClassDesc;
 
+    /// Returns description.
     fn get_description(&self, lang: Language, localization: &Localization) -> String {
         format_class_description(*self, lang, localization)
     }
 
+    /// Creates desc component.
     fn create_desc_component(&self) -> Self::DescComponent {
         LocalizedClassDesc(*self)
     }
 
+    /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = *self;
 
@@ -1325,6 +1363,7 @@ impl SelectionItem for Class {
         }
     }
 
+    /// Returns image key.
     fn get_image_key(&self, player: &Player) -> String {
         let race_key = player.race.to_lowername();
         let sex_key = player.sex.to_lowername();
@@ -1340,14 +1379,17 @@ impl SelectionItem for Class {
 impl SelectionItem for Ajah {
     type DescComponent = LocalizedAjahDesc;
 
+    /// Returns description.
     fn get_description(&self, lang: Language, localization: &Localization) -> String {
         format_ajah_description(*self, lang, localization)
     }
 
+    /// Creates desc component.
     fn create_desc_component(&self) -> Self::DescComponent {
         LocalizedAjahDesc(*self)
     }
 
+    /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = Class::Mage(*self);
 
@@ -1370,6 +1412,7 @@ impl SelectionItem for Ajah {
         next_game_state.set(GameState::Playing);
     }
 
+    /// Returns image key.
     fn get_image_key(&self, player: &Player) -> String {
         let race_key = player.race.to_lowername();
         let sex_key = match player.sex {
@@ -1396,14 +1439,17 @@ pub enum PetChoice {
 impl SelectionItem for PetChoice {
     type DescComponent = LocalizedPetDesc;
 
+    /// Returns description.
     fn get_description(&self, lang: Language, localization: &Localization) -> String {
         format_pet_description(*self, lang, localization)
     }
 
+    /// Creates desc component.
     fn create_desc_component(&self) -> Self::DescComponent {
         LocalizedPetDesc(*self)
     }
 
+    /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         let monster_name = match self {
             PetChoice::Rat => "Rat",
@@ -1417,6 +1463,7 @@ impl SelectionItem for PetChoice {
         next_game_state.set(GameState::Playing);
     }
 
+    /// Performs the items operation.
     fn items() -> Vec<Self> {
         vec![PetChoice::Rat, PetChoice::Owl, PetChoice::Snake, PetChoice::Weasel]
     }
@@ -1425,14 +1472,17 @@ impl SelectionItem for PetChoice {
 impl SelectionItem for MonsterKind {
     type DescComponent = LocalizedMonsterKindDesc;
 
+    /// Returns description.
     fn get_description(&self, lang: Language, localization: &Localization) -> String {
         format_monster_kind_description(*self, lang, localization)
     }
 
+    /// Creates desc component.
     fn create_desc_component(&self) -> Self::DescComponent {
         LocalizedMonsterKindDesc(*self)
     }
 
+    /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         if let Some(ref mut pet) = player.pet {
             pet.kind = *self;
@@ -1441,6 +1491,7 @@ impl SelectionItem for MonsterKind {
     }
 }
 
+/// Sets up selection screen.
 pub fn setup_selection_screen<T: SelectionItem>(
     mut commands: Commands,
     settings: Res<Settings>,
@@ -1641,6 +1692,7 @@ pub fn setup_selection_screen<T: SelectionItem>(
         });
 }
 
+/// Sets up race selection.
 pub fn setup_race_selection(
     commands: Commands,
     settings: Res<Settings>,
@@ -1659,6 +1711,7 @@ pub fn setup_race_selection(
     );
 }
 
+/// Sets up class selection.
 pub fn setup_class_selection(
     commands: Commands,
     settings: Res<Settings>,
@@ -1677,6 +1730,7 @@ pub fn setup_class_selection(
     );
 }
 
+/// Sets up subclass selection.
 pub fn setup_subclass_selection(
     commands: Commands,
     settings: Res<Settings>,

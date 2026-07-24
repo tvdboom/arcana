@@ -1,3 +1,5 @@
+//! Generic dropdown controls and shop-specific filter dropdowns.
+
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
 use serde::{Deserialize, Serialize};
@@ -37,6 +39,7 @@ pub struct ShopDropdownOptionCategory(pub Option<Category>);
 #[derive(Component, Clone, Copy)]
 pub struct ShopDropdownOptionKind(pub Option<Kind>);
 
+/// Handles shop dropdown click.
 pub fn handle_shop_dropdown_click(
     event: On<Pointer<Click>>,
     btn_q: Query<&ShopDropdownButton>,
@@ -53,6 +56,7 @@ pub fn handle_shop_dropdown_click(
     }
 }
 
+/// Handles shop dropdown option hand.
 pub fn handle_shop_dropdown_option_hand(
     event: On<Pointer<Click>>,
     opt_q: Query<&ShopDropdownOptionHand>,
@@ -68,6 +72,7 @@ pub fn handle_shop_dropdown_option_hand(
     }
 }
 
+/// Handles shop dropdown option type.
 pub fn handle_shop_dropdown_option_type(
     event: On<Pointer<Click>>,
     opt_q: Query<&ShopDropdownOptionType>,
@@ -83,6 +88,7 @@ pub fn handle_shop_dropdown_option_type(
     }
 }
 
+/// Handles shop dropdown option category.
 pub fn handle_shop_dropdown_option_category(
     event: On<Pointer<Click>>,
     opt_q: Query<&ShopDropdownOptionCategory>,
@@ -98,6 +104,7 @@ pub fn handle_shop_dropdown_option_category(
     }
 }
 
+/// Handles shop dropdown option kind.
 pub fn handle_shop_dropdown_option_kind(
     event: On<Pointer<Click>>,
     opt_q: Query<&ShopDropdownOptionKind>,
@@ -113,6 +120,7 @@ pub fn handle_shop_dropdown_option_kind(
     }
 }
 
+/// Spawns dropdown hand.
 pub fn spawn_dropdown_hand(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -222,6 +230,7 @@ pub fn spawn_dropdown_hand(
         });
 }
 
+/// Spawns dropdown type.
 pub fn spawn_dropdown_type(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -333,6 +342,7 @@ pub fn spawn_dropdown_type(
         });
 }
 
+/// Spawns dropdown category.
 pub fn spawn_dropdown_category(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -450,6 +460,7 @@ pub fn spawn_dropdown_category(
         });
 }
 
+/// Spawns dropdown kind.
 pub fn spawn_dropdown_kind(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -567,6 +578,7 @@ pub fn spawn_dropdown_kind(
         });
 }
 
+/// Performs the shop close dropdown on outside click operation.
 pub fn shop_close_dropdown_on_outside_click(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     mut open_dropdown: ResMut<OpenDropdown>,

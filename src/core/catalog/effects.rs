@@ -1,3 +1,5 @@
+//! Combat and item effect definitions with targeting and localization helpers.
+
 use crate::core::localization::Localization;
 use crate::core::player::Attribute;
 use crate::core::settings::Language;
@@ -256,6 +258,7 @@ impl Effect {
         }
     }
 
+    /// Performs the description operation.
     pub fn description(&self, language: Language, localization: &Localization) -> String {
         let template =
             localization.get(format!("effect.{}", self.to_string().to_lowercase()), language);

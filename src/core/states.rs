@@ -1,3 +1,5 @@
+//! Bevy application and gameplay state definitions and state predicates.
+
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
@@ -37,6 +39,7 @@ pub enum GameState {
     Duel,
 }
 
+/// Returns whether panel state.
 pub fn is_panel_state(state: GameState) -> bool {
     matches!(
         state,

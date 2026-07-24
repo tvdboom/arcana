@@ -1,3 +1,5 @@
+//! Deterministic shop inventory, filtering UI, and equipment transactions.
+
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::{all_equipment, get_equipment};
@@ -85,6 +87,7 @@ pub struct ShopTabClickGuard {
 pub struct ShopGoldLabel;
 
 impl Default for ShopFilters {
+    /// Returns the default value.
     fn default() -> Self {
         Self {
             tab: ShopTab::Weapons,
@@ -101,6 +104,7 @@ struct DeterministicRng {
 }
 
 impl DeterministicRng {
+    /// Creates a new value with the supplied configuration.
     fn new(seed: u64) -> Self {
         Self {
             state: if seed == 0 {
@@ -111,11 +115,13 @@ impl DeterministicRng {
         }
     }
 
+    /// Performs the next u32 operation.
     fn next_u32(&mut self) -> u32 {
         self.state = self.state.wrapping_mul(1664525).wrapping_add(1013904223);
         (self.state >> 32) as u32
     }
 
+    /// Performs the random bool operation.
     fn random_bool(&mut self, p: f64) -> bool {
         let val = self.next_u32() as f64 / u32::MAX as f64;
         val < p
@@ -123,6 +129,7 @@ impl DeterministicRng {
 }
 
 #[allow(dead_code)]
+/// Generates deterministic shop.
 pub fn generate_deterministic_shop(player_name: &str, player_level: u32) -> Vec<String> {
     let mut hasher = DefaultHasher::new();
     player_name.hash(&mut hasher);
@@ -144,6 +151,7 @@ pub fn generate_deterministic_shop(player_name: &str, player_level: u32) -> Vec<
 #[derive(Component)]
 pub struct ShopContentWrapper;
 
+/// Sets up shop ui.
 pub fn setup_shop_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -226,6 +234,7 @@ pub fn setup_shop_ui(
     }
 }
 
+/// Updates shop ui.
 pub fn update_shop_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -271,6 +280,7 @@ pub fn update_shop_ui(
     }
 }
 
+/// Builds shop content.
 pub fn build_shop_content(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -331,6 +341,7 @@ pub fn build_shop_content(
         });
 }
 
+/// Builds shop content inner.
 pub fn build_shop_content_inner(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -668,6 +679,7 @@ pub struct ShopItemCard {
 #[derive(Component)]
 pub struct ShopItemTooltip(pub String);
 
+/// Spawns shop item card.
 fn spawn_shop_item_card(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -768,6 +780,7 @@ fn spawn_shop_item_card(
 #[derive(Component, Clone, Copy)]
 pub struct ShopTabButton(pub ShopTab);
 
+/// Handles shop tab click.
 pub fn handle_shop_tab_click(
     event: On<Pointer<Click>>,
     mut shop_ui_state: ResMut<ShopUiState>,
@@ -788,6 +801,7 @@ pub fn handle_shop_tab_click(
     }
 }
 
+/// Performs the remember shop scroll position operation.
 pub fn remember_shop_scroll_position(
     mut shop_ui_state: ResMut<ShopUiState>,
     scroll_q: Query<&ScrollPosition, With<ShopItemsScroll>>,
@@ -798,6 +812,7 @@ pub fn remember_shop_scroll_position(
     }
 }
 
+/// Handles shop item card click.
 pub fn handle_shop_item_card_click(
     event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -860,6 +875,7 @@ pub fn handle_shop_item_card_click(
     }
 }
 
+/// Updates shop gold system.
 pub fn update_shop_gold_system(
     player: Res<Player>,
     mut label_q: Query<&mut Text, With<ShopGoldLabel>>,
@@ -871,6 +887,7 @@ pub fn update_shop_gold_system(
     }
 }
 
+/// Runs the shop tooltip system.
 pub fn shop_tooltip_system(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -926,6 +943,7 @@ pub fn shop_tooltip_system(
     }
 }
 
+/// Runs the shop tab button system.
 pub fn shop_tab_button_system(
     shop_ui_state: Res<ShopUiState>,
     mut tab_btn_q: Query<(Entity, &ShopTabButton, &Interaction, &mut BackgroundColor)>,

@@ -1,3 +1,5 @@
+//! Scrollable container components and synchronized custom scrollbar behavior.
+
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -23,6 +25,7 @@ pub struct ScrollbarThumbX {
     pub container: Entity,
 }
 
+/// Runs the scroll system.
 pub fn scroll_system(
     mut mouse_wheel_events: MessageReader<bevy::input::mouse::MouseWheel>,
     mut query: Query<(&mut ScrollPosition, &ComputedNode, &Interaction), With<ScrollableContainer>>,
@@ -50,6 +53,7 @@ pub fn scroll_system(
     }
 }
 
+/// Handles scrollbar thumb drag.
 pub fn on_scrollbar_thumb_drag(
     ev: On<Pointer<Drag>>,
     thumb_q: Query<&ScrollbarThumb>,
@@ -89,6 +93,7 @@ pub fn on_scrollbar_thumb_drag(
     scroll.y = (scroll.y + ev.delta.y * max_scroll / max_thumb_top).clamp(0.0, max_scroll);
 }
 
+/// Updates scrollbar system.
 pub fn update_scrollbar_system(
     mut scroll_q: Query<(&mut ScrollPosition, &ComputedNode), With<ScrollableContainer>>,
     mut track_q: Query<
@@ -153,6 +158,8 @@ pub fn update_scrollbar_system(
     }
 }
 
+/// Handles scrollbar thumb drag x.
+#[cfg_attr(target_arch = "wasm32", allow(dead_code))]
 pub fn on_scrollbar_thumb_drag_x(
     ev: On<Pointer<Drag>>,
     thumb_q: Query<&ScrollbarThumbX>,
@@ -192,6 +199,7 @@ pub fn on_scrollbar_thumb_drag_x(
     scroll.x = (scroll.x + ev.delta.x * max_scroll / max_thumb_left).clamp(0.0, max_scroll);
 }
 
+/// Updates scrollbar x system.
 pub fn update_scrollbar_x_system(
     mut scroll_q: Query<(&mut ScrollPosition, &ComputedNode), With<ScrollableContainer>>,
     mut track_q: Query<

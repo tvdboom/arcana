@@ -1,3 +1,5 @@
+//! Reusable gameplay button bundles, styling, and interaction observers.
+
 use crate::core::assets::WorldAssets;
 use crate::core::constants::*;
 use crate::core::menu::utils::{add_text, recolor};

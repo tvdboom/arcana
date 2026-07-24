@@ -1,3 +1,5 @@
+//! Menu button markers, construction, styling, and click handlers.
+
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::constants::*;
@@ -33,6 +35,7 @@ pub enum MenuBtn {
 #[derive(Component)]
 pub struct DisabledButton;
 
+/// Handles click menu button.
 pub fn on_click_menu_button(
     event: On<Pointer<Click>>,
     btn_q: Query<(Option<&DisabledButton>, &MenuBtn)>,
@@ -50,7 +53,9 @@ pub fn on_click_menu_button(
     mut state: Option<ResMut<crate::core::combat::mechanics::CombatState>>,
     duel_active: Option<Res<crate::core::combat::mechanics::DuelActive>>,
 ) {
-    let (disabled, btn) = btn_q.get(event.entity).unwrap();
+    let Ok((disabled, btn)) = btn_q.get(event.entity) else {
+        return;
+    };
 
     if disabled.is_some() {
         return;
@@ -125,6 +130,7 @@ pub fn on_click_menu_button(
     }
 }
 
+/// Spawns menu button.
 pub fn spawn_menu_button(
     parent: &mut ChildSpawnerCommands,
     btn: MenuBtn,

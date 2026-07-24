@@ -8,7 +8,7 @@
 //!
 //! Run with:
 //!   cargo run --bin pack-assets                  (assets/ -> assets.pak)
-//!   cargo run --bin pack-assets -- <src> <out>   (custom paths)
+//!   `cargo run --bin pack-assets -- <src> <out>` (custom paths)
 //!
 //! ## Format (keep in sync with `src/asset_pak.rs`)
 //! ```text
@@ -77,6 +77,7 @@ pub fn run(src_dir: impl AsRef<Path>, pak_path: impl AsRef<Path>) {
     }
 }
 
+/// Performs the pack operation.
 fn pack(src_dir: &Path, pak_path: &Path) -> io::Result<()> {
     let files = collect_files(src_dir)?;
     println!("Packing {} files from {} ...", files.len(), src_dir.display());
@@ -165,11 +166,13 @@ fn pack(src_dir: &Path, pak_path: &Path) -> io::Result<()> {
     Ok(())
 }
 
+/// Performs the shard path operation.
 fn shard_path(pak_path: &Path, shard: u16) -> PathBuf {
     let stem = pak_path.file_stem().and_then(|value| value.to_str()).unwrap_or("assets");
     pak_path.with_file_name(format!("{stem}-{shard:03}.pak"))
 }
 
+/// Removes old shards.
 fn remove_old_shards(pak_path: &Path) -> io::Result<()> {
     let parent = pak_path
         .parent()
@@ -194,6 +197,7 @@ fn remove_old_shards(pak_path: &Path) -> io::Result<()> {
     Ok(())
 }
 
+/// Builds index.
 fn build_index(entries: &[Entry]) -> Vec<u8> {
     let mut index = Vec::new();
     index.extend_from_slice(&(entries.len() as u32).to_le_bytes());
@@ -209,6 +213,7 @@ fn build_index(entries: &[Entry]) -> Vec<u8> {
 }
 
 #[allow(dead_code)]
+/// Runs the pack-assets entry point.
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let src = args.get(1).map(String::as_str).unwrap_or("assets");

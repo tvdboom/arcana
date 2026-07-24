@@ -1,23 +1,16 @@
-/// Orchestrator build binary.
-///
-/// Calls the same asset-processing and catalog-generation logic as the Cargo
-/// build script, but as a standalone command:
-///
-///   cargo run --bin build-assets                 (uses feature flags compiled in)
-///   cargo run --bin build-assets --no-default-features   (copy-only, no WebP)
-///
-/// The root `build.rs` Cargo build script includes these same implementation
-/// files so that `cargo build` also runs everything automatically.
-#[allow(dead_code)]
-mod convert_to_ktx2 {
-    include!("convert_to_ktx2.rs");
-}
+//! Standalone asset-build orchestrator.
+//!
+//! It runs the asset conversion and catalog generation stages selected by features.
 
 #[allow(dead_code)]
-mod catalog_gen {
-    include!("generate_catalogs.rs");
-}
+#[path = "convert_to_ktx2.rs"]
+mod convert_to_ktx2;
 
+#[allow(dead_code)]
+#[path = "generate_catalogs.rs"]
+mod catalog_gen;
+
+/// Runs the build-assets entry point.
 fn main() {
     let process_assets = cfg!(feature = "process-assets");
     let gen_catalogs = cfg!(feature = "generate-catalogs");

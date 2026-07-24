@@ -1,3 +1,5 @@
+//! Cross-cutting systems for character creation, progression, and state transitions.
+
 use crate::core::actions::gain_xp;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::{Ajah, Class};
@@ -10,6 +12,7 @@ use crate::core::ui::modal::ActiveModal;
 use bevy::prelude::*;
 use rand::{rng, RngExt};
 
+/// Checks keys menu.
 pub fn check_keys_menu(
     app_state: Res<State<AppState>>,
     game_state: Res<State<GameState>>,

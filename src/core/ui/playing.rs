@@ -1,3 +1,5 @@
+//! Primary gameplay HUD, action navigation, inventory, and character summary.
+
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use strum::IntoEnumIterator;
@@ -184,6 +186,7 @@ pub enum InfoTooltip {
     Pet,
 }
 
+/// Performs the portrait key operation.
 fn portrait_key(player: &Player) -> String {
     match player.class {
         Class::Mage(ajah) => ajah.get_image_key(player),
@@ -191,18 +194,22 @@ fn portrait_key(player: &Player) -> String {
     }
 }
 
+/// Performs the class line operation.
 fn class_line(player: &Player, localization: &Localization, lang: Language) -> String {
     format!("{} {}", localization.get("general.level", lang), player.level())
 }
 
+/// Performs the playing title operation.
 fn playing_title(player: &Player) -> String {
     player.name.clone()
 }
 
+/// Performs the pet image key operation.
 fn pet_image_key(pet: &crate::core::monsters::Monster) -> String {
     Path::new(&pet.image).file_stem().and_then(|s| s.to_str()).unwrap_or(&pet.image).to_lowercase()
 }
 
+/// Performs the localized class name operation.
 fn localized_class_name(player: &Player, localization: &Localization, lang: Language) -> String {
     match player.class {
         Class::Mage(ajah) => format!(
@@ -214,6 +221,7 @@ fn localized_class_name(player: &Player, localization: &Localization, lang: Lang
     }
 }
 
+/// Performs the name with level operation.
 pub fn name_with_level(
     name: &str,
     prefix: &str,
@@ -226,6 +234,7 @@ pub fn name_with_level(
     capitalize_words(&raw_name)
 }
 
+/// Performs the signed line operation.
 fn signed_line(label: impl Into<String>, value: i32) -> String {
     let label = label.into();
     if value >= 0 {
@@ -235,6 +244,7 @@ fn signed_line(label: impl Into<String>, value: i32) -> String {
     }
 }
 
+/// Performs the weapon bonus lines operation.
 fn weapon_bonus_lines(
     player: &Player,
     localization: &Localization,
@@ -261,6 +271,7 @@ fn weapon_bonus_lines(
         .collect()
 }
 
+/// Performs the combat breakdown operation.
 fn combat_breakdown(
     stat: PlayingStat,
     player: &Player,
@@ -337,6 +348,7 @@ fn combat_breakdown(
     }
 }
 
+/// Performs the perk bonus lines operation.
 fn perk_bonus_lines(
     player: &Player,
     localization: &Localization,
@@ -380,12 +392,14 @@ fn perk_bonus_lines(
     lines
 }
 
+/// Clears tooltips.
 fn clear_tooltips(commands: &mut Commands, tooltip_q: &Query<Entity, With<TooltipNode>>) {
     for entity in tooltip_q.iter() {
         commands.entity(entity).try_despawn();
     }
 }
 
+/// Spawns active hotkey tooltip.
 fn spawn_active_hotkey_tooltip(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -403,8 +417,8 @@ fn spawn_active_hotkey_tooltip(
     if let Some(key) = equipped_key {
         if let Some(ability) = get_ability(key) {
             let title =
-                name_with_level(&ability.name, "ability", ability.level as u8, &localization, lang);
-            let lines = ability.full_description(lang, &localization);
+                name_with_level(&ability.name, "ability", ability.level as u8, localization, lang);
+            let lines = ability.full_description(lang, localization);
             spawn_item_tooltip(
                 commands,
                 assets,
@@ -565,6 +579,7 @@ fn spawn_card(
     });
 }
 
+/// Handles perk card click.
 pub fn handle_perk_card_click(
     event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -651,6 +666,7 @@ pub fn spawn_combat_stat(
         });
 }
 
+/// Sets up playing screen.
 pub fn setup_playing_screen(
     mut commands: Commands,
     settings: Res<Settings>,
@@ -1421,19 +1437,20 @@ pub fn spawn_stats_column(
                     ..default()
                 })
                 .with_children(|parent| {
-                    for index in 0..5 {
+                    for (index, &hotkey) in ABILITY_HOTKEYS.iter().enumerate() {
                         spawn_active_hotkey_slot(
                             parent,
                             assets,
                             index,
                             player.active_abilities.get(index).and_then(|opt| opt.as_deref()),
-                            ABILITY_HOTKEYS[index],
+                            hotkey,
                         );
                     }
                 });
         });
 }
 
+/// Spawns bar.
 pub fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_health: bool) {
     let bar_height = Val::Px(36.);
     let font_size = 1.9;
@@ -1595,6 +1612,7 @@ pub enum RightColumnTooltip {
     Equipment(String),
 }
 
+/// Runs the right column tooltip system.
 pub fn right_column_tooltip_system(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -1726,6 +1744,7 @@ pub fn right_column_tooltip_system(
     }
 }
 
+/// Runs the info tooltip system.
 pub fn info_tooltip_system(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -1821,6 +1840,7 @@ pub fn info_tooltip_system(
     }
 }
 
+/// Handles tab click.
 fn handle_tab_click(
     ev: On<Pointer<Click>>,
     btn_q: Query<&RightTabBtn>,
@@ -1835,6 +1855,7 @@ fn handle_tab_click(
     }
 }
 
+/// Spawns right column.
 fn spawn_right_column(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -2766,6 +2787,7 @@ pub fn restore_tab_scroll(
     }
 }
 
+/// Runs the tab button hover system.
 pub fn tab_button_hover_system(
     right_tab: Res<RightTab>,
     mut tab_btn_q: Query<(Entity, &RightTabBtn, &Interaction, &mut BackgroundColor)>,
@@ -2797,6 +2819,7 @@ pub fn tab_button_hover_system(
     }
 }
 
+/// Updates playing screen.
 pub fn update_playing_screen(
     player: Res<Player>,
     settings: Res<Settings>,
@@ -2920,6 +2943,7 @@ pub fn update_playing_screen(
     }
 }
 
+/// Performs the highlight border operation.
 pub fn highlight_border<E: std::fmt::Debug + Clone + Reflect>(
     color: Color,
     thickness: Val,
@@ -2937,6 +2961,7 @@ pub fn highlight_border<E: std::fmt::Debug + Clone + Reflect>(
     }
 }
 
+/// Spawns playing action button.
 pub fn spawn_playing_action_button(
     parent: &mut ChildSpawnerCommands,
     action: Action,
@@ -3000,6 +3025,7 @@ pub struct EquipmentCard {
     pub price: u32,
 }
 
+/// Equips item.
 pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
     let old_hp = player.max_health();
     let old_mp = player.max_mana();
@@ -3138,6 +3164,7 @@ pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
     None
 }
 
+/// Unequips item.
 pub fn unequip_item(player: &mut Player, key: &str) {
     let old_hp = player.max_health();
     let old_mp = player.max_mana();
@@ -3173,6 +3200,7 @@ pub fn unequip_item(player: &mut Player, key: &str) {
     player.update_health_mana(old_hp, old_mp);
 }
 
+/// Unequips slot.
 pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
     let old_hp = player.max_health();
     let old_mp = player.max_mana();
@@ -3196,6 +3224,7 @@ pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
     res
 }
 
+/// Handles equipment card click.
 pub fn handle_equipment_card_click(
     event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -3319,6 +3348,7 @@ pub fn handle_equipment_card_click(
     }
 }
 
+/// Handles equipment slot click.
 pub fn handle_equipment_slot_click(
     event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -3382,6 +3412,7 @@ pub fn handle_equipment_slot_click(
     }
 }
 
+/// Spawns equipment card.
 pub fn spawn_equipment_card<'a>(
     parent: &'a mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -3502,6 +3533,7 @@ pub fn spawn_equipment_card<'a>(
     cmd
 }
 
+/// Updates action buttons.
 pub fn update_action_buttons(
     player: Res<Player>,
     mut commands: Commands,
@@ -3535,6 +3567,7 @@ pub fn update_action_buttons(
     }
 }
 
+/// Handles active ability card click.
 pub fn handle_active_ability_card_click(
     event: On<Pointer<Click>>,
     mut player: ResMut<Player>,
@@ -3589,6 +3622,7 @@ pub fn handle_active_ability_card_click(
     }
 }
 
+/// Spawns active hotkey slot.
 fn spawn_active_hotkey_slot(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -3663,6 +3697,7 @@ fn spawn_active_hotkey_slot(
         });
 }
 
+/// Handles hotkey slot hover.
 pub fn handle_hotkey_slot_hover(
     event: On<Pointer<Over>>,
     mut commands: Commands,
@@ -3685,6 +3720,7 @@ pub fn handle_hotkey_slot_hover(
     }
 }
 
+/// Handles hotkey slot hover out.
 pub fn handle_hotkey_slot_hover_out(
     _event: On<Pointer<Out>>,
     mut commands: Commands,
@@ -3697,6 +3733,7 @@ pub fn handle_hotkey_slot_hover_out(
     commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Default));
 }
 
+/// Updates active hotkey slots.
 pub fn update_active_hotkey_slots(
     mut player: ResMut<Player>,
     assets: Res<WorldAssets>,
@@ -3741,12 +3778,14 @@ pub fn update_active_hotkey_slots(
     }
 }
 
+/// Clears drag ghost.
 fn clear_drag_ghost(commands: &mut Commands, ghost_q: &Query<Entity, With<PrecombatDragGhost>>) {
     for entity in ghost_q {
         commands.entity(entity).try_despawn();
     }
 }
 
+/// Handles hotkey drag start.
 pub fn handle_hotkey_drag_start(
     event: On<Pointer<DragStart>>,
     mut commands: Commands,
@@ -3795,6 +3834,7 @@ pub fn handle_hotkey_drag_start(
     commands.entity(event.entity).insert(DraggingSlot);
 }
 
+/// Handles hotkey drag.
 pub fn handle_hotkey_drag(
     event: On<Pointer<Drag>>,
     mut commands: Commands,
@@ -3809,6 +3849,7 @@ pub fn handle_hotkey_drag(
     commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Move));
 }
 
+/// Handles hotkey drag end.
 pub fn handle_hotkey_drag_end(
     _event: On<Pointer<DragEnd>>,
     mut commands: Commands,
@@ -3842,6 +3883,7 @@ pub fn handle_hotkey_drag_end(
     );
 }
 
+/// Handles hotkey drop.
 pub fn handle_hotkey_drop(
     event: On<Pointer<DragDrop>>,
     mut player: ResMut<Player>,
@@ -3887,6 +3929,7 @@ pub fn handle_hotkey_drop(
     );
 }
 
+/// Handles active hotkey slot click.
 pub fn handle_active_hotkey_slot_click(
     event: On<Pointer<Click>>,
     mut player: ResMut<Player>,
@@ -3910,6 +3953,7 @@ pub fn handle_active_hotkey_slot_click(
     }
 }
 
+/// Runs the active hotkey slot tooltip system.
 pub fn active_hotkey_slot_tooltip_system(
     mut commands: Commands,
     assets: Res<WorldAssets>,

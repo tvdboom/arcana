@@ -1,3 +1,5 @@
+//! Quest selection and resolution, including scaled encounters and deferred rewards.
+
 use crate::core::actions::gain_xp;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
@@ -51,6 +53,7 @@ struct QuestCardProfile {
     artifact_max: u32,
 }
 
+/// Applies pending quest xp.
 pub fn apply_pending_quest_xp(
     mut pending_quest_xp: ResMut<PendingQuestXp>,
     mut player: ResMut<Player>,
@@ -67,6 +70,7 @@ pub fn apply_pending_quest_xp(
     gain_xp(&mut player, amount, &mut level_up, &mut play_audio_msg, &mut next_game_state);
 }
 
+/// Applies pending quest rewards.
 pub fn apply_pending_quest_rewards(
     mut pending_quest_rewards: ResMut<PendingQuestRewards>,
     mut player: ResMut<Player>,
@@ -93,6 +97,7 @@ pub fn apply_pending_quest_rewards(
     }
 }
 
+/// Sets up quest ui.
 pub fn setup_quest_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -119,6 +124,7 @@ pub fn setup_quest_ui(
     }
 }
 
+/// Updates quest ui.
 pub fn update_quest_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -150,6 +156,7 @@ pub fn update_quest_ui(
     }
 }
 
+/// Performs the quest profile operation.
 fn quest_profile(tier: u32) -> QuestCardProfile {
     match tier {
         0 => QuestCardProfile {
@@ -194,6 +201,7 @@ fn quest_profile(tier: u32) -> QuestCardProfile {
     }
 }
 
+/// Performs the quest level range operation.
 fn quest_level_range(tier: u32, player_level: u32) -> (u32, u32) {
     match tier {
         0 => (player_level.saturating_sub(2).max(1), player_level.saturating_add(1).max(1)),
@@ -202,6 +210,7 @@ fn quest_level_range(tier: u32, player_level: u32) -> (u32, u32) {
     }
 }
 
+/// Rolls count.
 fn roll_count(rng: &mut impl rand::Rng, min: u32, max: u32) -> u32 {
     if min >= max {
         min
@@ -210,6 +219,7 @@ fn roll_count(rng: &mut impl rand::Rng, min: u32, max: u32) -> u32 {
     }
 }
 
+/// Performs the sample names operation.
 fn sample_names(pool: Vec<String>, count: u32, rng: &mut impl rand::Rng) -> Vec<String> {
     let mut rewards = Vec::new();
     let mut remaining = pool;
@@ -225,6 +235,7 @@ fn sample_names(pool: Vec<String>, count: u32, rng: &mut impl rand::Rng) -> Vec<
     rewards
 }
 
+/// Performs the quest equipment rewards operation.
 fn quest_equipment_rewards(
     tier: u32,
     player_level: u32,
@@ -250,6 +261,7 @@ fn quest_equipment_rewards(
     sample_names(pool, count, rng)
 }
 
+/// Performs the quest consumable rewards operation.
 fn quest_consumable_rewards(
     tier: u32,
     player_level: u32,
@@ -270,6 +282,7 @@ fn quest_consumable_rewards(
     sample_names(pool, count, rng)
 }
 
+/// Performs the quest artifact rewards operation.
 fn quest_artifact_rewards(
     tier: u32,
     player_level: u32,
@@ -290,6 +303,7 @@ fn quest_artifact_rewards(
     sample_names(pool, count, rng)
 }
 
+/// Returns whether auto equip.
 fn can_auto_equip(player: &Player, equipment: &Equipment) -> bool {
     match equipment {
         Equipment::Wearable(w) => match w.slot {
@@ -318,6 +332,7 @@ fn can_auto_equip(player: &Player, equipment: &Equipment) -> bool {
     }
 }
 
+/// Performs the grant equipment reward operation.
 fn grant_equipment_reward(player: &mut Player, key: String) -> bool {
     if let Some(equipment) = get_equipment(&key) {
         if can_auto_equip(player, &equipment) {
@@ -330,6 +345,7 @@ fn grant_equipment_reward(player: &mut Player, key: String) -> bool {
     false
 }
 
+/// Builds quest content.
 fn build_quest_content(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -357,6 +373,7 @@ fn build_quest_content(
     card_ents
 }
 
+/// Builds quest content inner.
 fn build_quest_content_inner(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -470,6 +487,7 @@ fn build_quest_content_inner(
     card_ents
 }
 
+/// Spawns quest card.
 fn spawn_quest_card(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -614,6 +632,7 @@ fn spawn_quest_card(
     border_entity
 }
 
+/// Handles quest card clicks.
 pub fn handle_quest_card_clicks(
     event: On<Pointer<Click>>,
     mut commands: Commands,

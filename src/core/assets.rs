@@ -1,3 +1,5 @@
+//! Loading and lookup of the images, fonts, audio, and catalogs used at runtime.
+
 use crate::core::catalog::catalog::*;
 use bevy::asset::AssetServer;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -22,10 +24,12 @@ fn load_linear(
     assets.load_builder().with_settings(linear_sampler).load(path)
 }
 
+/// Performs the leak str operation.
 fn leak_str(value: String) -> &'static str {
     Box::leak(value.into_boxed_str())
 }
 
+/// Inserts image aliases.
 fn insert_image_aliases(
     image_paths: &mut HashMap<&'static str, String>,
     image_path: &str,
@@ -36,6 +40,7 @@ fn insert_image_aliases(
     }
 }
 
+/// Performs the catalog image aliases operation.
 fn catalog_image_aliases(name: &str, image: &str) -> Vec<String> {
     let mut aliases = vec![format!("build_{}", name), image.to_string()];
     if let Some(stem) = Path::new(image).file_stem().and_then(|s| s.to_str()) {
@@ -55,6 +60,7 @@ pub struct WorldAssets {
 }
 
 impl WorldAssets {
+    /// Returns asset.
     fn get_asset<'a, T: Clone>(
         &self,
         map: &'a HashMap<&str, T>,
@@ -65,14 +71,17 @@ impl WorldAssets {
         map.get(name.as_str()).unwrap_or_else(|| panic!("No asset for {asset_type} {name}."))
     }
 
+    /// Performs the audio operation.
     pub fn audio(&self, name: impl Into<String>) -> Handle<AudioSource> {
         self.get_asset(&self.audio, name, "audio").clone()
     }
 
+    /// Performs the font operation.
     pub fn font(&self, name: impl Into<String>) -> Handle<Font> {
         self.get_asset(&self.fonts, name, "font").clone()
     }
 
+    /// Performs the image operation.
     pub fn image(&self, name: impl Into<String>) -> Handle<Image> {
         let name = name.into();
         if let Some(image) = self.images.get(name.as_str()) {
@@ -92,6 +101,7 @@ impl WorldAssets {
 }
 
 impl FromWorld for WorldAssets {
+    /// Performs the from world operation.
     fn from_world(world: &mut World) -> Self {
         let asset_server = world.get_resource::<AssetServer>().unwrap().clone();
         let assets = &asset_server;
@@ -412,6 +422,7 @@ mod tests {
     use super::catalog_image_aliases;
 
     #[test]
+    /// Performs the catalog image aliases include build key and raw path operation.
     fn catalog_image_aliases_include_build_key_and_raw_path() {
         let aliases = catalog_image_aliases(
             "Mythic Alchemy Poisonousherbs",

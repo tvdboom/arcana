@@ -1,3 +1,5 @@
+//! Gameplay interface screens and reusable UI components.
+
 pub mod button;
 pub mod creation;
 pub mod defeat;

@@ -1,3 +1,5 @@
+//! Rest choices that exchange action points and gold for recovery benefits.
+
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::localization::Localization;
@@ -20,6 +22,7 @@ pub struct RestContentWrapper;
 #[derive(Component)]
 pub struct RestCardMarker(pub u32); // 0 = Rough Rest, 1 = Common Lodging, 2 = Grand Accommodation
 
+/// Sets up rest ui.
 pub fn setup_rest_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -48,6 +51,7 @@ pub fn setup_rest_ui(
     }
 }
 
+/// Updates rest ui.
 pub fn update_rest_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -79,6 +83,7 @@ pub fn update_rest_ui(
     }
 }
 
+/// Builds rest content.
 pub fn build_rest_content(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -108,6 +113,7 @@ pub fn build_rest_content(
     card_ents
 }
 
+/// Builds rest content inner.
 pub fn build_rest_content_inner(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -280,6 +286,7 @@ pub fn build_rest_content_inner(
     card_ents
 }
 
+/// Spawns rest card ui.
 pub fn spawn_rest_card_ui<M: Component>(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -461,6 +468,7 @@ pub fn spawn_rest_card_ui<M: Component>(
 }
 
 // System to handle click on rest cards
+/// Handles rest card clicks.
 pub fn handle_rest_card_clicks(
     event: On<Pointer<Click>>,
     mut commands: Commands,

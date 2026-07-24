@@ -1,3 +1,5 @@
+//! Localized strings and helpers for translating game concepts and interface text.
+
 use std::collections::HashMap;
 
 use crate::core::classes::{Ajah, Class};
@@ -20,6 +22,7 @@ pub struct Localization {
 }
 
 impl FromWorld for Localization {
+    /// Performs the from world operation.
     fn from_world(_world: &mut World) -> Self {
         let en = serde_json::from_str(include_str!("../../assets/language/en.json"))
             .expect("Failed to parse en.json");
@@ -36,6 +39,7 @@ impl FromWorld for Localization {
     }
 }
 
+/// Performs the map localization key operation.
 fn map_localization_key(key: &str) -> String {
     let lower = key.to_lowercase();
     if lower.contains('.') {
@@ -109,11 +113,13 @@ fn map_localization_key(key: &str) -> String {
 }
 
 #[allow(dead_code)]
+/// Returns custom localization.
 fn get_custom_localization(_key: &str, _language: Language) -> Option<String> {
     None
 }
 
 impl Localization {
+    /// Performs the get operation.
     pub fn get(&self, key: impl Into<String>, language: Language) -> String {
         let key = key.into();
         let mapped_key = map_localization_key(&key);
@@ -128,6 +134,7 @@ impl Localization {
         panic!("Missing localization key: '{}' (mapped from '{}')", mapped_key, key)
     }
 
+    /// Returns opt.
     pub fn get_opt(&self, key: &str, language: Language) -> Option<String> {
         let mapped_key = map_localization_key(key);
         let map = match language {
@@ -163,6 +170,7 @@ pub struct LocalizedPetDesc(pub PetChoice);
 #[derive(Component)]
 pub struct LocalizedMonsterKindDesc(pub MonsterKind);
 
+/// Formats race description.
 pub fn format_race_description(
     race: Race,
     language: Language,
@@ -188,6 +196,7 @@ pub fn format_race_description(
     }
 }
 
+/// Formats class description.
 pub fn format_class_description(
     class: Class,
     language: Language,
@@ -225,6 +234,7 @@ pub fn format_class_description(
     format!("{desc}\n\n{}", bonus_desc.to_lowercase())
 }
 
+/// Formats ajah description.
 pub fn format_ajah_description(
     ajah: Ajah,
     language: Language,
@@ -240,6 +250,7 @@ pub fn format_ajah_description(
     format!("{desc}\n\n{}", bonus_desc.to_lowercase())
 }
 
+/// Formats pet description.
 pub fn format_pet_description(
     pet: PetChoice,
     language: Language,
@@ -249,6 +260,7 @@ pub fn format_pet_description(
     localization.get(format!("pet.{}_desc", pet_key), language)
 }
 
+/// Formats monster kind description.
 pub fn format_monster_kind_description(
     kind: MonsterKind,
     _language: Language,

@@ -1,3 +1,5 @@
+//! Hunt selection, combat setup, and deferred experience, loot, and pet rewards.
+
 use crate::core::actions::gain_xp;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
@@ -39,6 +41,7 @@ pub struct PendingHuntPet {
     pub offer_available: bool,
 }
 
+/// Performs the hunt pet chance operation.
 pub fn hunt_pet_chance(player: &Player) -> f64 {
     let mut chance = 5 + player.charisma_mod();
     if matches!(player.class, Class::Druid) {
@@ -47,6 +50,7 @@ pub fn hunt_pet_chance(player: &Player) -> f64 {
     chance.clamp(0, 100) as f64 / 100.0
 }
 
+/// Applies pending hunt xp.
 pub fn apply_pending_hunt_xp(
     mut pending_hunt_xp: ResMut<PendingHuntXp>,
     mut player: ResMut<Player>,
@@ -63,6 +67,7 @@ pub fn apply_pending_hunt_xp(
     gain_xp(&mut player, amount, &mut level_up, &mut play_audio_msg, &mut next_game_state);
 }
 
+/// Applies pending hunt loot.
 pub fn apply_pending_hunt_loot(
     mut pending_hunt_loot: ResMut<PendingHuntLoot>,
     mut player: ResMut<Player>,
@@ -75,6 +80,7 @@ pub fn apply_pending_hunt_loot(
     }
 }
 
+/// Sets up hunt ui.
 pub fn setup_hunt_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -101,6 +107,7 @@ pub fn setup_hunt_ui(
     }
 }
 
+/// Updates hunt ui.
 pub fn update_hunt_ui(
     mut commands: Commands,
     assets: Res<WorldAssets>,
@@ -132,6 +139,7 @@ pub fn update_hunt_ui(
     }
 }
 
+/// Builds hunt content.
 fn build_hunt_content(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -159,6 +167,7 @@ fn build_hunt_content(
     card_ents
 }
 
+/// Builds hunt content inner.
 fn build_hunt_content_inner(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -272,6 +281,7 @@ fn build_hunt_content_inner(
     card_ents
 }
 
+/// Spawns hunt card.
 fn spawn_hunt_card<M: Component>(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
@@ -416,6 +426,7 @@ fn spawn_hunt_card<M: Component>(
     border_entity
 }
 
+/// Chooses hunting artifact.
 fn choose_hunting_artifact(tier: u32) -> Option<String> {
     let mut hunting_artifacts: Vec<_> = all_artifacts()
         .iter()
@@ -448,6 +459,7 @@ fn choose_hunting_artifact(tier: u32) -> Option<String> {
     hunting_artifacts[start..end].choose(&mut rng).map(|art| art.name.clone())
 }
 
+/// Handles hunt card clicks.
 pub fn handle_hunt_card_clicks(
     event: On<Pointer<Click>>,
     mut commands: Commands,

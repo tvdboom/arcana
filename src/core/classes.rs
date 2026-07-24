@@ -1,3 +1,5 @@
+//! Playable class and Ajah definitions together with their gameplay properties.
+
 use crate::core::catalog::equipment::Kind;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
@@ -21,6 +23,7 @@ pub enum Ajah {
 }
 
 impl Ajah {
+    /// Performs the kind operation.
     pub fn kind(&self) -> Kind {
         match self {
             Ajah::Black => Kind::Shadow,

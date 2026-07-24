@@ -1,3 +1,5 @@
+//! Music and sound-effect resources, messages, playback, and volume controls.
+
 use std::collections::HashMap;
 use std::time::Duration;
 
@@ -20,6 +22,7 @@ impl PlayingAudio {
     pub const TWEEN: AudioTween = AudioTween::new(Duration::from_secs(2), AudioEasing::OutPowi(2));
 }
 
+/// Performs the master volume db operation.
 fn master_volume_db(volume: f32) -> f32 {
     if volume <= 0.0 {
         -80.0
@@ -28,10 +31,12 @@ fn master_volume_db(volume: f32) -> f32 {
     }
 }
 
+/// Returns volume db.
 fn effective_volume_db(base: f32, settings: &Settings) -> f32 {
     base + master_volume_db(settings.volume)
 }
 
+/// Performs the base volume for key operation.
 fn base_volume_for_key(name: &str) -> f32 {
     if name == "music" {
         PlayingAudio::DEFAULT_MUSIC_VOLUME
@@ -48,6 +53,7 @@ pub struct PlayAudioMsg {
 }
 
 impl PlayAudioMsg {
+    /// Creates a new value with the supplied configuration.
     pub fn new(name: impl Into<String>) -> Self {
         Self {
             name: name.into(),
@@ -56,11 +62,13 @@ impl PlayAudioMsg {
         }
     }
 
+    /// Performs the volume operation.
     pub fn volume(mut self, volume: f32) -> Self {
         self.volume = volume;
         self
     }
 
+    /// Performs the background operation.
     pub fn background(mut self) -> Self {
         self.is_background = true;
         self
@@ -73,6 +81,7 @@ pub struct PauseAudioMsg {
 }
 
 impl PauseAudioMsg {
+    /// Creates a new value with the supplied configuration.
     pub fn new(name: impl Into<String>) -> Self {
         Self {
             name: name.into(),
@@ -86,6 +95,7 @@ pub struct StopAudioMsg {
 }
 
 impl StopAudioMsg {
+    /// Creates a new value with the supplied configuration.
     pub fn new(name: impl Into<String>) -> Self {
         Self {
             name: name.into(),
@@ -102,6 +112,7 @@ pub struct MusicBtnCmp;
 #[derive(Message, Deref)]
 pub struct ChangeAudioMsg(pub Option<AudioSettings>);
 
+/// Sets up audio.
 pub fn setup_audio(mut commands: Commands, assets: Local<WorldAssets>) {
     commands
         .spawn((
@@ -129,6 +140,7 @@ pub fn setup_audio(mut commands: Commands, assets: Local<WorldAssets>) {
         });
 }
 
+/// Updates audio.
 pub fn update_audio(
     mut change_audio_msg: MessageReader<ChangeAudioMsg>,
     mut btn_q: Query<&mut ImageNode, With<MusicBtnCmp>>,
@@ -185,6 +197,7 @@ pub fn update_audio(
     }
 }
 
+/// Toggles audio.
 pub fn toggle_audio(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut change_audio_msg: MessageWriter<ChangeAudioMsg>,
@@ -194,11 +207,13 @@ pub fn toggle_audio(
     }
 }
 
+/// Performs the play music operation.
 pub fn play_music(mut play_audio_msg: MessageWriter<PlayAudioMsg>) {
     play_audio_msg
         .write(PlayAudioMsg::new("music").volume(PlayingAudio::DEFAULT_MUSIC_VOLUME).background());
 }
 
+/// Performs the play audio operation.
 pub fn play_audio(
     mut play_audio_msg: MessageReader<PlayAudioMsg>,
     mut playing_audio: ResMut<PlayingAudio>,
@@ -264,6 +279,7 @@ pub fn play_audio(
     }
 }
 
+/// Applies live volume to playing audio.
 pub fn apply_live_volume_to_playing_audio(
     settings: Res<Settings>,
     playing_audio: Res<PlayingAudio>,
@@ -281,6 +297,7 @@ pub fn apply_live_volume_to_playing_audio(
     }
 }
 
+/// Performs the pause audio operation.
 pub fn pause_audio(
     mut pause_audio_msg: MessageReader<PauseAudioMsg>,
     playing_audio: Res<PlayingAudio>,
@@ -295,6 +312,7 @@ pub fn pause_audio(
     }
 }
 
+/// Stops audio.
 pub fn stop_audio(
     mut stop_audio_msg: MessageReader<StopAudioMsg>,
     mut playing_audio: ResMut<PlayingAudio>,
@@ -310,6 +328,7 @@ pub fn stop_audio(
     }
 }
 
+/// Performs the mute audio operation.
 pub fn mute_audio(
     mut mute_audio_msg: MessageReader<MuteAudioMsg>,
     playing_audio: Res<PlayingAudio>,

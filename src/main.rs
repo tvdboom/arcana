@@ -1,13 +1,19 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+//! Arcana's executable entry point and top-level Bevy application setup.
+//!
+//! This crate wires together the game plugins, runtime assets, window, and logging.
+
 mod asset_pak;
 mod core;
 mod utils;
 
 use bevy::asset::AssetMetaCheck;
+#[cfg(target_os = "windows")]
 use bevy::ecs::system::NonSendMarker;
 use bevy::prelude::*;
 use bevy::window::{WindowMode, WindowResolution};
+#[cfg(target_os = "windows")]
 use bevy::winit::WINIT_WINDOWS;
 use bevy_kira_audio::AudioPlugin;
 use std::fs::{File, OpenOptions};
@@ -23,6 +29,7 @@ pub const TITLE: &str = "Arcana";
 #[allow(dead_code)]
 static LOG_FILE: Mutex<Option<File>> = Mutex::new(None);
 
+/// Runs the main entry point.
 fn main() {
     #[cfg(not(debug_assertions))]
     init_panic_logger();
@@ -68,6 +75,7 @@ fn main() {
 }
 
 #[allow(dead_code)]
+/// Performs the init panic logger operation.
 fn init_panic_logger() {
     panic::set_hook(Box::new(|info| {
         let mut guard = LOG_FILE.lock().unwrap();
@@ -89,6 +97,7 @@ fn init_panic_logger() {
 }
 
 #[cfg(target_os = "windows")]
+/// Performs the set window icon operation.
 fn set_window_icon(_: NonSendMarker) {
     use winit::window::Icon;
 

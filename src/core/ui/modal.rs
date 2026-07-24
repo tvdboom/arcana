@@ -1,3 +1,5 @@
+//! Modal dialog components, builders, and confirmation interactions.
+
 use bevy::prelude::*;
 use bevy::window::{CursorIcon, SystemCursorIcon};
 
@@ -34,6 +36,7 @@ pub struct ActiveModal {
 #[derive(Component)]
 pub struct ModalOverlay;
 
+/// Spawns modal.
 pub fn spawn_modal(
     commands: &mut Commands,
     assets: &WorldAssets,
@@ -157,6 +160,7 @@ pub fn spawn_modal(
         });
 }
 
+/// Performs the confirm modal action operation.
 fn confirm_modal_action(
     commands: &mut Commands,
     active_modal: &mut ActiveModal,
@@ -218,6 +222,7 @@ fn confirm_modal_action(
     }
 }
 
+/// Performs the cancel modal action operation.
 fn cancel_modal_action(
     commands: &mut Commands,
     active_modal: &mut ActiveModal,
@@ -232,6 +237,7 @@ fn cancel_modal_action(
     }
 }
 
+/// Handles modal ok click.
 pub fn handle_modal_ok_click(
     _event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -251,6 +257,7 @@ pub fn handle_modal_ok_click(
     );
 }
 
+/// Handles modal cancel click.
 pub fn handle_modal_cancel_click(
     _event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -261,6 +268,7 @@ pub fn handle_modal_cancel_click(
     cancel_modal_action(&mut commands, &mut active_modal, &mut play_audio_msg, &overlay_q);
 }
 
+/// Handles modal overlay click.
 pub fn handle_modal_overlay_click(
     _event: On<Pointer<Click>>,
     mut commands: Commands,
@@ -271,6 +279,7 @@ pub fn handle_modal_overlay_click(
     cancel_modal_action(&mut commands, &mut active_modal, &mut play_audio_msg, &overlay_q);
 }
 
+/// Runs the modal input system.
 pub fn modal_input_system(
     mut commands: Commands,
     mut keyboard: ResMut<ButtonInput<KeyCode>>,
