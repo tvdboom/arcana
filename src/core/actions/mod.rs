@@ -102,7 +102,8 @@ pub fn trigger_level_up(
                     weight *= 3.0;
                 }
             }
-            if matches!(player.class, Class::Warrior | Class::Assassin) && ab.kind == Kind::Physical
+            if matches!(player.class, Class::Warrior | Class::Assassin | Class::Monk)
+                && ab.kind == Kind::Physical
             {
                 weight *= 2.0;
             }

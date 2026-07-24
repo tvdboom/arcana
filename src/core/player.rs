@@ -677,10 +677,19 @@ impl Player {
             })
             .filter(|s| *s > 0.0)
             .collect();
-        if speeds.is_empty() {
+        let weapon_speed = if speeds.is_empty() {
             1.0
         } else {
             speeds.iter().sum::<f32>() / speeds.len() as f32
+        };
+        weapon_speed * self.class_attack_speed_multiplier()
+    }
+
+    /// Basic-attack speed multiplier supplied by the character's class.
+    pub fn class_attack_speed_multiplier(&self) -> f32 {
+        match self.class {
+            Class::Monk => 1.1,
+            _ => 1.0,
         }
     }
 
@@ -697,7 +706,8 @@ impl Player {
                 }
             })
             .collect();
-        chances.iter().cloned().fold(0.0_f32, f32::max)
+        (chances.iter().cloned().fold(0.0_f32, f32::max) + self.race.crit_chance_bonus())
+            .clamp(0.0, 1.0)
     }
 
     /// Performs the attack operation.
@@ -745,6 +755,7 @@ impl Player {
     /// Performs the initiative operation.
     pub fn initiative(&self) -> u32 {
         let bonus = self.dexterity_mod()
+            + self.class_initiative_bonus()
             + self.training_bonus_for_skill("initiative") as i32
             + self.equipped_equipment().iter().map(|w| w.initiative()).sum::<i32>()
             + self
@@ -761,6 +772,14 @@ impl Player {
                 })
                 .sum::<i32>();
         Self::apply_combat_bonus(5, bonus)
+    }
+
+    /// Flat initiative bonus supplied by the Assassin class.
+    pub fn class_initiative_bonus(&self) -> i32 {
+        match self.class {
+            Class::Assassin => 2,
+            _ => 0,
+        }
     }
 
     /// (height_cm, weight_kg). Height and weight are derived deterministically from name and race.
@@ -796,10 +815,49 @@ impl Player {
             Race::Human => 21.0 + rand_val * 4.0,
             Race::Dwarf => 45.0 + rand_val * 10.0,
             Race::Orc => 31.0 + rand_val * 6.0,
+            Race::Halfling => 20.0 + rand_val * 5.0,
         };
 
         let weight = (height_m * height_m * bmi).round() as u32;
 
         (height, weight)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    /// Verifies that Halfling luck contributes critical-strike chance.
+    fn halfling_luck_increases_critical_chance() {
+        let player = Player {
+            race: Race::Halfling,
+            ..default()
+        };
+
+        assert!((player.crit_chance() - 0.03).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    /// Verifies that attack speed is the Monk's only derived-stat bonus.
+    fn monk_has_only_an_attack_speed_bonus() {
+        let player = Player {
+            class: Class::Monk,
+            wisdom: START_CHARACTERISTIC + 2,
+            ..default()
+        };
+        let baseline = Player {
+            class: Class::Warrior,
+            wisdom: START_CHARACTERISTIC + 2,
+            ..default()
+        };
+
+        assert_eq!(player.max_mana(), baseline.max_mana());
+        assert_eq!(player.mana_regen(), baseline.mana_regen());
+        assert_eq!(player.initiative(), baseline.initiative());
+        assert_eq!(player.defense(), baseline.defense());
+        assert!((player.attack_speed() - 1.1).abs() < f32::EPSILON);
+        assert!((baseline.attack_speed() - 1.0).abs() < f32::EPSILON);
     }
 }

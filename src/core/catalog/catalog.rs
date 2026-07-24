@@ -367,6 +367,61 @@ mod tests {
     }
 
     #[test]
+    /// Verifies that the added creatures keep their curated progression and combat roles.
+    fn added_creatures_have_curated_levels_and_combat_roles() {
+        let grave_warden = get_monster("Grave Warden").expect("Grave Warden is catalogued");
+        assert_eq!(grave_warden.level, 9);
+        assert!(grave_warden.is_from_image_dir("creatures"));
+        assert!(grave_warden.effects.iter().any(|effect| matches!(effect, Effect::Curse { .. })));
+
+        let void_reaver = get_monster("Void Reaver").expect("Void Reaver is catalogued");
+        assert_eq!(void_reaver.level, 16);
+        assert!(void_reaver.is_from_image_dir("creatures"));
+        assert!(void_reaver
+            .effects
+            .iter()
+            .any(|effect| matches!(effect, Effect::Vulnerability { .. })));
+        assert!(void_reaver.attack > void_reaver.defense);
+        assert!(void_reaver.initiative > grave_warden.initiative);
+    }
+
+    #[test]
+    /// Verifies that the expanded creature and pet roster keeps its curated progression.
+    fn expanded_monster_roster_has_curated_levels_and_families() {
+        let creatures = [
+            ("Bog Imp", 3),
+            ("Mire Hag", 5),
+            ("Bone Colossus", 8),
+            ("Storm Harpy", 9),
+            ("Crimson Minotaur", 11),
+            ("Frostbound Wraith", 14),
+            ("Moonfang Werewolf", 17),
+            ("Abyssal Behemoth", 20),
+        ];
+        let pets = [
+            ("Fox", 1),
+            ("Raven", 1),
+            ("Badger", 2),
+            ("Boar", 3),
+            ("Lynx", 3),
+            ("Shadow Panther", 5),
+            ("Frost Stag", 6),
+            ("Ember Drake", 8),
+        ];
+
+        for (name, level) in creatures {
+            let monster = get_monster(name).unwrap_or_else(|| panic!("{name} is catalogued"));
+            assert_eq!(monster.level, level);
+            assert!(monster.is_from_image_dir("creatures"));
+        }
+        for (name, level) in pets {
+            let monster = get_monster(name).unwrap_or_else(|| panic!("{name} is catalogued"));
+            assert_eq!(monster.level, level);
+            assert!(monster.is_from_image_dir("pets"));
+        }
+    }
+
+    #[test]
     /// Verifies generated ability targeting, durations, and school distribution.
     fn generated_abilities_respect_targeting_and_cooldown_rules() {
         let physical_share =

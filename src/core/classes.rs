@@ -11,6 +11,7 @@ pub enum Class {
     Mage(Ajah),
     #[default]
     Warrior,
+    Monk,
 }
 
 #[derive(EnumIter, Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]

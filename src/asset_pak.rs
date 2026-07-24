@@ -527,13 +527,26 @@ mod tests {
             Err(AssetReaderError::NotFound(_))
         ));
     }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    /// Verifies that stale shipping archives cannot shadow development assets.
+    fn native_debug_build_uses_asset_directory() {
+        assert!(!native_pack_enabled());
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+/// Returns whether a native build should load the shipping asset archive.
+fn native_pack_enabled() -> bool {
+    !cfg!(debug_assertions)
 }
 
 /// Registers the `assets.pak` archive as the default asset source.
 ///
 /// Must be called before `AssetPlugin` is added (i.e. before `DefaultPlugins`).
-/// On native, if no archive is present we leave Bevy's default `assets/` folder
-/// reader in place so iterative development keeps working without a pack step.
+/// Native debug builds always use Bevy's default `assets/` folder reader so a
+/// stale shipping archive cannot shadow freshly generated development assets.
 pub fn register(app: &mut App) {
     #[cfg(target_arch = "wasm32")]
     {
@@ -550,6 +563,11 @@ pub fn register(app: &mut App) {
 
     #[cfg(not(target_arch = "wasm32"))]
     {
+        if !native_pack_enabled() {
+            info!("Debug build; loading assets from the 'assets/' folder.");
+            return;
+        }
+
         let pak_path = std::path::PathBuf::from(PAK_PATH);
         if !pak_path.exists() {
             info!("'{PAK_PATH}' not found; loading assets from the 'assets/' folder.");

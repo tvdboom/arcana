@@ -54,8 +54,20 @@ fn map_localization_key(key: &str) -> String {
         return format!("attribute.{}", lower);
     }
     // Check races
-    if ["human", "human_desc", "elf", "elf_desc", "dwarf", "dwarf_desc", "orc", "orc_desc"]
-        .contains(&lower.as_str())
+    if [
+        "human",
+        "human_desc",
+        "elf",
+        "elf_desc",
+        "dwarf",
+        "dwarf_desc",
+        "orc",
+        "orc_desc",
+        "halfling",
+        "halfling_desc",
+        "halfling_luck",
+    ]
+    .contains(&lower.as_str())
     {
         return format!("race.{}", lower);
     }
@@ -69,6 +81,8 @@ fn map_localization_key(key: &str) -> String {
         "assassin_desc",
         "druid",
         "druid_desc",
+        "monk",
+        "monk_desc",
     ]
     .contains(&lower.as_str())
     {
@@ -188,6 +202,9 @@ pub fn format_race_description(
             modifier_strs.push(format!("  {val:+} {attr_name}"));
         }
     }
+    if race == Race::Halfling {
+        modifier_strs.push(format!("  +3% {}", localization.get("general.crit_chance", language)));
+    }
 
     if modifier_strs.is_empty() {
         desc
@@ -228,6 +245,11 @@ pub fn format_class_description(
             let melee_label = localization.get("general.melee", language);
             let hp_label = localization.get("general.health", language);
             format!(" +1 {physical_label} {ability_label}\n +1 {melee_label} {weapon_label}\n +1 {perk_label}\n +20 max {hp_label}")
+        },
+        Class::Monk => {
+            let finesse_label = localization.get("general.finesse", language);
+            let attack_speed_label = localization.get("general.attack_speed", language);
+            format!(" +1 {physical_label} {ability_label}\n +1 {finesse_label} {weapon_label}\n +1 {perk_label}\n +10% {attack_speed_label}")
         },
     };
 

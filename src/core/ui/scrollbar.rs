@@ -25,14 +25,31 @@ pub struct ScrollbarThumbX {
     pub container: Entity,
 }
 
+/// Returns whether a scrollable viewport currently owns mouse-wheel input.
+fn is_scroll_target(
+    interaction: &Interaction,
+    cursor: Option<&bevy::ui::RelativeCursorPosition>,
+) -> bool {
+    cursor.is_some_and(bevy::ui::RelativeCursorPosition::cursor_over)
+        || *interaction != Interaction::None
+}
+
 /// Runs the scroll system.
 pub fn scroll_system(
     mut mouse_wheel_events: MessageReader<bevy::input::mouse::MouseWheel>,
-    mut query: Query<(&mut ScrollPosition, &ComputedNode, &Interaction), With<ScrollableContainer>>,
+    mut query: Query<
+        (
+            &mut ScrollPosition,
+            &ComputedNode,
+            &Interaction,
+            Option<&bevy::ui::RelativeCursorPosition>,
+        ),
+        With<ScrollableContainer>,
+    >,
 ) {
     for event in mouse_wheel_events.read() {
-        for (mut scroll, computed, interaction) in &mut query {
-            if *interaction != Interaction::None {
+        for (mut scroll, computed, interaction, cursor) in &mut query {
+            if is_scroll_target(interaction, cursor) {
                 // Scroll offset speed factor
                 let max_scroll_y = (computed.content_size().y - computed.size().y).max(0.0);
                 let max_scroll_x = (computed.content_size().x - computed.size().x).max(0.0);
@@ -261,5 +278,21 @@ pub fn update_scrollbar_x_system(
                 thumb_node.left = Val::Px(thumb_left);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    /// Verifies child-card hover still routes wheel input to its scroll viewport.
+    fn cursor_position_enables_scrolling_without_parent_interaction() {
+        let cursor = bevy::ui::RelativeCursorPosition {
+            cursor_over: true,
+            normalized: Some(Vec2::ZERO),
+        };
+
+        assert!(is_scroll_target(&Interaction::None, Some(&cursor)));
     }
 }

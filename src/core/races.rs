@@ -11,6 +11,7 @@ pub enum Race {
     Elf,
     Dwarf,
     Orc,
+    Halfling,
 }
 
 impl Race {
@@ -21,6 +22,7 @@ impl Race {
             Race::Elf => (100, 1350),
             Race::Dwarf => (60, 400),
             Race::Orc => (16, 60),
+            Race::Halfling => (20, 160),
         }
     }
 
@@ -40,6 +42,7 @@ impl Race {
             Race::Elf => (self.age_range(), (170, 200), (50, 75)),
             Race::Human => (self.age_range(), (160, 190), (60, 95)),
             Race::Orc => (self.age_range(), (180, 220), (90, 145)),
+            Race::Halfling => (self.age_range(), (95, 125), (22, 45)),
         }
     }
 
@@ -51,37 +54,69 @@ impl Race {
                 Race::Elf => -2,
                 Race::Human => 0,
                 Race::Orc => 2,
+                Race::Halfling => -1,
             },
             Attribute::Dexterity => match self {
                 Race::Dwarf => -1,
                 Race::Elf => 2,
                 Race::Human => 1,
                 Race::Orc => 0,
+                Race::Halfling => 2,
             },
             Attribute::Constitution => match self {
                 Race::Dwarf => 2,
                 Race::Elf => -1,
                 Race::Human => 0,
                 Race::Orc => 2,
+                Race::Halfling => 0,
             },
             Attribute::Intelligence => match self {
                 Race::Dwarf => 0,
                 Race::Elf => 1,
                 Race::Human => 0,
                 Race::Orc => -1,
+                Race::Halfling => 0,
             },
             Attribute::Wisdom => match self {
                 Race::Dwarf => 1,
                 Race::Elf => 1,
                 Race::Human => 0,
                 Race::Orc => 0,
+                Race::Halfling => 0,
             },
             Attribute::Charisma => match self {
                 Race::Dwarf => -1,
                 Race::Elf => 1,
                 Race::Human => 1,
                 Race::Orc => -1,
+                Race::Halfling => 1,
             },
         }
+    }
+
+    /// Additional critical-strike chance granted by this race.
+    pub fn crit_chance_bonus(&self) -> f32 {
+        match self {
+            Race::Halfling => 0.03,
+            _ => 0.0,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    /// Verifies that Halfling attributes favor agility and charm.
+    fn halfling_has_agility_and_charisma_adjustments() {
+        let race = Race::Halfling;
+
+        assert_eq!(race.characteristic_mod(Attribute::Strength), -1);
+        assert_eq!(race.characteristic_mod(Attribute::Dexterity), 2);
+        assert_eq!(race.characteristic_mod(Attribute::Constitution), 0);
+        assert_eq!(race.characteristic_mod(Attribute::Intelligence), 0);
+        assert_eq!(race.characteristic_mod(Attribute::Wisdom), 0);
+        assert_eq!(race.characteristic_mod(Attribute::Charisma), 1);
     }
 }

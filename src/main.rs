@@ -29,6 +29,18 @@ pub const TITLE: &str = "Arcana";
 #[allow(dead_code)]
 static LOG_FILE: Mutex<Option<File>> = Mutex::new(None);
 
+#[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
+/// Returns the generated asset directory used by native development builds.
+fn asset_file_path() -> String {
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("assets").to_string_lossy().into_owned()
+}
+
+#[cfg(any(not(debug_assertions), target_arch = "wasm32"))]
+/// Returns the conventional asset directory used by packaged builds.
+fn asset_file_path() -> String {
+    "assets".to_string()
+}
+
 /// Runs the main entry point.
 fn main() {
     #[cfg(not(debug_assertions))]
@@ -61,6 +73,7 @@ fn main() {
             })
             // Disable loading of asset meta since that fails on itch.io
             .set(AssetPlugin {
+                file_path: asset_file_path(),
                 meta_check: AssetMetaCheck::Never,
                 ..default()
             }),
@@ -115,4 +128,16 @@ fn set_window_icon(_: NonSendMarker) {
             window.set_window_icon(Some(icon.clone()));
         }
     });
+}
+
+#[cfg(all(test, debug_assertions, not(target_arch = "wasm32")))]
+mod tests {
+    use super::asset_file_path;
+    use std::path::Path;
+
+    #[test]
+    /// Verifies that native debug builds resolve the generated repository assets.
+    fn native_debug_asset_directory_exists() {
+        assert!(Path::new(&asset_file_path()).is_dir());
+    }
 }

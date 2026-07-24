@@ -49,6 +49,41 @@ fn catalog_image_aliases(name: &str, image: &str) -> Vec<String> {
     aliases
 }
 
+/// Returns the runtime keys and paths for the Halfling and Monk portrait expansion.
+fn expansion_portrait_paths() -> Vec<(String, String)> {
+    let mut portraits =
+        vec![("halfling".to_string(), "images/races/halfling_man.webp".to_string())];
+
+    for sex in ["man", "woman"] {
+        portraits.push((format!("halfling_{sex}"), format!("images/races/halfling_{sex}.webp")));
+    }
+
+    for class in [
+        "warrior",
+        "assassin",
+        "druid",
+        "mage",
+        "mage_black",
+        "mage_red",
+        "mage_green",
+        "mage_white",
+    ] {
+        for sex in ["man", "woman"] {
+            let key = format!("{class}_halfling_{sex}");
+            portraits.push((key.clone(), format!("images/classes/{key}.webp")));
+        }
+    }
+
+    for race in ["human", "elf", "dwarf", "orc", "halfling"] {
+        for sex in ["man", "woman"] {
+            let key = format!("monk_{race}_{sex}");
+            portraits.push((key.clone(), format!("images/classes/{key}.webp")));
+        }
+    }
+
+    portraits
+}
+
 #[derive(Resource)]
 pub struct WorldAssets {
     pub audio: HashMap<&'static str, Handle<AudioSource>>,
@@ -147,7 +182,7 @@ impl FromWorld for WorldAssets {
             ("medium", assets.load("fonts/FiraMono-Medium.ttf")),
         ]);
 
-        let images: HashMap<&'static str, Handle<Image>> = HashMap::from([
+        let mut images: HashMap<&'static str, Handle<Image>> = HashMap::from([
             // Icons
             ("mute", assets.load("images/icons/mute.webp")),
             ("sound", assets.load("images/icons/sound.webp")),
@@ -339,6 +374,10 @@ impl FromWorld for WorldAssets {
             ("action_odyssey", load_linear(assets, "images/actions/odyssey.webp")),
         ]);
 
+        for (key, path) in expansion_portrait_paths() {
+            images.insert(leak_str(key), assets.load(path));
+        }
+
         let mut image_paths = HashMap::new();
 
         for ability in all_abilities() {
@@ -419,7 +458,9 @@ impl FromWorld for WorldAssets {
 
 #[cfg(test)]
 mod tests {
-    use super::catalog_image_aliases;
+    use super::{catalog_image_aliases, expansion_portrait_paths};
+    use std::collections::HashSet;
+    use std::path::Path;
 
     #[test]
     /// Performs the catalog image aliases include build key and raw path operation.
@@ -434,5 +475,17 @@ mod tests {
             .iter()
             .any(|alias| alias == "images/catalog/consumable/Alchemy_40_poisonousherbs.webp"));
         assert!(aliases.iter().any(|alias| alias == "Alchemy_40_poisonousherbs"));
+    }
+
+    #[test]
+    /// Verifies that every expanded playable portrait has a unique runtime key and built asset.
+    fn expansion_portraits_have_unique_keys_and_built_assets() {
+        let portraits = expansion_portrait_paths();
+        let unique_keys = portraits.iter().map(|(key, _)| key).collect::<HashSet<_>>();
+        assert_eq!(unique_keys.len(), portraits.len());
+
+        for (_, path) in portraits {
+            assert!(Path::new("assets").join(&path).is_file(), "missing portrait: {path}");
+        }
     }
 }

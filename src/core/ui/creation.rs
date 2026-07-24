@@ -19,6 +19,9 @@ use crate::core::player::{AgeStage, Attribute, Player, Sex};
 use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
+use crate::core::ui::scrollbar::{
+    on_scrollbar_thumb_drag_x, ScrollableContainer, ScrollbarThumbX, ScrollbarTrackX,
+};
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::input::keyboard::{Key, KeyboardInput};
@@ -1325,7 +1328,7 @@ impl SelectionItem for Class {
             .filter(|a| {
                 a.level == 1
                     && match *self {
-                        Class::Assassin | Class::Warrior => !a.kind.is_magic(),
+                        Class::Assassin | Class::Warrior | Class::Monk => !a.kind.is_magic(),
                         _ => a.kind.is_magic(),
                     }
             })
@@ -1347,6 +1350,7 @@ impl SelectionItem for Class {
                         Class::Druid => a.category == Category::Magical,
                         Class::Mage(_) => a.category == Category::Magical,
                         Class::Warrior => a.category == Category::Melee,
+                        Class::Monk => a.category == Category::Finesse,
                     }
             })
             .choose(&mut rng())
@@ -1372,6 +1376,7 @@ impl SelectionItem for Class {
             Class::Warrior => format!("warrior_{}_{}", race_key, sex_key),
             Class::Assassin => format!("assassin_{}_{}", race_key, sex_key),
             Class::Druid => format!("druid_{}_{}", race_key, sex_key),
+            Class::Monk => format!("monk_{}_{}", race_key, sex_key),
         }
     }
 }
@@ -1434,6 +1439,8 @@ pub enum PetChoice {
     Rat,
     Snake,
     Weasel,
+    Fox,
+    Raven,
 }
 
 impl SelectionItem for PetChoice {
@@ -1456,6 +1463,8 @@ impl SelectionItem for PetChoice {
             PetChoice::Owl => "Owl",
             PetChoice::Snake => "Snake",
             PetChoice::Weasel => "Weasel",
+            PetChoice::Fox => "Fox",
+            PetChoice::Raven => "Raven",
         };
         if let Some(pet_monster) = crate::core::catalog::catalog::get_monster(monster_name) {
             player.pet = Some(pet_monster);
@@ -1465,7 +1474,14 @@ impl SelectionItem for PetChoice {
 
     /// Performs the items operation.
     fn items() -> Vec<Self> {
-        vec![PetChoice::Rat, PetChoice::Owl, PetChoice::Snake, PetChoice::Weasel]
+        vec![
+            PetChoice::Rat,
+            PetChoice::Owl,
+            PetChoice::Snake,
+            PetChoice::Weasel,
+            PetChoice::Fox,
+            PetChoice::Raven,
+        ]
     }
 }
 
@@ -1536,143 +1552,223 @@ pub fn setup_selection_screen<T: SelectionItem>(
                     ));
                 });
 
-            // Container for the cards
+            // Scrollable card viewport. Four cards fit exactly; additional entries extend the
+            // content width and reveal the draggable horizontal scrollbar.
             parent
                 .spawn(Node {
                     width: percent(96.),
-                    height: percent(70.),
-                    flex_direction: FlexDirection::Row,
-                    flex_wrap: FlexWrap::NoWrap,
-                    justify_content: JustifyContent::Center,
+                    height: percent(72.),
+                    position_type: PositionType::Relative,
+                    flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     ..default()
                 })
-                .with_children(|parent| {
-                    for item in T::items() {
-                        let prefix = match title_key {
-                            "choose race" => "race",
-                            "choose class" => "class",
-                            "choose subclass" => "ajah",
-                            "choose pet" => "pet",
-                            _ => "",
-                        };
-                        let item_key = if prefix.is_empty() {
-                            item.to_lowername()
-                        } else {
-                            format!("{}.{}", prefix, item.to_lowername())
-                        };
-                        let item_name = localization.get(&item_key, lang);
-
-                        parent
-                            .spawn((
-                                Node {
-                                    width: percent(22.),
-                                    height: percent(98.),
-                                    position_type: PositionType::Relative,
-                                    margin: UiRect::horizontal(percent(1.5)),
-                                    ..default()
-                                },
-                                BackgroundColor(NORMAL_BUTTON_COLOR),
-                            ))
-                            .with_children(|parent| {
-                                parent
-                                    .spawn(Node {
-                                        width: percent(100.),
-                                        height: percent(100.),
-                                        flex_direction: FlexDirection::Column,
-                                        align_items: AlignItems::Center,
-                                        justify_content: JustifyContent::FlexStart,
-                                        padding: UiRect::all(percent(1.5)),
-                                        ..default()
-                                    })
-                                    .with_children(|parent| {
-                                        parent.spawn((
-                                            Node {
-                                                width: percent(100.),
-                                                height: percent(50.),
-                                                ..default()
-                                            },
-                                            ImageNode::new(
-                                                assets.image(item.get_image_key(player)),
-                                            )
-                                            .with_mode(NodeImageMode::Stretch),
-                                        ));
-
-                                        parent
-                                            .spawn((
-                                                Node {
-                                                    width: percent(100.),
-                                                    height: percent(50.),
-                                                    flex_direction: FlexDirection::Column,
-                                                    align_items: AlignItems::Center,
-                                                    justify_content: JustifyContent::FlexStart,
-                                                    ..default()
-                                                },
-                                                ImageNode::new(assets.image("stone"))
-                                                    .with_mode(NodeImageMode::Stretch),
-                                            ))
-                                            .with_children(|parent| {
-                                                parent.spawn((
-                                                    Node {
-                                                        margin: UiRect::vertical(percent(4.5)),
-                                                        ..default()
-                                                    },
-                                                    add_text(
-                                                        item_name,
-                                                        "bold",
-                                                        SUBTITLE_TEXT_SIZE,
-                                                        &assets,
-                                                    ),
-                                                    TextColor(BUTTON_TEXT_COLOR),
-                                                    LocalizedText(item_key.clone()),
-                                                ));
-
-                                                parent.spawn((
-                                                    Node {
-                                                        width: percent(85.),
-                                                        margin: UiRect::horizontal(percent(7.5)),
-                                                        ..default()
-                                                    },
-                                                    add_text(
-                                                        item.get_description(lang, &localization),
-                                                        "medium",
-                                                        1.8,
-                                                        &assets,
-                                                    ),
-                                                    TextColor(Color::WHITE),
-                                                    item.create_desc_component(),
-                                                ));
-                                            });
-                                    });
+                .with_children(|wrapper| {
+                    let container_entity = wrapper
+                        .spawn((
+                            Node {
+                                width: percent(100.),
+                                height: percent(96.),
+                                flex_direction: FlexDirection::Row,
+                                flex_wrap: FlexWrap::NoWrap,
+                                justify_content: JustifyContent::FlexStart,
+                                align_items: AlignItems::Center,
+                                overflow: Overflow::scroll_x(),
+                                ..default()
+                            },
+                            ScrollableContainer,
+                            ScrollPosition::default(),
+                            Interaction::default(),
+                            Pickable::default(),
+                            bevy::ui::RelativeCursorPosition::default(),
+                        ))
+                        .with_children(|parent| {
+                            for item in T::items() {
+                                let prefix = match title_key {
+                                    "choose race" => "race",
+                                    "choose class" => "class",
+                                    "choose subclass" => "ajah",
+                                    "choose pet" => "pet",
+                                    _ => "",
+                                };
+                                let item_key = if prefix.is_empty() {
+                                    item.to_lowername()
+                                } else {
+                                    format!("{}.{}", prefix, item.to_lowername())
+                                };
+                                let item_name = localization.get(&item_key, lang);
 
                                 parent
                                     .spawn((
                                         Node {
-                                            position_type: PositionType::Absolute,
-                                            width: percent(110.),
-                                            height: percent(110.),
-                                            left: percent(-5.),
-                                            top: percent(-5.),
+                                            width: percent(22.),
+                                            height: percent(94.),
+                                            position_type: PositionType::Relative,
+                                            margin: UiRect::horizontal(percent(1.5)),
+                                            flex_shrink: 0.,
                                             ..default()
                                         },
-                                        ImageNode::new(assets.image("border"))
-                                            .with_mode(NodeImageMode::Stretch),
+                                        BackgroundColor(NORMAL_BUTTON_COLOR),
                                     ))
-                                    .observe(reimage::<Over>(assets.image("border_hover")))
-                                    .observe(reimage::<Out>(assets.image("border")))
-                                    .observe(cursor::<Over>(SystemCursorIcon::Pointer))
-                                    .observe(cursor::<Out>(SystemCursorIcon::Default))
-                                    .observe(move |
-                                        _: On<Pointer<Click>>,
-                                        mut player: ResMut<Player>,
-                                        mut play_audio_msg: MessageWriter<PlayAudioMsg>,
-                                        mut next_game_state: ResMut<NextState<GameState>>| {
-                                        play_audio_msg.write(PlayAudioMsg::new("button"));
+                                    .with_children(|parent| {
+                                        parent
+                                            .spawn(Node {
+                                                width: percent(100.),
+                                                height: percent(100.),
+                                                flex_direction: FlexDirection::Column,
+                                                align_items: AlignItems::Center,
+                                                justify_content: JustifyContent::FlexStart,
+                                                padding: UiRect::all(percent(1.5)),
+                                                ..default()
+                                            })
+                                            .with_children(|parent| {
+                                                parent.spawn((
+                                                    Node {
+                                                        width: percent(100.),
+                                                        height: percent(50.),
+                                                        ..default()
+                                                    },
+                                                    ImageNode::new(
+                                                        assets.image(item.get_image_key(player)),
+                                                    )
+                                                    .with_mode(NodeImageMode::Stretch),
+                                                ));
 
-                                        item.on_select(&mut player, &mut next_game_state);
+                                                parent
+                                                    .spawn((
+                                                        Node {
+                                                            width: percent(100.),
+                                                            height: percent(50.),
+                                                            flex_direction: FlexDirection::Column,
+                                                            align_items: AlignItems::Center,
+                                                            justify_content:
+                                                                JustifyContent::FlexStart,
+                                                            ..default()
+                                                        },
+                                                        ImageNode::new(assets.image("stone"))
+                                                            .with_mode(NodeImageMode::Stretch),
+                                                    ))
+                                                    .with_children(|parent| {
+                                                        parent.spawn((
+                                                            Node {
+                                                                margin: UiRect::vertical(percent(
+                                                                    4.5,
+                                                                )),
+                                                                ..default()
+                                                            },
+                                                            add_text(
+                                                                item_name,
+                                                                "bold",
+                                                                SUBTITLE_TEXT_SIZE,
+                                                                &assets,
+                                                            ),
+                                                            TextColor(BUTTON_TEXT_COLOR),
+                                                            LocalizedText(item_key.clone()),
+                                                        ));
+
+                                                        parent.spawn((
+                                                            Node {
+                                                                width: percent(85.),
+                                                                margin: UiRect::horizontal(
+                                                                    percent(7.5),
+                                                                ),
+                                                                ..default()
+                                                            },
+                                                            add_text(
+                                                                item.get_description(
+                                                                    lang,
+                                                                    &localization,
+                                                                ),
+                                                                "medium",
+                                                                1.8,
+                                                                &assets,
+                                                            ),
+                                                            TextColor(Color::WHITE),
+                                                            item.create_desc_component(),
+                                                        ));
+                                                    });
+                                            });
+
+                                        parent
+                                            .spawn((
+                                                Node {
+                                                    position_type: PositionType::Absolute,
+                                                    width: percent(110.),
+                                                    height: percent(110.),
+                                                    left: percent(-5.),
+                                                    top: percent(-5.),
+                                                    ..default()
+                                                },
+                                                ImageNode::new(assets.image("border"))
+                                                    .with_mode(NodeImageMode::Stretch),
+                                            ))
+                                            .observe(reimage::<Over>(assets.image("border_hover")))
+                                            .observe(reimage::<Out>(assets.image("border")))
+                                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                            .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                            .observe(
+                                                move |_: On<Pointer<Click>>,
+                                                      mut player: ResMut<Player>,
+                                                      mut play_audio_msg: MessageWriter<
+                                                    PlayAudioMsg,
+                                                >,
+                                                      mut next_game_state: ResMut<
+                                                    NextState<GameState>,
+                                                >| {
+                                                    play_audio_msg
+                                                        .write(PlayAudioMsg::new("button"));
+
+                                                    item.on_select(
+                                                        &mut player,
+                                                        &mut next_game_state,
+                                                    );
+                                                },
+                                            );
                                     });
-                            });
-                    }
+                            }
+                        })
+                        .id();
+
+                    wrapper
+                        .spawn((
+                            Node {
+                                position_type: PositionType::Absolute,
+                                height: Val::Px(8.),
+                                left: percent(1.5),
+                                right: percent(1.5),
+                                bottom: Val::Px(0.),
+                                border_radius: BorderRadius::all(Val::Px(4.)),
+                                ..default()
+                            },
+                            BackgroundColor(Color::srgba_u8(0, 0, 0, 190)),
+                            Visibility::Hidden,
+                            ScrollbarTrackX {
+                                container: container_entity,
+                            },
+                        ))
+                        .with_children(|track| {
+                            track
+                                .spawn((
+                                    Node {
+                                        position_type: PositionType::Absolute,
+                                        height: percent(100.),
+                                        width: Val::Px(64.),
+                                        left: Val::Px(0.),
+                                        border_radius: BorderRadius::all(Val::Px(4.)),
+                                        ..default()
+                                    },
+                                    BackgroundColor(Color::srgba_u8(230, 205, 120, 240)),
+                                    Button,
+                                    Interaction::default(),
+                                    Pickable::default(),
+                                    ScrollbarThumbX {
+                                        container: container_entity,
+                                    },
+                                ))
+                                .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                .observe(on_scrollbar_thumb_drag_x);
+                        });
                 });
 
             // Back button container centered horizontally at the bottom of the screen

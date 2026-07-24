@@ -4,6 +4,7 @@ use std::env::current_dir;
 use std::fs::File;
 use std::io;
 use std::io::{Read, Write};
+use std::mem::size_of;
 
 use crate::core::actions::shop::ShopInventory;
 use crate::core::audio::ChangeAudioMsg;
@@ -16,6 +17,9 @@ use bincode::config::standard;
 use bincode::serde::{decode_from_slice, encode_to_vec};
 use rfd::FileDialog;
 use serde::{Deserialize, Serialize};
+
+const SAVE_MAGIC: &[u8; 8] = b"ARCANASV";
+const SAVE_VERSION: u16 = 1;
 
 #[derive(Serialize, Deserialize)]
 pub struct SaveAll {
@@ -30,11 +34,46 @@ pub struct LoadCharacterMsg;
 #[derive(Message)]
 pub struct SaveCharacterMsg(pub bool);
 
+/// Encodes the current versioned save envelope.
+fn encode_save_bytes(data: &SaveAll) -> io::Result<Vec<u8>> {
+    let payload = encode_to_vec(data, standard()).map_err(io::Error::other)?;
+    let mut buffer = Vec::with_capacity(SAVE_MAGIC.len() + size_of::<u16>() + payload.len());
+    buffer.extend_from_slice(SAVE_MAGIC);
+    buffer.extend_from_slice(&SAVE_VERSION.to_le_bytes());
+    buffer.extend_from_slice(&payload);
+    Ok(buffer)
+}
+
+/// Decodes current saves and migrates the legacy unversioned representation.
+fn decode_save_bytes(buffer: &[u8]) -> io::Result<SaveAll> {
+    if let Some(versioned) = buffer.strip_prefix(SAVE_MAGIC) {
+        let version_bytes = versioned.get(..size_of::<u16>()).ok_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidData, "save version header is truncated")
+        })?;
+        let version = u16::from_le_bytes([version_bytes[0], version_bytes[1]]);
+        let payload = &versioned[size_of::<u16>()..];
+
+        return match version {
+            SAVE_VERSION => decode_from_slice(payload, standard())
+                .map(|(data, _)| data)
+                .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error)),
+            _ => Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("unsupported save version {version}"),
+            )),
+        };
+    }
+
+    decode_from_slice(buffer, standard())
+        .map(|(data, _)| data)
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))
+}
+
 /// Serializes a complete save to the requested native file.
 fn save_to_bin(file_path: &str, data: &SaveAll) -> io::Result<()> {
     let mut file = File::create(file_path)?;
 
-    let buffer = encode_to_vec(data, standard()).map_err(io::Error::other)?;
+    let buffer = encode_save_bytes(data)?;
     file.write_all(&buffer)?;
 
     Ok(())
@@ -47,9 +86,7 @@ fn load_from_bin(file_path: &str) -> io::Result<SaveAll> {
     let mut buffer = vec![];
     file.read_to_end(&mut buffer)?;
 
-    let (data, _) = decode_from_slice(&buffer, standard())
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
-    Ok(data)
+    decode_save_bytes(&buffer)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -124,5 +161,49 @@ pub fn save_game(
 pub fn run_autosave(settings: Res<Settings>, mut save_game_msg: MessageWriter<SaveCharacterMsg>) {
     if settings.autosave {
         save_game_msg.write(SaveCharacterMsg(true));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::classes::Class;
+    use crate::core::races::Race;
+
+    /// Creates a compact save fixture for codec compatibility tests.
+    fn fixture() -> SaveAll {
+        let player = Player {
+            name: "Legacy Hero".to_string(),
+            class: Class::Warrior,
+            race: Race::Orc,
+            ..default()
+        };
+
+        SaveAll {
+            settings: Settings::default(),
+            player,
+            shop_inventory: ShopInventory::default(),
+        }
+    }
+
+    #[test]
+    /// Verifies that legacy unversioned saves still decode after enum expansion.
+    fn legacy_unversioned_save_still_loads() {
+        let legacy = encode_to_vec(fixture(), standard()).expect("legacy fixture encodes");
+        let decoded = decode_save_bytes(&legacy).expect("legacy fixture migrates");
+
+        assert_eq!(decoded.player.name, "Legacy Hero");
+        assert_eq!(decoded.player.class, Class::Warrior);
+        assert_eq!(decoded.player.race, Race::Orc);
+    }
+
+    #[test]
+    /// Verifies that current saves carry and decode the explicit version envelope.
+    fn current_save_uses_versioned_envelope() {
+        let bytes = encode_save_bytes(&fixture()).expect("current fixture encodes");
+        assert!(bytes.starts_with(SAVE_MAGIC));
+
+        let decoded = decode_save_bytes(&bytes).expect("current fixture decodes");
+        assert_eq!(decoded.player.name, "Legacy Hero");
     }
 }

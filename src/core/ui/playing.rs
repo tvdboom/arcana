@@ -335,10 +335,12 @@ fn combat_breakdown(
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
                 weapon.initiative()
             }));
-            if matches!(player.class, Class::Assassin) {
+            let class_bonus = player.class_initiative_bonus();
+            if class_bonus > 0 {
+                let class_key = format!("class.{}", player.class.to_lowername());
                 lines.push(format!(
                     "[assassin] {}",
-                    signed_line(localization.get("class.assassin", lang), 2)
+                    signed_line(localization.get(class_key, lang), class_bonus)
                 ));
             }
             lines.extend(perk_bonus_lines(player, localization, lang, stat));
@@ -4018,5 +4020,30 @@ pub fn active_hotkey_slot_tooltip_system(
                 *last_shown = None;
             }
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    /// Verifies that the Assassin combat row uses a registered rich-text icon.
+    fn assassin_combat_breakdown_icon_resolves() {
+        let localization = Localization::from_world(&mut World::new());
+        let assassin = Player {
+            class: Class::Assassin,
+            ..default()
+        };
+
+        let initiative =
+            combat_breakdown(PlayingStat::Initiative, &assassin, &localization, Language::English);
+
+        assert!(initiative.iter().any(|line| line.starts_with("[assassin]")));
+        assert!(
+            Path::new("assets/images/icons/assassin.webp").is_file(),
+            "missing rich-text icon assassin"
+        );
     }
 }

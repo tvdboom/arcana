@@ -1207,16 +1207,29 @@ fn monster_effects(name: &str, level: u32) -> Vec<String> {
     let mut effs = Vec::new();
     let name_lower = name.to_lowercase();
 
-    if ["hell hound", "cerberus", "red", "fire troll"].iter().any(|x| name_lower.contains(x)) {
+    if ["hell hound", "cerberus", "red", "fire troll", "ember drake"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         effs.push(format!("Burn(damage: {}, duration: 3.0)", 1 + level.div_ceil(2)));
-    } else if ["snake", "spider", "basilisk", "yuan-ti", "formicid", "wyrm", "green"]
+    } else if ["snake", "spider", "basilisk", "yuan-ti", "formicid", "bog imp", "wyrm", "green"]
         .iter()
         .any(|x| name_lower.contains(x))
     {
         effs.push(format!("Poison(damage: {}, duration: 4.0)", 1 + level.div_ceil(3)));
-    } else if ["medusa", "lich", "skeleton", "drow", "aboleth", "mind flayer", "black"]
-        .iter()
-        .any(|x| name_lower.contains(x))
+    } else if [
+        "medusa",
+        "lich",
+        "skeleton",
+        "drow",
+        "aboleth",
+        "mind flayer",
+        "grave warden",
+        "mire hag",
+        "black",
+    ]
+    .iter()
+    .any(|x| name_lower.contains(x))
     {
         effs.push(format!("Curse(damage: {}, timer: 3)", 3 + level));
     } else if ["ice troll", "blue", "silver", "winter", "frost"]
@@ -1237,21 +1250,33 @@ fn monster_effects(name: &str, level: u32) -> Vec<String> {
         "owlbear",
         "worg",
         "balor",
+        "bone colossus",
+        "crimson minotaur",
+        "moonfang werewolf",
+        "abyssal behemoth",
+        "badger",
+        "boar",
     ]
     .iter()
     .any(|x| name_lower.contains(x))
     {
         effs.push(format!("Bleed(damage_pct: {:.1})", 8.0 + level as f32 * 2.0));
-    } else if ["bat", "owl", "vulture"].iter().any(|x| name_lower.contains(x)) {
+    } else if ["bat", "owl", "vulture", "storm harpy", "raven"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         effs.push(format!("Blind(miss_pct: {:.1}, duration: 2.0)", 8.0 + level as f32));
-    } else if ["weasel", "rat", "hyena", "puma"].iter().any(|x| name_lower.contains(x)) {
+    } else if ["weasel", "rat", "hyena", "puma", "fox"].iter().any(|x| name_lower.contains(x)) {
         effs.push(format!("Cleave(damage_pct: {:.1}, duration: 0.0)", 8.0 + level as f32));
     } else if ["unicorn", "pegasus", "empyrean", "gold", "angel"]
         .iter()
         .any(|x| name_lower.contains(x))
     {
         effs.push(format!("Regen(heal: {}, duration: 3.0)", 1 + level.div_ceil(4)));
-    } else if ["griffin", "manticore", "tiger"].iter().any(|x| name_lower.contains(x)) {
+    } else if ["griffin", "manticore", "tiger", "void reaver", "lynx", "shadow panther"]
+        .iter()
+        .any(|x| name_lower.contains(x))
+    {
         effs.push(format!(
             "Vulnerability(damage_pct: {:.1}, duration: 2.5)",
             4.0 + level as f32 * 0.6
@@ -1910,21 +1935,60 @@ fn monster_stats(name: &str, level: u32, kind: &str) -> (u32, u32, u32, u32, f32
 
     if contains_any(
         &lower,
-        &["troll", "ogre", "stone golem", "tarrasque", "bear", "crocodile", "hydra"],
+        &[
+            "troll",
+            "ogre",
+            "stone golem",
+            "tarrasque",
+            "bear",
+            "crocodile",
+            "hydra",
+            "grave warden",
+            "bone colossus",
+            "crimson minotaur",
+            "abyssal behemoth",
+            "badger",
+            "boar",
+        ],
     ) {
         health *= 1.18;
         defense *= 1.12;
         initiative *= 0.82;
         speed *= 0.9;
+    } else if lower.contains("void reaver") {
+        health *= 0.92;
+        attack *= 1.18;
+        defense *= 0.94;
+        initiative *= 1.18;
+        speed *= 1.10;
     } else if contains_any(
         &lower,
-        &["bat", "weasel", "puma", "tiger", "spider", "snake", "drow", "vulture"],
+        &[
+            "bat",
+            "weasel",
+            "puma",
+            "tiger",
+            "spider",
+            "snake",
+            "drow",
+            "vulture",
+            "bog imp",
+            "storm harpy",
+            "moonfang werewolf",
+            "fox",
+            "raven",
+            "lynx",
+            "shadow panther",
+        ],
     ) {
         health *= 0.90;
         defense *= 0.90;
         initiative *= 1.22;
         speed *= 1.12;
-    } else if contains_any(&lower, &["lich", "mind flayer", "rakshasa", "aboleth", "medusa"]) {
+    } else if contains_any(
+        &lower,
+        &["lich", "mind flayer", "rakshasa", "aboleth", "medusa", "mire hag", "frostbound wraith"],
+    ) {
         health *= 0.94;
         attack *= 1.12;
         initiative *= 1.08;
@@ -1946,17 +2010,26 @@ fn monster_creature_level(name: &str) -> u32 {
         "goblin" | "skeleton" => 1,
         "formicid" | "kuo-toa" | "lizardfolk" | "gnoll" => 2,
         "drow" => 3,
+        "bog imp" => 3,
         "ogre" => 4,
+        "mire hag" => 5,
         "basilisk" | "fire troll" | "ice troll" | "mountain troll" => 6,
         "medusa" | "owlbear" | "griffin" | "manticore" => 7,
+        "bone colossus" => 8,
+        "grave warden" => 9,
+        "storm harpy" => 9,
         "worg" => 4,
         "hydra" | "yuan-ti" => 10,
+        "crimson minotaur" => 11,
         "mind flayer" | "rakshasa" => 12,
         "aboleth" => 13,
+        "frostbound wraith" => 14,
         "empyrean" => 15,
+        "void reaver" => 16,
+        "moonfang werewolf" => 17,
         "lich" => 18,
         "balor" => 19,
-        "tarrasque" => 20,
+        "tarrasque" | "abyssal behemoth" => 20,
         _ => 5,
     }
 }
@@ -1964,11 +2037,13 @@ fn monster_creature_level(name: &str) -> u32 {
 /// Returns the curated progression level for a tameable pet.
 fn monster_pet_level(name: &str) -> u32 {
     match name.to_lowercase().as_str() {
-        "rat" | "bat" | "snake" | "spider" | "weasel" | "owl" | "vulture" | "lizard" => 1,
-        "hyena" | "puma" | "eagle" | "crocodile" => 2,
-        "wolf" | "worg" | "bear" | "tiger" => 3,
-        "hell hound" | "griffin" | "owlbear" | "cerberus" => 5,
-        "pegasus" | "unicorn" | "manticore" => 8,
+        "rat" | "bat" | "snake" | "spider" | "weasel" | "owl" | "vulture" | "lizard" | "fox"
+        | "raven" => 1,
+        "hyena" | "puma" | "eagle" | "crocodile" | "badger" => 2,
+        "wolf" | "worg" | "bear" | "tiger" | "boar" | "lynx" => 3,
+        "hell hound" | "griffin" | "owlbear" | "cerberus" | "shadow panther" => 5,
+        "frost stag" => 6,
+        "pegasus" | "unicorn" | "manticore" | "ember drake" => 8,
         _ => 4,
     }
 }
