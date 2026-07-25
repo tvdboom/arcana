@@ -504,9 +504,7 @@ pub fn build_craft_content_inner(
                                             border_radius: BorderRadius::all(Val::Px(3.)),
                                             ..default()
                                         },
-                                        ImageNode::new(
-                                            assets.image(format!("build_{}", art_eq.name())),
-                                        ),
+                                        ImageNode::new(assets.image(art_eq.image())),
                                     ));
 
                                     parent
@@ -800,10 +798,7 @@ pub fn build_craft_content_inner(
                                                     border_radius: BorderRadius::all(Val::Px(3.)),
                                                     ..default()
                                                 },
-                                                ImageNode::new(
-                                                    assets
-                                                        .image(format!("build_{}", art_eq.name())),
-                                                ),
+                                                ImageNode::new(assets.image(art_eq.image())),
                                             ));
 
                                             parent
@@ -1261,7 +1256,7 @@ pub fn build_craft_content_inner(
                                         border_radius: BorderRadius::all(Val::Px(3.)),
                                         ..default()
                                     },
-                                    ImageNode::new(assets.image(format!("build_{}", item.name()))),
+                                    ImageNode::new(assets.image(item.image())),
                                 ));
 
                                 parent

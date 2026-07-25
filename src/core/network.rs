@@ -21,7 +21,6 @@ use crate::core::actions::gain_xp;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::equipment::Equipment;
-use crate::core::classes::Class;
 use crate::core::combat::mechanics::{
     consumable_card_order, enemy_cast_ability, enemy_use_consumable, step_combat, try_cast_ability,
     try_use_consumable, CombatCard, CombatFx, CombatSpeed, CombatState, CombatStatus, Fighter,
@@ -32,7 +31,6 @@ use crate::core::monsters::{ActiveMonster, Monster, MonsterKind};
 use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::states::GameState;
-use crate::core::ui::creation::SelectionItem;
 use crate::core::ui::level_up::LevelUpPending;
 use crate::core::ui::toast::{spawn_toast, ToastContainer};
 
@@ -758,10 +756,7 @@ pub fn host_check_start(
 
 /// Build the character image key for `player` (mirrors the playing screen).
 pub fn portrait_key(player: &Player) -> String {
-    match player.class {
-        Class::Mage(ajah) => ajah.get_image_key(player),
-        _ => player.class.get_image_key(player),
-    }
+    player.portrait_key()
 }
 
 /// Represent the opposing player as a `Monster` so the standard combat engine

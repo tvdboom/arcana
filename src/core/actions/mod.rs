@@ -94,7 +94,7 @@ pub fn trigger_level_up(
         .map(|ab| {
             let mut weight = 1.0;
             let is_magical = ab.kind.is_magic();
-            if matches!(player.class, Class::Druid | Class::Mage(_)) && is_magical {
+            if player.class.is_magical() && is_magical {
                 weight *= 2.0;
             }
             if let Class::Mage(ajah) = player.class {
@@ -102,9 +102,7 @@ pub fn trigger_level_up(
                     weight *= 3.0;
                 }
             }
-            if matches!(player.class, Class::Warrior | Class::Assassin | Class::Monk)
-                && ab.kind == Kind::Physical
-            {
+            if !player.class.is_magical() && ab.kind == Kind::Physical {
                 weight *= 2.0;
             }
             (*ab, weight)

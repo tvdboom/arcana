@@ -8,19 +8,22 @@ use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::{all_abilities, all_perks, all_weapons};
 use crate::core::catalog::equipment::Kind;
-use crate::core::catalog::weapons::Category;
-use crate::core::classes::{Ajah, Class};
+use crate::core::classes::{
+    Ajah, AssassinPath, BardStyle, Class, ClassSpecialization, MonkSchool, PetChoice, WarriorPath,
+};
 use crate::core::constants::*;
+use crate::core::deities::{Deity, EthicalAlignment, MoralAlignment};
 use crate::core::localization::*;
 use crate::core::menu::buttons::*;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, reimage};
 use crate::core::monsters::MonsterKind;
 use crate::core::player::{AgeStage, Attribute, Player, Sex};
-use crate::core::races::Race;
+use crate::core::races::{ElfHeritage, Race};
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
 use crate::core::ui::scrollbar::{
-    on_scrollbar_thumb_drag_x, ScrollableContainer, ScrollbarThumbX, ScrollbarTrackX,
+    on_scrollbar_thumb_drag_x, HorizontalWheelScroll, ScrollableContainer, ScrollbarThumbX,
+    ScrollbarTrackX,
 };
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
@@ -67,6 +70,21 @@ pub struct AgeValueNode;
 
 #[derive(Component, Clone, Copy)]
 pub struct AgeStageButton(pub u32);
+
+#[derive(Component, Clone, Copy)]
+struct DeityCardImage(MoralAlignment);
+
+#[derive(Component, Clone, Copy)]
+struct DeityCardName(MoralAlignment);
+
+#[derive(Component, Clone, Copy)]
+struct DeityCardAlignment(MoralAlignment);
+
+#[derive(Component, Clone, Copy)]
+struct DeityCardDescription(MoralAlignment);
+
+#[derive(Component, Clone, Copy)]
+struct DeityChoiceButton(Deity);
 
 /// Performs the creation attribute value operation.
 fn creation_attribute_value(player: &Player, attr: Attribute) -> u32 {
@@ -117,10 +135,11 @@ fn spawn_sex_button(
     parent
         .spawn((
             Node {
-                width: Val::Px(120.),
+                min_width: Val::Px(120.),
                 height: Val::Px(38.),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                padding: UiRect::horizontal(Val::Px(12.)),
                 border: UiRect::all(Val::Px(2.)),
                 border_radius: BorderRadius::all(Val::Px(4.)),
                 ..default()
@@ -449,10 +468,11 @@ fn spawn_continue_button(
     parent
         .spawn((
             Node {
-                width: Val::Px(200.),
+                min_width: Val::Px(200.),
                 height: Val::Px(45.),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                padding: UiRect::horizontal(Val::Px(16.)),
                 margin: UiRect::all(Val::Px(8.)),
                 border: UiRect::all(Val::Px(2.)),
                 border_radius: BorderRadius::all(Val::Px(4.)),
@@ -1297,12 +1317,41 @@ impl SelectionItem for Race {
         player.race = *self;
         let (min_age, max_age) = player.race.age_stage_range(stage);
         player.age = rng().random_range(min_age..=max_age);
-        next_game_state.set(GameState::ChooseClass);
+        if *self == Race::Elf {
+            next_game_state.set(GameState::ChooseElfHeritage);
+        } else {
+            next_game_state.set(GameState::ChooseClass);
+        }
     }
 
     /// Returns image key.
     fn get_image_key(&self, player: &Player) -> String {
         format!("{}_{}", self.to_lowername(), player.sex.to_lowername())
+    }
+}
+
+impl SelectionItem for ElfHeritage {
+    type DescComponent = LocalizedElfHeritageDesc;
+
+    /// Returns this heritage's localized gameplay description.
+    fn get_description(&self, lang: Language, localization: &Localization) -> String {
+        format_elf_heritage_description(*self, lang, localization)
+    }
+
+    /// Creates the component used to refresh this description after a language change.
+    fn create_desc_component(&self) -> Self::DescComponent {
+        LocalizedElfHeritageDesc(*self)
+    }
+
+    /// Stores the selected elven heritage and advances to class selection.
+    fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
+        player.elf_heritage = *self;
+        next_game_state.set(GameState::ChooseClass);
+    }
+
+    /// Returns the portrait dedicated to this heritage and selected sex.
+    fn get_image_key(&self, player: &Player) -> String {
+        format!("elf_{}_{}", self.to_lowername().replace(' ', "_"), player.sex.to_lowername())
     }
 }
 
@@ -1322,16 +1371,12 @@ impl SelectionItem for Class {
     /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = *self;
+        player.specialization = self.default_specialization();
+        player.pet = None;
 
         let ability = all_abilities()
             .iter()
-            .filter(|a| {
-                a.level == 1
-                    && match *self {
-                        Class::Assassin | Class::Warrior | Class::Monk => !a.kind.is_magic(),
-                        _ => a.kind.is_magic(),
-                    }
-            })
+            .filter(|ability| ability.level == 1 && self.accepts_starting_ability(ability.kind))
             .choose(&mut rng())
             .unwrap();
 
@@ -1343,16 +1388,7 @@ impl SelectionItem for Class {
 
         let weapon = all_weapons()
             .iter()
-            .filter(|a| {
-                a.level < 3
-                    && match *self {
-                        Class::Assassin => a.category == Category::Finesse,
-                        Class::Druid => a.category == Category::Magical,
-                        Class::Mage(_) => a.category == Category::Magical,
-                        Class::Warrior => a.category == Category::Melee,
-                        Class::Monk => a.category == Category::Finesse,
-                    }
-            })
+            .filter(|weapon| weapon.level < 3 && self.accepts_starting_weapon(weapon.category))
             .choose(&mut rng())
             .unwrap();
 
@@ -1360,11 +1396,7 @@ impl SelectionItem for Class {
         player.missing_health = 0;
         player.missing_mana = 0;
 
-        if matches!(*self, Class::Mage(_) | Class::Druid) {
-            next_game_state.set(GameState::ChooseSubClass);
-        } else {
-            next_game_state.set(GameState::Playing);
-        }
+        next_game_state.set(GameState::ChooseSubClass);
     }
 
     /// Returns image key.
@@ -1377,6 +1409,7 @@ impl SelectionItem for Class {
             Class::Assassin => format!("assassin_{}_{}", race_key, sex_key),
             Class::Druid => format!("druid_{}_{}", race_key, sex_key),
             Class::Monk => format!("monk_{}_{}", race_key, sex_key),
+            Class::Bard => format!("bard_{}_{}", race_key, sex_key),
         }
     }
 }
@@ -1397,6 +1430,8 @@ impl SelectionItem for Ajah {
     /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
         player.class = Class::Mage(*self);
+        player.specialization = ClassSpecialization::Mage(*self);
+        player.abilities.truncate(1);
 
         let ability = all_abilities()
             .iter()
@@ -1414,7 +1449,7 @@ impl SelectionItem for Ajah {
             .unwrap();
 
         player.abilities.push(ability.name.clone());
-        next_game_state.set(GameState::Playing);
+        next_game_state.set(GameState::ChooseDeity);
     }
 
     /// Returns image key.
@@ -1433,14 +1468,28 @@ impl SelectionItem for Ajah {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, strum_macros::EnumIter)]
-pub enum PetChoice {
-    Owl,
-    Rat,
-    Snake,
-    Weasel,
-    Fox,
-    Raven,
+/// Returns the portrait used by a non-mage specialization card.
+fn specialization_portrait_key(
+    class_key: &str,
+    specialization_key: Option<&str>,
+    player: &Player,
+) -> String {
+    let race = player.race.to_lowername();
+    let sex = player.sex.to_lowername();
+    match specialization_key {
+        Some(specialization) => format!("{class_key}_{specialization}_{race}_{sex}"),
+        None => format!("{class_key}_{race}_{sex}"),
+    }
+}
+
+/// Stores a specialization and advances to deity selection.
+fn choose_specialization(
+    player: &mut Player,
+    specialization: ClassSpecialization,
+    next_game_state: &mut NextState<GameState>,
+) {
+    player.specialization = specialization;
+    next_game_state.set(GameState::ChooseDeity);
 }
 
 impl SelectionItem for PetChoice {
@@ -1458,18 +1507,10 @@ impl SelectionItem for PetChoice {
 
     /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
-        let monster_name = match self {
-            PetChoice::Rat => "Rat",
-            PetChoice::Owl => "Owl",
-            PetChoice::Snake => "Snake",
-            PetChoice::Weasel => "Weasel",
-            PetChoice::Fox => "Fox",
-            PetChoice::Raven => "Raven",
-        };
-        if let Some(pet_monster) = crate::core::catalog::catalog::get_monster(monster_name) {
+        if let Some(pet_monster) = crate::core::catalog::catalog::get_monster(self.monster_name()) {
             player.pet = Some(pet_monster);
         }
-        next_game_state.set(GameState::Playing);
+        choose_specialization(player, ClassSpecialization::Druid(*self), next_game_state);
     }
 
     /// Performs the items operation.
@@ -1482,6 +1523,108 @@ impl SelectionItem for PetChoice {
             PetChoice::Fox,
             PetChoice::Raven,
         ]
+    }
+}
+
+macro_rules! impl_specialization_selection {
+    ($ty:ty, $variant:ident, $class_key:literal, $specific_portrait:literal) => {
+        impl SelectionItem for $ty {
+            type DescComponent = LocalizedSpecializationDesc;
+
+            /// Returns this specialization's localized gameplay description.
+            fn get_description(&self, lang: Language, localization: &Localization) -> String {
+                format_specialization_description(
+                    ClassSpecialization::$variant(*self),
+                    lang,
+                    localization,
+                )
+            }
+
+            /// Creates the component used to refresh this description after a language change.
+            fn create_desc_component(&self) -> Self::DescComponent {
+                LocalizedSpecializationDesc(ClassSpecialization::$variant(*self))
+            }
+
+            /// Stores this specialization and advances to deity selection.
+            fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
+                choose_specialization(
+                    player,
+                    ClassSpecialization::$variant(*self),
+                    next_game_state,
+                );
+            }
+
+            /// Returns the selected race and sex portrait for this class.
+            fn get_image_key(&self, player: &Player) -> String {
+                let specialization = self.to_lowername().replace(' ', "_");
+                specialization_portrait_key(
+                    $class_key,
+                    $specific_portrait.then_some(specialization.as_str()),
+                    player,
+                )
+            }
+        }
+    };
+}
+
+impl_specialization_selection!(AssassinPath, Assassin, "assassin", true);
+impl_specialization_selection!(BardStyle, Bard, "bard", true);
+
+impl SelectionItem for WarriorPath {
+    type DescComponent = LocalizedSpecializationDesc;
+
+    /// Returns this warrior path's localized gameplay description.
+    fn get_description(&self, lang: Language, localization: &Localization) -> String {
+        format_specialization_description(ClassSpecialization::Warrior(*self), lang, localization)
+    }
+
+    /// Creates the component used to refresh this description after a language change.
+    fn create_desc_component(&self) -> Self::DescComponent {
+        LocalizedSpecializationDesc(ClassSpecialization::Warrior(*self))
+    }
+
+    /// Stores this warrior path and advances to deity selection.
+    fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
+        choose_specialization(player, ClassSpecialization::Warrior(*self), next_game_state);
+    }
+
+    /// Returns a dedicated requested calling portrait or the base warrior portrait.
+    fn get_image_key(&self, player: &Player) -> String {
+        let specialization = match self {
+            WarriorPath::Templar => Some("templar"),
+            WarriorPath::Berserker => Some("berserker"),
+            WarriorPath::Paladin | WarriorPath::Warden => None,
+        };
+        specialization_portrait_key("warrior", specialization, player)
+    }
+}
+
+impl SelectionItem for MonkSchool {
+    type DescComponent = LocalizedSpecializationDesc;
+
+    /// Returns this monk school's localized gameplay description.
+    fn get_description(&self, lang: Language, localization: &Localization) -> String {
+        format_specialization_description(ClassSpecialization::Monk(*self), lang, localization)
+    }
+
+    /// Creates the component used to refresh this description after a language change.
+    fn create_desc_component(&self) -> Self::DescComponent {
+        LocalizedSpecializationDesc(ClassSpecialization::Monk(*self))
+    }
+
+    /// Stores this monk school and advances to deity selection.
+    fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
+        choose_specialization(player, ClassSpecialization::Monk(*self), next_game_state);
+    }
+
+    /// Returns the school, race, and sex-specific monk portrait.
+    fn get_image_key(&self, player: &Player) -> String {
+        format!(
+            "monk_{}_{}_{}",
+            self.to_lowername().replace(' ', "_"),
+            player.race.to_lowername(),
+            player.sex.to_lowername()
+        )
     }
 }
 
@@ -1518,6 +1661,8 @@ pub fn setup_selection_screen<T: SelectionItem>(
     player: &Player,
 ) {
     let lang = settings.language;
+    let items = T::items();
+    let center_cards = items.len() <= 3;
     let (mut root_node, pickable) = add_root_node(true);
     root_node.justify_content = JustifyContent::FlexStart;
 
@@ -1571,24 +1716,34 @@ pub fn setup_selection_screen<T: SelectionItem>(
                                 height: percent(96.),
                                 flex_direction: FlexDirection::Row,
                                 flex_wrap: FlexWrap::NoWrap,
-                                justify_content: JustifyContent::FlexStart,
+                                justify_content: if center_cards {
+                                    JustifyContent::Center
+                                } else {
+                                    JustifyContent::FlexStart
+                                },
                                 align_items: AlignItems::Center,
                                 overflow: Overflow::scroll_x(),
                                 ..default()
                             },
                             ScrollableContainer,
+                            HorizontalWheelScroll,
                             ScrollPosition::default(),
                             Interaction::default(),
                             Pickable::default(),
                             bevy::ui::RelativeCursorPosition::default(),
                         ))
                         .with_children(|parent| {
-                            for item in T::items() {
+                            for item in items {
                                 let prefix = match title_key {
                                     "choose race" => "race",
                                     "choose class" => "class",
+                                    "choose elf heritage" => "heritage",
                                     "choose subclass" => "ajah",
                                     "choose pet" => "pet",
+                                    "choose assassin path"
+                                    | "choose warrior path"
+                                    | "choose monk school"
+                                    | "choose bard style" => "specialization",
                                     _ => "",
                                 };
                                 let item_key = if prefix.is_empty() {
@@ -1807,6 +1962,25 @@ pub fn setup_race_selection(
     );
 }
 
+/// Sets up the heritage selection shown only after choosing Elf.
+pub fn setup_elf_heritage_selection(
+    commands: Commands,
+    settings: Res<Settings>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    player: Res<Player>,
+) {
+    setup_selection_screen::<ElfHeritage>(
+        commands,
+        settings,
+        assets,
+        localization,
+        "choose elf heritage",
+        true,
+        &player,
+    );
+}
+
 /// Sets up class selection.
 pub fn setup_class_selection(
     commands: Commands,
@@ -1835,6 +2009,17 @@ pub fn setup_subclass_selection(
     mut player: ResMut<Player>,
 ) {
     match player.class {
+        Class::Assassin => {
+            setup_selection_screen::<AssassinPath>(
+                commands,
+                settings,
+                assets,
+                localization,
+                "choose assassin path",
+                true,
+                &player,
+            );
+        },
         Class::Mage(_) => {
             setup_selection_screen::<Ajah>(
                 commands,
@@ -1862,6 +2047,499 @@ pub fn setup_subclass_selection(
                 &player,
             );
         },
-        _ => {},
+        Class::Warrior => {
+            setup_selection_screen::<WarriorPath>(
+                commands,
+                settings,
+                assets,
+                localization,
+                "choose warrior path",
+                true,
+                &player,
+            );
+        },
+        Class::Monk => {
+            setup_selection_screen::<MonkSchool>(
+                commands,
+                settings,
+                assets,
+                localization,
+                "choose monk school",
+                true,
+                &player,
+            );
+        },
+        Class::Bard => {
+            setup_selection_screen::<BardStyle>(
+                commands,
+                settings,
+                assets,
+                localization,
+                "choose bard style",
+                true,
+                &player,
+            );
+        },
+    }
+}
+
+/// Sets up the three-card deity alignment selector.
+pub fn setup_deity_selection(
+    mut commands: Commands,
+    settings: Res<Settings>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+) {
+    let lang = settings.language;
+    let (mut root_node, pickable) = add_root_node(true);
+    root_node.justify_content = JustifyContent::FlexStart;
+
+    commands
+        .spawn((
+            root_node,
+            pickable,
+            ImageNode::new(assets.image("bg2")).with_mode(NodeImageMode::Stretch),
+            MenuCmp,
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Node {
+                    margin: UiRect::vertical(percent(2.5)),
+                    ..default()
+                },
+                add_text(localization.get("choose deity", lang), "bold", TITLE_TEXT_SIZE, &assets),
+                TextColor(BUTTON_TEXT_COLOR),
+                LocalizedText("choose deity".to_string()),
+            ));
+
+            parent
+                .spawn(Node {
+                    width: percent(90.),
+                    height: percent(76.),
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Stretch,
+                    column_gap: percent(2.),
+                    ..default()
+                })
+                .with_children(|cards| {
+                    for moral in MoralAlignment::iter() {
+                        let shown_deity = Deity::from_alignment(moral, EthicalAlignment::Neutral);
+                        spawn_deity_alignment_card(
+                            cards,
+                            &assets,
+                            &localization,
+                            lang,
+                            moral,
+                            shown_deity,
+                        );
+                    }
+                });
+
+            parent
+                .spawn(Node {
+                    position_type: PositionType::Absolute,
+                    width: percent(100.),
+                    bottom: percent(2.),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    column_gap: Val::Px(24.),
+                    ..default()
+                })
+                .with_children(|buttons| {
+                    spawn_menu_button(buttons, MenuBtn::Back, &assets, &localization, lang);
+                });
+        });
+}
+
+/// Spawns one moral-alignment card with three ethical-alignment choices.
+fn spawn_deity_alignment_card(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    localization: &Localization,
+    lang: Language,
+    moral: MoralAlignment,
+    shown_deity: Deity,
+) {
+    parent
+        .spawn((
+            Node {
+                width: percent(26.),
+                height: percent(94.),
+                position_type: PositionType::Relative,
+                margin: UiRect::horizontal(percent(1.5)),
+                flex_shrink: 0.,
+                ..default()
+            },
+            BackgroundColor(NORMAL_BUTTON_COLOR),
+        ))
+        .with_children(|card| {
+            card.spawn(Node {
+                width: percent(100.),
+                height: percent(100.),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::FlexStart,
+                padding: UiRect::all(percent(1.5)),
+                ..default()
+            })
+            .with_children(|content| {
+                content
+                    .spawn((
+                        Node {
+                            width: percent(100.),
+                            height: percent(48.),
+                            position_type: PositionType::Relative,
+                            ..default()
+                        },
+                        ImageNode::new(assets.image(shown_deity.image_key()))
+                            .with_mode(NodeImageMode::Stretch),
+                        DeityCardImage(moral),
+                    ))
+                    .with_children(|portrait| {
+                        portrait.spawn((
+                            Node {
+                                position_type: PositionType::Absolute,
+                                width: percent(100.),
+                                left: percent(0.),
+                                top: percent(3.),
+                                justify_content: JustifyContent::Center,
+                                padding: UiRect::horizontal(percent(4.)),
+                                ..default()
+                            },
+                            add_text(
+                                localization
+                                    .get(format!("deity.{}", shown_deity.to_lowername()), lang),
+                                "bold",
+                                2.1,
+                                assets,
+                            ),
+                            TextColor(BUTTON_TEXT_COLOR),
+                            TextLayout::justify(Justify::Center),
+                            TextShadow::default(),
+                            Pickable::IGNORE,
+                            DeityCardName(moral),
+                        ));
+                    });
+
+                content
+                    .spawn((
+                        Node {
+                            width: percent(100.),
+                            height: percent(52.),
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::FlexStart,
+                            ..default()
+                        },
+                        ImageNode::new(assets.image("stone")).with_mode(NodeImageMode::Stretch),
+                    ))
+                    .with_children(|details| {
+                        details.spawn((
+                            Node {
+                                margin: UiRect::vertical(percent(4.5)),
+                                ..default()
+                            },
+                            add_text(
+                                format_deity_alignment(shown_deity, lang, localization),
+                                "bold",
+                                SUBTITLE_TEXT_SIZE,
+                                assets,
+                            ),
+                            TextColor(BUTTON_TEXT_COLOR),
+                            DeityCardAlignment(moral),
+                        ));
+
+                        details.spawn((
+                            Node {
+                                width: percent(85.),
+                                margin: UiRect::horizontal(percent(7.5)),
+                                ..default()
+                            },
+                            add_text(
+                                format_deity_description(shown_deity, lang, localization),
+                                "medium",
+                                1.8,
+                                assets,
+                            ),
+                            TextColor(Color::WHITE),
+                            DeityCardDescription(moral),
+                        ));
+
+                        details
+                            .spawn(Node {
+                                width: percent(82.),
+                                flex_direction: FlexDirection::Column,
+                                row_gap: Val::Px(4.),
+                                margin: UiRect::top(Val::Auto),
+                                padding: UiRect::bottom(percent(4.)),
+                                ..default()
+                            })
+                            .with_children(|choices| {
+                                for ethical in [
+                                    EthicalAlignment::Lawful,
+                                    EthicalAlignment::Neutral,
+                                    EthicalAlignment::Chaotic,
+                                ] {
+                                    spawn_deity_choice(
+                                        choices,
+                                        assets,
+                                        localization,
+                                        lang,
+                                        moral,
+                                        ethical,
+                                    );
+                                }
+                            });
+                    });
+            });
+
+            card.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    width: percent(110.),
+                    height: percent(110.),
+                    left: percent(-5.),
+                    top: percent(-5.),
+                    ..default()
+                },
+                ImageNode::new(assets.image("border")).with_mode(NodeImageMode::Stretch),
+                Pickable {
+                    should_block_lower: false,
+                    is_hoverable: true,
+                },
+            ))
+            .observe(reimage::<Over>(assets.image("border_hover")))
+            .observe(reimage::<Out>(assets.image("border")));
+        });
+}
+
+/// Spawns one ethical-alignment preview and selection button within a deity card.
+fn spawn_deity_choice(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    localization: &Localization,
+    lang: Language,
+    moral: MoralAlignment,
+    ethical: EthicalAlignment,
+) {
+    let deity = Deity::from_alignment(moral, ethical);
+    debug_assert_eq!(deity.ethical_alignment(), ethical);
+    let label_key = deity_choice_label_key(moral, ethical);
+
+    parent
+        .spawn((
+            Node {
+                width: percent(100.),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                padding: UiRect::axes(Val::Px(10.), Val::Px(5.)),
+                border: UiRect::all(Val::Px(1.)),
+                border_radius: BorderRadius::all(Val::Px(4.)),
+                ..default()
+            },
+            BackgroundColor(NORMAL_BUTTON_COLOR),
+            BorderColor::all(BUTTON_BORDER_COLOR),
+            Button,
+            Interaction::default(),
+            Pickable::default(),
+            DeityChoiceButton(deity),
+        ))
+        .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+        .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+        .observe(recolor::<Press>(PRESSED_BUTTON_COLOR))
+        .observe(recolor::<Release>(HOVERED_BUTTON_COLOR))
+        .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+        .observe(cursor::<Out>(SystemCursorIcon::Default))
+        .observe(on_deity_choice_over)
+        .observe(on_deity_choice_out)
+        .observe(on_deity_choice_click)
+        .with_children(|choice| {
+            choice.spawn((
+                add_text(localization.get(label_key, lang), "bold", 1.8, assets),
+                TextColor(BUTTON_TEXT_COLOR),
+                LocalizedText(label_key.to_string()),
+            ));
+        });
+}
+
+/// Returns the ethical-choice label, using True only for the grid's center.
+fn deity_choice_label_key(moral: MoralAlignment, ethical: EthicalAlignment) -> &'static str {
+    if moral == MoralAlignment::Neutral && ethical == EthicalAlignment::Neutral {
+        return "alignment.true";
+    }
+
+    match ethical {
+        EthicalAlignment::Lawful => "alignment.lawful",
+        EthicalAlignment::Neutral => "alignment.neutral",
+        EthicalAlignment::Chaotic => "alignment.chaotic",
+    }
+}
+
+/// Previews a deity when its alignment button is hovered.
+fn on_deity_choice_over(
+    event: On<Pointer<Over>>,
+    choice_q: Query<&DeityChoiceButton>,
+    assets: Res<WorldAssets>,
+    settings: Res<Settings>,
+    localization: Res<Localization>,
+    mut image_q: Query<(&DeityCardImage, &mut ImageNode)>,
+    mut name_q: Query<(&DeityCardName, &mut Text)>,
+    mut alignment_q: Query<
+        (&DeityCardAlignment, &mut Text),
+        (Without<DeityCardName>, Without<DeityCardDescription>),
+    >,
+    mut desc_q: Query<
+        (&DeityCardDescription, &mut Text),
+        (Without<DeityCardName>, Without<DeityCardAlignment>),
+    >,
+) {
+    let Ok(choice) = choice_q.get(event.entity) else {
+        return;
+    };
+    refresh_deity_card(
+        choice.0,
+        &assets,
+        &settings,
+        &localization,
+        &mut image_q,
+        &mut name_q,
+        &mut alignment_q,
+        &mut desc_q,
+    );
+}
+
+/// Restores a card's neutral preview when its alignment button is no longer hovered.
+fn on_deity_choice_out(
+    event: On<Pointer<Out>>,
+    choice_q: Query<&DeityChoiceButton>,
+    assets: Res<WorldAssets>,
+    settings: Res<Settings>,
+    localization: Res<Localization>,
+    mut image_q: Query<(&DeityCardImage, &mut ImageNode)>,
+    mut name_q: Query<(&DeityCardName, &mut Text)>,
+    mut alignment_q: Query<
+        (&DeityCardAlignment, &mut Text),
+        (Without<DeityCardName>, Without<DeityCardDescription>),
+    >,
+    mut desc_q: Query<
+        (&DeityCardDescription, &mut Text),
+        (Without<DeityCardName>, Without<DeityCardAlignment>),
+    >,
+) {
+    let Ok(choice) = choice_q.get(event.entity) else {
+        return;
+    };
+    let neutral_deity =
+        Deity::from_alignment(choice.0.moral_alignment(), EthicalAlignment::Neutral);
+    refresh_deity_card(
+        neutral_deity,
+        &assets,
+        &settings,
+        &localization,
+        &mut image_q,
+        &mut name_q,
+        &mut alignment_q,
+        &mut desc_q,
+    );
+}
+
+/// Refreshes one deity card with the supplied deity's image and localized text.
+fn refresh_deity_card(
+    deity: Deity,
+    assets: &WorldAssets,
+    settings: &Settings,
+    localization: &Localization,
+    image_q: &mut Query<(&DeityCardImage, &mut ImageNode)>,
+    name_q: &mut Query<(&DeityCardName, &mut Text)>,
+    alignment_q: &mut Query<
+        (&DeityCardAlignment, &mut Text),
+        (Without<DeityCardName>, Without<DeityCardDescription>),
+    >,
+    desc_q: &mut Query<
+        (&DeityCardDescription, &mut Text),
+        (Without<DeityCardName>, Without<DeityCardAlignment>),
+    >,
+) {
+    let moral = deity.moral_alignment();
+    for (marker, mut image) in image_q.iter_mut() {
+        if marker.0 == moral {
+            image.image = assets.image(deity.image_key());
+        }
+    }
+    for (marker, mut text) in name_q.iter_mut() {
+        if marker.0 == moral {
+            text.0 = localization.get(format!("deity.{}", deity.to_lowername()), settings.language);
+        }
+    }
+    for (marker, mut text) in alignment_q.iter_mut() {
+        if marker.0 == moral {
+            text.0 = format_deity_alignment(deity, settings.language, localization);
+        }
+    }
+    for (marker, mut text) in desc_q.iter_mut() {
+        if marker.0 == moral {
+            text.0 = format_deity_description(deity, settings.language, localization);
+        }
+    }
+}
+
+/// Commits the clicked deity and completes character creation.
+fn on_deity_choice_click(
+    event: On<Pointer<Click>>,
+    choice_q: Query<&DeityChoiceButton>,
+    mut player: ResMut<Player>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    let Ok(choice) = choice_q.get(event.entity) else {
+        return;
+    };
+
+    player.deity = choice.0;
+    play_audio_msg.write(PlayAudioMsg::new("button"));
+    next_game_state.set(GameState::Playing);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Verifies requested warrior callings select race- and sex-specific portraits.
+    #[test]
+    fn warrior_calling_portraits_include_calling_race_and_sex() {
+        let mut player = Player {
+            race: Race::Elf,
+            sex: Sex::Woman,
+            ..default()
+        };
+
+        assert_eq!(WarriorPath::Templar.get_image_key(&player), "warrior_templar_elf_woman");
+        assert_eq!(WarriorPath::Berserker.get_image_key(&player), "warrior_berserker_elf_woman");
+
+        player.race = Race::Dragonborn;
+        player.sex = Sex::Man;
+        assert_eq!(WarriorPath::Templar.get_image_key(&player), "warrior_templar_dragonborn_man");
+        assert_eq!(
+            WarriorPath::Berserker.get_image_key(&player),
+            "warrior_berserker_dragonborn_man"
+        );
+    }
+
+    /// Verifies only the center of the alignment grid uses the True label.
+    #[test]
+    fn only_center_deity_choice_is_true() {
+        assert_eq!(
+            deity_choice_label_key(MoralAlignment::Neutral, EthicalAlignment::Neutral),
+            "alignment.true"
+        );
+        assert_eq!(
+            deity_choice_label_key(MoralAlignment::Good, EthicalAlignment::Neutral),
+            "alignment.neutral"
+        );
+        assert_eq!(
+            deity_choice_label_key(MoralAlignment::Evil, EthicalAlignment::Neutral),
+            "alignment.neutral"
+        );
     }
 }

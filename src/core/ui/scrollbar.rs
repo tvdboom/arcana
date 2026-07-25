@@ -5,6 +5,10 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct ScrollableContainer;
 
+/// Marks a carousel that maps the vertical mouse wheel to horizontal scrolling.
+#[derive(Component)]
+pub struct HorizontalWheelScroll;
+
 #[derive(Component)]
 pub struct ScrollbarTrack {
     pub container: Entity,
@@ -43,18 +47,19 @@ pub fn scroll_system(
             &ComputedNode,
             &Interaction,
             Option<&bevy::ui::RelativeCursorPosition>,
+            Option<&HorizontalWheelScroll>,
         ),
         With<ScrollableContainer>,
     >,
 ) {
     for event in mouse_wheel_events.read() {
-        for (mut scroll, computed, interaction, cursor) in &mut query {
-            if is_scroll_target(interaction, cursor) {
+        for (mut scroll, computed, interaction, cursor, horizontal_wheel) in &mut query {
+            if horizontal_wheel.is_some() || is_scroll_target(interaction, cursor) {
                 // Scroll offset speed factor
                 let max_scroll_y = (computed.content_size().y - computed.size().y).max(0.0);
                 let max_scroll_x = (computed.content_size().x - computed.size().x).max(0.0);
 
-                if max_scroll_x > 0.0 && max_scroll_y <= 0.0 {
+                if horizontal_wheel.is_some() || (max_scroll_x > 0.0 && max_scroll_y <= 0.0) {
                     scroll.x -= event.y * 200.0;
                     scroll.x = scroll.x.clamp(0.0, max_scroll_x);
                 } else {

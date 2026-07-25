@@ -76,6 +76,16 @@ impl Equipment {
         }
     }
 
+    /// Returns the asset path for this equipment item's icon.
+    pub fn image(&self) -> &str {
+        match self {
+            Equipment::Wearable(a) => &a.image,
+            Equipment::Weapon(w) => &w.image,
+            Equipment::Consumable(c) => &c.image,
+            Equipment::Artifact(r) => &r.image,
+        }
+    }
+
     /// Performs the level operation.
     pub fn level(&self) -> u32 {
         match self {

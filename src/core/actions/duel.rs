@@ -632,7 +632,11 @@ mod native {
                                         },
                                         BackgroundColor(NORMAL_BUTTON_COLOR),
                                         BorderColor::all(Color::srgb_u8(120, 200, 120)),
-                                        ImageNode::new(assets.image(format!("build_{key}")))
+                                        ImageNode::new(
+                                            get_equipment(key)
+                                                .map(|equipment| assets.image(equipment.image()))
+                                                .unwrap_or_else(|| assets.image("stone")),
+                                        )
                                             .with_mode(NodeImageMode::Stretch),
                                         Button,
                                         Interaction::default(),
@@ -721,7 +725,11 @@ mod native {
                                         },
                                         BackgroundColor(NORMAL_BUTTON_COLOR),
                                         BorderColor::all(BUTTON_BORDER_COLOR),
-                                        ImageNode::new(assets.image(format!("build_{key}")))
+                                        ImageNode::new(
+                                            get_equipment(key)
+                                                .map(|equipment| assets.image(equipment.image()))
+                                                .unwrap_or_else(|| assets.image("stone")),
+                                        )
                                             .with_mode(NodeImageMode::Stretch),
                                         Interaction::default(),
                                         Pickable::default(),
@@ -835,7 +843,13 @@ mod native {
                                                     },
                                                     BackgroundColor(NORMAL_BUTTON_COLOR),
                                                     BorderColor::all(border),
-                                                    ImageNode::new(assets.image(format!("build_{key}")))
+                                                    ImageNode::new(
+                                                        get_equipment(key)
+                                                            .map(|equipment| {
+                                                                assets.image(equipment.image())
+                                                            })
+                                                            .unwrap_or_else(|| assets.image("stone")),
+                                                    )
                                                         .with_mode(NodeImageMode::Stretch),
                                                     Button,
                                                     Interaction::default(),

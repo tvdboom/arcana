@@ -14,15 +14,15 @@ use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::modifiers::Modifier;
 use crate::core::catalog::weapons::{Category, Hand};
 use crate::core::catalog::wearables::WearableSlot;
-use crate::core::classes::Class;
+use crate::core::classes::ClassSpecialization;
 use crate::core::constants::*;
-use crate::core::localization::{Localization, LocalizedText};
+use crate::core::localization::{format_deity_alignment, Localization, LocalizedText};
 use crate::core::menu::buttons::DisabledButton;
 use crate::core::menu::utils::{add_root_node, add_text, recolor, spawn_rich_text_row};
 use crate::core::player::{Attribute, Player};
+use crate::core::races::Race;
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
-use crate::core::ui::creation::SelectionItem;
 pub use crate::core::ui::level_up::{manage_level_up_overlay, LevelUpPending};
 use crate::core::ui::modal::{spawn_modal, ActiveModal, ModalAction};
 use crate::core::ui::scrollbar::{
@@ -69,6 +69,7 @@ pub enum PlayingStat {
     ClassLine,
     CharRace,
     CharClass,
+    CharDeity,
     CharSex,
     CharAge,
     CharHeight,
@@ -188,10 +189,7 @@ pub enum InfoTooltip {
 
 /// Performs the portrait key operation.
 fn portrait_key(player: &Player) -> String {
-    match player.class {
-        Class::Mage(ajah) => ajah.get_image_key(player),
-        _ => player.class.get_image_key(player),
-    }
+    player.portrait_key()
 }
 
 /// Performs the class line operation.
@@ -211,14 +209,29 @@ fn pet_image_key(pet: &crate::core::monsters::Monster) -> String {
 
 /// Performs the localized class name operation.
 fn localized_class_name(player: &Player, localization: &Localization, lang: Language) -> String {
-    match player.class {
-        Class::Mage(ajah) => format!(
-            "{} {}",
-            localization.get(format!("ajah.{}", ajah.to_lowername()), lang),
-            localization.get("class.mage", lang)
-        ),
-        _ => localization.get(format!("class.{}", player.class.to_lowername()), lang),
-    }
+    debug_assert!(player.specialization_is_valid());
+    let class_name = localization.get(format!("class.{}", player.class.to_lowername()), lang);
+    let specialization_name = match player.specialization {
+        ClassSpecialization::Assassin(path) => {
+            localization.get(format!("specialization.{}", path.to_lowername()), lang)
+        },
+        ClassSpecialization::Druid(pet) => {
+            localization.get(format!("pet.{}", pet.to_lowername()), lang)
+        },
+        ClassSpecialization::Mage(ajah) => {
+            localization.get(format!("ajah.{}", ajah.to_lowername()), lang)
+        },
+        ClassSpecialization::Warrior(path) => {
+            localization.get(format!("specialization.{}", path.to_lowername()), lang)
+        },
+        ClassSpecialization::Monk(school) => {
+            localization.get(format!("specialization.{}", school.to_lowername()), lang)
+        },
+        ClassSpecialization::Bard(style) => {
+            localization.get(format!("specialization.{}", style.to_lowername()), lang)
+        },
+    };
+    format!("{specialization_name} {class_name}")
 }
 
 /// Performs the name with level operation.
@@ -271,6 +284,59 @@ fn weapon_bonus_lines(
         .collect()
 }
 
+/// Returns the localized race or elven-heritage name used by stat breakdowns.
+fn localized_race_source(player: &Player, localization: &Localization, lang: Language) -> String {
+    if player.race == Race::Elf {
+        localization.get(format!("heritage.{}", player.elf_heritage.to_lowername()), lang)
+    } else {
+        localization.get(format!("race.{}", player.race.to_lowername()), lang)
+    }
+}
+
+/// Adds a race or heritage contribution to a combat-stat breakdown.
+fn push_race_bonus_line(
+    lines: &mut Vec<String>,
+    player: &Player,
+    localization: &Localization,
+    lang: Language,
+    value: i32,
+) {
+    if value != 0 {
+        lines.push(format!(
+            "[race] {}",
+            signed_line(localized_race_source(player, localization, lang), value)
+        ));
+    }
+}
+
+/// Adds a class contribution to a combat-stat breakdown.
+fn push_class_bonus_line(
+    lines: &mut Vec<String>,
+    player: &Player,
+    localization: &Localization,
+    lang: Language,
+    value: i32,
+) {
+    if value != 0 {
+        let class_name = localization.get(format!("class.{}", player.class.to_lowername()), lang);
+        lines.push(format!("[class] {}", signed_line(class_name, value)));
+    }
+}
+
+/// Adds a deity contribution to a combat-stat breakdown.
+fn push_deity_bonus_line(
+    lines: &mut Vec<String>,
+    player: &Player,
+    localization: &Localization,
+    lang: Language,
+    value: i32,
+) {
+    if value != 0 {
+        let deity_name = localization.get(format!("deity.{}", player.deity.to_lowername()), lang);
+        lines.push(format!("[deity] {}", signed_line(deity_name, value)));
+    }
+}
+
 /// Performs the combat breakdown operation.
 fn combat_breakdown(
     stat: PlayingStat,
@@ -282,10 +348,35 @@ fn combat_breakdown(
         PlayingStat::Attack => {
             let mut lines =
                 vec![format!("[base] {}", signed_line(localization.get("general.base", lang), 5))];
+            let race_attribute_bonus = player.race_attribute_mod(Attribute::Strength);
             lines.push(format!(
                 "[strength] {}",
-                signed_line(localization.get("attribute.strength", lang), player.strength_mod())
+                signed_line(
+                    localization.get("attribute.strength", lang),
+                    player.strength_mod() - race_attribute_bonus
+                )
             ));
+            push_race_bonus_line(
+                &mut lines,
+                player,
+                localization,
+                lang,
+                race_attribute_bonus + player.elf_heritage_attack_bonus(),
+            );
+            push_class_bonus_line(
+                &mut lines,
+                player,
+                localization,
+                lang,
+                player.class_attack_bonus(),
+            );
+            push_deity_bonus_line(
+                &mut lines,
+                player,
+                localization,
+                lang,
+                player.deity_attack_bonus(),
+            );
             let training_bonus = player.training_bonus_for_skill("attack");
             if training_bonus > 0 {
                 lines.push(format!(
@@ -300,13 +391,29 @@ fn combat_breakdown(
         PlayingStat::Defense => {
             let mut lines =
                 vec![format!("[base] {}", signed_line(localization.get("general.base", lang), 5))];
+            let race_attribute_bonus = player.race_attribute_mod(Attribute::Constitution);
             lines.push(format!(
                 "[constitution] {}",
                 signed_line(
                     localization.get("attribute.constitution", lang),
-                    player.constitution_mod()
+                    player.constitution_mod() - race_attribute_bonus
                 )
             ));
+            push_race_bonus_line(&mut lines, player, localization, lang, race_attribute_bonus);
+            push_class_bonus_line(
+                &mut lines,
+                player,
+                localization,
+                lang,
+                player.class_defense_bonus(),
+            );
+            push_deity_bonus_line(
+                &mut lines,
+                player,
+                localization,
+                lang,
+                player.deity_defense_bonus(),
+            );
             let training_bonus = player.training_bonus_for_skill("defense");
             if training_bonus > 0 {
                 lines.push(format!(
@@ -321,10 +428,29 @@ fn combat_breakdown(
         PlayingStat::Initiative => {
             let mut lines =
                 vec![format!("[base] {}", signed_line(localization.get("general.base", lang), 5))];
+            let race_attribute_bonus = player.race_attribute_mod(Attribute::Dexterity);
             lines.push(format!(
                 "[dexterity] {}",
-                signed_line(localization.get("attribute.dexterity", lang), player.dexterity_mod())
+                signed_line(
+                    localization.get("attribute.dexterity", lang),
+                    player.dexterity_mod() - race_attribute_bonus
+                )
             ));
+            push_race_bonus_line(&mut lines, player, localization, lang, race_attribute_bonus);
+            push_class_bonus_line(
+                &mut lines,
+                player,
+                localization,
+                lang,
+                player.class_initiative_bonus(),
+            );
+            push_deity_bonus_line(
+                &mut lines,
+                player,
+                localization,
+                lang,
+                player.deity_initiative_bonus(),
+            );
             let training_bonus = player.training_bonus_for_skill("initiative");
             if training_bonus > 0 {
                 lines.push(format!(
@@ -335,14 +461,6 @@ fn combat_breakdown(
             lines.extend(weapon_bonus_lines(player, localization, lang, |weapon| {
                 weapon.initiative()
             }));
-            let class_bonus = player.class_initiative_bonus();
-            if class_bonus > 0 {
-                let class_key = format!("class.{}", player.class.to_lowername());
-                lines.push(format!(
-                    "[assassin] {}",
-                    signed_line(localization.get(class_key, lang), class_bonus)
-                ));
-            }
             lines.extend(perk_bonus_lines(player, localization, lang, stat));
             lines
         },
@@ -428,7 +546,7 @@ fn spawn_active_hotkey_tooltip(
                 lines,
                 windows,
                 None,
-                Some(ability.name.clone()),
+                Some(ability.image.clone()),
                 0.0,
             );
         }
@@ -476,7 +594,7 @@ fn refresh_hovered_hotkey_slot(
 fn spawn_placeholder(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
-    image_key: &str,
+    image_path: &str,
     size: Val,
 ) {
     parent.spawn((
@@ -489,8 +607,7 @@ fn spawn_placeholder(
         },
         BackgroundColor(PLACEHOLDER_COLOR),
         BorderColor::all(BUTTON_BORDER_COLOR),
-        ImageNode::new(assets.image(format!("build_{}", image_key)))
-            .with_mode(NodeImageMode::Stretch),
+        ImageNode::new(assets.image(image_path)).with_mode(NodeImageMode::Stretch),
     ));
 }
 
@@ -498,7 +615,7 @@ fn spawn_placeholder(
 fn spawn_card(
     parent: &mut ChildSpawnerCommands,
     assets: &WorldAssets,
-    image_key: &str,
+    image_path: &str,
     name: String,
     name_key: Option<String>,
     lines: Vec<String>,
@@ -559,7 +676,7 @@ fn spawn_card(
                 });
         }
 
-        spawn_placeholder(parent, assets, image_key, ICON_ITEM);
+        spawn_placeholder(parent, assets, image_path, ICON_ITEM);
 
         parent
             .spawn(Node {
@@ -1305,6 +1422,7 @@ pub fn spawn_stats_column(
                                     let char_rows = [
                                         ("general.race", PlayingStat::CharRace),
                                         ("general.class", PlayingStat::CharClass),
+                                        ("general.deity", PlayingStat::CharDeity),
                                         ("general.sex", PlayingStat::CharSex),
                                         ("general.age", PlayingStat::CharAge),
                                         ("general.height", PlayingStat::CharHeight),
@@ -1595,7 +1713,7 @@ pub fn equip_slot_tooltip_system(
                     stat_lines,
                     &windows,
                     Some(sell_price),
-                    Some(weapon.name().to_string()),
+                    Some(weapon.image().to_string()),
                     if matches!(weapon, Equipment::Artifact(_)) {
                         64.0
                     } else {
@@ -1686,7 +1804,7 @@ pub fn right_column_tooltip_system(
                         lines,
                         &windows,
                         None,
-                        Some(ability.name.clone()),
+                        Some(ability.image.clone()),
                         0.0,
                     );
                 }
@@ -1703,7 +1821,7 @@ pub fn right_column_tooltip_system(
                         lines,
                         &windows,
                         None,
-                        Some(perk.name.clone()),
+                        Some(perk.image.clone()),
                         0.0,
                     );
                 }
@@ -1737,7 +1855,7 @@ pub fn right_column_tooltip_system(
                         lines,
                         &windows,
                         Some(sell_price),
-                        Some(equipment.name().to_string()),
+                        Some(equipment.image().to_string()),
                         extra_width,
                     );
                 }
@@ -2314,7 +2432,9 @@ pub fn rebuild_playing_lists(
             EquipSlot::Gloves => player.gloves.as_deref(),
         };
         image.image = match equipped_key {
-            Some(key) => assets.image(format!("build_{}", key)),
+            Some(key) => get_equipment(key)
+                .map(|equipment| assets.image(equipment.image()))
+                .unwrap_or_else(|| assets.image("stone")),
             None => assets.image("stone"),
         };
     }
@@ -2624,7 +2744,7 @@ pub fn rebuild_playing_lists(
                 spawn_card(
                     parent,
                     &assets,
-                    &ability.name,
+                    &ability.image,
                     name_with_level(
                         &ability.name,
                         "ability",
@@ -2658,7 +2778,7 @@ pub fn rebuild_playing_lists(
                 spawn_card(
                     parent,
                     &assets,
-                    &perk.name,
+                    &perk.image,
                     name_with_level(&perk.name, "perk", perk.level as u8, &localization, lang),
                     None,
                     vec![perk.description(lang, &localization)],
@@ -2852,9 +2972,15 @@ pub fn update_playing_screen(
         text.0 = match stat.0 {
             PlayingStat::ClassLine => class_line(&player, &localization, lang),
             PlayingStat::CharRace => {
-                localization.get(format!("race.{}", player.race.to_lowername()), lang)
+                if player.race == crate::core::races::Race::Elf {
+                    localization
+                        .get(format!("heritage.{}", player.elf_heritage.to_lowername()), lang)
+                } else {
+                    localization.get(format!("race.{}", player.race.to_lowername()), lang)
+                }
             },
             PlayingStat::CharClass => localized_class_name(&player, &localization, lang),
+            PlayingStat::CharDeity => format_deity_alignment(player.deity, lang, &localization),
             PlayingStat::CharSex => match player.sex {
                 crate::core::player::Sex::Man => localization.get("general.man", lang),
                 crate::core::player::Sex::Woman => localization.get("general.woman", lang),
@@ -3427,6 +3553,10 @@ pub fn spawn_equipment_card<'a>(
     let is_equipped = card.is_equipped;
     let price = card.price;
     let card_key = card.key.clone();
+    let image_path = get_equipment(image_key)
+        .expect("equipment card must reference a catalog item")
+        .image()
+        .to_string();
     let tooltip = RightColumnTooltip::Equipment(card.key.clone());
     let out_color = if is_equipped && highlight_equipped {
         SELECTED_COLOR
@@ -3503,7 +3633,7 @@ pub fn spawn_equipment_card<'a>(
                 ));
             });
 
-        spawn_placeholder(parent, assets, image_key, ICON_ITEM);
+        spawn_placeholder(parent, assets, &image_path, ICON_ITEM);
 
         parent
             .spawn(Node {
@@ -3654,16 +3784,17 @@ fn spawn_active_hotkey_slot(
         },
     ));
 
-    let image_key = match key {
-        Some(k) => format!("build_{k}"),
-        None => "stone".to_string(),
-    };
-    let image_color = match key {
-        Some(_) => Color::WHITE,
-        None => Color::NONE,
+    let (image, image_color) = match key {
+        Some(key) => (
+            get_ability(key)
+                .map(|ability| assets.image(ability.image))
+                .unwrap_or_else(|| assets.image("stone")),
+            Color::WHITE,
+        ),
+        None => (assets.image("stone"), Color::NONE),
     };
     cmd.insert(ImageNode {
-        image: assets.image(&image_key),
+        image,
         color: image_color,
         ..default()
     });
@@ -3769,7 +3900,9 @@ pub fn update_active_hotkey_slots(
         };
 
         if let Some(key) = key {
-            image_node.image = assets.image(format!("build_{key}"));
+            image_node.image = get_ability(key)
+                .map(|ability| assets.image(ability.image))
+                .unwrap_or_else(|| assets.image("stone"));
             image_node.color = Color::WHITE;
             *bg_color = BackgroundColor(SELECTED_COLOR);
         } else {
@@ -3826,7 +3959,12 @@ pub fn handle_hotkey_drag_start(
         },
         BorderColor::all(BUTTON_BORDER_COLOR),
         BackgroundColor(Color::srgba(1., 1., 1., 0.25)),
-        ImageNode::new(assets.image(format!("build_{key}"))).with_mode(NodeImageMode::Stretch),
+        ImageNode::new(
+            get_ability(key)
+                .map(|ability| assets.image(ability.image))
+                .unwrap_or_else(|| assets.image("stone")),
+        )
+        .with_mode(NodeImageMode::Stretch),
         GlobalZIndex(1200),
         Pickable::IGNORE,
         PrecombatDragGhost,
@@ -4026,24 +4164,122 @@ pub fn active_hotkey_slot_tooltip_system(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::classes::{AssassinPath, Class, WarriorPath};
+    use crate::core::deities::Deity;
+    use crate::core::races::ElfHeritage;
     use std::path::Path;
 
     #[test]
-    /// Verifies that the Assassin combat row uses a registered rich-text icon.
-    fn assassin_combat_breakdown_icon_resolves() {
+    /// Verifies that combat identity rows use registered generic rich-text icons.
+    fn combat_identity_breakdown_icons_resolve() {
         let localization = Localization::from_world(&mut World::new());
         let assassin = Player {
             class: Class::Assassin,
+            specialization: ClassSpecialization::Assassin(AssassinPath::Nightblade),
             ..default()
         };
 
         let initiative =
             combat_breakdown(PlayingStat::Initiative, &assassin, &localization, Language::English);
 
-        assert!(initiative.iter().any(|line| line.starts_with("[assassin]")));
-        assert!(
-            Path::new("assets/images/icons/assassin.webp").is_file(),
-            "missing rich-text icon assassin"
+        assert!(initiative.iter().any(|line| line == "[class] Assassin: +5"));
+        for icon in ["race", "class", "deity"] {
+            assert!(
+                Path::new("assets/images/icons").join(format!("{icon}.webp")).is_file(),
+                "missing rich-text icon {icon}"
+            );
+        }
+    }
+
+    #[test]
+    /// Verifies identity modifiers follow race, class, and deity order after the attribute.
+    fn attack_breakdown_orders_generic_identity_sources() {
+        let localization = Localization::from_world(&mut World::new());
+        let player = Player {
+            sex: crate::core::player::Sex::Woman,
+            race: Race::Orc,
+            class: Class::Warrior,
+            specialization: ClassSpecialization::Warrior(WarriorPath::Berserker),
+            deity: Deity::Kharos,
+            ..default()
+        };
+
+        let attack =
+            combat_breakdown(PlayingStat::Attack, &player, &localization, Language::English);
+
+        assert_eq!(
+            &attack[..5],
+            [
+                "[base] Base: +5",
+                "[strength] Strength: +0",
+                "[race] Orc: +1",
+                "[class] Warrior: +1",
+                "[deity] Kharos, the Ash Tyrant: +2",
+            ]
         );
+    }
+
+    #[test]
+    /// Verifies High Elf attack breakdowns do not show a removed Strength penalty.
+    fn high_elf_attack_breakdown_has_no_race_penalty() {
+        let localization = Localization::from_world(&mut World::new());
+        let high_elf = Player {
+            sex: crate::core::player::Sex::Woman,
+            race: Race::Elf,
+            elf_heritage: ElfHeritage::High,
+            ..default()
+        };
+
+        let attack =
+            combat_breakdown(PlayingStat::Attack, &high_elf, &localization, Language::English);
+
+        assert!(attack.iter().any(|line| line == "[strength] Strength: +0"));
+        assert!(!attack.iter().any(|line| line.starts_with("[race]")));
+    }
+
+    #[test]
+    /// Verifies that Wood Elf and deity modifiers appear with distinct tooltip icons.
+    fn combat_breakdown_identifies_heritage_and_deity_modifiers() {
+        let localization = Localization::from_world(&mut World::new());
+        let melee_weapon = crate::core::catalog::catalog::all_weapons()
+            .iter()
+            .find(|weapon| weapon.category == Category::Melee)
+            .expect("catalog contains a melee weapon")
+            .name
+            .clone();
+        let wood_elf = Player {
+            race: Race::Elf,
+            elf_heritage: ElfHeritage::Wood,
+            deity: Deity::Kharos,
+            weapon_lh: Some(melee_weapon),
+            ..default()
+        };
+
+        let attack =
+            combat_breakdown(PlayingStat::Attack, &wood_elf, &localization, Language::English);
+        let defense =
+            combat_breakdown(PlayingStat::Defense, &wood_elf, &localization, Language::English);
+
+        assert!(attack.iter().any(|line| line == "[race] Wood Elf: -1"));
+        assert!(attack.iter().any(|line| line == "[deity] Kharos, the Ash Tyrant: +2"));
+        assert!(defense.iter().any(|line| line == "[deity] Kharos, the Ash Tyrant: -3"));
+    }
+
+    #[test]
+    /// Verifies that deity initiative modifiers appear only in the Initiative breakdown.
+    fn initiative_breakdown_identifies_deity_modifier() {
+        let localization = Localization::from_world(&mut World::new());
+        let player = Player {
+            deity: Deity::Vaelis,
+            ..default()
+        };
+
+        let attack =
+            combat_breakdown(PlayingStat::Attack, &player, &localization, Language::English);
+        let initiative =
+            combat_breakdown(PlayingStat::Initiative, &player, &localization, Language::English);
+
+        assert!(!attack.iter().any(|line| line.starts_with("[deity]")));
+        assert!(initiative.iter().any(|line| line == "[deity] Vaelis, the Laughing Wind: +3"));
     }
 }

@@ -1008,8 +1008,16 @@ fn spawn_choice_card(
                 },
                 BackgroundColor(PLACEHOLDER_COLOR),
                 BorderColor::all(BUTTON_BORDER_COLOR),
-                ImageNode::new(assets.image(format!("build_{}", img_name)))
-                    .with_mode(NodeImageMode::Stretch),
+                ImageNode::new(assets.image(if is_ability {
+                    get_ability(&img_name)
+                        .expect("level-up ability choice must exist in the catalog")
+                        .image
+                } else {
+                    get_perk(&img_name)
+                        .expect("level-up perk choice must exist in the catalog")
+                        .image
+                }))
+                .with_mode(NodeImageMode::Stretch),
             ));
 
             // Text content

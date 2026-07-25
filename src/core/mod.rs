@@ -8,7 +8,9 @@ mod catalog;
 pub mod classes;
 mod combat;
 mod constants;
+pub mod deities;
 pub mod game_state;
+mod identity;
 pub mod localization;
 mod menu;
 mod monsters;
@@ -239,10 +241,14 @@ impl Plugin for GamePlugin {
             )
             .add_systems(OnEnter(GameState::ChooseRace), setup_race_selection)
             .add_systems(OnExit(GameState::ChooseRace), despawn::<MenuCmp>)
+            .add_systems(OnEnter(GameState::ChooseElfHeritage), setup_elf_heritage_selection)
+            .add_systems(OnExit(GameState::ChooseElfHeritage), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::ChooseClass), setup_class_selection)
             .add_systems(OnExit(GameState::ChooseClass), despawn::<MenuCmp>)
             .add_systems(OnEnter(GameState::ChooseSubClass), setup_subclass_selection)
             .add_systems(OnExit(GameState::ChooseSubClass), despawn::<MenuCmp>)
+            .add_systems(OnEnter(GameState::ChooseDeity), setup_deity_selection)
+            .add_systems(OnExit(GameState::ChooseDeity), despawn::<MenuCmp>)
             .add_systems(
                 OnEnter(GameState::Playing),
                 (

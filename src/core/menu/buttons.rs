@@ -80,12 +80,22 @@ pub fn on_click_menu_button(
                 GameState::ChooseRace => {
                     next_game_state.set(GameState::CreateCharacter);
                 },
-                GameState::ChooseClass => {
+                GameState::ChooseElfHeritage => {
                     next_game_state.set(GameState::ChooseRace);
+                },
+                GameState::ChooseClass => {
+                    if player.race == crate::core::races::Race::Elf {
+                        next_game_state.set(GameState::ChooseElfHeritage);
+                    } else {
+                        next_game_state.set(GameState::ChooseRace);
+                    }
                 },
                 GameState::ChooseSubClass => {
                     player.pet = None; // Reset pet selection
                     next_game_state.set(GameState::ChooseClass);
+                },
+                GameState::ChooseDeity => {
+                    next_game_state.set(GameState::ChooseSubClass);
                 },
                 GameState::Settings => {
                     next_game_state.set(GameState::GameMenu);
@@ -141,7 +151,7 @@ pub fn spawn_menu_button(
     let key = btn.to_lowername();
     let label = localization.get(&key, language);
 
-    let (width, height) = match btn {
+    let (min_width, height) = match btn {
         MenuBtn::Back => (Val::Vh(22.22), Val::Vh(5.0)),
         MenuBtn::NewCharacter | MenuBtn::Settings | MenuBtn::Quit | MenuBtn::Continue => {
             (Val::Vh(46.67), Val::Vh(8.33))
@@ -157,10 +167,13 @@ pub fn spawn_menu_button(
     parent
         .spawn((
             Node {
-                width,
+                // Let localized labels grow beyond the familiar menu-button size.
+                // A fixed width clips longer translations such as Spanish labels.
+                min_width,
                 height,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                padding: UiRect::horizontal(Val::Vh(1.33)),
                 margin,
                 border: UiRect::all(Val::Vh(0.22)),
                 border_radius: BorderRadius::all(Val::Vh(0.44)),

@@ -16,9 +16,8 @@ use crate::core::combat::mechanics::DuelActive;
 use crate::core::actions::hunt::PendingHuntPet;
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
-use crate::core::catalog::catalog::get_equipment;
+use crate::core::catalog::catalog::{get_ability, get_equipment};
 use crate::core::catalog::equipment::Equipment;
-use crate::core::classes::Class;
 use crate::core::constants::{
     BAR_BG_COLOR, BUTTON_BORDER_COLOR, BUTTON_TEXT_COLOR, HOVERED_BUTTON_COLOR, LABEL_TEXT_SIZE,
     NORMAL_BUTTON_COLOR, PLACEHOLDER_COLOR, PRESSED_BUTTON_COLOR, SELECTED_COLOR,
@@ -28,7 +27,6 @@ use crate::core::menu::utils::{add_root_node, add_text, recolor};
 use crate::core::monsters::{ActiveMonster, Monster, MonsterKind};
 use crate::core::player::Player;
 use crate::core::settings::Settings;
-use crate::core::ui::creation::SelectionItem;
 use crate::core::ui::playing::{
     EquipSlot, InfoTooltip, PetHealthBarFill, RightColumnTooltip, StatLabel,
 };
@@ -232,10 +230,14 @@ pub fn setup_combat_ui(
                     parent
                         .spawn((
                             Node {
-                                width: Val::Vh(18.0),
+                                // The combat label changes with both language and battle
+                                // state, so its width must follow the text rather than
+                                // truncate longer translations.
+                                min_width: Val::Vh(18.0),
                                 height: Val::Vh(5.0),
                                 align_items: AlignItems::Center,
                                 justify_content: JustifyContent::Center,
+                                padding: UiRect::horizontal(Val::Vh(1.0)),
                                 border: UiRect::all(Val::Vh(0.22)),
                                 border_radius: BorderRadius::all(Val::Vh(0.44)),
                                 ..default()
@@ -313,10 +315,11 @@ fn spawn_continue_with_pet_button(
     parent
         .spawn((
             Node {
-                width: Val::Vh(26.0),
+                min_width: Val::Vh(26.0),
                 height: Val::Vh(5.0),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                padding: UiRect::horizontal(Val::Vh(1.0)),
                 border: UiRect::all(Val::Vh(0.22)),
                 border_radius: BorderRadius::all(Val::Vh(0.44)),
                 ..default()
@@ -434,10 +437,7 @@ fn spawn_player_panel(
 
 /// Performs the player image key operation.
 fn player_image_key(player: &Player) -> String {
-    match player.class {
-        Class::Mage(ajah) => ajah.get_image_key(player),
-        _ => player.class.get_image_key(player),
-    }
+    player.portrait_key()
 }
 
 /// Spawns character portrait.
@@ -1106,7 +1106,8 @@ fn spawn_active_abilities(
                             assets,
                             ability_key.map(|key| key.to_string()),
                             ability_key
-                                .map(|key| format!("build_{key}"))
+                                .and_then(get_ability)
+                                .map(|ability| ability.image)
                                 .unwrap_or_else(|| "stone".to_string()),
                             hotkey,
                             ability_key.is_some(),
@@ -1718,7 +1719,8 @@ fn spawn_enemy_active_abilities(
                             assets,
                             ability_key.map(|key| key.to_string()),
                             ability_key
-                                .map(|key| format!("build_{key}"))
+                                .and_then(get_ability)
+                                .map(|ability| ability.image)
                                 .unwrap_or_else(|| "stone".to_string()),
                             "",
                             ability_key.is_some(),

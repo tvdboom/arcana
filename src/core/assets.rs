@@ -41,21 +41,24 @@ fn insert_image_aliases(
 }
 
 /// Performs the catalog image aliases operation.
-fn catalog_image_aliases(name: &str, image: &str) -> Vec<String> {
-    let mut aliases = vec![format!("build_{}", name), image.to_string()];
-    if let Some(stem) = Path::new(image).file_stem().and_then(|s| s.to_str()) {
-        aliases.push(stem.to_string());
-    }
-    aliases
+fn catalog_image_aliases(image: &str) -> Vec<String> {
+    vec![image.to_string()]
 }
 
-/// Returns the runtime keys and paths for the Halfling and Monk portrait expansion.
+/// Returns runtime keys and paths for expanded playable portraits and deity art.
 fn expansion_portrait_paths() -> Vec<(String, String)> {
     let mut portraits =
         vec![("halfling".to_string(), "images/races/halfling_man.webp".to_string())];
 
     for sex in ["man", "woman"] {
         portraits.push((format!("halfling_{sex}"), format!("images/races/halfling_{sex}.webp")));
+    }
+
+    for heritage in ["high", "dark", "wood"] {
+        for sex in ["man", "woman"] {
+            let key = format!("elf_{heritage}_{sex}");
+            portraits.push((key.clone(), format!("images/races/{key}.webp")));
+        }
     }
 
     for class in [
@@ -79,6 +82,75 @@ fn expansion_portrait_paths() -> Vec<(String, String)> {
             let key = format!("monk_{race}_{sex}");
             portraits.push((key.clone(), format!("images/classes/{key}.webp")));
         }
+    }
+
+    for school in ["open_hand", "iron_body", "shadow_step", "spirit_fist"] {
+        for race in ["human", "elf", "dwarf", "orc", "halfling", "dragonborn"] {
+            for sex in ["man", "woman"] {
+                let key = format!("monk_{school}_{race}_{sex}");
+                portraits.push((key.clone(), format!("images/classes/{key}.webp")));
+            }
+        }
+    }
+
+    for (class, specializations) in [
+        ("assassin", ["nightblade", "venomhand", "duelist", "phantom"]),
+        ("bard", ["war_chant", "silver_ballad", "grave_dirge", "wild_rhythm"]),
+    ] {
+        for specialization in specializations {
+            for race in ["human", "elf", "dwarf", "orc", "halfling", "dragonborn"] {
+                for sex in ["man", "woman"] {
+                    let key = format!("{class}_{specialization}_{race}_{sex}");
+                    portraits.push((key.clone(), format!("images/classes/{key}.webp")));
+                }
+            }
+        }
+    }
+
+    for specialization in ["templar", "berserker"] {
+        for race in ["human", "elf", "dwarf", "orc", "halfling", "dragonborn"] {
+            for sex in ["man", "woman"] {
+                let key = format!("warrior_{specialization}_{race}_{sex}");
+                portraits.push((key.clone(), format!("images/classes/{key}.webp")));
+            }
+        }
+    }
+
+    portraits.push(("dragonborn".to_string(), "images/races/dragonborn_man.webp".to_string()));
+    for sex in ["man", "woman"] {
+        portraits
+            .push((format!("dragonborn_{sex}"), format!("images/races/dragonborn_{sex}.webp")));
+        for class in [
+            "warrior",
+            "assassin",
+            "druid",
+            "mage",
+            "mage_black",
+            "mage_red",
+            "mage_green",
+            "mage_white",
+            "monk",
+            "bard",
+        ] {
+            let key = format!("{class}_dragonborn_{sex}");
+            portraits.push((key.clone(), format!("images/classes/{key}.webp")));
+        }
+    }
+
+    for race in ["human", "dwarf", "orc", "halfling"] {
+        for sex in ["man", "woman"] {
+            portraits
+                .push((format!("bard_{race}_{sex}"), format!("images/classes/bard_{sex}.webp")));
+        }
+    }
+    for sex in ["man", "woman"] {
+        let key = format!("bard_elf_{sex}");
+        portraits.push((key.clone(), format!("images/classes/{key}.webp")));
+    }
+    for deity in
+        ["aeloria", "serapha", "aurion", "vaelis", "tharos", "oryn", "kharos", "nyxara", "vhal"]
+    {
+        portraits.push((format!("deity_{deity}"), format!("images/deities/{deity}.webp")));
     }
 
     portraits
@@ -238,6 +310,9 @@ impl FromWorld for WorldAssets {
             ("wisdom", assets.load("images/icons/wisdom.webp")),
             ("charisma", assets.load("images/icons/charisma.webp")),
             ("training", assets.load("images/icons/training.webp")),
+            ("race", assets.load("images/icons/race.webp")),
+            ("class", assets.load("images/icons/class.webp")),
+            ("deity", assets.load("images/icons/deity.webp")),
             ("assassin", assets.load("images/icons/assassin.webp")),
             // Effects
             ("blind", assets.load("images/icons/blind.webp")),
@@ -384,23 +459,19 @@ impl FromWorld for WorldAssets {
             insert_image_aliases(
                 &mut image_paths,
                 &ability.image,
-                catalog_image_aliases(&ability.name, &ability.image),
+                catalog_image_aliases(&ability.image),
             );
         }
 
         for perk in all_perks() {
-            insert_image_aliases(
-                &mut image_paths,
-                &perk.image,
-                catalog_image_aliases(&perk.name, &perk.image),
-            );
+            insert_image_aliases(&mut image_paths, &perk.image, catalog_image_aliases(&perk.image));
         }
 
         for weapon in all_weapons() {
             insert_image_aliases(
                 &mut image_paths,
                 &weapon.image,
-                catalog_image_aliases(&weapon.name, &weapon.image),
+                catalog_image_aliases(&weapon.image),
             );
         }
 
@@ -408,7 +479,7 @@ impl FromWorld for WorldAssets {
             insert_image_aliases(
                 &mut image_paths,
                 &wearable.image,
-                catalog_image_aliases(&wearable.name, &wearable.image),
+                catalog_image_aliases(&wearable.image),
             );
         }
 
@@ -416,7 +487,7 @@ impl FromWorld for WorldAssets {
             insert_image_aliases(
                 &mut image_paths,
                 &consumable.image,
-                catalog_image_aliases(&consumable.name, &consumable.image),
+                catalog_image_aliases(&consumable.image),
             );
         }
 
@@ -424,7 +495,7 @@ impl FromWorld for WorldAssets {
             insert_image_aliases(
                 &mut image_paths,
                 &artifact.image,
-                catalog_image_aliases(&artifact.name, &artifact.image),
+                catalog_image_aliases(&artifact.image),
             );
         }
 
@@ -459,22 +530,31 @@ impl FromWorld for WorldAssets {
 #[cfg(test)]
 mod tests {
     use super::{catalog_image_aliases, expansion_portrait_paths};
+    use crate::core::catalog::catalog::{all_perks, all_weapons};
     use std::collections::HashSet;
     use std::path::Path;
 
     #[test]
-    /// Performs the catalog image aliases include build key and raw path operation.
-    fn catalog_image_aliases_include_build_key_and_raw_path() {
-        let aliases = catalog_image_aliases(
-            "Mythic Alchemy Poisonousherbs",
-            "images/catalog/consumable/Alchemy_40_poisonousherbs.webp",
-        );
+    /// Verifies catalog image aliases preserve the catalog image path.
+    fn catalog_image_aliases_include_raw_path() {
+        let image = "images/catalog/consumable/Alchemy_40_poisonousherbs.webp";
 
-        assert!(aliases.iter().any(|alias| alias == "build_Mythic Alchemy Poisonousherbs"));
-        assert!(aliases
+        assert_eq!(catalog_image_aliases(image), [image]);
+    }
+
+    #[test]
+    /// Verifies catalog entries with the same display name retain distinct image paths.
+    fn duplicate_catalog_names_keep_distinct_images() {
+        let perk =
+            all_perks().iter().find(|perk| perk.name == "Dagger").expect("Dagger perk must exist");
+        let weapon = all_weapons()
             .iter()
-            .any(|alias| alias == "images/catalog/consumable/Alchemy_40_poisonousherbs.webp"));
-        assert!(aliases.iter().any(|alias| alias == "Alchemy_40_poisonousherbs"));
+            .find(|weapon| weapon.name == "Dagger")
+            .expect("Dagger weapon must exist");
+
+        assert_ne!(perk.image, weapon.image);
+        assert_eq!(catalog_image_aliases(&perk.image), vec![perk.image.clone()]);
+        assert_eq!(catalog_image_aliases(&weapon.image), vec![weapon.image.clone()]);
     }
 
     #[test]
@@ -486,6 +566,45 @@ mod tests {
 
         for (_, path) in portraits {
             assert!(Path::new("assets").join(&path).is_file(), "missing portrait: {path}");
+        }
+    }
+
+    #[test]
+    /// Verifies requested heritage and specialized character keys use dedicated files.
+    fn expanded_identity_portraits_are_not_aliases() {
+        for (key, path) in expansion_portrait_paths() {
+            let is_heritage = key.starts_with("elf_high_")
+                || key.starts_with("elf_dark_")
+                || key.starts_with("elf_wood_");
+            let is_monk_school = key.starts_with("monk_open_hand_")
+                || key.starts_with("monk_iron_body_")
+                || key.starts_with("monk_shadow_step_")
+                || key.starts_with("monk_spirit_fist_");
+            let is_assassin_path = key.starts_with("assassin_nightblade_")
+                || key.starts_with("assassin_venomhand_")
+                || key.starts_with("assassin_duelist_")
+                || key.starts_with("assassin_phantom_");
+            let is_bard_style = key.starts_with("bard_war_chant_")
+                || key.starts_with("bard_silver_ballad_")
+                || key.starts_with("bard_grave_dirge_")
+                || key.starts_with("bard_wild_rhythm_");
+            let is_requested_warrior_calling =
+                key.starts_with("warrior_templar_") || key.starts_with("warrior_berserker_");
+            let is_elf_bard = key.starts_with("bard_elf_");
+            let is_dragonborn_class = key.contains("_dragonborn_");
+            if is_heritage
+                || is_monk_school
+                || is_assassin_path
+                || is_bard_style
+                || is_requested_warrior_calling
+                || is_elf_bard
+                || is_dragonborn_class
+            {
+                assert_eq!(
+                    Path::new(&path).file_stem().and_then(|stem| stem.to_str()),
+                    Some(key.as_str())
+                );
+            }
         }
     }
 }

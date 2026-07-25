@@ -295,7 +295,7 @@ pub fn spawn_tooltip(
                                         height: Val::Percent(100.),
                                         ..default()
                                     },
-                                    ImageNode::new(assets.image(format!("build_{}", image_path)))
+                                    ImageNode::new(assets.image(image_path))
                                         .with_mode(NodeImageMode::Stretch),
                                 ));
                             });

@@ -143,10 +143,13 @@ pub fn spawn_label(
                 parent
                     .spawn((
                         Node {
-                            width: Val::Vh(13.33),
+                            // Keep the standard size for short labels while allowing
+                            // localized setting names to determine a wider button.
+                            min_width: Val::Vh(13.33),
                             height: Val::Vh(5.0),
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::Center,
+                            padding: UiRect::horizontal(Val::Vh(0.67)),
                             margin: UiRect::horizontal(Val::Vh(0.89)),
                             border: UiRect::all(Val::Vh(0.22)),
                             border_radius: BorderRadius::all(Val::Vh(0.44)),

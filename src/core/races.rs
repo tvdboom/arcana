@@ -1,5 +1,6 @@
 //! Playable races and their attribute, aging, and descriptive properties.
 
+use crate::core::identity::IdentityBonuses;
 use crate::core::player::{AgeStage, Attribute};
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
@@ -12,6 +13,15 @@ pub enum Race {
     Dwarf,
     Orc,
     Halfling,
+    Dragonborn,
+}
+
+#[derive(EnumIter, Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ElfHeritage {
+    #[default]
+    High,
+    Dark,
+    Wood,
 }
 
 impl Race {
@@ -23,6 +33,7 @@ impl Race {
             Race::Dwarf => (60, 400),
             Race::Orc => (16, 60),
             Race::Halfling => (20, 160),
+            Race::Dragonborn => (15, 110),
         }
     }
 
@@ -43,6 +54,7 @@ impl Race {
             Race::Human => (self.age_range(), (160, 190), (60, 95)),
             Race::Orc => (self.age_range(), (180, 220), (90, 145)),
             Race::Halfling => (self.age_range(), (95, 125), (22, 45)),
+            Race::Dragonborn => (self.age_range(), (185, 225), (105, 165)),
         }
     }
 
@@ -50,25 +62,28 @@ impl Race {
     pub fn characteristic_mod(&self, attr: Attribute) -> i32 {
         match attr {
             Attribute::Strength => match self {
-                Race::Dwarf => 1,
-                Race::Elf => -2,
+                Race::Dwarf => 0,
+                Race::Elf => 0,
                 Race::Human => 0,
-                Race::Orc => 2,
+                Race::Orc => 1,
                 Race::Halfling => -1,
+                Race::Dragonborn => 1,
             },
             Attribute::Dexterity => match self {
                 Race::Dwarf => -1,
-                Race::Elf => 2,
+                Race::Elf => 0,
                 Race::Human => 1,
-                Race::Orc => 0,
+                Race::Orc => -1,
                 Race::Halfling => 2,
+                Race::Dragonborn => -1,
             },
             Attribute::Constitution => match self {
-                Race::Dwarf => 2,
-                Race::Elf => -1,
+                Race::Dwarf => 1,
+                Race::Elf => 0,
                 Race::Human => 0,
-                Race::Orc => 2,
+                Race::Orc => 1,
                 Race::Halfling => 0,
+                Race::Dragonborn => 0,
             },
             Attribute::Intelligence => match self {
                 Race::Dwarf => 0,
@@ -76,6 +91,7 @@ impl Race {
                 Race::Human => 0,
                 Race::Orc => -1,
                 Race::Halfling => 0,
+                Race::Dragonborn => -1,
             },
             Attribute::Wisdom => match self {
                 Race::Dwarf => 1,
@@ -83,22 +99,58 @@ impl Race {
                 Race::Human => 0,
                 Race::Orc => 0,
                 Race::Halfling => 0,
+                Race::Dragonborn => 0,
             },
             Attribute::Charisma => match self {
-                Race::Dwarf => -1,
+                Race::Dwarf => 0,
                 Race::Elf => 1,
                 Race::Human => 1,
                 Race::Orc => -1,
                 Race::Halfling => 1,
+                Race::Dragonborn => 1,
             },
         }
     }
 
-    /// Additional critical-strike chance granted by this race.
-    pub fn crit_chance_bonus(&self) -> f32 {
+    /// Returns the race's direct bonuses beyond its attribute adjustments.
+    pub fn bonuses(self) -> IdentityBonuses {
         match self {
-            Race::Halfling => 0.03,
-            _ => 0.0,
+            Race::Halfling => IdentityBonuses {
+                crit_chance: 0.12,
+                ..Default::default()
+            },
+            Race::Dragonborn => IdentityBonuses {
+                max_health: 10,
+                ..Default::default()
+            },
+            Race::Human | Race::Elf | Race::Dwarf | Race::Orc => IdentityBonuses::default(),
+        }
+    }
+}
+
+impl ElfHeritage {
+    /// Returns the attribute adjustment supplied by this elven heritage.
+    pub fn characteristic_mod(self, attr: Attribute) -> i32 {
+        match (self, attr) {
+            (ElfHeritage::High, Attribute::Intelligence) => 1,
+            _ => 0,
+        }
+    }
+
+    /// Returns this heritage's direct bonuses beyond its attribute adjustments.
+    pub fn bonuses(self) -> IdentityBonuses {
+        match self {
+            ElfHeritage::High => IdentityBonuses::default(),
+            ElfHeritage::Dark => IdentityBonuses {
+                max_mana: -10,
+                crit_chance: 0.08,
+                ..Default::default()
+            },
+            ElfHeritage::Wood => IdentityBonuses {
+                melee_attack: -1,
+                ranged_attack: 1,
+                ..Default::default()
+            },
         }
     }
 }
@@ -118,5 +170,40 @@ mod tests {
         assert_eq!(race.characteristic_mod(Attribute::Intelligence), 0);
         assert_eq!(race.characteristic_mod(Attribute::Wisdom), 0);
         assert_eq!(race.characteristic_mod(Attribute::Charisma), 1);
+    }
+
+    #[test]
+    /// Verifies that Dragonborn trade agility and intellect for strength and endurance.
+    fn dragonborn_has_draconic_attribute_adjustments() {
+        let race = Race::Dragonborn;
+
+        assert_eq!(race.characteristic_mod(Attribute::Strength), 1);
+        assert_eq!(race.characteristic_mod(Attribute::Dexterity), -1);
+        assert_eq!(race.characteristic_mod(Attribute::Constitution), 0);
+        assert_eq!(race.characteristic_mod(Attribute::Intelligence), -1);
+        assert_eq!(race.characteristic_mod(Attribute::Charisma), 1);
+        assert_eq!(race.bonuses().max_health, 10);
+    }
+
+    #[test]
+    /// Verifies that Elf ancestry no longer changes Strength or Dexterity.
+    fn elf_has_no_base_strength_or_dexterity_adjustment() {
+        let race = Race::Elf;
+
+        assert_eq!(race.characteristic_mod(Attribute::Strength), 0);
+        assert_eq!(race.characteristic_mod(Attribute::Dexterity), 0);
+    }
+
+    #[test]
+    /// Verifies that elven heritage profiles remain restrained and role-specific.
+    fn elf_heritages_have_balanced_tradeoffs() {
+        assert_eq!(ElfHeritage::High.characteristic_mod(Attribute::Intelligence), 1);
+        assert_eq!(ElfHeritage::High.characteristic_mod(Attribute::Strength), 0);
+
+        assert!((ElfHeritage::Dark.bonuses().crit_chance - 0.08).abs() < f32::EPSILON);
+        assert_eq!(ElfHeritage::Dark.bonuses().max_mana, -10);
+
+        assert_eq!(ElfHeritage::Wood.bonuses().ranged_attack, 1);
+        assert_eq!(ElfHeritage::Wood.bonuses().melee_attack, -1);
     }
 }

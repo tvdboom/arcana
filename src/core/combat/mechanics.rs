@@ -9,13 +9,14 @@ use crate::core::catalog::catalog::{get_ability, get_equipment};
 use crate::core::catalog::effects::Effect;
 use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::equipment::Kind;
+use crate::core::catalog::modifiers::Modifier;
 use crate::core::catalog::weapons::{Category, Weapon};
 use crate::core::combat::ui::{
     CombatCmp, CombatContinueWithPetButton, CombatContinueWithPetSlot, CombatEffectIcon,
     CombatPetName, CombatPortraitLevel, CombatPortraitName, CombatStatLabel,
 };
 use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin};
-use crate::core::monsters::ActiveMonster;
+use crate::core::monsters::{ActiveMonster, Monster};
 use crate::core::player::{Attribute, Player};
 use crate::core::states::GameState;
 use crate::core::ui::playing::TooltipNode;
@@ -190,6 +191,7 @@ pub struct TimedEffect {
     pub effect: Effect,
     pub remaining: f32,
     pub tick_acc: f32,
+    pub magnitude_multiplier: f32,
 }
 
 /// A weapon-bound effect and whether it triggers on landing a hit (offensive
@@ -204,6 +206,8 @@ pub struct WeaponEffect {
 #[allow(dead_code)]
 pub struct CombatWeapon {
     pub name: String,
+    pub kind: Kind,
+    pub category: Category,
     pub attack_speed: f32,
     pub attack_timer: f32,
     pub attack: f32,
@@ -240,6 +244,7 @@ pub struct Fighter {
     pub weapon_effects: Vec<WeaponEffect>,
     pub attack_style: AttackStyle,
     pub intelligence_mod: f32,
+    pub passive_modifiers: Vec<Modifier>,
     pub alive: bool,
     pub weapons: Vec<CombatWeapon>,
 }
@@ -494,7 +499,14 @@ impl Fighter {
 
     /// Performs the lifesteal operation.
     fn lifesteal(&self) -> f32 {
-        let mut v = 0.0;
+        let mut v = self
+            .passive_modifiers
+            .iter()
+            .filter_map(|modifier| match modifier {
+                Modifier::LifeSteal(percentage) => Some(percentage / 100.0),
+                _ => None,
+            })
+            .sum::<f32>();
         for te in &self.effects {
             if let Effect::Lifesteal {
                 percentage,
@@ -504,7 +516,62 @@ impl Fighter {
                 v += percentage / 100.0;
             }
         }
-        v
+        v.max(0.0)
+    }
+
+    /// Multiplies outgoing damage for the supplied element and optional weapon category.
+    fn outgoing_damage_multiplier(&self, kind: Kind, category: Option<Category>) -> f32 {
+        let percentage = self
+            .passive_modifiers
+            .iter()
+            .filter_map(|modifier| match modifier {
+                Modifier::KindPowerMultiplier(modifier_kind, value) if *modifier_kind == kind => {
+                    Some(*value)
+                },
+                Modifier::CategoryPowerMultiplier(modifier_category, value)
+                    if category == Some(*modifier_category) =>
+                {
+                    Some(*value)
+                },
+                _ => None,
+            })
+            .sum::<f32>();
+        (1.0 + percentage / 100.0).max(0.0)
+    }
+
+    /// Multiplies incoming damage after elemental and weapon-category resistances.
+    fn incoming_damage_multiplier(&self, kind: Kind, category: Option<Category>) -> f32 {
+        let percentage = self
+            .passive_modifiers
+            .iter()
+            .filter_map(|modifier| match modifier {
+                Modifier::KindResistanceMultiplier(modifier_kind, value)
+                    if *modifier_kind == kind =>
+                {
+                    Some(*value)
+                },
+                Modifier::CategoryResistanceMultiplier(modifier_category, value)
+                    if category == Some(*modifier_category) =>
+                {
+                    Some(*value)
+                },
+                _ => None,
+            })
+            .sum::<f32>();
+        (1.0 - percentage / 100.0).max(0.0)
+    }
+
+    /// Multiplies direct and periodic healing caused by this fighter.
+    fn healing_multiplier(&self) -> f32 {
+        let percentage = self
+            .passive_modifiers
+            .iter()
+            .filter_map(|modifier| match modifier {
+                Modifier::HealingMultiplier(value) => Some(*value),
+                _ => None,
+            })
+            .sum::<f32>();
+        (1.0 + percentage / 100.0).max(0.0)
     }
 
     /// Performs the take damage operation.
@@ -545,6 +612,7 @@ pub struct CombatState {
     pub player: Fighter,
     pub pet: Option<Fighter>,
     pub enemy: Fighter,
+    pub enemy_pet: Option<Fighter>,
     pub abilities: Vec<AbilitySlot>,
     pub enemy_abilities: Vec<AbilitySlot>,
     pub status: CombatStatus,
@@ -603,6 +671,199 @@ fn player_attack_style(player: &Player) -> AttackStyle {
     }
 }
 
+/// Returns the full flat attack contribution of one equipped weapon.
+fn weapon_attack(weapon: &Weapon) -> f32 {
+    let modifier = weapon
+        .modifiers
+        .iter()
+        .filter_map(|modifier| match modifier {
+            Modifier::AttackModifier(value) => Some(*value),
+            _ => None,
+        })
+        .sum::<i32>();
+    (weapon.attack as i32 + modifier).max(0) as f32
+}
+
+/// Returns the attack presentation used by a weapon category.
+fn category_attack_style(category: Category) -> AttackStyle {
+    match category {
+        Category::Range => AttackStyle::Range,
+        Category::Finesse => AttackStyle::Finesse,
+        Category::Melee => AttackStyle::Melee,
+        Category::Magical | Category::Shield | Category::Book => AttackStyle::Other,
+    }
+}
+
+/// Builds basic attacks for a player without letting shields or books auto-attack.
+fn player_combat_weapons(player: &Player) -> Vec<CombatWeapon> {
+    let equipped = player.equipped_equipment();
+    let attacking_weapons = equipped
+        .iter()
+        .filter_map(|equipment| match equipment {
+            Equipment::Weapon(weapon)
+                if !matches!(weapon.category, Category::Shield | Category::Book) =>
+            {
+                Some(weapon)
+            },
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    if attacking_weapons.is_empty() {
+        return Vec::new();
+    }
+
+    let weapon_attack_total =
+        attacking_weapons.iter().map(|weapon| weapon_attack(weapon)).sum::<f32>();
+    let shared_attack =
+        (player.attack() as f32 - weapon_attack_total).max(0.0) / attacking_weapons.len() as f32;
+    let speed_multiplier = player.attack_speed_multiplier();
+    let non_weapon_crit = player.non_weapon_crit_chance();
+
+    attacking_weapons
+        .into_iter()
+        .map(|weapon| CombatWeapon {
+            name: weapon.name.clone(),
+            kind: weapon.kind,
+            category: weapon.category,
+            attack_speed: weapon.attack_speed * speed_multiplier,
+            attack_timer: 0.0,
+            attack: shared_attack + weapon_attack(weapon),
+            crit_chance: (weapon.crit_chance + non_weapon_crit).clamp(0.0, 1.0),
+            effects: weapon
+                .effects
+                .iter()
+                .map(|effect| WeaponEffect {
+                    effect: effect.clone(),
+                    on_hit: true,
+                })
+                .collect(),
+            attack_style: category_attack_style(weapon.category),
+        })
+        .collect()
+}
+
+/// Builds the combat fighter used for either local or networked players.
+fn fighter_from_player(player: &Player) -> Fighter {
+    Fighter {
+        max_health: player.max_health() as f32,
+        health: player.health() as f32,
+        display_health: player.health() as f32,
+        max_mana: player.max_mana() as f32,
+        mana: player.mana() as f32,
+        display_mana: player.mana() as f32,
+        base_attack: player.attack() as f32,
+        base_defense: player.defense() as f32,
+        base_initiative: player.initiative() as f32,
+        base_attack_speed: player.attack_speed(),
+        crit_chance: player.crit_chance(),
+        health_regen: player.health_regen() as f32,
+        mana_regen: player.mana_regen() as f32,
+        attack_timer: 0.0,
+        effects: Vec::new(),
+        weapon_effects: player_equipment_effects(player),
+        attack_style: player_attack_style(player),
+        intelligence_mod: player.intelligence_mod() as f32,
+        passive_modifiers: player.active_modifiers(),
+        alive: true,
+        weapons: player_combat_weapons(player),
+    }
+}
+
+/// Builds a pet combatant while applying all pet-specific owner modifiers.
+fn fighter_from_pet(pet: &Monster, owner: &Player) -> Fighter {
+    let attack = (pet.attack as i32 + owner.pet_attack_bonus()).max(0) as f32;
+    let defense = (pet.defense as i32 + owner.pet_defense_bonus()).max(0) as f32;
+    let initiative = (pet.initiative as i32 + owner.pet_initiative_bonus()).max(0) as f32;
+    let attack_speed = pet.attack_speed * owner.pet_attack_speed_multiplier();
+    let effects = pet
+        .effects
+        .iter()
+        .map(|effect| WeaponEffect {
+            effect: effect.clone(),
+            on_hit: true,
+        })
+        .collect::<Vec<_>>();
+
+    Fighter {
+        max_health: pet.max_health as f32,
+        health: pet.health as f32,
+        display_health: pet.health as f32,
+        max_mana: 0.0,
+        mana: 0.0,
+        display_mana: 0.0,
+        base_attack: attack,
+        base_defense: defense,
+        base_initiative: initiative,
+        base_attack_speed: attack_speed,
+        crit_chance: 0.0,
+        health_regen: pet.health_regen as f32,
+        mana_regen: 0.0,
+        attack_timer: 0.0,
+        effects: Vec::new(),
+        weapon_effects: effects.clone(),
+        attack_style: AttackStyle::Other,
+        intelligence_mod: 0.0,
+        passive_modifiers: Vec::new(),
+        alive: true,
+        weapons: vec![CombatWeapon {
+            name: "Basic Attack".to_string(),
+            kind: Kind::Physical,
+            category: Category::Melee,
+            attack_speed,
+            attack_timer: 0.0,
+            attack,
+            crit_chance: 0.0,
+            effects,
+            attack_style: AttackStyle::Other,
+        }],
+    }
+}
+
+/// Builds a non-player monster combatant.
+fn fighter_from_monster(monster: &Monster) -> Fighter {
+    let effects = monster
+        .effects
+        .iter()
+        .map(|effect| WeaponEffect {
+            effect: effect.clone(),
+            on_hit: true,
+        })
+        .collect::<Vec<_>>();
+    Fighter {
+        max_health: monster.max_health as f32,
+        health: monster.health as f32,
+        display_health: monster.health as f32,
+        max_mana: 0.0,
+        mana: 0.0,
+        display_mana: 0.0,
+        base_attack: monster.attack as f32,
+        base_defense: monster.defense as f32,
+        base_initiative: monster.initiative as f32,
+        base_attack_speed: monster.attack_speed,
+        crit_chance: 0.0,
+        health_regen: monster.health_regen as f32,
+        mana_regen: 0.0,
+        attack_timer: 0.0,
+        effects: Vec::new(),
+        weapon_effects: effects.clone(),
+        attack_style: AttackStyle::Other,
+        intelligence_mod: 0.0,
+        passive_modifiers: monster.modifiers.clone(),
+        alive: true,
+        weapons: vec![CombatWeapon {
+            name: "Basic Attack".to_string(),
+            kind: Kind::Physical,
+            category: Category::Melee,
+            attack_speed: monster.attack_speed,
+            attack_timer: 0.0,
+            attack: monster.attack as f32,
+            crit_chance: 0.0,
+            effects,
+            attack_style: AttackStyle::Other,
+        }],
+    }
+}
+
 /// Builds the complete combat snapshot from the player, pet, monster, and optional duel.
 ///
 /// Shared character attack is divided between two attacking weapons so dual-wielding adds
@@ -624,193 +885,12 @@ pub fn setup_combat_state(
     };
     let monster = &active_monster.monster;
 
-    let player_equipped = player.equipped_equipment();
-    let attacking_weapons: Vec<&Weapon> = player_equipped
-        .iter()
-        .filter_map(|eq| {
-            if let Equipment::Weapon(w) = eq {
-                if !matches!(w.category, Category::Shield | Category::Book) {
-                    Some(w)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .collect();
-
-    let player_weapons = if attacking_weapons.len() == 2 {
-        let base_player_attack = (player.attack() as i32
-            - player_equipped.iter().map(|eq| eq.attack()).sum::<i32>())
-        .max(0) as f32;
-        let shared_attack_per_weapon = base_player_attack / attacking_weapons.len() as f32;
-
-        attacking_weapons
-            .into_iter()
-            .map(|w| {
-                let attack_style = match w.category {
-                    Category::Range => AttackStyle::Range,
-                    Category::Finesse => AttackStyle::Finesse,
-                    Category::Melee => AttackStyle::Melee,
-                    _ => AttackStyle::Other,
-                };
-                CombatWeapon {
-                    name: w.name.clone(),
-                    attack_speed: w.attack_speed,
-                    attack_timer: 0.0,
-                    attack: shared_attack_per_weapon + w.attack as f32,
-                    crit_chance: w.crit_chance,
-                    effects: w
-                        .effects
-                        .iter()
-                        .map(|e| WeaponEffect {
-                            effect: e.clone(),
-                            on_hit: true,
-                        })
-                        .collect(),
-                    attack_style,
-                }
-            })
-            .collect()
-    } else {
-        vec![CombatWeapon {
-            name: "Primary Weapon".to_string(),
-            attack_speed: player.attack_speed(),
-            attack_timer: 0.0,
-            attack: player.attack() as f32,
-            crit_chance: player.crit_chance(),
-            effects: player_equipment_effects(&player),
-            attack_style: player_attack_style(&player),
-        }]
-    };
-
-    let player_fighter = Fighter {
-        max_health: player.max_health() as f32,
-        health: player.health() as f32,
-        display_health: player.health() as f32,
-        max_mana: player.max_mana() as f32,
-        mana: player.mana() as f32,
-        display_mana: player.mana() as f32,
-        base_attack: player.attack() as f32,
-        base_defense: player.defense() as f32,
-        base_initiative: player.initiative() as f32,
-        base_attack_speed: player.attack_speed(),
-        crit_chance: player.crit_chance(),
-        health_regen: player.health_regen() as f32,
-        mana_regen: player.mana_regen() as f32,
-        attack_timer: 0.0,
-        effects: Vec::new(),
-        weapon_effects: player_equipment_effects(&player),
-        attack_style: player_attack_style(&player),
-        intelligence_mod: player.intelligence_mod() as f32,
-        alive: true,
-        weapons: player_weapons,
-    };
-
-    let pet_fighter = player.pet.as_ref().map(|pet| Fighter {
-        max_health: pet.max_health as f32,
-        health: pet.health as f32,
-        display_health: pet.health as f32,
-        max_mana: 0.0,
-        mana: 0.0,
-        display_mana: 0.0,
-        base_attack: pet.attack as f32,
-        base_defense: pet.defense as f32,
-        base_initiative: pet.initiative as f32,
-        base_attack_speed: pet.attack_speed,
-        crit_chance: 0.0,
-        health_regen: pet.health_regen as f32,
-        mana_regen: 0.0,
-        attack_timer: 0.0,
-        effects: Vec::new(),
-        weapon_effects: pet
-            .effects
-            .iter()
-            .map(|e| WeaponEffect {
-                effect: e.clone(),
-                on_hit: true,
-            })
-            .collect(),
-        attack_style: AttackStyle::Other,
-        intelligence_mod: 0.0,
-        alive: true,
-        weapons: vec![CombatWeapon {
-            name: "Basic Attack".to_string(),
-            attack_speed: pet.attack_speed,
-            attack_timer: 0.0,
-            attack: pet.attack as f32,
-            crit_chance: 0.0,
-            effects: pet
-                .effects
-                .iter()
-                .map(|e| WeaponEffect {
-                    effect: e.clone(),
-                    on_hit: true,
-                })
-                .collect(),
-            attack_style: AttackStyle::Other,
-        }],
-    });
-
-    let (opp_max_mana, opp_mana) = if let Some(ref duel) = duel_state {
-        if let Some(ref opp) = duel.opponent {
-            (opp.max_mana() as f32, opp.mana() as f32)
-        } else {
-            (0.0, 0.0)
-        }
-    } else {
-        (0.0, 0.0)
-    };
-
-    let enemy_fighter = Fighter {
-        max_health: monster.max_health as f32,
-        health: monster.health as f32,
-        display_health: monster.health as f32,
-        max_mana: opp_max_mana,
-        mana: opp_mana,
-        display_mana: opp_mana,
-        base_attack: monster.attack as f32,
-        base_defense: monster.defense as f32,
-        base_initiative: monster.initiative as f32,
-        base_attack_speed: monster.attack_speed,
-        crit_chance: 0.0,
-        health_regen: monster.health_regen as f32,
-        mana_regen: 0.0,
-        attack_timer: 0.0,
-        effects: Vec::new(),
-        weapon_effects: monster
-            .effects
-            .iter()
-            .map(|e| WeaponEffect {
-                effect: e.clone(),
-                on_hit: true,
-            })
-            .collect(),
-        attack_style: AttackStyle::Other,
-        intelligence_mod: duel_state
-            .as_ref()
-            .and_then(|duel| duel.opponent.as_ref())
-            .map(|opponent| opponent.intelligence_mod() as f32)
-            .unwrap_or(0.0),
-        alive: true,
-        weapons: vec![CombatWeapon {
-            name: "Basic Attack".to_string(),
-            attack_speed: monster.attack_speed,
-            attack_timer: 0.0,
-            attack: monster.attack as f32,
-            crit_chance: 0.0,
-            effects: monster
-                .effects
-                .iter()
-                .map(|e| WeaponEffect {
-                    effect: e.clone(),
-                    on_hit: true,
-                })
-                .collect(),
-            attack_style: AttackStyle::Other,
-        }],
-    };
+    let player_fighter = fighter_from_player(&player);
+    let pet_fighter = player.pet.as_ref().map(|pet| fighter_from_pet(pet, &player));
+    let opponent = duel_state.as_ref().and_then(|duel| duel.opponent.as_ref());
+    let enemy_fighter = opponent.map_or_else(|| fighter_from_monster(monster), fighter_from_player);
+    let enemy_pet_fighter = opponent
+        .and_then(|opponent| opponent.pet.as_ref().map(|pet| fighter_from_pet(pet, opponent)));
 
     let build_ability_slots = |active_abilities: &[Option<String>]| {
         active_abilities
@@ -841,6 +921,7 @@ pub fn setup_combat_state(
         player: player_fighter,
         pet: pet_fighter,
         enemy: enemy_fighter,
+        enemy_pet: enemy_pet_fighter,
         abilities,
         enemy_abilities,
         status: CombatStatus::Ongoing,
@@ -893,6 +974,7 @@ enum Who {
     Player,
     Pet,
     Enemy,
+    EnemyPet,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -945,6 +1027,7 @@ impl CombatState {
             Who::Player => Some(&self.player),
             Who::Pet => self.pet.as_ref(),
             Who::Enemy => Some(&self.enemy),
+            Who::EnemyPet => self.enemy_pet.as_ref(),
         }
     }
 
@@ -954,6 +1037,7 @@ impl CombatState {
             Who::Player => Some(&mut self.player),
             Who::Pet => self.pet.as_mut(),
             Who::Enemy => Some(&mut self.enemy),
+            Who::EnemyPet => self.enemy_pet.as_mut(),
         }
     }
 }
@@ -966,7 +1050,20 @@ fn resolve_basic_attack(
     weapon_index: usize,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
 ) -> Option<(AttackStyle, AttackOutcome)> {
-    let (atk, atk_init, crit_chance, extra_crit, miss, weapon_effects, lifesteal, attack_style) = {
+    let (
+        atk,
+        atk_init,
+        crit_chance,
+        extra_crit,
+        miss,
+        weapon_effects,
+        lifesteal,
+        healing_multiplier,
+        attack_style,
+        kind,
+        category,
+        outgoing_multiplier,
+    ) = {
         let a = match state.get(attacker) {
             Some(a) if a.alive => a,
             _ => return None,
@@ -980,13 +1077,24 @@ fn resolve_basic_attack(
             a.miss_chance(),
             weapon.effects.clone(),
             a.lifesteal(),
+            a.healing_multiplier(),
             weapon.attack_style,
+            weapon.kind,
+            weapon.category,
+            a.outgoing_damage_multiplier(weapon.kind, Some(weapon.category)),
         )
     };
 
-    let (def, def_init, can_dodge, incoming_mult, def_alive) = {
+    let (def, def_init, can_dodge, incoming_mult, resistance_multiplier, def_alive) = {
         let d = state.get(defender)?;
-        (d.eff_defense(), d.eff_initiative(), d.can_dodge(), d.incoming_multiplier(), d.alive)
+        (
+            d.eff_defense(),
+            d.eff_initiative(),
+            d.can_dodge(),
+            d.incoming_multiplier(),
+            d.incoming_damage_multiplier(kind, Some(category)),
+            d.alive,
+        )
     };
     if !def_alive {
         return None;
@@ -1032,7 +1140,8 @@ fn resolve_basic_attack(
         }
     }
 
-    let mut dmg = compute_damage(atk, def, crit, incoming_mult);
+    let mut dmg =
+        compute_damage(atk, def, crit, incoming_mult) * outgoing_multiplier * resistance_multiplier;
     dmg *= 1.0 + bonus_pct;
 
     if let Some(d) = state.get_mut(defender) {
@@ -1052,7 +1161,7 @@ fn resolve_basic_attack(
     // Lifesteal heals the attacker.
     if lifesteal > 0.0 {
         if let Some(a) = state.get_mut(attacker) {
-            a.heal(dmg * lifesteal);
+            a.heal(dmg * lifesteal * healing_multiplier);
         }
     }
 
@@ -1090,7 +1199,7 @@ fn resolve_basic_attack(
         } else {
             defender
         };
-        apply_effect(state, attacker, tgt, &we.effect, play_audio_msg);
+        apply_effect(state, attacker, tgt, &we.effect, kind, Some(category), play_audio_msg);
     }
     // Apply the defender's on-being-hit weapon effects (shields/books).
     let def_when_hit: Vec<Effect> = state
@@ -1103,7 +1212,7 @@ fn resolve_basic_attack(
         } else {
             attacker
         };
-        apply_effect(state, defender, tgt, &e, play_audio_msg);
+        apply_effect(state, defender, tgt, &e, Kind::Physical, None, play_audio_msg);
     }
     Some((attack_style, AttackOutcome::Hit))
 }
@@ -1112,7 +1221,7 @@ fn resolve_basic_attack(
 fn side_of(who: Who) -> FxSide {
     match who {
         Who::Player | Who::Pet => FxSide::Player,
-        Who::Enemy => FxSide::Enemy,
+        Who::Enemy | Who::EnemyPet => FxSide::Enemy,
     }
 }
 
@@ -1122,8 +1231,21 @@ fn apply_effect(
     source: Who,
     target: Who,
     effect: &Effect,
+    kind: Kind,
+    category: Option<Category>,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
 ) {
+    let outgoing_multiplier = state
+        .get(source)
+        .map(|fighter| fighter.outgoing_damage_multiplier(kind, category))
+        .unwrap_or(1.0);
+    let incoming_multiplier = state
+        .get(target)
+        .map(|fighter| fighter.incoming_damage_multiplier(kind, category))
+        .unwrap_or(1.0);
+    let damage_multiplier = outgoing_multiplier * incoming_multiplier;
+    let healing_multiplier = state.get(source).map(Fighter::healing_multiplier).unwrap_or(1.0);
+
     if matches!(target, Who::Player) && effect.debuff_icon().is_some() {
         play_audio_msg.write(PlayAudioMsg::new("curse"));
     }
@@ -1133,7 +1255,7 @@ fn apply_effect(
         } => {
             if let Some(t) = state.get_mut(target) {
                 let missing = t.max_health - t.health;
-                t.heal(missing * (*heal_pct as f32 / 100.0));
+                t.heal(missing * (*heal_pct as f32 / 100.0) * healing_multiplier);
             }
         },
         Effect::Pierce {
@@ -1149,8 +1271,9 @@ fn apply_effect(
         } => {
             // Pierce is instant; Burn/Poison handled as DoT below too, but their
             // initial application also lands an instant tick for responsiveness.
+            let scaled_damage = *damage as f32 * damage_multiplier;
             if let Some(t) = state.get_mut(target) {
-                t.take_damage(*damage as f32);
+                t.take_damage(scaled_damage);
             }
             let color = match effect {
                 Effect::Pierce {
@@ -1166,10 +1289,10 @@ fn apply_effect(
             };
             state.fx.push(CombatFx {
                 side: side_of(target),
-                text: format!("-{}", damage),
+                text: format!("-{}", scaled_damage.round() as i32),
                 color,
             });
-            push_timed(state, target, effect.clone());
+            push_timed(state, target, effect.clone(), damage_multiplier);
         },
         Effect::InstantMana {
             amount,
@@ -1182,7 +1305,7 @@ fn apply_effect(
             amount,
         } => {
             if let Some(t) = state.get_mut(target) {
-                t.mana = (t.mana - *amount as f32).max(0.0);
+                t.mana = (t.mana - *amount as f32 * damage_multiplier).max(0.0);
             }
         },
         Effect::Manasteal {
@@ -1208,11 +1331,19 @@ fn apply_effect(
             // A cleaving strike: deal a percentage of the source's attack as
             // immediate damage to the target, mitigated by its defense.
             let atk = state.get(source).map(|s| s.eff_attack_for(s.base_attack)).unwrap_or(0.0);
-            let (def, incoming) = state
+            let (def, incoming, resistance) = state
                 .get(target)
-                .map(|t| (t.eff_defense(), t.incoming_multiplier()))
-                .unwrap_or((0.0, 1.0));
-            let dmg = compute_damage(atk * (damage_pct / 100.0), def, false, incoming);
+                .map(|t| {
+                    (
+                        t.eff_defense(),
+                        t.incoming_multiplier(),
+                        t.incoming_damage_multiplier(kind, category),
+                    )
+                })
+                .unwrap_or((0.0, 1.0, 1.0));
+            let dmg = compute_damage(atk * (damage_pct / 100.0), def, false, incoming)
+                * outgoing_multiplier
+                * resistance;
             if let Some(t) = state.get_mut(target) {
                 t.take_damage(dmg);
             }
@@ -1223,12 +1354,23 @@ fn apply_effect(
             });
         },
         // Timed buffs / debuffs / damage-over-time / heal-over-time.
-        _ => push_timed(state, target, effect.clone()),
+        _ => {
+            let magnitude_multiplier = match effect {
+                Effect::Curse {
+                    ..
+                } => damage_multiplier,
+                Effect::Regen {
+                    ..
+                } => healing_multiplier,
+                _ => 1.0,
+            };
+            push_timed(state, target, effect.clone(), magnitude_multiplier);
+        },
     }
 }
 
 /// Adds a timed effect, refreshing non-stackable effects of the same variant.
-fn push_timed(state: &mut CombatState, target: Who, effect: Effect) {
+fn push_timed(state: &mut CombatState, target: Who, effect: Effect, magnitude_multiplier: f32) {
     let duration = effect_duration(&effect);
     if let Some(t) = state.get_mut(target) {
         let refresh_existing = !matches!(effect, Effect::Bleed { .. } | Effect::Curse { .. });
@@ -1238,6 +1380,7 @@ fn push_timed(state: &mut CombatState, target: Who, effect: Effect) {
             }) {
                 existing.effect = effect;
                 existing.remaining = existing.remaining.max(duration);
+                existing.magnitude_multiplier = magnitude_multiplier;
                 return;
             }
         }
@@ -1245,6 +1388,7 @@ fn push_timed(state: &mut CombatState, target: Who, effect: Effect) {
             effect,
             remaining: duration,
             tick_acc: 0.0,
+            magnitude_multiplier,
         });
     }
 }
@@ -1445,6 +1589,8 @@ fn tick_fighter_effects(fighter: &mut Fighter, dt: f32) -> Vec<(FxSide, String, 
     let mut curse_damage = Vec::new();
     for te in fighter.effects.iter_mut() {
         let (hp_s, mp_s) = effect_per_second(&te.effect);
+        let hp_s = hp_s * te.magnitude_multiplier;
+        let mp_s = mp_s * te.magnitude_multiplier;
         if hp_s != 0.0 || mp_s != 0.0 {
             te.tick_acc += dt;
             while te.tick_acc >= 1.0 {
@@ -1467,7 +1613,7 @@ fn tick_fighter_effects(fighter: &mut Fighter, dt: f32) -> Vec<(FxSide, String, 
         } = &te.effect
         {
             if te.remaining <= 0.0 {
-                curse_damage.push(*damage as f32);
+                curse_damage.push(*damage as f32 * te.magnitude_multiplier);
             }
         }
     }
@@ -1507,7 +1653,7 @@ pub fn step_combat(
     }
 
     // Regen.
-    for who in [Who::Player, Who::Pet, Who::Enemy] {
+    for who in [Who::Player, Who::Pet, Who::Enemy, Who::EnemyPet] {
         if let Some(f) = state.get_mut(who) {
             if f.alive {
                 f.health =
@@ -1518,7 +1664,7 @@ pub fn step_combat(
     }
 
     // Damage/heal over time + effect expiry.
-    for who in [Who::Player, Who::Pet, Who::Enemy] {
+    for who in [Who::Player, Who::Pet, Who::Enemy, Who::EnemyPet] {
         let fx = if let Some(f) = state.get_mut(who) {
             tick_fighter_effects(f, dt)
         } else {
@@ -1543,9 +1689,20 @@ pub fn step_combat(
     } else {
         Who::Player
     };
-    for (attacker, defender) in
-        [(Who::Player, Who::Enemy), (Who::Pet, Who::Enemy), (Who::Enemy, enemy_target)]
+    let player_target = if state.enemy_pet.as_ref().map(|pet| pet.alive).unwrap_or(false)
+        && (state.enemy.has_taunt()
+            || state.enemy_pet.as_ref().map(|pet| pet.has_taunt()).unwrap_or(false))
     {
+        Who::EnemyPet
+    } else {
+        Who::Enemy
+    };
+    for (attacker, defender) in [
+        (Who::Player, player_target),
+        (Who::Pet, player_target),
+        (Who::Enemy, enemy_target),
+        (Who::EnemyPet, enemy_target),
+    ] {
         let num_weapons = {
             let Some(f) = state.get(attacker) else {
                 continue;
@@ -1733,6 +1890,11 @@ pub fn try_cast_ability(
     let Some(ability) = get_ability(&key) else {
         return;
     };
+    let ability_category = if ability.kind == Kind::Physical {
+        state.player.weapons.first().map(|weapon| weapon.category)
+    } else {
+        None
+    };
 
     state.player.mana -= effective_cost;
 
@@ -1770,11 +1932,27 @@ pub fn try_cast_ability(
         if effect_targets_self(effect) {
             for &ally in &allies {
                 if state.get(ally).is_some() {
-                    apply_effect(state, Who::Player, ally, effect, play_audio_msg);
+                    apply_effect(
+                        state,
+                        Who::Player,
+                        ally,
+                        effect,
+                        ability.kind,
+                        ability_category,
+                        play_audio_msg,
+                    );
                 }
             }
         } else if !enemy_dodged && state.enemy.alive {
-            apply_effect(state, Who::Player, Who::Enemy, effect, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Player,
+                Who::Enemy,
+                effect,
+                ability.kind,
+                ability_category,
+                play_audio_msg,
+            );
         }
     }
 
@@ -1815,9 +1993,25 @@ pub fn try_use_consumable(
         // Beneficial effects buff the player; any offensive effect is thrown at
         // the enemy so a consumable never debuffs its own user.
         if effect_targets_self(effect) {
-            apply_effect(state, Who::Player, Who::Player, effect, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Player,
+                Who::Player,
+                effect,
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
         } else if state.enemy.alive {
-            apply_effect(state, Who::Player, Who::Enemy, effect, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Player,
+                Who::Enemy,
+                effect,
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
         }
     }
 
@@ -1854,14 +2048,23 @@ pub fn enemy_cast_ability(
     let Some(ability) = get_ability(key) else {
         return;
     };
-    if let Some(slot) =
-        state.enemy_abilities.iter_mut().find(|slot| slot.key.as_deref() == Some(key))
-    {
-        if slot.cooldown <= 0.0 {
-            slot.cooldown = ability.cooldown;
-        }
-        slot.remaining = slot.cooldown;
+    let ability_category = if ability.kind == Kind::Physical {
+        state.enemy.weapons.first().map(|weapon| weapon.category)
+    } else {
+        None
+    };
+    let Some(slot_index) =
+        state.enemy_abilities.iter().position(|slot| slot.key.as_deref() == Some(key))
+    else {
+        return;
+    };
+    let effective_cost = (state.enemy_abilities[slot_index].mana_cost as f32
+        * (1.0 - state.enemy.clearcasting_reduction()))
+    .round();
+    if state.enemy_abilities[slot_index].remaining > 0.0 || state.enemy.mana < effective_cost {
+        return;
     }
+    state.enemy.mana -= effective_cost;
 
     // The host player can dodge offensive effects.
     let has_offensive = ability.effects.iter().any(|e| !effect_targets_self(e));
@@ -1887,11 +2090,41 @@ pub fn enemy_cast_ability(
 
     for effect in &ability.effects {
         if effect_targets_self(effect) {
-            apply_effect(state, Who::Enemy, Who::Enemy, effect, play_audio_msg);
+            let allies = if ability.is_aoe {
+                [Some(Who::Enemy), Some(Who::EnemyPet)]
+            } else {
+                [Some(Who::Enemy), None]
+            };
+            for ally in allies.into_iter().flatten() {
+                if state.get(ally).is_some() {
+                    apply_effect(
+                        state,
+                        Who::Enemy,
+                        ally,
+                        effect,
+                        ability.kind,
+                        ability_category,
+                        play_audio_msg,
+                    );
+                }
+            }
         } else if !player_dodged && state.player.alive {
-            apply_effect(state, Who::Enemy, Who::Player, effect, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Player,
+                effect,
+                ability.kind,
+                ability_category,
+                play_audio_msg,
+            );
         }
     }
+    let slot = &mut state.enemy_abilities[slot_index];
+    if slot.cooldown <= 0.0 {
+        slot.cooldown = ability.cooldown;
+    }
+    slot.remaining = slot.cooldown;
 
     state.fx.push(CombatFx {
         side: FxSide::Enemy,
@@ -1922,9 +2155,25 @@ pub fn enemy_use_consumable(
 
     for effect in &consumable.effects {
         if effect_targets_self(effect) {
-            apply_effect(state, Who::Enemy, Who::Enemy, effect, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                effect,
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
         } else if state.player.alive {
-            apply_effect(state, Who::Enemy, Who::Player, effect, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Player,
+                effect,
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
         }
     }
 
@@ -2936,10 +3185,11 @@ fn spawn_continue_with_pet_button(
         parent
             .spawn((
                 Node {
-                    width: Val::Vh(26.0),
+                    min_width: Val::Vh(26.0),
                     height: Val::Vh(5.0),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
+                    padding: UiRect::horizontal(Val::Vh(1.0)),
                     border: UiRect::all(Val::Vh(0.22)),
                     border_radius: BorderRadius::all(Val::Vh(0.44)),
                     ..default()
@@ -3149,7 +3399,9 @@ pub fn update_combat_equipment_slots(
             };
 
             let img_handle = match equipped_key {
-                Some(key) => assets.image(format!("build_{}", key)),
+                Some(key) => get_equipment(key)
+                    .map(|equipment| assets.image(equipment.image()))
+                    .unwrap_or_else(|| assets.image("stone")),
                 None => assets.image("stone"),
             };
             if image.image != img_handle {
@@ -3190,7 +3442,9 @@ pub fn update_combat_equipment_slots(
             };
 
             let img_handle = match equipped_key {
-                Some(key) => assets.image(format!("build_{}", key)),
+                Some(key) => get_equipment(key)
+                    .map(|equipment| assets.image(equipment.image()))
+                    .unwrap_or_else(|| assets.image("stone")),
                 None => assets.image("stone"),
             };
             if image.image != img_handle {
@@ -3230,8 +3484,10 @@ pub fn update_combat_equipment_slots(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::catalog::catalog::all_wearables;
+    use crate::core::catalog::catalog::{all_weapons, all_wearables};
     use crate::core::catalog::wearables::WearableSlot;
+    use crate::core::classes::Class;
+    use crate::core::deities::Deity;
 
     /// Returns a neutral fighter suitable for isolated combat-mechanics tests.
     fn test_fighter() -> Fighter {
@@ -3254,6 +3510,7 @@ mod tests {
             weapon_effects: Vec::new(),
             attack_style: AttackStyle::Melee,
             intelligence_mod: 0.0,
+            passive_modifiers: Vec::new(),
             alive: true,
             weapons: Vec::new(),
         }
@@ -3265,6 +3522,7 @@ mod tests {
             player: test_fighter(),
             pet: None,
             enemy: test_fighter(),
+            enemy_pet: None,
             abilities: Vec::new(),
             enemy_abilities: Vec::new(),
             status: CombatStatus::Ongoing,
@@ -3293,6 +3551,104 @@ mod tests {
         // Test eff_attack_for with a base attack of 15.0
         let attack = fighter.eff_attack_for(15.0);
         assert_eq!(attack, 15.0);
+    }
+
+    #[test]
+    /// Verifies every percentage-based passive modifier reaches combat math.
+    fn passive_combat_modifiers_are_applied() {
+        let mut fighter = test_fighter();
+        fighter.passive_modifiers = vec![
+            Modifier::KindPowerMultiplier(Kind::Fire, 10.0),
+            Modifier::CategoryPowerMultiplier(Category::Range, 5.0),
+            Modifier::KindResistanceMultiplier(Kind::Ice, 20.0),
+            Modifier::CategoryResistanceMultiplier(Category::Range, 5.0),
+            Modifier::LifeSteal(7.0),
+            Modifier::HealingMultiplier(12.0),
+        ];
+
+        assert!(
+            (fighter.outgoing_damage_multiplier(Kind::Fire, Some(Category::Range)) - 1.15).abs()
+                < f32::EPSILON
+        );
+        assert!(
+            (fighter.incoming_damage_multiplier(Kind::Ice, Some(Category::Range)) - 0.75).abs()
+                < f32::EPSILON
+        );
+        assert!((fighter.lifesteal() - 0.07).abs() < f32::EPSILON);
+        assert!((fighter.healing_multiplier() - 1.12).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    /// Verifies direct scaling remains attached to periodic damage and healing.
+    fn timed_effect_magnitude_is_applied() {
+        let mut state = test_combat_state();
+        push_timed(
+            &mut state,
+            Who::Player,
+            Effect::Poison {
+                damage: 2,
+                duration: 2.0,
+            },
+            1.5,
+        );
+
+        tick_fighter_effects(&mut state.player, 1.0);
+
+        assert!((state.player.health - 97.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    /// Verifies dual wielding keeps shared attack singular and applies identity speed and crit.
+    fn dual_wielding_applies_identity_bonuses_once() {
+        let weapons = all_weapons()
+            .iter()
+            .filter(|weapon| weapon.category == Category::Finesse && weapon.level == 1)
+            .take(2)
+            .collect::<Vec<_>>();
+        assert_eq!(weapons.len(), 2);
+        let player = Player {
+            class: Class::Monk,
+            deity: Deity::Aeloria,
+            weapon_lh: Some(weapons[0].name.clone()),
+            weapon_rh: Some(weapons[1].name.clone()),
+            ..default()
+        };
+
+        let combat_weapons = player_combat_weapons(&player);
+        assert_eq!(combat_weapons.len(), 2);
+        assert!(
+            (combat_weapons.iter().map(|weapon| weapon.attack).sum::<f32>()
+                - player.attack() as f32)
+                .abs()
+                < f32::EPSILON
+        );
+        for (combat_weapon, catalog_weapon) in combat_weapons.iter().zip(weapons) {
+            assert!(
+                (combat_weapon.attack_speed - catalog_weapon.attack_speed * 1.1).abs()
+                    < f32::EPSILON
+            );
+            assert!(
+                (combat_weapon.crit_chance - (catalog_weapon.crit_chance + 0.12)).abs()
+                    < f32::EPSILON
+            );
+        }
+    }
+
+    #[test]
+    /// Verifies defensive shields and books never create a basic auto-attack.
+    fn shields_and_books_do_not_auto_attack() {
+        for category in [Category::Shield, Category::Book] {
+            let weapon = all_weapons()
+                .iter()
+                .find(|weapon| weapon.category == category)
+                .unwrap_or_else(|| panic!("catalog contains a {category:?} weapon"));
+            let player = Player {
+                weapon_lh: Some(weapon.name.clone()),
+                ..default()
+            };
+
+            assert!(player_combat_weapons(&player).is_empty());
+        }
     }
 
     #[test]
@@ -3343,6 +3699,7 @@ mod tests {
                 initiative_pct: 10.0,
                 duration: 5.0,
             },
+            1.0,
         );
         push_timed(
             &mut state,
@@ -3351,6 +3708,7 @@ mod tests {
                 initiative_pct: 20.0,
                 duration: 3.0,
             },
+            1.0,
         );
 
         assert_eq!(state.player.effects.len(), 1);

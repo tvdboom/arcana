@@ -20,8 +20,10 @@ pub enum GameState {
     #[default]
     CreateCharacter,
     ChooseRace,
+    ChooseElfHeritage,
     ChooseClass,
     ChooseSubClass,
+    ChooseDeity,
     Playing,
     Combat,
     CombatPaused,

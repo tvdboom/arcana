@@ -2,7 +2,9 @@
 
 use crate::core::actions::gain_xp;
 use crate::core::audio::PlayAudioMsg;
-use crate::core::classes::{Ajah, Class};
+use crate::core::classes::{
+    AssassinPath, BardStyle, Class, ClassSpecialization, MonkSchool, PetChoice, WarriorPath,
+};
 use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin, StartNewCharacterMsg};
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
@@ -119,14 +121,26 @@ pub fn check_keys_menu(
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_game_state.set(GameState::CreateCharacter);
                 },
-                GameState::ChooseClass => {
+                GameState::ChooseElfHeritage => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_game_state.set(GameState::ChooseRace);
+                },
+                GameState::ChooseClass => {
+                    play_audio_msg.write(PlayAudioMsg::new("button"));
+                    if player.race == crate::core::races::Race::Elf {
+                        next_game_state.set(GameState::ChooseElfHeritage);
+                    } else {
+                        next_game_state.set(GameState::ChooseRace);
+                    }
                 },
                 GameState::ChooseSubClass => {
                     player.pet = None; // Reset pet selection
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     next_game_state.set(GameState::ChooseClass);
+                },
+                GameState::ChooseDeity => {
+                    play_audio_msg.write(PlayAudioMsg::new("button"));
+                    next_game_state.set(GameState::ChooseSubClass);
                 },
                 GameState::CreateCharacter => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
@@ -199,6 +213,11 @@ pub fn check_keys_menu(
                     let race = player.race;
                     race.on_select(&mut player, &mut next_game_state);
                 },
+                GameState::ChooseElfHeritage => {
+                    play_audio_msg.write(PlayAudioMsg::new("button"));
+                    let heritage = player.elf_heritage;
+                    heritage.on_select(&mut player, &mut next_game_state);
+                },
                 GameState::ChooseClass => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     let class = player.class;
@@ -207,18 +226,54 @@ pub fn check_keys_menu(
                 GameState::ChooseSubClass => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));
                     match player.class {
-                        Class::Mage(_) => {
-                            let ajah = Ajah::default();
+                        Class::Assassin => {
+                            let path = match player.specialization {
+                                ClassSpecialization::Assassin(path) => path,
+                                _ => AssassinPath::default(),
+                            };
+                            path.on_select(&mut player, &mut next_game_state);
+                        },
+                        Class::Mage(class_ajah) => {
+                            let ajah = match player.specialization {
+                                ClassSpecialization::Mage(spec_ajah) if spec_ajah == class_ajah => {
+                                    spec_ajah
+                                },
+                                _ => class_ajah,
+                            };
                             ajah.on_select(&mut player, &mut next_game_state);
                         },
                         Class::Druid => {
-                            let kind = player.pet.as_ref().map(|p| p.kind).unwrap_or_default();
-                            kind.on_select(&mut player, &mut next_game_state);
+                            let pet = match player.specialization {
+                                ClassSpecialization::Druid(pet) => pet,
+                                _ => PetChoice::default(),
+                            };
+                            pet.on_select(&mut player, &mut next_game_state);
                         },
-                        _ => {
-                            next_game_state.set(GameState::CreateCharacter);
+                        Class::Warrior => {
+                            let path = match player.specialization {
+                                ClassSpecialization::Warrior(path) => path,
+                                _ => WarriorPath::default(),
+                            };
+                            path.on_select(&mut player, &mut next_game_state);
+                        },
+                        Class::Monk => {
+                            let school = match player.specialization {
+                                ClassSpecialization::Monk(school) => school,
+                                _ => MonkSchool::default(),
+                            };
+                            school.on_select(&mut player, &mut next_game_state);
+                        },
+                        Class::Bard => {
+                            let style = match player.specialization {
+                                ClassSpecialization::Bard(style) => style,
+                                _ => BardStyle::default(),
+                            };
+                            style.on_select(&mut player, &mut next_game_state);
                         },
                     }
+                },
+                GameState::ChooseDeity => {
+                    play_audio_msg.write(PlayAudioMsg::new("error"));
                 },
                 GameState::GameMenu | GameState::Settings => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));

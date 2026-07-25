@@ -732,8 +732,7 @@ fn spawn_shop_item_card(
                     height: percent(100.),
                     ..default()
                 },
-                ImageNode::new(assets.image(format!("build_{}", item.name())))
-                    .with_mode(NodeImageMode::Stretch),
+                ImageNode::new(assets.image(item.image())).with_mode(NodeImageMode::Stretch),
             ));
 
             parent
@@ -932,7 +931,7 @@ pub fn shop_tooltip_system(
                 lines,
                 &windows,
                 Some(equipment.price()),
-                Some(equipment.name().to_string()),
+                Some(equipment.image().to_string()),
                 if matches!(equipment, Equipment::Artifact(_)) {
                     64.0
                 } else {

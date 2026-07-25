@@ -1207,7 +1207,11 @@ fn monster_effects(name: &str, level: u32) -> Vec<String> {
     let mut effs = Vec::new();
     let name_lower = name.to_lowercase();
 
-    if ["hell hound", "cerberus", "red", "fire troll", "ember drake"]
+    if level == 1 && name_lower == "snake" {
+        effs.push("Poison(damage: 1, duration: 0.5)".to_string());
+    } else if level == 1 && ["weasel", "rat", "fox"].contains(&name_lower.as_str()) {
+        effs.push("Cleave(damage_pct: 60.0, duration: 0.0)".to_string());
+    } else if ["hell hound", "cerberus", "red", "fire troll", "ember drake"]
         .iter()
         .any(|x| name_lower.contains(x))
     {
@@ -1216,7 +1220,8 @@ fn monster_effects(name: &str, level: u32) -> Vec<String> {
         .iter()
         .any(|x| name_lower.contains(x))
     {
-        effs.push(format!("Poison(damage: {}, duration: 4.0)", 1 + level.div_ceil(3)));
+        let damage = 1 + level.div_ceil(3);
+        effs.push(format!("Poison(damage: {damage}, duration: 4.0)"));
     } else if [
         "medusa",
         "lich",
