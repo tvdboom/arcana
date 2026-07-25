@@ -1370,28 +1370,34 @@ impl SelectionItem for Class {
 
     /// Handles select.
     fn on_select(&self, player: &mut Player, next_game_state: &mut NextState<GameState>) {
-        player.class = *self;
-        player.specialization = self.default_specialization();
-        player.pet = None;
-
-        let ability = all_abilities()
+        let mut random = rng();
+        let lowest_ability_level = all_abilities()
             .iter()
-            .filter(|ability| ability.level == 1 && self.accepts_starting_ability(ability.kind))
-            .choose(&mut rng())
-            .unwrap();
-
-        player.abilities = vec![ability.name.clone()];
-
-        let perk = all_perks().iter().filter(|a| a.level == 1).choose(&mut rng()).unwrap();
-
-        player.perks = vec![perk.name.clone()];
-
+            .filter(|ability| self.accepts_starting_ability(ability.kind))
+            .map(|ability| ability.level)
+            .min();
+        let ability = lowest_ability_level.and_then(|level| {
+            all_abilities()
+                .iter()
+                .filter(|ability| {
+                    ability.level == level && self.accepts_starting_ability(ability.kind)
+                })
+                .choose(&mut random)
+        });
+        let perk = all_perks().iter().filter(|perk| perk.level == 1).choose(&mut random);
         let weapon = all_weapons()
             .iter()
             .filter(|weapon| weapon.level < 3 && self.accepts_starting_weapon(weapon.category))
-            .choose(&mut rng())
-            .unwrap();
+            .choose(&mut random);
+        let (Some(ability), Some(perk), Some(weapon)) = (ability, perk, weapon) else {
+            return;
+        };
 
+        player.class = *self;
+        player.specialization = self.default_specialization();
+        player.pet = None;
+        player.abilities = vec![ability.name.clone()];
+        player.perks = vec![perk.name.clone()];
         player.weapon_lh = Some(weapon.name.clone());
         player.missing_health = 0;
         player.missing_mana = 0;
@@ -1588,12 +1594,13 @@ impl SelectionItem for WarriorPath {
         choose_specialization(player, ClassSpecialization::Warrior(*self), next_game_state);
     }
 
-    /// Returns a dedicated requested calling portrait or the base warrior portrait.
+    /// Returns the dedicated race- and sex-specific portrait for this warrior path.
     fn get_image_key(&self, player: &Player) -> String {
         let specialization = match self {
+            WarriorPath::Paladin => Some("paladin"),
             WarriorPath::Templar => Some("templar"),
             WarriorPath::Berserker => Some("berserker"),
-            WarriorPath::Paladin | WarriorPath::Warden => None,
+            WarriorPath::Warden => Some("warden"),
         };
         specialization_portrait_key("warrior", specialization, player)
     }
@@ -2505,7 +2512,7 @@ fn on_deity_choice_click(
 mod tests {
     use super::*;
 
-    /// Verifies requested warrior callings select race- and sex-specific portraits.
+    /// Verifies every warrior calling selects a race- and sex-specific portrait.
     #[test]
     fn warrior_calling_portraits_include_calling_race_and_sex() {
         let mut player = Player {
@@ -2514,8 +2521,10 @@ mod tests {
             ..default()
         };
 
+        assert_eq!(WarriorPath::Paladin.get_image_key(&player), "warrior_paladin_elf_woman");
         assert_eq!(WarriorPath::Templar.get_image_key(&player), "warrior_templar_elf_woman");
         assert_eq!(WarriorPath::Berserker.get_image_key(&player), "warrior_berserker_elf_woman");
+        assert_eq!(WarriorPath::Warden.get_image_key(&player), "warrior_warden_elf_woman");
 
         player.race = Race::Dragonborn;
         player.sex = Sex::Man;
@@ -2524,6 +2533,7 @@ mod tests {
             WarriorPath::Berserker.get_image_key(&player),
             "warrior_berserker_dragonborn_man"
         );
+        assert_eq!(WarriorPath::Warden.get_image_key(&player), "warrior_warden_dragonborn_man");
     }
 
     /// Verifies only the center of the alignment grid uses the True label.

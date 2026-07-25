@@ -227,7 +227,13 @@ impl Player {
                 let ajah = ajah.to_lowername();
                 format!("mage_{ajah}_{race}_{sex}")
             },
-            Class::Warrior => format!("warrior_{race}_{sex}"),
+            Class::Warrior => match self.specialization {
+                ClassSpecialization::Warrior(path) => {
+                    let path = path.to_lowername().replace(' ', "_");
+                    format!("warrior_{path}_{race}_{sex}")
+                },
+                _ => format!("warrior_{race}_{sex}"),
+            },
             Class::Monk => match self.specialization {
                 ClassSpecialization::Monk(school) => {
                     let school = school.to_lowername().replace(' ', "_");
@@ -1495,7 +1501,7 @@ mod tests {
     }
 
     #[test]
-    /// Verifies that Assassin and Bard gameplay portraits retain their selected specialization.
+    /// Verifies gameplay portraits retain their selected specialization.
     fn specialization_portraits_include_selected_path() {
         let assassin = Player {
             sex: Sex::Woman,
@@ -1510,9 +1516,16 @@ mod tests {
             specialization: ClassSpecialization::Bard(BardStyle::GraveDirge),
             ..default()
         };
+        let templar = Player {
+            race: Race::Halfling,
+            class: Class::Warrior,
+            specialization: ClassSpecialization::Warrior(WarriorPath::Templar),
+            ..default()
+        };
 
         assert_eq!(assassin.portrait_key(), "assassin_venomhand_elf_woman");
         assert_eq!(bard.portrait_key(), "bard_grave_dirge_dragonborn_man");
+        assert_eq!(templar.portrait_key(), "warrior_templar_halfling_man");
     }
 
     #[test]

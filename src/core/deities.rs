@@ -95,7 +95,8 @@ impl Deity {
                 ..Default::default()
             },
             Deity::Aurion => IdentityBonuses {
-                defense: 3,
+                defense: 1,
+                health_regen: 1,
                 ..Default::default()
             },
             Deity::Vaelis => IdentityBonuses {
@@ -108,9 +109,8 @@ impl Deity {
                 ..Default::default()
             },
             Deity::Oryn => IdentityBonuses {
-                attack: 1,
-                defense: 1,
-                initiative: -2,
+                defense: 2,
+                max_health: 10,
                 ..Default::default()
             },
             Deity::Kharos => IdentityBonuses {
@@ -165,6 +165,33 @@ mod tests {
         let maximum = ratings.iter().copied().fold(f32::NEG_INFINITY, f32::max);
 
         assert!(maximum / minimum <= 1.07, "deity ratings diverged: {ratings:?}");
+    }
+
+    /// Counts the non-zero modifiers in a divine bonus package.
+    fn active_modifier_count(bonuses: IdentityBonuses) -> usize {
+        usize::from(bonuses.attack != 0)
+            + usize::from(bonuses.defense != 0)
+            + usize::from(bonuses.initiative != 0)
+            + usize::from(bonuses.max_health != 0)
+            + usize::from(bonuses.max_mana != 0)
+            + usize::from(bonuses.health_regen != 0)
+            + usize::from(bonuses.mana_regen != 0)
+            + usize::from(bonuses.crit_chance != 0.0)
+            + usize::from(bonuses.attack_speed != 0.0)
+            + usize::from(bonuses.melee_attack != 0)
+            + usize::from(bonuses.finesse_attack != 0)
+            + usize::from(bonuses.ranged_attack != 0)
+    }
+
+    #[test]
+    /// Verifies that every deity grants at most two numerical modifiers.
+    fn deity_bonuses_have_at_most_two_modifiers() {
+        for deity in Deity::iter() {
+            assert!(
+                active_modifier_count(deity.bonuses()) <= 2,
+                "{deity:?} grants too many modifiers"
+            );
+        }
     }
 
     #[test]

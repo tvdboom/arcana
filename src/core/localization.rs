@@ -164,6 +164,11 @@ impl Localization {
         };
         map.get(&mapped_key).cloned()
     }
+
+    /// Returns a localized catalog-monster name when a translation is available.
+    pub fn monster_name(&self, name: &str, language: Language) -> Option<String> {
+        self.get_opt(&format!("monster.{name}"), language)
+    }
 }
 
 /// Marks a text entity with the localization key so it can be updated on language change.
@@ -612,6 +617,25 @@ pub fn update_localized_text(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use strum::IntoEnumIterator;
+
+    /// Verifies every generated monster name has a translation in every supported language.
+    #[test]
+    fn catalog_monsters_have_translated_names_in_every_language() {
+        let localization = Localization::from_world(&mut World::new());
+
+        for language in Language::iter() {
+            for monster in crate::core::catalog::catalog::all_monsters() {
+                assert!(
+                    localization.monster_name(&monster.name, language).is_some(),
+                    "missing {language:?} translation for monster {}",
+                    monster.name
+                );
+            }
+        }
+
+        assert_eq!(localization.monster_name("Fox", Language::Dutch).as_deref(), Some("Vos"));
+    }
 
     /// Verifies alignment formatting omits deity names and handles true neutral naturally.
     #[test]

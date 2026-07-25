@@ -31,6 +31,9 @@ use rand::{rng, RngExt};
 use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumString};
 
+const MAX_CATALOG_LEVEL: u32 = 20;
+const ENDGAME_MONSTER_MIN_LEVEL: u32 = MAX_CATALOG_LEVEL - 1;
+
 #[derive(
     EnumString, Debug, Display, Clone, Copy, PartialEq, Eq, Hash, Reflect, Serialize, Deserialize,
 )]
@@ -65,6 +68,37 @@ impl Action {
 #[derive(Component)]
 pub struct ActionButton(pub Action);
 
+/// Returns the highest catalog level that can supply an unowned level-up choice.
+///
+/// At level 20 and beyond, choices start at the final catalog tier and fall back one tier at a
+/// time so continued progression never searches for a catalog level that does not exist.
+fn level_up_choice_level(
+    player_level: u32,
+    mut has_unowned_choice_at_level: impl FnMut(u32) -> bool,
+) -> Option<u32> {
+    if player_level < MAX_CATALOG_LEVEL {
+        return Some(player_level);
+    }
+
+    (1..=MAX_CATALOG_LEVEL).rev().find(|&level| has_unowned_choice_at_level(level))
+}
+
+/// Returns the monster-level range for a hunt or quest combat encounter.
+///
+/// Endgame characters fight only level-19 or level-20 monsters because the catalog's level cap
+/// is 20; lower-level characters retain the existing tier-based encounter ranges.
+pub(crate) fn encounter_level_range(player_level: u32, tier: u32) -> (u32, u32) {
+    if player_level >= MAX_CATALOG_LEVEL {
+        return (ENDGAME_MONSTER_MIN_LEVEL, MAX_CATALOG_LEVEL);
+    }
+
+    match tier {
+        0 => (player_level.saturating_sub(2).max(1), player_level),
+        1 => (player_level.saturating_sub(1).max(1), player_level.saturating_add(1)),
+        _ => (player_level, player_level.saturating_add(2)),
+    }
+}
+
 // Reusable level up helper
 /// Performs the trigger level up operation.
 pub fn trigger_level_up(
@@ -84,9 +118,17 @@ pub fn trigger_level_up(
     }
 
     let mut ability_choices = Vec::new();
+    let ability_choice_level = level_up_choice_level(player.level(), |level| {
+        all_abilities().iter().any(|ability| {
+            ability.level == level && !player.abilities.contains(&ability.name.to_string())
+        })
+    });
     let ability_pool: Vec<_> = all_abilities()
         .iter()
-        .filter(|ab| ab.level == player.level() && !player.abilities.contains(&ab.name.to_string()))
+        .filter(|ability| {
+            Some(ability.level) == ability_choice_level
+                && !player.abilities.contains(&ability.name.to_string())
+        })
         .collect();
 
     let mut weighted_pool: Vec<(&Ability, f64)> = ability_pool
@@ -134,9 +176,16 @@ pub fn trigger_level_up(
     }
 
     let mut perk_choices = Vec::new();
+    let perk_choice_level = level_up_choice_level(player.level(), |level| {
+        all_perks()
+            .iter()
+            .any(|perk| perk.level == level && !player.perks.contains(&perk.name.to_string()))
+    });
     let mut perk_pool: Vec<_> = all_perks()
         .iter()
-        .filter(|pk| pk.level == player.level() && !player.perks.contains(&pk.name.to_string()))
+        .filter(|perk| {
+            Some(perk.level) == perk_choice_level && !player.perks.contains(&perk.name.to_string())
+        })
         .collect();
     for _ in 0..3 {
         if perk_pool.is_empty() {
@@ -910,5 +959,27 @@ pub fn handle_study_card_clicks(
         play_audio_msg.write(PlayAudioMsg::new("study"));
 
         player.ap += ap_cost;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{encounter_level_range, level_up_choice_level};
+
+    /// Verifies endgame level-ups begin with the final catalog tier and fall back by tier.
+    #[test]
+    fn endgame_level_up_choices_fall_back_to_the_highest_available_tier() {
+        assert_eq!(level_up_choice_level(20, |level| level == 20), Some(20));
+        assert_eq!(level_up_choice_level(35, |level| level == 19), Some(19));
+        assert_eq!(level_up_choice_level(35, |level| level == 7), Some(7));
+    }
+
+    /// Verifies endgame encounters stay within the two highest monster catalog tiers.
+    #[test]
+    fn endgame_encounters_are_level_nineteen_or_twenty() {
+        for tier in 0..=2 {
+            assert_eq!(encounter_level_range(20, tier), (19, 20));
+            assert_eq!(encounter_level_range(99, tier), (19, 20));
+        }
     }
 }

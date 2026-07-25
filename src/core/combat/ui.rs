@@ -24,7 +24,7 @@ use crate::core::constants::{
 };
 use crate::core::localization::{Localization, LocalizedText};
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
-use crate::core::monsters::{ActiveMonster, Monster, MonsterKind};
+use crate::core::monsters::{ActiveMonster, Monster};
 use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::ui::playing::{
@@ -756,6 +756,12 @@ fn spawn_portrait_label(
     level: u32,
     is_player: bool,
 ) {
+    let display_name = if is_player {
+        capitalize_words(name)
+    } else {
+        name.to_string()
+    };
+
     parent
         .spawn(Node {
             position_type: PositionType::Absolute,
@@ -768,7 +774,7 @@ fn spawn_portrait_label(
         })
         .with_children(|parent| {
             parent.spawn((
-                add_text(capitalize_words(name), "bold", 2.8, assets),
+                add_text(display_name, "bold", 2.8, assets),
                 TextColor(BUTTON_TEXT_COLOR),
                 CombatPortraitName {
                     is_player,
@@ -1420,7 +1426,12 @@ fn spawn_monster_panel(
                             spawn_monster_portrait(
                                 parent,
                                 assets,
-                                &monster_display_name(monster),
+                                &crate::core::combat::mechanics::localize_monster_name(
+                                    &monster.name,
+                                    monster.kind,
+                                    localization,
+                                    lang,
+                                ),
                                 monster.level,
                                 &monster.image,
                                 if is_pvp {
@@ -1443,23 +1454,6 @@ fn spawn_monster_panel(
                         });
                 });
         });
-}
-
-/// Performs the monster display name operation.
-fn monster_display_name(monster: &Monster) -> String {
-    let name = capitalize_words(&monster.name);
-    if monster.kind != MonsterKind::Dragon {
-        return name;
-    }
-
-    let mut parts = name.split_whitespace();
-    let color = parts.next().unwrap_or("Dragon");
-    let stage = parts.collect::<Vec<_>>().join(" ");
-    if stage.is_empty() {
-        format!("{color} Dragon")
-    } else {
-        format!("{color} Dragon ({stage})")
-    }
 }
 
 /// Spawns monster portrait.

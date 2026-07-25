@@ -2428,6 +2428,10 @@ pub fn localize_monster_name(
     localization: &crate::core::localization::Localization,
     lang: crate::core::settings::Language,
 ) -> String {
+    if let Some(localized_name) = localization.monster_name(name, lang) {
+        return localized_name;
+    }
+
     if kind == crate::core::monsters::MonsterKind::Dragon {
         let name_cap = crate::utils::capitalize_words(name);
         let mut parts = name_cap.split_whitespace();
@@ -2452,10 +2456,6 @@ pub fn localize_monster_name(
                 return format!("{} {} ({})", color_loc, dragon_loc, stage_loc);
             }
         }
-    }
-
-    if let Some(loc_name) = localization.get_opt(name, lang) {
-        return loc_name;
     }
 
     crate::utils::capitalize_words(name)

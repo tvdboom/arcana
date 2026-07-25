@@ -107,7 +107,7 @@ fn expansion_portrait_paths() -> Vec<(String, String)> {
         }
     }
 
-    for specialization in ["templar", "berserker"] {
+    for specialization in ["paladin", "templar", "berserker", "warden"] {
         for race in ["human", "elf", "dwarf", "orc", "halfling", "dragonborn"] {
             for sex in ["man", "woman"] {
                 let key = format!("warrior_{specialization}_{race}_{sex}");
@@ -588,15 +588,17 @@ mod tests {
                 || key.starts_with("bard_silver_ballad_")
                 || key.starts_with("bard_grave_dirge_")
                 || key.starts_with("bard_wild_rhythm_");
-            let is_requested_warrior_calling =
-                key.starts_with("warrior_templar_") || key.starts_with("warrior_berserker_");
+            let is_warrior_calling = key.starts_with("warrior_paladin_")
+                || key.starts_with("warrior_templar_")
+                || key.starts_with("warrior_berserker_")
+                || key.starts_with("warrior_warden_");
             let is_elf_bard = key.starts_with("bard_elf_");
             let is_dragonborn_class = key.contains("_dragonborn_");
             if is_heritage
                 || is_monk_school
                 || is_assassin_path
                 || is_bard_style
-                || is_requested_warrior_calling
+                || is_warrior_calling
                 || is_elf_bard
                 || is_dragonborn_class
             {

@@ -126,8 +126,10 @@ mod tests {
     use crate::core::catalog::effects::Effect;
     use crate::core::catalog::equipment::Kind;
     use crate::core::catalog::weapons::Category;
+    use crate::core::classes::{Ajah, Class};
     use std::collections::HashSet;
     use std::path::Path;
+    use strum::IntoEnumIterator;
 
     /// Performs the effect duration operation.
     fn effect_duration(effect: &Effect) -> f32 {
@@ -324,6 +326,28 @@ mod tests {
     }
 
     #[test]
+    /// Verifies every class and Ajah can receive a compatible starter ability.
+    fn creation_ability_options_cover_every_class_and_ajah() {
+        for class in Class::iter() {
+            assert!(
+                all_abilities().iter().any(|ability| {
+                    ability.level == 1 && class.accepts_starting_ability(ability.kind)
+                }),
+                "{class:?} has no compatible level-one starting ability"
+            );
+        }
+
+        for ajah in Ajah::iter() {
+            assert!(
+                all_abilities()
+                    .iter()
+                    .any(|ability| ability.level < 3 && ability.kind == ajah.kind()),
+                "{ajah:?} has no compatible introductory ability"
+            );
+        }
+    }
+
+    #[test]
     /// Performs the catalog entries have unique names valid levels and images operation.
     fn catalog_entries_have_unique_names_valid_levels_and_images() {
         assert_unique("ability", all_abilities().iter().map(|item| item.name.as_str()));
@@ -450,6 +474,81 @@ mod tests {
                     effect_duration(effect)
                 );
             }
+        }
+    }
+
+    #[test]
+    /// Verifies semantic catalog generation exposes the intended range of combat effects and perks.
+    fn generated_ability_and_perk_effects_cover_distinct_gameplay_roles() {
+        let ability_effects: HashSet<String> = all_abilities()
+            .iter()
+            .flat_map(|ability| ability.effects.iter())
+            .map(ToString::to_string)
+            .collect();
+        for effect in [
+            "Berserk",
+            "Bleed",
+            "Blind",
+            "Burn",
+            "Clearcasting",
+            "Cleave",
+            "Curse",
+            "Focus",
+            "Fortify",
+            "Freeze",
+            "Haste",
+            "Heal",
+            "Immobilize",
+            "InstantMana",
+            "Lifesteal",
+            "ManaBurn",
+            "ManaFlow",
+            "Manasteal",
+            "Paranoia",
+            "Pierce",
+            "Poison",
+            "Purge",
+            "Regen",
+            "Silence",
+            "StatBoost",
+            "Stun",
+            "Taunt",
+            "Thorns",
+            "Vulnerability",
+        ] {
+            assert!(
+                ability_effects.contains(effect),
+                "{effect} is absent from generated abilities"
+            );
+        }
+
+        let perk_modifiers = all_perks()
+            .iter()
+            .flat_map(|perk| perk.modifiers.iter())
+            .map(|modifier| format!("{modifier:?}"))
+            .collect::<Vec<_>>();
+        for modifier in [
+            "AttackModifier",
+            "AttackSpeedModifier",
+            "AttributeModifier",
+            "CategoryPowerMultiplier",
+            "CritChanceModifier",
+            "DefenseModifier",
+            "HealthRegen",
+            "HealingMultiplier",
+            "KindPowerMultiplier",
+            "KindResistanceMultiplier",
+            "ManaRegen",
+            "MaxHealthModifier",
+            "MaxManaModifier",
+            "PetAttackModifier",
+            "PetDefenseModifier",
+            "PetInitiativeModifier",
+        ] {
+            assert!(
+                perk_modifiers.iter().any(|generated| generated.starts_with(modifier)),
+                "{modifier} is absent from generated perks"
+            );
         }
     }
 

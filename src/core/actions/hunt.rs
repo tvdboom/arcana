@@ -1,6 +1,6 @@
 //! Hunt selection, combat setup, and deferred experience, loot, and pet rewards.
 
-use crate::core::actions::gain_xp;
+use crate::core::actions::{encounter_level_range, gain_xp};
 use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::catalog::all_artifacts;
@@ -501,11 +501,7 @@ pub fn handle_hunt_card_clicks(
 
     if combat_triggered {
         let p_level = player.level();
-        let (min_lvl, max_lvl) = match tier {
-            0 => (p_level.saturating_sub(2).max(1), p_level),
-            1 => (p_level.saturating_sub(1).max(1), p_level.saturating_add(1)),
-            _ => (p_level, p_level.saturating_add(2)),
-        };
+        let (min_lvl, max_lvl) = encounter_level_range(p_level, tier);
 
         let possible: Vec<crate::core::monsters::Monster> =
             crate::core::catalog::catalog::all_monsters()

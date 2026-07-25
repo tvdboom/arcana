@@ -238,19 +238,21 @@ impl ClassSpecialization {
             ClassSpecialization::Monk(school) => match school {
                 MonkSchool::OpenHand => IdentityBonuses {
                     attack: 1,
+                    max_mana: 5,
                     ..Default::default()
                 },
                 MonkSchool::IronBody => IdentityBonuses {
-                    defense: 3,
+                    defense: 1,
+                    health_regen: 1,
                     ..Default::default()
                 },
                 MonkSchool::ShadowStep => IdentityBonuses {
-                    initiative: 3,
+                    initiative: 2,
+                    attack_speed: 0.05,
                     ..Default::default()
                 },
                 MonkSchool::SpiritFist => IdentityBonuses {
                     attack: 1,
-                    max_mana: 15,
                     mana_regen: 1,
                     ..Default::default()
                 },
@@ -258,6 +260,7 @@ impl ClassSpecialization {
             ClassSpecialization::Bard(style) => match style {
                 BardStyle::WarChant => IdentityBonuses {
                     attack: 1,
+                    max_mana: 5,
                     ..Default::default()
                 },
                 BardStyle::SilverBallad => IdentityBonuses {
@@ -267,7 +270,6 @@ impl ClassSpecialization {
                 },
                 BardStyle::GraveDirge => IdentityBonuses {
                     attack: 1,
-                    max_mana: 15,
                     mana_regen: 1,
                     ..Default::default()
                 },

@@ -2,6 +2,7 @@
 //!
 //! It derives items and monsters from the available source artwork.
 
+use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::fs::{self, File};
 use std::io::Write;
@@ -92,6 +93,9 @@ const UNIQUE_MODIFIERS: &[&str] = &[
     "of the hearth",
     "of the skies",
 ];
+
+/// Ability schools that must have a level-one option for character creation.
+const STARTING_ABILITY_KINDS: &[&str] = &["Physical", "Fire", "Ice", "Nature", "Holy", "Shadow"];
 
 const SHADOW_POOL: &[&str] = &[
     "Vampiric Touch",
@@ -1527,137 +1531,556 @@ fn artifact_price(name: &str, group: &str, level: u32) -> u32 {
     (base as f32 * multiplier).round().max(1.0) as u32
 }
 
-/// Builds a level-scaled ability effect whose targeting matches its name and kind.
-fn ability_effects(kind: &str, name: &str, level: u32, variant: usize) -> (Vec<String>, bool, f32) {
-    let lower = name.to_lowercase();
+/// Builds level-scaled, semantically matched ability effects from its presentation name and icon.
+///
+/// The source filename carries useful visual context that can be absent from a cleaned display name,
+/// such as `trapfrost`, `mindbreak`, or `petattack`.  Every branch keeps its effects on one target
+/// side because an [`Ability`](crate::core::catalog::abilities::Ability) has one target declaration.
+fn ability_effects(kind: &str, name: &str, filename: &str, level: u32) -> (Vec<String>, bool, f32) {
+    let lower = format!("{name} {filename}").to_lowercase();
     let power = level as f32;
+    let short_duration = 2.5 + power * 0.05;
+    let duration = 3.5 + power * 0.08;
+    let direct_damage = 3 + level * 3;
+    let dot_damage = 1 + level.div_ceil(3);
+    let is_direct = contains_any(
+        &lower,
+        &[
+            "attack",
+            "bolt",
+            "blast",
+            "beam",
+            "arrow",
+            "shot",
+            "spear",
+            "throw",
+            "strike",
+            "hit",
+            "claw",
+            "cut",
+            "slash",
+            "blow",
+            "stab",
+            "bomb",
+            "explosion",
+            "rain",
+        ],
+    );
+
+    // Beneficial and utility effects take precedence over an elemental school: an Ice Block is a
+    // defensive spell, for example, not an enemy slow merely because its icon is blue.
+    if contains_any(&lower, &["purge", "dispel", "cleanse", "break chain", "unshackle"]) {
+        return (vec!["Purge".to_string()], true, 0.0);
+    }
+    if contains_any(
+        &lower,
+        &[
+            "heal",
+            "healing",
+            "renew",
+            "restor",
+            "tranquility",
+            "recovery",
+            "overheal",
+            "natures touch",
+            "nature's touch",
+        ],
+    ) {
+        if contains_any(&lower, &["touch", "renew", "wave", "tranquility", "growth", "restor"]) {
+            return (
+                vec![format!("Regen(heal: {}, duration: {duration:.1})", 1 + level.div_ceil(2))],
+                true,
+                duration,
+            );
+        }
+        return (vec![format!("Heal(heal_pct: {})", 12 + level * 2)], true, 0.0);
+    }
+    let fiery_wall = kind == "Fire" && contains_any(&lower, &["fire wall", "firewall"]);
+    if contains_any(
+        &lower,
+        &[
+            "shield",
+            "armor",
+            "ward",
+            "guard",
+            "aegis",
+            "barrier",
+            "wall",
+            "stance",
+            "defense",
+            "defence",
+            "skin",
+            "bastion",
+            "block",
+            "fortress",
+            "metalarmor",
+            "resistance",
+        ],
+    ) && !fiery_wall
+    {
+        let mut effects =
+            vec![format!("Fortify(defense_pct: {:.1}, duration: {duration:.1})", 8.0 + power)];
+        if contains_any(&lower, &["thorn", "spine", "brist"]) {
+            effects.push(format!(
+                "Thorns(damage_reflected_pct: {:.1}, duration: {duration:.1})",
+                6.0 + power * 0.8
+            ));
+        }
+        return (effects, true, duration);
+    }
+    if contains_any(&lower, &["mana", "meditation", "rune", "arcane", "spirit", "mind", "science"])
+        && !is_direct
+        && !contains_any(&lower, &["drain", "burn", "steal"])
+        && !contains_any(&lower, &["mindbreak", "mind control", "hypnosis", "obsession"])
+    {
+        if contains_any(&lower, &["meditation", "flow", "rune", "spirit"]) {
+            return (
+                vec![format!(
+                    "ManaFlow(amount: {}, duration: {duration:.1})",
+                    1 + level.div_ceil(4)
+                )],
+                true,
+                duration,
+            );
+        }
+        if contains_any(&lower, &["arcane", "magic", "clearcasting"]) {
+            return (
+                vec![format!(
+                    "Clearcasting(reduction_pct: {:.1}, duration: {duration:.1})",
+                    12.0 + power * 0.7
+                )],
+                true,
+                duration,
+            );
+        }
+        return (vec![format!("InstantMana(amount: {})", 4 + level * 2)], true, 0.0);
+    }
+    if contains_any(&lower, &["thorn", "spine", "spikes", "brist"]) {
+        return (
+            vec![format!(
+                "Thorns(damage_reflected_pct: {:.1}, duration: {duration:.1})",
+                6.0 + power * 0.8
+            )],
+            true,
+            duration,
+        );
+    }
+    if contains_any(&lower, &["taunt", "aggro", "provoke"]) {
+        return (vec![format!("Taunt(duration: {duration:.1})")], true, duration);
+    }
+    if contains_any(
+        &lower,
+        &[
+            "speed",
+            "fast",
+            "dash",
+            "escape",
+            "teleport",
+            "portal",
+            "jump",
+            "move",
+            "run",
+            "fly",
+            "evade",
+            "dodge",
+            "sneak",
+            "stealth",
+            "shadowing",
+        ],
+    ) {
+        return (
+            vec![format!("Haste(initiative_pct: {:.1}, duration: {duration:.1})", 7.0 + power)],
+            true,
+            duration,
+        );
+    }
+    if contains_any(
+        &lower,
+        &["focus", "aim", "target", "precision", "third eye", "headshoot", "eye"],
+    ) {
+        return (
+            vec![format!(
+                "Focus(crit_chance_pct: {:.1}, duration: {duration:.1})",
+                5.0 + power * 0.75
+            )],
+            true,
+            duration,
+        );
+    }
+    if contains_any(&lower, &["rage", "bloodlust", "anger", "ruthless", "fury", "berserk"]) {
+        return (
+            vec![format!("Berserk(attack_pct: {:.1}, duration: {duration:.1})", 8.0 + power)],
+            true,
+            duration,
+        );
+    }
+    if contains_any(
+        &lower,
+        &[
+            "pet", "beast", "animal", "wolf", "bear", "raven", "snake", "spider", "insect", "dog",
+            "golem", "summon", "army", "clones",
+        ],
+    ) {
+        return (
+            vec![format!(
+                "BeastFrenzy(attack_pct: {:.1}, attack_speed_pct: {:.1}, duration: {duration:.1})",
+                6.0 + power * 0.8,
+                5.0 + power * 0.6
+            )],
+            true,
+            duration,
+        );
+    }
+    if contains_any(&lower, &["vampir", "lifesteal", "devour", "voracity", "soul devouring"]) {
+        return (
+            vec![format!(
+                "Lifesteal(percentage: {:.1}, duration: {duration:.1})",
+                4.0 + power * 0.5
+            )],
+            true,
+            duration,
+        );
+    }
+    if contains_any(&lower, &["sharpen", "mastery", "weapon switch", "sword power", "domination"]) {
+        return (
+            vec![
+                format!("Empower(damage_pct: {:.1}, duration: {duration:.1})", 6.0 + power),
+                format!("Bleed(damage_pct: {:.1})", 8.0 + power * 1.5),
+            ],
+            true,
+            duration.max(12.0),
+        );
+    }
+    if contains_any(
+        &lower,
+        &["muscle", "strength", "power", "hard", "endurance", "health", "body", "discipline"],
+    ) && !is_direct
+    {
+        let attribute = if contains_any(&lower, &["endurance", "health", "body", "hard"]) {
+            "Constitution"
+        } else {
+            "Strength"
+        };
+        return (
+            vec![format!(
+                "StatBoost(attribute: {attribute}, amount: {}, duration: {duration:.1})",
+                1 + level.div_ceil(5)
+            )],
+            true,
+            duration,
+        );
+    }
+
+    // Offensive control effects are keyed from their gameplay meaning before elemental fallbacks.
+    if contains_any(
+        &lower,
+        &[
+            "stun",
+            "paralysis",
+            "petrif",
+            "timestop",
+            "skullbreaker",
+            "concuss",
+            "hammerfall",
+            "shock",
+            "lightning",
+            "mind control",
+            "hypnosis",
+        ],
+    ) {
+        return (vec![format!("Stun(duration: {short_duration:.1})")], false, short_duration);
+    }
+    if contains_any(&lower, &["silence", "mindbreak", "disarm", "mute"]) {
+        return (vec![format!("Silence(duration: {duration:.1})")], false, duration);
+    }
+    if contains_any(&lower, &["blind", "smoke", "blackwater"]) {
+        return (
+            vec![format!("Blind(miss_pct: {:.1}, duration: {duration:.1})", 8.0 + power)],
+            false,
+            duration,
+        );
+    }
+    if contains_any(
+        &lower,
+        &["root", "snare", "net", "trap", "chain", "rope", "lasso", "hook", "capture"],
+    ) {
+        let mut effects = vec![format!("Immobilize(duration: {duration:.1})")];
+        if contains_any(&lower, &["poison", "venom", "toxic", "acid"]) {
+            effects.push(format!("Poison(damage: {dot_damage}, duration: {duration:.1})"));
+        } else if kind == "Ice" || contains_any(&lower, &["frost", "ice"]) {
+            effects.push(format!(
+                "Freeze(attack_speed_pct: -{:.1}, duration: {duration:.1})",
+                7.0 + power
+            ));
+        }
+        return (effects, false, duration);
+    }
+    if contains_any(&lower, &["fear", "terror", "nightmare", "howl", "cry", "demonic cry"]) {
+        return (
+            vec![format!("Paranoia(initiative_pct: -{:.1}, duration: {duration:.1})", 7.0 + power)],
+            false,
+            duration,
+        );
+    }
+    if contains_any(
+        &lower,
+        &["curse", "hex", "doom", "plague", "demonic fate", "demon mark", "corrupt"],
+    ) {
+        return (
+            vec![
+                format!("Curse(damage: {}, timer: {})", 3 + level * 2, duration.ceil() as u32),
+                format!(
+                    "Vulnerability(damage_pct: {:.1}, duration: {duration:.1})",
+                    5.0 + power * 0.7
+                ),
+            ],
+            false,
+            duration,
+        );
+    }
+    if contains_any(&lower, &["mana burn", "manablast", "mana blast", "destroy mana"]) {
+        return (vec![format!("ManaBurn(amount: {})", 4 + level * 2)], false, 0.0);
+    }
+    if contains_any(&lower, &["drain", "siphon", "mana steal", "manasteal"]) {
+        return (vec![format!("Manasteal(percentage: {:.1})", 7.0 + power)], false, 0.0);
+    }
+    if contains_any(
+        &lower,
+        &["poison", "venom", "toxic", "acid", "infection", "bite", "sting", "scorpion"],
+    ) {
+        return (
+            vec![format!("Poison(damage: {dot_damage}, duration: {duration:.1})")],
+            false,
+            duration,
+        );
+    }
+
     match kind {
-        "Fire" if contains_any(&lower, &["shield", "armor", "ward", "cloak"]) => {
-            (vec![format!("Empower(damage_pct: {:.1}, duration: 4.0)", 8.0 + power)], true, 4.0)
-        },
-        "Fire" => {
-            (vec![format!("Burn(damage: {}, duration: 4.0)", 2 + level.div_ceil(2))], false, 4.0)
-        },
-        "Ice" if contains_any(&lower, &["shield", "armor", "wall", "aegis"]) => {
-            (vec![format!("Fortify(defense_pct: {:.1}, duration: 4.0)", 10.0 + power)], true, 4.0)
-        },
+        "Fire" if is_direct => (
+            vec![
+                format!("Pierce(damage: {direct_damage})"),
+                format!("Burn(damage: {}, duration: {duration:.1})", 1 + level.div_ceil(2)),
+            ],
+            false,
+            duration,
+        ),
+        "Fire" => (
+            vec![format!("Burn(damage: {}, duration: {duration:.1})", 1 + level.div_ceil(2))],
+            false,
+            duration,
+        ),
+        "Ice" if is_direct => (
+            vec![
+                format!("Pierce(damage: {})", 2 + level * 2),
+                format!("Freeze(attack_speed_pct: -{:.1}, duration: {duration:.1})", 7.0 + power),
+            ],
+            false,
+            duration,
+        ),
         "Ice" => (
-            vec![format!("Freeze(attack_speed_pct: -{:.1}, duration: 3.0)", 8.0 + power)],
+            vec![format!("Freeze(attack_speed_pct: -{:.1}, duration: {duration:.1})", 7.0 + power)],
             false,
-            3.0,
+            duration,
         ),
-        "Nature" if contains_any(&lower, &["growth", "heal", "harmony", "renew"]) => {
-            (vec![format!("Regen(heal: {}, duration: 5.0)", 1 + level.div_ceil(2))], true, 5.0)
-        },
-        "Nature" if contains_any(&lower, &["root", "snare", "trap", "vine"]) => (
-            vec![format!("Immobilize(duration: {:.1})", 1.5 + power * 0.08)],
+        "Nature" if is_direct => (
+            vec![
+                format!("Pierce(damage: {})", 2 + level * 2),
+                format!("Poison(damage: {dot_damage}, duration: {duration:.1})"),
+            ],
             false,
-            1.5 + power * 0.08,
+            duration,
         ),
-        "Nature" => {
-            (vec![format!("Poison(damage: {}, duration: 5.0)", 1 + level.div_ceil(3))], false, 5.0)
-        },
-        "Holy" if contains_any(&lower, &["smite", "judgment", "hammer", "wrath", "strike"]) => {
-            (vec![format!("Pierce(damage: {})", 4 + level * 3)], false, 0.0)
-        },
-        "Holy" if contains_any(&lower, &["shield", "bastion", "guard", "aegis"]) => {
-            (vec![format!("Fortify(defense_pct: {:.1}, duration: 5.0)", 10.0 + power)], true, 5.0)
-        },
-        "Holy" if variant.is_multiple_of(3) => {
-            (vec![format!("Heal(heal_pct: {})", 15 + level * 2)], true, 0.0)
-        },
-        "Holy" => {
-            (vec![format!("Regen(heal: {}, duration: 5.0)", 1 + level.div_ceil(2))], true, 5.0)
-        },
-        "Shadow" if contains_any(&lower, &["drain", "siphon", "vampir"]) => {
-            (vec![format!("Manasteal(percentage: {:.1})", 8.0 + power)], false, 0.0)
-        },
-        "Shadow" if contains_any(&lower, &["curse", "doom", "hex", "plague"]) => {
-            (vec![format!("Curse(damage: {}, timer: 3)", 4 + level * 2)], false, 3.0)
-        },
-        "Shadow" if contains_any(&lower, &["fear", "terror", "nightmare"]) => (
-            vec![format!("Paranoia(initiative_pct: -{:.1}, duration: 4.0)", 8.0 + power)],
+        "Nature" => (
+            vec![format!("Poison(damage: {dot_damage}, duration: {duration:.1})")],
             false,
-            4.0,
+            duration,
+        ),
+        "Holy"
+            if contains_any(
+                &lower,
+                &["smite", "judgment", "hammer", "wrath", "strike", "light", "sun", "holy"],
+            ) =>
+        {
+            (vec![format!("Pierce(damage: {direct_damage})")], false, 0.0)
+        },
+        "Holy" => (
+            vec![format!("Regen(heal: {}, duration: {duration:.1})", 1 + level.div_ceil(2))],
+            true,
+            duration,
+        ),
+        "Shadow" if is_direct => (
+            vec![
+                format!("Pierce(damage: {direct_damage})"),
+                format!("Vulnerability(damage_pct: {:.1}, duration: {duration:.1})", 5.0 + power),
+            ],
+            false,
+            duration,
         ),
         "Shadow" => (
-            vec![format!("Vulnerability(damage_pct: {:.1}, duration: 4.0)", 6.0 + power)],
+            vec![format!("Vulnerability(damage_pct: {:.1}, duration: {duration:.1})", 5.0 + power)],
             false,
-            4.0,
+            duration,
         ),
-        _ if contains_any(&lower, &["shield", "guard", "wall", "stance", "defense"]) => {
-            (vec![format!("Fortify(defense_pct: {:.1}, duration: 4.0)", 8.0 + power)], true, 4.0)
+        _ if contains_any(
+            &lower,
+            &["cleave", "wave", "whirl", "vortex", "spin", "flock", "thousand"],
+        ) =>
+        {
+            (
+                vec![format!("Cleave(damage_pct: {:.1}, duration: 0.0)", 16.0 + power * 1.8)],
+                false,
+                0.0,
+            )
         },
-        _ if contains_any(&lower, &["focus", "aim", "target", "precision"]) => (
-            vec![format!("Focus(crit_chance_pct: {:.1}, duration: 4.0)", 5.0 + power * 0.75)],
-            true,
-            4.0,
-        ),
-        _ if contains_any(&lower, &["cleave", "wave", "whirl", "spin"]) => (
-            vec![format!("Cleave(damage_pct: {:.1}, duration: 0.0)", 18.0 + power * 2.0)],
-            false,
-            0.0,
-        ),
-        _ if contains_any(&lower, &["pierce", "arrow", "spear", "shot"]) => {
-            (vec![format!("Pierce(damage: {})", 4 + level * 3)], false, 0.0)
-        },
-        _ => (vec![format!("Bleed(damage_pct: {:.1})", 10.0 + power * 2.0)], true, 12.0),
+        _ => (vec![format!("Pierce(damage: {direct_damage})")], false, 0.0),
     }
 }
 
-/// Builds thematic passive modifiers for a perk.
-fn perk_modifiers(kind: &str, name: &str, level: u32, variant: usize) -> Vec<String> {
-    let lower = name.to_lowercase();
+/// Builds semantic passive modifiers for a perk from its presentation name and icon.
+fn perk_modifiers(kind: &str, name: &str, filename: &str, level: u32) -> Vec<String> {
+    let lower = format!("{name} {filename}").to_lowercase();
     let stat = level.div_ceil(4).max(1) as i32;
-    let percent = 4.0 + level as f32;
-    let mut modifiers = match kind {
-        "Fire" => vec![format!("KindPowerMultiplier(Fire, {percent:.1})")],
-        "Ice" => vec![format!("KindResistanceMultiplier(Ice, {percent:.1})")],
-        "Nature" => vec![format!("KindPowerMultiplier(Nature, {percent:.1})")],
-        "Holy" => vec![format!("HealingMultiplier({percent:.1})")],
-        "Shadow" => vec![format!("KindPowerMultiplier(Shadow, {percent:.1})")],
-        _ if contains_any(&lower, &["bow", "arrow", "shot", "target", "aim"]) => {
-            vec![format!("CategoryPowerMultiplier(Range, {percent:.1})")]
-        },
-        _ if contains_any(&lower, &["dagger", "assassin", "poison", "venom", "agile"]) => {
-            vec![format!("CategoryPowerMultiplier(Finesse, {percent:.1})")]
-        },
-        _ if contains_any(&lower, &["shield", "armor", "guard", "defense", "skin"]) => {
-            vec![format!("DefenseModifier({stat})")]
-        },
-        _ if contains_any(&lower, &["pet", "beast", "animal", "companion"]) => {
-            vec![format!("PetAttackModifier({stat})")]
-        },
-        _ => vec![format!("AttackModifier({stat})")],
-    };
+    let percent = 3.0 + level as f32;
+    let resource = 2 + level.div_ceil(4) as i32;
+    let defensive = contains_any(
+        &lower,
+        &[
+            "shield",
+            "armor",
+            "guard",
+            "defense",
+            "defence",
+            "skin",
+            "wall",
+            "stone body",
+            "body",
+            "barrier",
+            "fort",
+            "plate",
+            "protection",
+            "ward",
+        ],
+    );
+    let pet = contains_any(
+        &lower,
+        &[
+            "pet",
+            "beast",
+            "animal",
+            "wolf",
+            "bear",
+            "raven",
+            "snake",
+            "spider",
+            "insect",
+            "dog",
+            "golem",
+            "summon",
+            "companion",
+        ],
+    );
+    let resource_magic = contains_any(
+        &lower,
+        &["mana", "magic", "arcane", "rune", "mind", "science", "wizard", "mage"],
+    );
+    let healing =
+        contains_any(&lower, &["heal", "restor", "renew", "life", "druid", "paladin", "priest"]);
+    let fast = contains_any(
+        &lower,
+        &["speed", "fast", "run", "jump", "move", "agile", "flex", "evade", "dodge"],
+    );
+    let precise =
+        contains_any(&lower, &["aim", "target", "focus", "eye", "precision", "headshoot", "sharp"]);
+    let mut modifiers = Vec::new();
 
-    if level >= 5 {
-        modifiers.push(match kind {
-            "Fire" => format!("AttributeModifier(Strength, {stat})"),
-            "Ice" => format!("AttributeModifier(Wisdom, {stat})"),
-            "Nature" => format!("HealthRegen({})", 1 + level / 6),
-            "Holy" => format!("AttributeModifier(Charisma, {stat})"),
-            "Shadow" => format!("LifeSteal({:.1})", 2.0 + level as f32 * 0.4),
-            _ if contains_any(&lower, &["bow", "arrow", "dagger", "agile", "speed"]) => {
-                format!("AttributeModifier(Dexterity, {stat})")
+    if defensive {
+        modifiers.push(format!("DefenseModifier({stat})"));
+        if level >= 5 {
+            modifiers.push(format!("MaxHealthModifier({})", level as i32 * 3));
+        }
+        if kind != "Physical" {
+            modifiers.push(format!("KindResistanceMultiplier({kind}, {:.1})", percent * 0.75));
+        }
+    } else if pet {
+        modifiers.push(format!("PetAttackModifier({stat})"));
+        modifiers.push(format!("PetDefenseModifier({})", stat.max(1)));
+        if level >= 7 {
+            modifiers.push(format!("PetInitiativeModifier({})", stat.max(1)));
+        }
+    } else if healing {
+        modifiers.push(format!("HealingMultiplier({percent:.1})"));
+        modifiers.push(format!("HealthRegen({resource})"));
+        if level >= 9 {
+            modifiers.push(format!("MaxHealthModifier({})", level as i32 * 3));
+        }
+    } else if resource_magic {
+        modifiers.push(format!("MaxManaModifier({})", level as i32 * 3));
+        modifiers.push(format!("ManaRegen({resource})"));
+        if kind != "Physical" {
+            modifiers.push(format!("KindPowerMultiplier({kind}, {percent:.1})"));
+        }
+    } else if precise {
+        modifiers.push(format!("CritChanceModifier({percent:.1})"));
+        if level >= 5 {
+            modifiers.push(format!("AttributeModifier(Dexterity, {stat})"));
+        }
+    } else if fast {
+        modifiers.push(format!("InitiativeModifier({stat})"));
+        modifiers.push(format!("AttackSpeedModifier({percent:.1})"));
+    } else if contains_any(&lower, &["bow", "arrow", "shot", "archer", "crossbow", "gun", "hunter"])
+    {
+        modifiers.push(format!("CategoryPowerMultiplier(Range, {percent:.1})"));
+        if level >= 5 {
+            modifiers.push(format!("AttributeModifier(Dexterity, {stat})"));
+        }
+    } else if contains_any(&lower, &["dagger", "assassin", "rogue", "knife", "poison", "venom"]) {
+        modifiers.push(format!("CategoryPowerMultiplier(Finesse, {percent:.1})"));
+        modifiers.push(format!("CritChanceModifier({:.1})", percent * 0.5));
+    } else if contains_any(
+        &lower,
+        &["sword", "axe", "hammer", "club", "spear", "warrior", "knight"],
+    ) {
+        modifiers.push(format!("CategoryPowerMultiplier(Melee, {percent:.1})"));
+        if level >= 5 {
+            modifiers.push(format!("AttributeModifier(Strength, {stat})"));
+        }
+    } else {
+        match kind {
+            "Fire" | "Nature" | "Shadow" => {
+                modifiers.push(format!("KindPowerMultiplier({kind}, {percent:.1})"));
             },
-            _ if contains_any(&lower, &["shield", "armor", "guard", "defense", "skin"]) => {
-                format!("AttributeModifier(Constitution, {stat})")
+            "Ice" => {
+                modifiers.push(format!("KindResistanceMultiplier(Ice, {percent:.1})"));
+                if level >= 5 {
+                    modifiers.push(format!("KindPowerMultiplier(Ice, {:.1})", percent * 0.6));
+                }
             },
-            _ => format!("AttributeModifier(Strength, {stat})"),
-        });
+            "Holy" => {
+                modifiers.push(format!("HealingMultiplier({percent:.1})"));
+                if level >= 5 {
+                    modifiers.push(format!("KindPowerMultiplier(Holy, {:.1})", percent * 0.6));
+                }
+            },
+            _ => {
+                modifiers.push(format!("AttackModifier({stat})"));
+                if level >= 5 {
+                    modifiers.push(format!("AttributeModifier(Strength, {stat})"));
+                }
+            },
+        }
     }
-    if level >= 13 {
-        modifiers.push(match (kind, variant % 2) {
-            ("Fire", 0) => format!("KindResistanceMultiplier(Fire, {:.1})", percent * 0.75),
-            ("Ice", 0) => format!("KindPowerMultiplier(Ice, {:.1})", percent * 0.75),
-            ("Nature", 0) => format!("MaxHealthModifier({})", level * 4),
-            ("Holy", 0) => format!("MaxManaModifier({})", level * 3),
-            ("Shadow", 0) => format!("ManaRegen({})", 1 + level / 8),
-            _ => format!("InitiativeModifier({})", stat.max(1)),
-        });
+
+    if contains_any(&lower, &["vampir", "leech", "drain", "devour"]) {
+        modifiers.push(format!("LifeSteal({:.1})", 1.5 + power_fraction(level)));
     }
+    modifiers.sort();
+    modifiers.dedup();
     modifiers
+}
+
+/// Returns the modest level-scaled percentage used by life-steal perk modifiers.
+fn power_fraction(level: u32) -> f32 {
+    level as f32 * 0.35
 }
 
 /// Builds a restrained on-hit or defensive effect for higher-level weapons.
@@ -2070,12 +2493,15 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             (f, score)
         })
         .collect();
-    abilities_files.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+    abilities_files.sort_by(|a, b| {
+        a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal).then_with(|| a.0.cmp(&b.0))
+    });
 
     let total_abs = abilities_files.len();
     let chunk_size_abs = total_abs as f64 / 20.0;
     let mut abilities_ron = String::from("[\n");
     let mut seen_abilities = HashSet::new();
+    let mut represented_starting_kinds = HashSet::new();
 
     for (idx, (filename, _)) in abilities_files.iter().enumerate() {
         let mut level = (idx as f64 / chunk_size_abs) as u32 + 1;
@@ -2095,6 +2521,9 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         } else {
             visual_kind(&Path::new(&abilities_dir).join(filename)).unwrap_or("Physical")
         };
+        if STARTING_ABILITY_KINDS.contains(&kind) && represented_starting_kinds.insert(kind) {
+            level = 1;
+        }
         let pool = match kind {
             "Fire" => FIRE_POOL,
             "Ice" => FROST_POOL,
@@ -2121,11 +2550,24 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         seen_abilities.insert(name.clone());
 
         let lower = format!("{filename} {name}").to_lowercase();
-        let is_aoe = level.is_multiple_of(4)
-            || ["wave", "rain", "blizzard", "storm", "aoe", "clones", "explode"]
-                .iter()
-                .any(|x| lower.contains(x));
-        let (effects, on_self, max_duration) = ability_effects(kind, &name, level, idx);
+        let is_aoe = [
+            "wave",
+            "rain",
+            "blizzard",
+            "storm",
+            "aoe",
+            "clones",
+            "army",
+            "pack",
+            "summon",
+            "pet",
+            "companion",
+            "healing wave",
+            "aura",
+        ]
+        .iter()
+        .any(|cue| lower.contains(cue));
+        let (effects, on_self, max_duration) = ability_effects(kind, &name, filename, level);
         let mana_cost = 4 + level * 2 + u32::from(is_aoe) * 3 + (idx % 3) as u32;
         let cooldown = (7.5
             + level as f32 * 0.25
@@ -2166,7 +2608,9 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             (f, s)
         })
         .collect();
-    perks_files.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+    perks_files.sort_by(|a, b| {
+        a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal).then_with(|| a.0.cmp(&b.0))
+    });
 
     let total_pks = perks_files.len();
     let chunk_size_pks = total_pks as f64 / 20.0;
@@ -2212,7 +2656,7 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         }
         let name = capitalize_words(&name);
         seen_perks.insert(name.clone());
-        let modifiers = perk_modifiers(kind, &name, level, idx);
+        let modifiers = perk_modifiers(kind, &name, filename, level);
 
         perks_ron.push_str(&format!(
             "    (\n        name: \"{name}\",\n        image: \"images/catalog/perks/{img}\",\n        level: {level},\n        modifiers: [{mods}],\n    ),\n",
@@ -2282,7 +2726,9 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             (f, s)
         })
         .collect();
-    weapons_files.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+    weapons_files.sort_by(|a, b| {
+        a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal).then_with(|| a.0.cmp(&b.0))
+    });
 
     let total_wps = weapons_files.len();
     let chunk_wps = total_wps as f64 / 20.0;
@@ -2435,7 +2881,9 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             armor_files.push((f, s, folder.to_string(), slot.to_string()));
         }
     }
-    armor_files.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+    armor_files.sort_by(|a, b| {
+        a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal).then_with(|| a.0.cmp(&b.0))
+    });
 
     let total_arm = armor_files.len();
     let chunk_arm = total_arm as f64 / 20.0;
