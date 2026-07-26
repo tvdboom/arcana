@@ -6,6 +6,7 @@ pub mod defeat;
 pub mod dropdown;
 pub mod level_up;
 pub mod modal;
+pub mod mutation;
 pub mod playing;
 pub mod scrollbar;
 pub mod toast;

@@ -419,7 +419,10 @@ mod tests {
             ("Storm Harpy", 9),
             ("Crimson Minotaur", 11),
             ("Frostbound Wraith", 14),
-            ("Moonfang Werewolf", 17),
+            ("Wererat", 8),
+            ("Werebear", 14),
+            ("Werewolf", 17),
+            ("Vampire", 19),
             ("Abyssal Behemoth", 20),
         ];
         let pets = [

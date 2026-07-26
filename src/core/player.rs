@@ -9,7 +9,7 @@ use crate::core::constants::{NAMES, START_CHARACTERISTIC};
 use crate::core::deities::Deity;
 use crate::core::identity::IdentityBonuses;
 use crate::core::monsters::Monster;
-use crate::core::races::{ElfHeritage, Race};
+use crate::core::races::{ElfHeritage, Mutation, Race};
 use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use rand::prelude::IndexedRandom;
@@ -127,6 +127,8 @@ pub struct Player {
     pub name: String,
     pub sex: Sex,
     pub race: Race,
+    #[serde(default)]
+    pub mutation: Option<Mutation>,
     pub class: Class,
     pub stage: AgeStage,
     pub age: u32,
@@ -171,6 +173,7 @@ impl Default for Player {
             name: NAMES.choose(&mut rng()).unwrap().to_string(),
             sex: Sex::default(),
             race: Race::default(),
+            mutation: None,
             class: Class::default(),
             stage: AgeStage::default(),
             age: 0,
@@ -212,6 +215,13 @@ impl Default for Player {
 impl Player {
     /// Returns the race, sex, class, and specialization-specific character portrait key.
     pub fn portrait_key(&self) -> String {
+        if let Some(mutation) = self.mutation {
+            let mutation = mutation.to_lowername();
+            return match self.sex {
+                Sex::Man => mutation,
+                Sex::Woman => format!("{mutation}_woman"),
+            };
+        }
         let race = self.race.to_lowername();
         let sex = self.sex.to_lowername();
         match self.class {
@@ -317,6 +327,7 @@ impl Player {
     /// Performs the strength operation.
     pub fn strength(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Strength);
+        let mutation_mod = self.mutation_attribute_mod(Attribute::Strength);
         let heritage_mod = self.elf_heritage_mod(Attribute::Strength);
         let sex_mod = self.sex.characteristic_mod(Attribute::Strength);
         let mut equip_mod = 0;
@@ -328,8 +339,14 @@ impl Player {
             }
         }
         let perk_mod = self.attribute_perk_mod(Attribute::Strength);
-        (self.strength as i32 + race_mod + heritage_mod + sex_mod + equip_mod + perk_mod).max(0)
-            as u32
+        (self.strength as i32
+            + race_mod
+            + mutation_mod
+            + heritage_mod
+            + sex_mod
+            + equip_mod
+            + perk_mod)
+            .max(0) as u32
     }
 
     /// Performs the strength mod operation.
@@ -340,6 +357,7 @@ impl Player {
     /// Performs the dexterity operation.
     pub fn dexterity(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Dexterity);
+        let mutation_mod = self.mutation_attribute_mod(Attribute::Dexterity);
         let heritage_mod = self.elf_heritage_mod(Attribute::Dexterity);
         let mut equip_mod = 0;
         for eq in self.equipped_equipment() {
@@ -350,7 +368,8 @@ impl Player {
             }
         }
         let perk_mod = self.attribute_perk_mod(Attribute::Dexterity);
-        (self.dexterity as i32 + race_mod + heritage_mod + equip_mod + perk_mod).max(0) as u32
+        (self.dexterity as i32 + race_mod + mutation_mod + heritage_mod + equip_mod + perk_mod)
+            .max(0) as u32
     }
 
     /// Performs the dexterity mod operation.
@@ -361,6 +380,7 @@ impl Player {
     /// Performs the constitution operation.
     pub fn constitution(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Constitution);
+        let mutation_mod = self.mutation_attribute_mod(Attribute::Constitution);
         let heritage_mod = self.elf_heritage_mod(Attribute::Constitution);
         let age_mod = self.stage.characteristic_mod(Attribute::Constitution);
         let mut equip_mod = 0;
@@ -372,8 +392,14 @@ impl Player {
             }
         }
         let perk_mod = self.attribute_perk_mod(Attribute::Constitution);
-        (self.constitution as i32 + race_mod + heritage_mod + age_mod + equip_mod + perk_mod).max(0)
-            as u32
+        (self.constitution as i32
+            + race_mod
+            + mutation_mod
+            + heritage_mod
+            + age_mod
+            + equip_mod
+            + perk_mod)
+            .max(0) as u32
     }
 
     /// Performs the constitution mod operation.
@@ -384,6 +410,7 @@ impl Player {
     /// Performs the intelligence operation.
     pub fn intelligence(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Intelligence);
+        let mutation_mod = self.mutation_attribute_mod(Attribute::Intelligence);
         let heritage_mod = self.elf_heritage_mod(Attribute::Intelligence);
         let mut equip_mod = 0;
         for eq in self.equipped_equipment() {
@@ -394,7 +421,8 @@ impl Player {
             }
         }
         let perk_mod = self.attribute_perk_mod(Attribute::Intelligence);
-        (self.intelligence as i32 + race_mod + heritage_mod + equip_mod + perk_mod).max(0) as u32
+        (self.intelligence as i32 + race_mod + mutation_mod + heritage_mod + equip_mod + perk_mod)
+            .max(0) as u32
     }
 
     /// Performs the intelligence mod operation.
@@ -405,6 +433,7 @@ impl Player {
     /// Performs the wisdom operation.
     pub fn wisdom(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Wisdom);
+        let mutation_mod = self.mutation_attribute_mod(Attribute::Wisdom);
         let heritage_mod = self.elf_heritage_mod(Attribute::Wisdom);
         let age_mod = self.stage.characteristic_mod(Attribute::Wisdom);
         let mut equip_mod = 0;
@@ -416,8 +445,14 @@ impl Player {
             }
         }
         let perk_mod = self.attribute_perk_mod(Attribute::Wisdom);
-        (self.wisdom as i32 + race_mod + heritage_mod + age_mod + equip_mod + perk_mod).max(0)
-            as u32
+        (self.wisdom as i32
+            + race_mod
+            + mutation_mod
+            + heritage_mod
+            + age_mod
+            + equip_mod
+            + perk_mod)
+            .max(0) as u32
     }
 
     /// Performs the wisdom mod operation.
@@ -428,6 +463,7 @@ impl Player {
     /// Performs the charisma operation.
     pub fn charisma(&self) -> u32 {
         let race_mod = self.race.characteristic_mod(Attribute::Charisma);
+        let mutation_mod = self.mutation_attribute_mod(Attribute::Charisma);
         let heritage_mod = self.elf_heritage_mod(Attribute::Charisma);
         let sex_mod = self.sex.characteristic_mod(Attribute::Charisma);
         let mut equip_mod = 0;
@@ -439,8 +475,14 @@ impl Player {
             }
         }
         let perk_mod = self.attribute_perk_mod(Attribute::Charisma);
-        (self.charisma as i32 + race_mod + heritage_mod + sex_mod + equip_mod + perk_mod).max(0)
-            as u32
+        (self.charisma as i32
+            + race_mod
+            + mutation_mod
+            + heritage_mod
+            + sex_mod
+            + equip_mod
+            + perk_mod)
+            .max(0) as u32
     }
 
     /// Performs the charisma mod operation.
@@ -605,9 +647,16 @@ impl Player {
         }
     }
 
+    /// Returns the permanent attribute adjustment from the active mutation.
+    fn mutation_attribute_mod(&self, attr: Attribute) -> i32 {
+        self.mutation.map_or(0, |mutation| mutation.characteristic_mod(attr))
+    }
+
     /// Returns the attribute modifier supplied by the player's race and heritage.
     pub fn race_attribute_mod(&self, attr: Attribute) -> i32 {
-        self.race.characteristic_mod(attr) + self.elf_heritage_mod(attr)
+        self.race.characteristic_mod(attr)
+            + self.elf_heritage_mod(attr)
+            + self.mutation_attribute_mod(attr)
     }
 
     /// Returns all applicable direct bonuses from race, heritage, class, specialization, and deity.
@@ -1526,6 +1575,23 @@ mod tests {
         assert_eq!(assassin.portrait_key(), "assassin_venomhand_elf_woman");
         assert_eq!(bard.portrait_key(), "bard_grave_dirge_dragonborn_man");
         assert_eq!(templar.portrait_key(), "warrior_templar_halfling_man");
+    }
+
+    #[test]
+    /// Verifies mutations select their sex-specific playable portrait.
+    fn mutation_portraits_include_female_variants() {
+        let male = Player {
+            mutation: Some(Mutation::Werewolf),
+            ..default()
+        };
+        let female = Player {
+            sex: Sex::Woman,
+            mutation: Some(Mutation::Werewolf),
+            ..default()
+        };
+
+        assert_eq!(male.portrait_key(), "werewolf");
+        assert_eq!(female.portrait_key(), "werewolf_woman");
     }
 
     #[test]

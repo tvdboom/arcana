@@ -23,8 +23,9 @@ use rfd::FileDialog;
 use serde::{Deserialize, Serialize};
 
 const SAVE_MAGIC: &[u8; 8] = b"ARCANASV";
-const SAVE_VERSION: u16 = 2;
-const PREVIOUS_SAVE_VERSION: u16 = 1;
+const SAVE_VERSION: u16 = 3;
+const PREVIOUS_SAVE_VERSION: u16 = 2;
+const LEGACY_SAVE_VERSION: u16 = 1;
 
 #[derive(Serialize, Deserialize)]
 pub struct SaveAll {
@@ -76,6 +77,105 @@ struct LegacySaveAllV1 {
     settings: Settings,
     player: LegacyPlayerV1,
     shop_inventory: ShopInventory,
+}
+
+#[derive(Serialize, Deserialize)]
+struct LegacyPlayerV2 {
+    name: String,
+    sex: Sex,
+    race: crate::core::races::Race,
+    class: crate::core::classes::Class,
+    stage: AgeStage,
+    age: u32,
+    xp: u32,
+    ap: u32,
+    missing_health: u32,
+    missing_mana: u32,
+    bonus_max_health: u32,
+    bonus_max_mana: u32,
+    strength: u32,
+    dexterity: u32,
+    constitution: u32,
+    intelligence: u32,
+    wisdom: u32,
+    charisma: u32,
+    abilities: Vec<String>,
+    active_abilities: Vec<Option<String>>,
+    perks: Vec<String>,
+    pet: Option<Monster>,
+    helmet: Option<String>,
+    armor: Option<String>,
+    gloves: Option<String>,
+    boots: Option<String>,
+    weapon_lh: Option<String>,
+    weapon_rh: Option<String>,
+    accessory: Option<String>,
+    accessory2: Option<String>,
+    equipped_consumables: Vec<String>,
+    inventory: Vec<String>,
+    gold: u32,
+    training: Training,
+    elf_heritage: ElfHeritage,
+    specialization: ClassSpecialization,
+    deity: Deity,
+}
+
+#[derive(Serialize, Deserialize)]
+struct LegacySaveAllV2 {
+    settings: Settings,
+    player: LegacyPlayerV2,
+    shop_inventory: ShopInventory,
+}
+
+impl From<LegacySaveAllV2> for SaveAll {
+    /// Migrates a version-two save with no supernatural mutation selected.
+    fn from(legacy: LegacySaveAllV2) -> Self {
+        let player = legacy.player;
+        Self {
+            settings: legacy.settings,
+            player: Player {
+                name: player.name,
+                sex: player.sex,
+                race: player.race,
+                mutation: None,
+                class: player.class,
+                stage: player.stage,
+                age: player.age,
+                xp: player.xp,
+                ap: player.ap,
+                missing_health: player.missing_health,
+                missing_mana: player.missing_mana,
+                bonus_max_health: player.bonus_max_health,
+                bonus_max_mana: player.bonus_max_mana,
+                strength: player.strength,
+                dexterity: player.dexterity,
+                constitution: player.constitution,
+                intelligence: player.intelligence,
+                wisdom: player.wisdom,
+                charisma: player.charisma,
+                abilities: player.abilities,
+                active_abilities: player.active_abilities,
+                perks: player.perks,
+                pet: player.pet,
+                helmet: player.helmet,
+                armor: player.armor,
+                gloves: player.gloves,
+                boots: player.boots,
+                weapon_lh: player.weapon_lh,
+                weapon_rh: player.weapon_rh,
+                accessory: player.accessory,
+                accessory2: player.accessory2,
+                equipped_consumables: player.equipped_consumables,
+                inventory: player.inventory,
+                gold: player.gold,
+                training: player.training,
+                elf_heritage: player.elf_heritage,
+                specialization: player.specialization,
+                deity: player.deity,
+            },
+            shop_inventory: legacy.shop_inventory,
+        }
+    }
 }
 
 impl From<LegacySaveAllV1> for SaveAll {
@@ -142,6 +242,7 @@ impl From<LegacySaveAllV1> for SaveAll {
                 name,
                 sex,
                 race,
+                mutation: None,
                 class,
                 stage,
                 age,
@@ -211,7 +312,10 @@ fn decode_save_bytes(buffer: &[u8]) -> io::Result<SaveAll> {
             SAVE_VERSION => decode_from_slice(payload, standard())
                 .map(|(data, _)| data)
                 .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error)),
-            PREVIOUS_SAVE_VERSION => decode_from_slice::<LegacySaveAllV1, _>(payload, standard())
+            PREVIOUS_SAVE_VERSION => decode_from_slice::<LegacySaveAllV2, _>(payload, standard())
+                .map(|(data, _)| data.into())
+                .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error)),
+            LEGACY_SAVE_VERSION => decode_from_slice::<LegacySaveAllV1, _>(payload, standard())
                 .map(|(data, _)| data.into())
                 .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error)),
             _ => Err(io::Error::new(
@@ -325,7 +429,7 @@ pub fn run_autosave(settings: Res<Settings>, mut save_game_msg: MessageWriter<Sa
 mod tests {
     use super::*;
     use crate::core::classes::Class;
-    use crate::core::races::Race;
+    use crate::core::races::{Mutation, Race};
 
     /// Creates a compact save fixture for codec compatibility tests.
     fn fixture() -> SaveAll {
@@ -389,6 +493,55 @@ mod tests {
         }
     }
 
+    /// Converts the current fixture into the exact version-two player layout.
+    fn version_two_fixture() -> LegacySaveAllV2 {
+        let current = fixture();
+        let player = current.player;
+        LegacySaveAllV2 {
+            settings: current.settings,
+            player: LegacyPlayerV2 {
+                name: player.name,
+                sex: player.sex,
+                race: player.race,
+                class: player.class,
+                stage: player.stage,
+                age: player.age,
+                xp: player.xp,
+                ap: player.ap,
+                missing_health: player.missing_health,
+                missing_mana: player.missing_mana,
+                bonus_max_health: player.bonus_max_health,
+                bonus_max_mana: player.bonus_max_mana,
+                strength: player.strength,
+                dexterity: player.dexterity,
+                constitution: player.constitution,
+                intelligence: player.intelligence,
+                wisdom: player.wisdom,
+                charisma: player.charisma,
+                abilities: player.abilities,
+                active_abilities: player.active_abilities,
+                perks: player.perks,
+                pet: player.pet,
+                helmet: player.helmet,
+                armor: player.armor,
+                gloves: player.gloves,
+                boots: player.boots,
+                weapon_lh: player.weapon_lh,
+                weapon_rh: player.weapon_rh,
+                accessory: player.accessory,
+                accessory2: player.accessory2,
+                equipped_consumables: player.equipped_consumables,
+                inventory: player.inventory,
+                gold: player.gold,
+                training: player.training,
+                elf_heritage: player.elf_heritage,
+                specialization: player.specialization,
+                deity: player.deity,
+            },
+            shop_inventory: current.shop_inventory,
+        }
+    }
+
     #[test]
     /// Verifies that legacy unversioned saves still decode after enum expansion.
     fn legacy_unversioned_save_still_loads() {
@@ -408,7 +561,7 @@ mod tests {
         let payload = encode_to_vec(legacy_fixture(), standard()).expect("legacy fixture encodes");
         let mut bytes = Vec::new();
         bytes.extend_from_slice(SAVE_MAGIC);
-        bytes.extend_from_slice(&PREVIOUS_SAVE_VERSION.to_le_bytes());
+        bytes.extend_from_slice(&LEGACY_SAVE_VERSION.to_le_bytes());
         bytes.extend_from_slice(&payload);
 
         let decoded = decode_save_bytes(&bytes).expect("version one fixture migrates");
@@ -418,12 +571,29 @@ mod tests {
     }
 
     #[test]
+    /// Verifies that a version-two save migrates with no mutation selected.
+    fn version_two_save_migrates_mutation() {
+        let payload = encode_to_vec(version_two_fixture(), standard()).expect("v2 fixture encodes");
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(SAVE_MAGIC);
+        bytes.extend_from_slice(&PREVIOUS_SAVE_VERSION.to_le_bytes());
+        bytes.extend_from_slice(&payload);
+
+        let decoded = decode_save_bytes(&bytes).expect("version two fixture migrates");
+        assert_eq!(decoded.player.mutation, None);
+        assert_eq!(decoded.player.deity, Deity::Tharos);
+    }
+
+    #[test]
     /// Verifies that current saves carry and decode the explicit version envelope.
     fn current_save_uses_versioned_envelope() {
-        let bytes = encode_save_bytes(&fixture()).expect("current fixture encodes");
+        let mut current = fixture();
+        current.player.mutation = Some(Mutation::Vampire);
+        let bytes = encode_save_bytes(&current).expect("current fixture encodes");
         assert!(bytes.starts_with(SAVE_MAGIC));
 
         let decoded = decode_save_bytes(&bytes).expect("current fixture decodes");
         assert_eq!(decoded.player.name, "Legacy Hero");
+        assert_eq!(decoded.player.mutation, Some(Mutation::Vampire));
     }
 }

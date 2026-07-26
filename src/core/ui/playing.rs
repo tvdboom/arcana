@@ -63,6 +63,10 @@ const ICON_STAT: Val = Val::Vw(2.4); // gold / AP stat icons
 #[derive(Component)]
 pub struct PlayingCmp;
 
+/// Marker for the main player portrait, which can change after a mutation.
+#[derive(Component)]
+pub struct PlayerPortrait;
+
 /// Simple text stats that are refreshed every frame.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PlayingStat {
@@ -1033,6 +1037,7 @@ pub fn spawn_image_column(
                     ..default()
                 },
                 BorderColor::all(BUTTON_BORDER_COLOR),
+                PlayerPortrait,
                 ImageNode::new(assets.image(portrait_key(player)))
                     .with_mode(NodeImageMode::Stretch),
             ))
@@ -1196,6 +1201,20 @@ pub fn spawn_image_column(
                 }
             });
     });
+}
+
+/// Refreshes the player portrait when identity or mutation data changes.
+pub fn update_player_portrait(
+    player: Res<Player>,
+    assets: Res<WorldAssets>,
+    mut portrait_q: Query<&mut ImageNode, With<PlayerPortrait>>,
+) {
+    if !player.is_changed() {
+        return;
+    }
+    for mut portrait in &mut portrait_q {
+        portrait.image = assets.image(portrait_key(&player));
+    }
 }
 
 /// Column 2: Level, health/mana bars, characteristics, attributes, combat stats.
@@ -2972,11 +2991,19 @@ pub fn update_playing_screen(
         text.0 = match stat.0 {
             PlayingStat::ClassLine => class_line(&player, &localization, lang),
             PlayingStat::CharRace => {
-                if player.race == crate::core::races::Race::Elf {
+                let base_race = if player.race == crate::core::races::Race::Elf {
                     localization
                         .get(format!("heritage.{}", player.elf_heritage.to_lowername()), lang)
                 } else {
                     localization.get(format!("race.{}", player.race.to_lowername()), lang)
+                };
+                if let Some(mutation) = player.mutation {
+                    format!(
+                        "{} {base_race}",
+                        localization.get(format!("mutation.{}", mutation.to_lowername()), lang)
+                    )
+                } else {
+                    base_race
                 }
             },
             PlayingStat::CharClass => localized_class_name(&player, &localization, lang),

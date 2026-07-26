@@ -42,8 +42,15 @@ pub fn manage_defeat_overlay(
     localization: Res<Localization>,
     settings: Res<Settings>,
     context: Option<Res<DefeatContext>>,
+    mutation_offer: Option<Res<crate::core::ui::mutation::PendingMutationOffer>>,
     defeat_q: Query<Entity, With<DefeatCmp>>,
 ) {
+    if mutation_offer.is_some() {
+        for entity in &defeat_q {
+            commands.entity(entity).try_despawn();
+        }
+        return;
+    }
     if let Some(ctx) = context {
         if defeat_q.is_empty() {
             setup_defeat_screen_inner(&mut commands, &assets, &localization, &settings, *ctx);
@@ -182,8 +189,9 @@ pub fn handle_defeat_keyboard_input(
     mut next_game_state: ResMut<NextState<GameState>>,
     mut pending_auto_rest: ResMut<PendingAutoRest>,
     context: Option<Res<DefeatContext>>,
+    mutation_offer: Option<Res<crate::core::ui::mutation::PendingMutationOffer>>,
 ) {
-    if context.is_none() {
+    if context.is_none() || mutation_offer.is_some() {
         return;
     }
     if keyboard.just_released(KeyCode::Enter)

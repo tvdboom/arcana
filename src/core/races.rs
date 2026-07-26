@@ -24,6 +24,44 @@ pub enum ElfHeritage {
     Wood,
 }
 
+/// A supernatural form acquired after surviving an eligible monster encounter.
+#[derive(EnumIter, Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Mutation {
+    Werewolf,
+    Wererat,
+    Werebear,
+    Vampire,
+    Undead,
+}
+
+impl Mutation {
+    /// Returns the mutation's permanent attribute adjustment.
+    pub fn characteristic_mod(self, attr: Attribute) -> i32 {
+        match (self, attr) {
+            (Self::Werewolf, Attribute::Constitution) => 4,
+            (Self::Werewolf, Attribute::Wisdom) => -4,
+            (Self::Wererat, Attribute::Dexterity) => 4,
+            (Self::Wererat, Attribute::Charisma) => -4,
+            (Self::Werebear, Attribute::Strength) => 4,
+            (Self::Werebear, Attribute::Intelligence) => -4,
+            (Self::Undead, Attribute::Constitution) => -4,
+            _ => 0,
+        }
+    }
+
+    /// Maps a mutation-bearing monster name to the form it can transmit.
+    pub fn from_monster_name(name: &str) -> Option<Self> {
+        match name.to_ascii_lowercase().as_str() {
+            "werewolf" => Some(Self::Werewolf),
+            "wererat" => Some(Self::Wererat),
+            "werebear" => Some(Self::Werebear),
+            "vampire" => Some(Self::Vampire),
+            "lich" => Some(Self::Undead),
+            _ => None,
+        }
+    }
+}
+
 impl Race {
     /// Plausible (min, max) age range in years for this race.
     pub fn age_range(&self) -> (u32, u32) {
@@ -205,5 +243,18 @@ mod tests {
 
         assert_eq!(ElfHeritage::Wood.bonuses().ranged_attack, 1);
         assert_eq!(ElfHeritage::Wood.bonuses().melee_attack, -1);
+    }
+
+    #[test]
+    /// Verifies mutation encounters and their balanced attribute tradeoffs.
+    fn mutations_map_from_monsters_and_adjust_attributes() {
+        assert_eq!(Mutation::from_monster_name("Werewolf"), Some(Mutation::Werewolf));
+        assert_eq!(Mutation::from_monster_name("Lich"), Some(Mutation::Undead));
+        assert_eq!(Mutation::from_monster_name("Goblin"), None);
+
+        assert_eq!(Mutation::Werebear.characteristic_mod(Attribute::Strength), 4);
+        assert_eq!(Mutation::Werebear.characteristic_mod(Attribute::Intelligence), -4);
+        assert_eq!(Mutation::Wererat.characteristic_mod(Attribute::Dexterity), 4);
+        assert_eq!(Mutation::Wererat.characteristic_mod(Attribute::Charisma), -4);
     }
 }

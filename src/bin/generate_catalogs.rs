@@ -1261,7 +1261,7 @@ fn monster_effects(name: &str, level: u32) -> Vec<String> {
         "balor",
         "bone colossus",
         "crimson minotaur",
-        "moonfang werewolf",
+        "werewolf",
         "abyssal behemoth",
         "badger",
         "boar",
@@ -2402,7 +2402,8 @@ fn monster_stats(name: &str, level: u32, kind: &str) -> (u32, u32, u32, u32, f32
             "vulture",
             "bog imp",
             "storm harpy",
-            "moonfang werewolf",
+            "werewolf",
+            "wererat",
             "fox",
             "raven",
             "lynx",
@@ -2415,7 +2416,16 @@ fn monster_stats(name: &str, level: u32, kind: &str) -> (u32, u32, u32, u32, f32
         speed *= 1.12;
     } else if contains_any(
         &lower,
-        &["lich", "mind flayer", "rakshasa", "aboleth", "medusa", "mire hag", "frostbound wraith"],
+        &[
+            "lich",
+            "vampire",
+            "mind flayer",
+            "rakshasa",
+            "aboleth",
+            "medusa",
+            "mire hag",
+            "frostbound wraith",
+        ],
     ) {
         health *= 0.94;
         attack *= 1.12;
@@ -2454,8 +2464,11 @@ fn monster_creature_level(name: &str) -> u32 {
         "frostbound wraith" => 14,
         "empyrean" => 15,
         "void reaver" => 16,
-        "moonfang werewolf" => 17,
+        "wererat" => 8,
+        "werebear" => 14,
+        "werewolf" => 17,
         "lich" => 18,
+        "vampire" => 19,
         "balor" => 19,
         "tarrasque" | "abyssal behemoth" => 20,
         _ => 5,

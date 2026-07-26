@@ -50,6 +50,12 @@ fn expansion_portrait_paths() -> Vec<(String, String)> {
     let mut portraits =
         vec![("halfling".to_string(), "images/races/halfling_man.webp".to_string())];
 
+    for mutation in ["werewolf", "wererat", "werebear", "vampire", "undead"] {
+        portraits.push((mutation.to_string(), format!("images/races/{mutation}.webp")));
+        portraits
+            .push((format!("{mutation}_woman"), format!("images/races/{mutation}_woman.webp")));
+    }
+
     for sex in ["man", "woman"] {
         portraits.push((format!("halfling_{sex}"), format!("images/races/halfling_{sex}.webp")));
     }
@@ -341,6 +347,7 @@ impl FromWorld for WorldAssets {
             ("bg_duel", assets.load("images/bg/duel.webp")),
             ("bg_combat", assets.load("images/bg/combat.webp")),
             ("defeat", assets.load("images/bg/defeat.webp")),
+            ("bg_mutation", assets.load("images/bg/mutation.webp")),
             // UI
             ("border", assets.load("images/ui/border.webp")),
             ("border_hover", assets.load("images/ui/border hover.webp")),

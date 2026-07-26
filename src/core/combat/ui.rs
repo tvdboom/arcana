@@ -1118,6 +1118,7 @@ fn spawn_active_abilities(
                             hotkey,
                             ability_key.is_some(),
                             true,
+                            None,
                             ability_key.map(|key| RightColumnTooltip::Ability(key.to_string())),
                             COMBAT_ABILITY_CARD_SIZE,
                             false,
@@ -1173,6 +1174,7 @@ fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, pl
                             CONSUMABLE_HOTKEYS[index],
                             true,
                             true,
+                            Some(player.inventory.iter().filter(|inv| *inv == key).count()),
                             Some(RightColumnTooltip::Equipment(key.clone())),
                             COMBAT_CONSUMABLE_CARD_SIZE,
                             true,
@@ -1196,6 +1198,7 @@ fn spawn_hover_card(
     label: &str,
     has_border: bool,
     show_hotkey: bool,
+    consumable_count: Option<usize>,
     tooltip: Option<RightColumnTooltip>,
     card_size: f32,
     dark_background: bool,
@@ -1306,6 +1309,32 @@ fn spawn_hover_card(
                         crate::core::combat::mechanics::AbilityCooldownText {
                             slot,
                             is_player,
+                        },
+                    ));
+                });
+        }
+        if let (Some(count), Some(crate::core::combat::mechanics::CombatCard::Consumable(key))) =
+            (consumable_count, combat_card.as_ref())
+        {
+            parent
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(1.),
+                        bottom: Val::Px(-1.),
+                        padding: UiRect::axes(Val::Px(2.), Val::Px(0.)),
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgba(0., 0., 0., 0.7)),
+                    Pickable::IGNORE,
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text(count.to_string(), "bold", 1.4, assets),
+                        TextColor(BUTTON_TEXT_COLOR),
+                        Pickable::IGNORE,
+                        crate::core::combat::mechanics::ConsumableCardCount {
+                            key: key.clone(),
                         },
                     ));
                 });
@@ -1719,6 +1748,7 @@ fn spawn_enemy_active_abilities(
                             "",
                             ability_key.is_some(),
                             false,
+                            None,
                             ability_key.map(|key| RightColumnTooltip::Ability(key.to_string())),
                             COMBAT_ABILITY_CARD_SIZE,
                             false,
@@ -1776,6 +1806,7 @@ fn spawn_enemy_consumables(
                             "",
                             true,
                             false,
+                            None,
                             Some(RightColumnTooltip::Equipment(key.clone())),
                             COMBAT_CONSUMABLE_CARD_SIZE,
                             true,

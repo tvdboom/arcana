@@ -18,6 +18,7 @@ use crate::core::combat::ui::{
 use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin};
 use crate::core::monsters::{ActiveMonster, Monster};
 use crate::core::player::{Attribute, Player};
+use crate::core::races::Mutation;
 use crate::core::states::GameState;
 use crate::core::ui::playing::TooltipNode;
 use crate::core::ui::utils::despawn_descendants_manual;
@@ -124,6 +125,12 @@ pub struct AbilityCooldownOverlay {
 pub struct ConsumableCardRoot {
     pub key: String,
     pub is_player: bool,
+}
+
+/// Inventory count text shown on a player's consumable combat card.
+#[derive(Component)]
+pub struct ConsumableCardCount {
+    pub key: String,
 }
 
 /// Identifies whether an equipment slot is for player or opponent/enemy.
@@ -245,6 +252,7 @@ pub struct Fighter {
     pub attack_style: AttackStyle,
     pub intelligence_mod: f32,
     pub passive_modifiers: Vec<Modifier>,
+    pub mutation: Option<Mutation>,
     pub alive: bool,
     pub weapons: Vec<CombatWeapon>,
 }
@@ -521,7 +529,7 @@ impl Fighter {
 
     /// Multiplies outgoing damage for the supplied element and optional weapon category.
     fn outgoing_damage_multiplier(&self, kind: Kind, category: Option<Category>) -> f32 {
-        let percentage = self
+        let mut percentage = self
             .passive_modifiers
             .iter()
             .filter_map(|modifier| match modifier {
@@ -536,12 +544,15 @@ impl Fighter {
                 _ => None,
             })
             .sum::<f32>();
+        if self.mutation == Some(Mutation::Vampire) {
+            percentage += 15.0;
+        }
         (1.0 + percentage / 100.0).max(0.0)
     }
 
     /// Multiplies incoming damage after elemental and weapon-category resistances.
     fn incoming_damage_multiplier(&self, kind: Kind, category: Option<Category>) -> f32 {
-        let percentage = self
+        let mut percentage = self
             .passive_modifiers
             .iter()
             .filter_map(|modifier| match modifier {
@@ -558,7 +569,16 @@ impl Fighter {
                 _ => None,
             })
             .sum::<f32>();
+        if self.mutation == Some(Mutation::Vampire) && kind == Kind::Fire {
+            percentage -= 15.0;
+        }
         (1.0 - percentage / 100.0).max(0.0)
+    }
+
+    /// Returns whether this fighter's mutation completely negates an effect.
+    fn is_immune_to_effect(&self, effect: &Effect) -> bool {
+        self.mutation == Some(Mutation::Undead)
+            && matches!(effect, Effect::Poison { .. } | Effect::Freeze { .. })
     }
 
     /// Multiplies direct and periodic healing caused by this fighter.
@@ -619,6 +639,7 @@ pub struct CombatState {
     pub player_won: bool,
     pub player_level: u32,
     pub enemy_level: u32,
+    pub mutation_candidate: Option<Mutation>,
     pub fx: Vec<CombatFx>,
     pub paused: bool,
     pub dodge_word: String,
@@ -764,6 +785,7 @@ fn fighter_from_player(player: &Player) -> Fighter {
         attack_style: player_attack_style(player),
         intelligence_mod: player.intelligence_mod() as f32,
         passive_modifiers: player.active_modifiers(),
+        mutation: player.mutation,
         alive: true,
         weapons: player_combat_weapons(player),
     }
@@ -804,6 +826,7 @@ fn fighter_from_pet(pet: &Monster, owner: &Player) -> Fighter {
         attack_style: AttackStyle::Other,
         intelligence_mod: 0.0,
         passive_modifiers: Vec::new(),
+        mutation: None,
         alive: true,
         weapons: vec![CombatWeapon {
             name: "Basic Attack".to_string(),
@@ -849,6 +872,7 @@ fn fighter_from_monster(monster: &Monster) -> Fighter {
         attack_style: AttackStyle::Other,
         intelligence_mod: 0.0,
         passive_modifiers: monster.modifiers.clone(),
+        mutation: None,
         alive: true,
         weapons: vec![CombatWeapon {
             name: "Basic Attack".to_string(),
@@ -928,6 +952,10 @@ pub fn setup_combat_state(
         player_won: false,
         player_level: player.level(),
         enemy_level: monster.level,
+        mutation_candidate: opponent
+            .is_none()
+            .then(|| Mutation::from_monster_name(&monster.name))
+            .flatten(),
         fx: Vec::new(),
         paused: false,
         dodge_word: localization.get("general.dodge", settings.language),
@@ -1235,6 +1263,10 @@ fn apply_effect(
     category: Option<Category>,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
 ) {
+    if state.get(target).is_some_and(|fighter| fighter.is_immune_to_effect(effect)) {
+        return;
+    }
+
     let outgoing_multiplier = state
         .get(source)
         .map(|fighter| fighter.outgoing_damage_multiplier(kind, category))
@@ -2222,6 +2254,7 @@ pub fn handle_combat_card_click(
 
 /// Performs the combat input operation.
 pub fn combat_input(
+    mut commands: Commands,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut combat_speed: ResMut<CombatSpeed>,
     mut state: Option<ResMut<CombatState>>,
@@ -2262,6 +2295,7 @@ pub fn combat_input(
     if state.status == CombatStatus::Over {
         if keyboard.just_pressed(KeyCode::Enter) || keyboard.just_pressed(KeyCode::NumpadEnter) {
             pending_hunt_xp.amount = state.xp_reward();
+            maybe_queue_mutation_offer(&mut commands, state.mutation_candidate);
             play_audio_msg.write(PlayAudioMsg::new("button"));
             next_game_state.set(GameState::Playing);
         }
@@ -2986,11 +3020,18 @@ pub fn sync_consumable_cards(
     mut commands: Commands,
     player: Res<Player>,
     q: Query<(Entity, &ConsumableCardRoot)>,
+    mut count_q: Query<(&ConsumableCardCount, &mut Text)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
 ) {
     if !player.is_changed() {
         return;
     }
+
+    for (card, mut text) in &mut count_q {
+        let count = player.inventory.iter().filter(|item| *item == &card.key).count();
+        **text = count.to_string();
+    }
+
     let mut despawned_any = false;
     for (entity, card) in &q {
         if !card.is_player {
@@ -3027,6 +3068,7 @@ pub fn handle_combat_end_button_click(
         if s.status == CombatStatus::Over {
             if duel.is_none() {
                 pending_hunt_xp.amount = s.xp_reward();
+                maybe_queue_mutation_offer(&mut commands, s.mutation_candidate);
             }
             // A lost combat leaves the player severely injured: show the defeat
             // screen overlay on top of the playing page.
@@ -3049,6 +3091,9 @@ pub fn handle_combat_end_button_click(
         } else {
             // Forfeiting active combat counts as a loss: reduce health to zero and transition
             player.set_health(0);
+            if duel.is_none() {
+                maybe_queue_mutation_offer(&mut commands, s.mutation_candidate);
+            }
             commands.insert_resource(crate::core::ui::defeat::DefeatContext {
                 was_pvp: duel.is_some(),
             });
@@ -3092,10 +3137,21 @@ pub fn handle_continue_with_pet_button_click(
     }
 
     pending_hunt_xp.amount = state.xp_reward();
+    maybe_queue_mutation_offer(&mut commands, state.mutation_candidate);
     player.set_pet(pending_hunt_pet.monster.clone());
     commands.remove_resource::<PendingHuntPet>();
     play_audio_msg.write(PlayAudioMsg::new("button"));
     next_game_state.set(GameState::Playing);
+}
+
+/// Queues the post-combat mutation choice for half of eligible encounters.
+fn maybe_queue_mutation_offer(commands: &mut Commands, candidate: Option<Mutation>) {
+    let Some(candidate) = candidate else {
+        return;
+    };
+    if rng().random_bool(0.5) {
+        commands.insert_resource(crate::core::ui::mutation::PendingMutationOffer(candidate));
+    }
 }
 
 /// Performs the cleanup combat on exit operation.
@@ -3511,6 +3567,7 @@ mod tests {
             attack_style: AttackStyle::Melee,
             intelligence_mod: 0.0,
             passive_modifiers: Vec::new(),
+            mutation: None,
             alive: true,
             weapons: Vec::new(),
         }
@@ -3529,6 +3586,7 @@ mod tests {
             player_won: false,
             player_level: 1,
             enemy_level: 1,
+            mutation_candidate: None,
             fx: Vec::new(),
             paused: false,
             dodge_word: "Dodge".to_string(),
@@ -3720,5 +3778,38 @@ mod tests {
                 ..
             }
         ));
+    }
+
+    #[test]
+    /// Verifies the vampire's damage bonus and matching Fire vulnerability.
+    fn vampire_mutation_has_equal_damage_tradeoff() {
+        let mut vampire = test_fighter();
+        vampire.mutation = Some(Mutation::Vampire);
+
+        assert!(
+            (vampire.outgoing_damage_multiplier(Kind::Physical, None) - 1.15).abs() < f32::EPSILON
+        );
+        assert!((vampire.incoming_damage_multiplier(Kind::Fire, None) - 1.15).abs() < f32::EPSILON);
+        assert!((vampire.incoming_damage_multiplier(Kind::Ice, None) - 1.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    /// Verifies undead negate Poison and Freeze without ignoring other effects.
+    fn undead_mutation_blocks_poison_and_freeze() {
+        let mut undead = test_fighter();
+        undead.mutation = Some(Mutation::Undead);
+
+        assert!(undead.is_immune_to_effect(&Effect::Poison {
+            damage: 5,
+            duration: 3.0,
+        }));
+        assert!(undead.is_immune_to_effect(&Effect::Freeze {
+            attack_speed_pct: -20.0,
+            duration: 3.0,
+        }));
+        assert!(!undead.is_immune_to_effect(&Effect::Burn {
+            damage: 5,
+            duration: 3.0,
+        }));
     }
 }

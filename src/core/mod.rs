@@ -272,6 +272,9 @@ impl Plugin for GamePlugin {
             .add_systems(
                 Update,
                 (
+                    crate::core::ui::mutation::open_random_mutation_shortcut,
+                    crate::core::ui::mutation::manage_mutation_overlay,
+                    crate::core::ui::mutation::handle_mutation_keyboard_input,
                     crate::core::ui::defeat::manage_defeat_overlay,
                     crate::core::ui::defeat::handle_defeat_keyboard_input,
                 )
@@ -285,6 +288,7 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     update_playing_screen,
+                    update_player_portrait,
                     update_action_buttons,
                     tab_button_hover_system,
                     equip_slot_tooltip_system,

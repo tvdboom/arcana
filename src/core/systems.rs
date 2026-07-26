@@ -5,6 +5,7 @@ use crate::core::audio::PlayAudioMsg;
 use crate::core::classes::{
     AssassinPath, BardStyle, Class, ClassSpecialization, MonkSchool, PetChoice, WarriorPath,
 };
+use crate::core::deities::Deity;
 use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin, StartNewCharacterMsg};
 use crate::core::player::Player;
 use crate::core::states::{AppState, GameState};
@@ -273,7 +274,9 @@ pub fn check_keys_menu(
                     }
                 },
                 GameState::ChooseDeity => {
-                    play_audio_msg.write(PlayAudioMsg::new("error"));
+                    player.deity = Deity::default();
+                    play_audio_msg.write(PlayAudioMsg::new("button"));
+                    next_game_state.set(GameState::Playing);
                 },
                 GameState::GameMenu | GameState::Settings => {
                     play_audio_msg.write(PlayAudioMsg::new("button"));

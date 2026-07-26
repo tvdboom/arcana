@@ -1,2 +1,8 @@
+[env]
+# Ignore stale generic compiler overrides on 64-bit MSVC hosts so native
+# dependencies discover one complete Visual Studio toolchain and Windows SDK.
+CC_x86_64_pc_windows_msvc = { value = "", force = true }
+CXX_x86_64_pc_windows_msvc = { value = "", force = true }
+
 [target.wasm32-unknown-unknown]
 runner = "wasm-server-runner"
