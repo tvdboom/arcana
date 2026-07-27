@@ -217,9 +217,13 @@ impl Player {
     pub fn portrait_key(&self) -> String {
         if let Some(mutation) = self.mutation {
             let mutation = mutation.to_lowername();
-            return match self.sex {
-                Sex::Man => mutation,
-                Sex::Woman => format!("{mutation}_woman"),
+            let sex = self.sex.to_lowername();
+            return match self.race {
+                Race::Human => match self.sex {
+                    Sex::Man => mutation,
+                    Sex::Woman => format!("{mutation}_woman"),
+                },
+                race => format!("{mutation}_{}_{sex}", race.to_lowername()),
             };
         }
         let race = self.race.to_lowername();
@@ -1578,20 +1582,32 @@ mod tests {
     }
 
     #[test]
-    /// Verifies mutations select their sex-specific playable portrait.
-    fn mutation_portraits_include_female_variants() {
-        let male = Player {
-            mutation: Some(Mutation::Werewolf),
-            ..default()
-        };
-        let female = Player {
-            sex: Sex::Woman,
-            mutation: Some(Mutation::Werewolf),
-            ..default()
-        };
+    /// Verifies mutations retain both race and sex in their playable portrait.
+    fn mutation_portraits_include_race_and_sex_variants() {
+        for mutation in Mutation::iter() {
+            for race in Race::iter() {
+                for sex in Sex::iter() {
+                    let player = Player {
+                        mutation: Some(mutation),
+                        race,
+                        sex,
+                        ..default()
+                    };
+                    let mutation = mutation.to_lowername();
+                    let expected = match race {
+                        Race::Human => match sex {
+                            Sex::Man => mutation,
+                            Sex::Woman => format!("{mutation}_woman"),
+                        },
+                        race => {
+                            format!("{mutation}_{}_{}", race.to_lowername(), sex.to_lowername())
+                        },
+                    };
 
-        assert_eq!(male.portrait_key(), "werewolf");
-        assert_eq!(female.portrait_key(), "werewolf_woman");
+                    assert_eq!(player.portrait_key(), expected);
+                }
+            }
+        }
     }
 
     #[test]

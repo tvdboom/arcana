@@ -54,6 +54,12 @@ fn expansion_portrait_paths() -> Vec<(String, String)> {
         portraits.push((mutation.to_string(), format!("images/races/{mutation}.webp")));
         portraits
             .push((format!("{mutation}_woman"), format!("images/races/{mutation}_woman.webp")));
+        for race in ["elf", "dwarf", "orc", "halfling", "dragonborn"] {
+            for sex in ["man", "woman"] {
+                let key = format!("{mutation}_{race}_{sex}");
+                portraits.push((key.clone(), format!("images/races/{key}.webp")));
+            }
+        }
     }
 
     for sex in ["man", "woman"] {
