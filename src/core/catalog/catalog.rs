@@ -737,4 +737,31 @@ mod tests {
             "monster power does not scale enough: {starter_power:.1} -> {endgame_power:.1}"
         );
     }
+
+    /// Verifies every dragon color has six advancing ages and reuses one portrait per age pair.
+    #[test]
+    fn dragons_follow_six_age_progression() {
+        let age_names = [
+            "Dragon Hatchling",
+            "Dragon Youth",
+            "Adult Dragon",
+            "Ancient Dragon",
+            "Wyrm",
+            "Great Wyrm",
+        ];
+
+        for color in ["Black", "Green", "Blue", "Silver", "Red", "Gold"] {
+            let dragons = age_names.map(|age| {
+                get_monster(&format!("{color} {age}"))
+                    .unwrap_or_else(|| panic!("missing {color} {age}"))
+            });
+
+            assert!(dragons.windows(2).all(|pair| pair[0].level < pair[1].level));
+            assert_eq!(dragons[0].image, dragons[1].image);
+            assert_eq!(dragons[2].image, dragons[3].image);
+            assert_eq!(dragons[4].image, dragons[5].image);
+        }
+
+        assert_eq!(get_monster("Gold Great Wyrm").unwrap().level, 20);
+    }
 }

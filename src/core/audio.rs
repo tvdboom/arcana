@@ -120,7 +120,7 @@ pub fn setup_audio(mut commands: Commands, assets: Local<WorldAssets>) {
                 position_type: PositionType::Absolute,
                 width: percent(5.),
                 height: percent(5.),
-                right: percent(0.),
+                right: Val::Px(-25.),
                 top: percent(2.),
                 ..default()
             },

@@ -3408,14 +3408,20 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         ("Blue", [4, 10, 16]),
         ("Silver", [5, 11, 17]),
         ("Red", [6, 12, 18]),
-        ("Gold", [7, 13, 20]),
+        ("Gold", [7, 13, 19]),
     ];
-    let dragon_ages =
-        [("Dragon Hatchling", "hatchling"), ("Dragon", "adult"), ("Elder Wyrm", "wyrm")];
+    let dragon_ages = [
+        ("Dragon Hatchling", "hatchling"),
+        ("Dragon Youth", "hatchling"),
+        ("Adult Dragon", "adult"),
+        ("Ancient Dragon", "adult"),
+        ("Wyrm", "wyrm"),
+        ("Great Wyrm", "wyrm"),
+    ];
 
     for (color, levels) in &dragon_colors {
         for (age_idx, (age_display, file_suffix)) in dragon_ages.iter().enumerate() {
-            let level = levels[age_idx];
+            let level = levels[age_idx / 2] + age_idx as u32 % 2;
             let name = format!("{} {}", color, age_display);
             let img = format!("{}_{}.{}", color.to_lowercase(), file_suffix, img_ext);
             let (max_hp, attack, defense, initiative, attack_speed, regen) =

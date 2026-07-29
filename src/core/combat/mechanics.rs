@@ -57,9 +57,6 @@ const XP_REWARD_TEXT_LIFE: f32 = 3.2;
 const DEATH_SKULL_ANIM_DURATION: f32 = 0.9;
 const DEATH_SKULL_START_SIZE: f32 = 6.0;
 const DEATH_SKULL_END_SIZE: f32 = 50.0;
-/// Scales down health/mana regeneration during combat so fights don't drag on
-/// when regen would otherwise outpace incoming damage.
-const COMBAT_REGEN_MULTIPLIER: f32 = 0.3;
 /// Action points added as a penalty when a (non-duel) combat is lost.
 const LOST_COMBAT_AP_PENALTY: u32 = 5;
 /// Bounds and step for the adjustable combat speed.
@@ -2694,11 +2691,7 @@ pub fn step_combat(
     // Regen.
     for who in [Who::Player, Who::Pet, Who::Enemy, Who::EnemyPet] {
         if let Some(f) = state.get_mut(who) {
-            if f.alive {
-                f.health =
-                    (f.health + f.health_regen * COMBAT_REGEN_MULTIPLIER * dt).min(f.max_health);
-                f.mana = (f.mana + f.mana_regen * COMBAT_REGEN_MULTIPLIER * dt).min(f.max_mana);
-            }
+            regenerate_fighter(f, dt);
         }
     }
 
@@ -2835,6 +2828,15 @@ pub fn step_combat(
             play_audio_msg.write(PlayAudioMsg::new("defeat"));
         }
     }
+}
+
+/// Restores exactly the fighter's listed Health and Mana regeneration each second.
+fn regenerate_fighter(fighter: &mut Fighter, dt: f32) {
+    if !fighter.alive {
+        return;
+    }
+    fighter.health = (fighter.health + fighter.health_regen * dt).min(fighter.max_health);
+    fighter.mana = (fighter.mana + fighter.mana_regen * dt).min(fighter.max_mana);
 }
 
 /// Performs the combat tick operation.
@@ -5217,6 +5219,21 @@ mod tests {
         state.player.mana = mana_cost - 1.0;
         assert!(!begin_guard(&mut state));
         assert_eq!(state.guard_remaining, 0.0);
+    }
+
+    #[test]
+    /// Verifies listed regeneration values are the exact resources restored per second.
+    fn combat_regeneration_uses_the_listed_per_second_values() {
+        let mut fighter = test_fighter();
+        fighter.health = 50.0;
+        fighter.mana = 20.0;
+        fighter.health_regen = 3.0;
+        fighter.mana_regen = 4.0;
+
+        regenerate_fighter(&mut fighter, 2.0);
+
+        assert_eq!(fighter.health, 56.0);
+        assert_eq!(fighter.mana, 28.0);
     }
 
     /// Advances an integration-test combat by a large deterministic time slice.
