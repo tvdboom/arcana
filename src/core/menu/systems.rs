@@ -12,6 +12,7 @@ use crate::core::menu::utils::{add_root_node, add_text};
 use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::states::{AppState, GameState};
+use crate::core::ui::toast::ToastContainer;
 #[derive(Message)]
 pub struct StartNewCharacterMsg;
 
@@ -165,6 +166,20 @@ pub fn setup_menu(
                         LocalizedText("created_by".to_string()),
                     ));
                 });
+
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: percent(8.),
+                    right: percent(2.),
+                    flex_direction: FlexDirection::Column,
+                    row_gap: Val::Px(6.),
+                    align_items: AlignItems::FlexEnd,
+                    ..default()
+                },
+                ToastContainer,
+                GlobalZIndex(970),
+            ));
         });
 }
 

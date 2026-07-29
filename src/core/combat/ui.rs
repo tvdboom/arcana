@@ -35,16 +35,24 @@ use crate::utils::capitalize_words;
 use bevy::window::SystemCursorIcon;
 
 const ACTIVE_HOTKEYS: [&str; 5] = ["Q", "W", "E", "R", "T"];
-const LEFT_PANEL_WIDTH: f32 = 46.0;
-const RIGHT_PANEL_WIDTH: f32 = 46.0;
+const LEFT_PANEL_WIDTH: f32 = 48.0;
+const RIGHT_PANEL_WIDTH: f32 = 48.0;
 const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
+const POISE_COLOR: Color = Color::srgb_u8(76, 112, 142);
+const POISE_BREAK_COLOR: Color = Color::srgb_u8(214, 126, 43);
+const RECOVERY_COLOR: Color = Color::srgb_u8(52, 125, 145);
 const BUTTON_TEXT_SIZE: f32 = 2.2;
-const COMBAT_PORTRAIT_ASPECT: f32 = 0.88;
-const COMBAT_IMAGE_COLUMN_WIDTH: f32 = 80.0;
-const COMBAT_STATS_COLUMN_WIDTH: f32 = 20.0;
-const COMBAT_CONSUMABLE_CARD_SIZE: f32 = 4.2;
-const COMBAT_ABILITY_CARD_SIZE: f32 = 5.6;
+const COMBAT_PORTRAIT_ASPECT: f32 = 0.84;
+const COMBAT_PORTRAIT_WIDTH: f32 = 60.0;
+const COMBAT_STATS_COLUMN_WIDTH: f32 = 17.5;
+const COMBAT_TACTIC_CARD_SIZE: f32 = 6.4;
+const COMBAT_CONSUMABLE_CARD_SIZE: f32 = 7.68;
+const COMBAT_CONSUMABLE_CARD_GAP: f32 = 6.0;
+const COMBAT_ABILITY_CARD_SIZE: f32 = 9.0;
+const COMBAT_RESOURCE_BAR_HEIGHT: f32 = 30.0;
+const COMBAT_POISE_BAR_HEIGHT: f32 = 28.0;
+const COMBAT_ENEMY_INTENT_HEIGHT: f32 = 76.0;
 const CONSUMABLE_HOTKEYS: [&str; 8] = ["A", "S", "D", "F", "G", "H", "J", "K"];
 
 #[derive(Component)]
@@ -69,11 +77,42 @@ pub struct CombatEnemyManaFill;
 pub struct CombatEnemyManaText;
 
 #[derive(Component)]
+pub struct CombatPoiseFill;
+
+#[derive(Component)]
+pub struct CombatPoiseBreakFill;
+
+#[derive(Component)]
+pub struct CombatPoiseText;
+
+#[derive(Component)]
+pub struct CombatEnemyIntentRoot;
+
+#[derive(Component)]
+pub struct CombatEnemyIntentImage;
+
+#[derive(Component)]
+pub struct CombatEnemyIntentName;
+
+#[derive(Component)]
+pub struct CombatEnemyIntentDescription;
+
+#[derive(Component)]
+pub struct CombatEnemyCastFill;
+
+#[derive(Component)]
+pub struct CombatEnemyRecoveryFill;
+
+#[derive(Component)]
+pub struct CombatEnemyCastText;
+
+#[derive(Component)]
 pub struct CombatPausedOverlay;
 
 #[derive(Component)]
 pub struct AbilityCardImage {
     pub slot: usize,
+    pub is_player: bool,
 }
 
 #[derive(Component)]
@@ -172,12 +211,12 @@ pub fn setup_combat_ui(
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::SpaceBetween,
                     align_items: AlignItems::Stretch,
-                    padding: UiRect::all(Val::Px(18.)),
-                    column_gap: Val::Px(16.),
+                    padding: UiRect::vertical(Val::Px(8.)),
+                    column_gap: Val::Px(8.),
                     ..default()
                 })
                 .with_children(|parent| {
-                    spawn_player_panel(parent, &assets, &localization, lang, &player);
+                    spawn_player_panel(parent, &assets, &localization, lang, &player, is_pvp);
                     spawn_monster_panel(
                         parent,
                         &assets,
@@ -348,6 +387,7 @@ fn spawn_continue_with_pet_button(
                     assets,
                 ),
                 TextColor(BUTTON_TEXT_COLOR),
+                LocalizedText("general.continue_with_pet".to_string()),
             ));
         });
 }
@@ -359,13 +399,14 @@ fn spawn_player_panel(
     localization: &Localization,
     lang: crate::core::settings::Language,
     player: &Player,
+    is_pvp: bool,
 ) {
     parent
         .spawn(Node {
             width: percent(LEFT_PANEL_WIDTH),
             height: percent(100.),
             flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(10.),
+            row_gap: Val::Px(6.),
             align_items: AlignItems::Stretch,
             ..default()
         })
@@ -374,19 +415,25 @@ fn spawn_player_panel(
                 .spawn(Node {
                     width: percent(100.),
                     flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceBetween,
-                    column_gap: Val::Px(12.),
+                    justify_content: JustifyContent::FlexStart,
+                    column_gap: Val::Px(6.),
                     align_items: AlignItems::Stretch,
                     ..default()
                 })
                 .with_children(|parent| {
+                    if !is_pvp {
+                        spawn_tactical_controls(parent, assets);
+                    } else {
+                        spawn_tactical_spacer(parent);
+                    }
                     parent
                         .spawn(Node {
-                            width: percent(COMBAT_IMAGE_COLUMN_WIDTH),
+                            width: Val::Vh(COMBAT_PORTRAIT_WIDTH),
                             flex_direction: FlexDirection::Column,
                             row_gap: Val::Px(0.),
                             align_items: AlignItems::Stretch,
                             align_self: AlignSelf::FlexStart,
+                            flex_shrink: 0.0,
                             ..default()
                         })
                         .with_children(|parent| {
@@ -413,7 +460,7 @@ fn spawn_player_panel(
                             justify_content: JustifyContent::FlexStart,
                             align_items: AlignItems::Stretch,
                             align_self: AlignSelf::FlexStart,
-                            row_gap: Val::Px(8.),
+                            row_gap: Val::Px(5.),
                             ..default()
                         })
                         .with_children(|parent| {
@@ -454,11 +501,11 @@ fn spawn_character_portrait(
     parent
         .spawn((
             Node {
-                width: percent(100.),
+                width: Val::Vh(COMBAT_PORTRAIT_WIDTH),
                 aspect_ratio: Some(COMBAT_PORTRAIT_ASPECT),
                 position_type: PositionType::Relative,
                 border: UiRect::all(Val::Px(3.)),
-                align_self: AlignSelf::FlexStart,
+                align_self: AlignSelf::Center,
                 ..default()
             },
             BorderColor::all(BUTTON_BORDER_COLOR),
@@ -945,7 +992,7 @@ fn spawn_combat_stat_row(
     value_font_size: f32,
     show_tooltip: bool,
     localize_label: bool,
-    _is_player: bool,
+    is_player: bool,
 ) {
     let mut cmd = parent.spawn(Node {
         width: percent(card_width),
@@ -963,7 +1010,11 @@ fn spawn_combat_stat_row(
         .insert(Interaction::default())
         .insert(Pickable::default());
     if show_tooltip {
-        cmd.insert(InfoTooltip::Combat(stat));
+        cmd.insert(if is_player {
+            InfoTooltip::Combat(stat)
+        } else {
+            InfoTooltip::CombatOpponent(stat)
+        });
     }
     cmd.with_children(|parent| {
         parent.spawn((
@@ -1080,6 +1131,77 @@ fn spawn_equipment_slot_column(
         });
 }
 
+/// Spawns Guard and the four selectable auto-attack stance cards.
+fn spawn_tactical_controls(parent: &mut ChildSpawnerCommands, assets: &WorldAssets) {
+    use crate::core::combat::mechanics::CombatCard;
+    use crate::core::combat::tactics::CombatStance as Stance;
+
+    parent
+        .spawn(Node {
+            width: Val::Vh(COMBAT_TACTIC_CARD_SIZE),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(4.),
+            flex_shrink: 0.0,
+            ..default()
+        })
+        .with_children(|parent| {
+            spawn_hover_card(
+                parent,
+                assets,
+                None,
+                "combat_guard".to_string(),
+                "Z",
+                true,
+                true,
+                None,
+                None,
+                COMBAT_TACTIC_CARD_SIZE,
+                true,
+                None,
+                Some(CombatCard::Guard),
+                true,
+            );
+            parent.spawn((
+                Node {
+                    width: percent(100.),
+                    height: Val::Px(1.),
+                    margin: UiRect::vertical(Val::Px(1.)),
+                    flex_shrink: 0.0,
+                    ..default()
+                },
+                BackgroundColor(BUTTON_BORDER_COLOR),
+            ));
+            for stance in Stance::ALL {
+                spawn_hover_card(
+                    parent,
+                    assets,
+                    None,
+                    stance.image_key().to_string(),
+                    stance.hotkey_label(),
+                    true,
+                    true,
+                    None,
+                    None,
+                    COMBAT_TACTIC_CARD_SIZE,
+                    true,
+                    None,
+                    Some(CombatCard::Stance(stance)),
+                    true,
+                );
+            }
+        });
+}
+
+/// Reserves the tactical-card column so mirrored combatants stay aligned.
+fn spawn_tactical_spacer(parent: &mut ChildSpawnerCommands) {
+    parent.spawn(Node {
+        width: Val::Vh(COMBAT_TACTIC_CARD_SIZE),
+        height: Val::Px(1.0),
+        flex_shrink: 0.0,
+        ..default()
+    });
+}
+
 /// Spawns active abilities.
 fn spawn_active_abilities(
     parent: &mut ChildSpawnerCommands,
@@ -1091,7 +1213,7 @@ fn spawn_active_abilities(
             width: percent(100.),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.),
-            margin: UiRect::top(Val::Px(6.)),
+            margin: UiRect::top(Val::Px(4.)),
             ..default()
         })
         .with_children(|parent| {
@@ -1149,7 +1271,7 @@ fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, pl
             width: percent(100.),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.),
-            margin: UiRect::top(Val::Px(6.)),
+            margin: UiRect::top(Val::Px(4.)),
             ..default()
         })
         .with_children(|parent| {
@@ -1157,9 +1279,10 @@ fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, pl
                 .spawn(Node {
                     width: percent(100.),
                     flex_direction: FlexDirection::Row,
-                    flex_wrap: FlexWrap::Wrap,
-                    column_gap: Val::Px(2.),
-                    row_gap: Val::Px(2.),
+                    flex_wrap: FlexWrap::NoWrap,
+                    justify_content: JustifyContent::Center,
+                    column_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
+                    row_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
                     ..default()
                 })
                 .with_children(|parent| {
@@ -1174,7 +1297,9 @@ fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, pl
                             CONSUMABLE_HOTKEYS[index],
                             true,
                             true,
-                            Some(player.inventory.iter().filter(|inv| *inv == key).count()),
+                            Some(player.inventory.iter().filter(|inv| *inv == key).count().min(
+                                crate::core::combat::mechanics::MAX_COMBAT_CONSUMABLES_PER_TYPE,
+                            )),
                             Some(RightColumnTooltip::Equipment(key.clone())),
                             COMBAT_CONSUMABLE_CARD_SIZE,
                             true,
@@ -1211,8 +1336,8 @@ fn spawn_hover_card(
     };
     let mut cmd = parent.spawn((
         Node {
-            width: Val::Vw(card_size),
-            height: Val::Vw(card_size),
+            width: Val::Vh(card_size),
+            height: Val::Vh(card_size),
             position_type: PositionType::Relative,
             border: if has_border {
                 UiRect::all(Val::Px(2.))
@@ -1256,6 +1381,7 @@ fn spawn_hover_card(
         if let CombatCard::Ability(slot) = card {
             cmd.insert(AbilityCardImage {
                 slot,
+                is_player,
             });
         }
         if let CombatCard::Consumable(key) = &card {
@@ -1397,7 +1523,7 @@ fn spawn_monster_panel(
             width: percent(RIGHT_PANEL_WIDTH),
             height: percent(100.),
             flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(10.),
+            row_gap: Val::Px(6.),
             align_items: AlignItems::Stretch,
             ..default()
         })
@@ -1406,8 +1532,8 @@ fn spawn_monster_panel(
                 .spawn(Node {
                     width: percent(100.),
                     flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceBetween,
-                    column_gap: Val::Px(12.),
+                    justify_content: JustifyContent::FlexEnd,
+                    column_gap: Val::Px(6.),
                     align_items: AlignItems::Stretch,
                     ..default()
                 })
@@ -1419,7 +1545,7 @@ fn spawn_monster_panel(
                             justify_content: JustifyContent::FlexStart,
                             align_items: AlignItems::Stretch,
                             align_self: AlignSelf::FlexStart,
-                            row_gap: Val::Px(8.),
+                            row_gap: Val::Px(5.),
                             ..default()
                         })
                         .with_children(|parent| {
@@ -1444,11 +1570,12 @@ fn spawn_monster_panel(
 
                     parent
                         .spawn(Node {
-                            width: percent(COMBAT_IMAGE_COLUMN_WIDTH),
+                            width: Val::Vh(COMBAT_PORTRAIT_WIDTH),
                             flex_direction: FlexDirection::Column,
                             row_gap: Val::Px(0.),
                             align_items: AlignItems::Stretch,
                             align_self: AlignSelf::FlexStart,
+                            flex_shrink: 0.0,
                             ..default()
                         })
                         .with_children(|parent| {
@@ -1479,8 +1606,12 @@ fn spawn_monster_panel(
                                     spawn_enemy_active_abilities(parent, assets, opp);
                                     spawn_enemy_consumables(parent, assets, opp);
                                 }
+                            } else {
+                                spawn_poise_bar(parent, assets, localization, lang, monster.level);
+                                spawn_enemy_intent(parent, assets, localization, lang);
                             }
                         });
+                    spawn_tactical_spacer(parent);
                 });
         });
 }
@@ -1500,11 +1631,11 @@ fn spawn_monster_portrait(
     parent
         .spawn((
             Node {
-                width: percent(100.),
+                width: Val::Vh(COMBAT_PORTRAIT_WIDTH),
                 aspect_ratio: Some(COMBAT_PORTRAIT_ASPECT),
                 position_type: PositionType::Relative,
                 border: UiRect::all(Val::Px(3.)),
-                align_self: AlignSelf::FlexStart,
+                align_self: AlignSelf::Center,
                 ..default()
             },
             BorderColor::all(BUTTON_BORDER_COLOR),
@@ -1574,7 +1705,7 @@ fn spawn_monster_health_bar(
         .spawn((
             Node {
                 width: percent(100.),
-                height: Val::Px(36.),
+                height: Val::Px(COMBAT_RESOURCE_BAR_HEIGHT),
                 position_type: PositionType::Relative,
                 border: UiRect {
                     left: Val::Px(2.),
@@ -1587,6 +1718,9 @@ fn spawn_monster_health_bar(
             },
             BackgroundColor(BAR_BG_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            Interaction::default(),
+            Pickable::default(),
+            InfoTooltip::Health,
         ))
         .with_children(|parent| {
             parent.spawn((
@@ -1648,7 +1782,7 @@ fn spawn_enemy_mana_bar(
         .spawn((
             Node {
                 width: percent(100.),
-                height: Val::Px(36.),
+                height: Val::Px(COMBAT_RESOURCE_BAR_HEIGHT),
                 position_type: PositionType::Relative,
                 border: UiRect {
                     left: Val::Px(2.),
@@ -1661,6 +1795,9 @@ fn spawn_enemy_mana_bar(
             },
             BackgroundColor(BAR_BG_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            Interaction::default(),
+            Pickable::default(),
+            InfoTooltip::Mana,
         ))
         .with_children(|parent| {
             parent.spawn((
@@ -1706,6 +1843,199 @@ fn spawn_enemy_mana_bar(
                         TextColor(Color::WHITE),
                         CombatEnemyManaText,
                     ));
+                });
+        });
+}
+
+/// Spawns the enemy Poise bar that exposes stagger and interrupt progress.
+fn spawn_poise_bar(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    localization: &Localization,
+    lang: crate::core::settings::Language,
+    enemy_level: u32,
+) {
+    let maximum = 42.0 + enemy_level as f32 * 4.0;
+    parent
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: Val::Px(COMBAT_POISE_BAR_HEIGHT),
+                position_type: PositionType::Relative,
+                border: UiRect {
+                    left: Val::Px(2.),
+                    right: Val::Px(2.),
+                    top: Val::Px(0.),
+                    bottom: Val::Px(2.),
+                },
+                flex_shrink: 0.0,
+                ..default()
+            },
+            BackgroundColor(BAR_BG_COLOR),
+            BorderColor::all(BUTTON_BORDER_COLOR),
+            Interaction::default(),
+            Pickable::default(),
+            InfoTooltip::Poise,
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    width: percent(100.),
+                    height: percent(100.),
+                    ..default()
+                },
+                BackgroundColor(POISE_COLOR),
+                CombatPoiseFill,
+            ));
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    width: percent(0.),
+                    height: percent(100.),
+                    ..default()
+                },
+                BackgroundColor(POISE_BREAK_COLOR),
+                CombatPoiseBreakFill,
+            ));
+            parent
+                .spawn(Node {
+                    position_type: PositionType::Absolute,
+                    width: percent(100.),
+                    height: percent(100.),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text(
+                            format!(
+                                "{:.0} / {:.0} {}",
+                                maximum,
+                                maximum,
+                                localization.get("combat.poise", lang)
+                            ),
+                            "bold",
+                            1.7,
+                            assets,
+                        ),
+                        TextColor(Color::WHITE),
+                        CombatPoiseText,
+                    ));
+                });
+        });
+}
+
+/// Spawns the telegraphed enemy move card and cast-progress bar.
+fn spawn_enemy_intent(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    localization: &Localization,
+    lang: crate::core::settings::Language,
+) {
+    parent
+        .spawn((
+            Node {
+                width: percent(100.),
+                min_height: Val::Px(COMBAT_ENEMY_INTENT_HEIGHT),
+                margin: UiRect::top(Val::Px(4.)),
+                padding: UiRect::all(Val::Px(6.)),
+                border: UiRect::all(Val::Px(2.)),
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(8.),
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.04, 0.03, 0.06, 0.90)),
+            BorderColor::all(POISE_COLOR),
+            CombatEnemyIntentRoot,
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Node {
+                    width: Val::Px(72.),
+                    height: Val::Px(72.),
+                    border: UiRect::all(Val::Px(1.)),
+                    flex_shrink: 0.0,
+                    ..default()
+                },
+                BorderColor::all(BUTTON_BORDER_COLOR),
+                ImageNode::new(assets.image("stone")).with_mode(NodeImageMode::Stretch),
+                CombatEnemyIntentImage,
+            ));
+            parent
+                .spawn(Node {
+                    flex_grow: 1.0,
+                    flex_direction: FlexDirection::Column,
+                    row_gap: Val::Px(4.),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        add_text(localization.get("combat.watching", lang), "bold", 2.0, assets),
+                        TextColor(Color::srgb(0.95, 0.78, 0.35)),
+                        CombatEnemyIntentName,
+                    ));
+                    parent.spawn((
+                        add_text(
+                            localization.get("combat.watching_desc", lang),
+                            "medium",
+                            1.35,
+                            assets,
+                        ),
+                        TextColor(Color::WHITE),
+                        CombatEnemyIntentDescription,
+                    ));
+                    parent
+                        .spawn((
+                            Node {
+                                width: percent(100.),
+                                height: Val::Px(18.),
+                                position_type: PositionType::Relative,
+                                border: UiRect::all(Val::Px(1.)),
+                                ..default()
+                            },
+                            BackgroundColor(BAR_BG_COLOR),
+                            BorderColor::all(BUTTON_BORDER_COLOR),
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                Node {
+                                    width: percent(0.),
+                                    height: percent(100.),
+                                    ..default()
+                                },
+                                BackgroundColor(Color::srgb(0.70, 0.20, 0.18)),
+                                CombatEnemyCastFill,
+                            ));
+                            parent.spawn((
+                                Node {
+                                    position_type: PositionType::Absolute,
+                                    width: percent(100.),
+                                    height: percent(100.),
+                                    ..default()
+                                },
+                                BackgroundColor(RECOVERY_COLOR),
+                                CombatEnemyRecoveryFill,
+                            ));
+                            parent
+                                .spawn(Node {
+                                    position_type: PositionType::Absolute,
+                                    width: percent(100.),
+                                    height: percent(100.),
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::Center,
+                                    ..default()
+                                })
+                                .with_children(|parent| {
+                                    parent.spawn((
+                                        add_text("", "bold", 1.2, assets),
+                                        TextColor(Color::WHITE),
+                                        CombatEnemyCastText,
+                                    ));
+                                });
+                        });
                 });
         });
 }
@@ -1791,9 +2121,10 @@ fn spawn_enemy_consumables(
                 .spawn(Node {
                     width: percent(100.),
                     flex_direction: FlexDirection::Row,
-                    flex_wrap: FlexWrap::Wrap,
-                    column_gap: Val::Px(2.),
-                    row_gap: Val::Px(2.),
+                    flex_wrap: FlexWrap::NoWrap,
+                    justify_content: JustifyContent::Center,
+                    column_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
+                    row_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
                     ..default()
                 })
                 .with_children(|parent| {
@@ -1826,7 +2157,7 @@ fn spawn_combat_resource_bar(
     is_health: bool,
     omit_top_border: bool,
 ) {
-    let bar_height = Val::Px(36.);
+    let bar_height = Val::Px(COMBAT_RESOURCE_BAR_HEIGHT);
     let font_size = 1.9;
     parent
         .spawn((
@@ -1849,6 +2180,13 @@ fn spawn_combat_resource_bar(
             },
             BackgroundColor(BAR_BG_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            Interaction::default(),
+            Pickable::default(),
+            if is_health {
+                InfoTooltip::Health
+            } else {
+                InfoTooltip::Mana
+            },
         ))
         .with_children(|parent| {
             let mut fill = parent.spawn((
@@ -1893,4 +2231,59 @@ fn spawn_combat_resource_bar(
                     ));
                 });
         });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Estimates the tallest player-side control stack at a viewport height.
+    fn player_stack_height(viewport_height: f32) -> f32 {
+        let vh = viewport_height / 100.0;
+        let portrait = COMBAT_PORTRAIT_WIDTH * vh / COMBAT_PORTRAIT_ASPECT;
+        let tactic_column = COMBAT_TACTIC_CARD_SIZE * vh * 5.0 + 23.0;
+        let portrait_row = portrait.max(tactic_column);
+        let ability_row = COMBAT_ABILITY_CARD_SIZE * vh;
+        let consumable_row = COMBAT_CONSUMABLE_CARD_SIZE * vh;
+
+        portrait_row + COMBAT_RESOURCE_BAR_HEIGHT * 2.0 + 4.0 + ability_row + 4.0 + consumable_row
+    }
+
+    #[test]
+    /// Verifies the complete combat controls fill the viewport without overflowing.
+    fn player_combat_stack_fits_default_and_compact_heights() {
+        for height in [900.0, 720.0] {
+            let usable_height = height - 16.0;
+            let bottom_gap = usable_height - player_stack_height(height);
+            assert!(bottom_gap >= 0.0, "combat stack does not fit a {height:.0}px viewport");
+            assert!(
+                bottom_gap <= 32.0,
+                "combat stack leaves an excessive {bottom_gap:.1}px bottom gap"
+            );
+        }
+    }
+
+    #[test]
+    /// Verifies the three columns and action rows fit at supported viewport sizes.
+    fn combat_cards_fit_portrait_and_panel_widths() {
+        for (viewport_width, viewport_height) in [(1600.0, 900.0), (1280.0, 720.0)] {
+            let panel_width = viewport_width * LEFT_PANEL_WIDTH / 100.0;
+            let stats_width = panel_width * COMBAT_STATS_COLUMN_WIDTH / 100.0;
+            let vh = viewport_height / 100.0;
+            let portrait_width = COMBAT_PORTRAIT_WIDTH * vh;
+            let ability_width = ACTIVE_HOTKEYS.len() as f32 * COMBAT_ABILITY_CARD_SIZE * vh + 4.0;
+            let consumable_width =
+                CONSUMABLE_HOTKEYS.len() as f32 * COMBAT_CONSUMABLE_CARD_SIZE * vh
+                    + (CONSUMABLE_HOTKEYS.len() - 1) as f32 * COMBAT_CONSUMABLE_CARD_GAP;
+            let three_columns_width =
+                COMBAT_TACTIC_CARD_SIZE * vh + portrait_width + stats_width + 12.0;
+
+            assert!(ability_width <= portrait_width);
+            assert!(ability_width >= portrait_width * 0.71);
+            assert!(ability_width <= portrait_width * 0.77);
+            assert!(consumable_width <= panel_width);
+            assert!(consumable_width <= portrait_width + COMBAT_TACTIC_CARD_SIZE * vh + 12.0);
+            assert!(three_columns_width <= panel_width);
+        }
+    }
 }

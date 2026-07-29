@@ -185,7 +185,11 @@ pub enum InfoTooltip {
     Gold,
     ActionPoints,
     Xp,
+    Health,
+    Mana,
+    Poise,
     Combat(PlayingStat),
+    CombatOpponent(PlayingStat),
     #[allow(dead_code)]
     Action(Action),
     Pet,
@@ -1959,7 +1963,30 @@ pub fn info_tooltip_system(
                 localization.get("general.xp", lang),
                 vec![localization.get("general.xp_desc", lang)],
             ),
+            InfoTooltip::Health => (
+                localization.get("general.health", lang),
+                vec![localization.get("general.health_desc", lang)],
+            ),
+            InfoTooltip::Mana => (
+                localization.get("general.mana", lang),
+                vec![localization.get("general.mana_desc", lang)],
+            ),
+            InfoTooltip::Poise => (
+                localization.get("combat.poise", lang),
+                vec![localization.get("combat.poise_desc", lang)],
+            ),
             InfoTooltip::Combat(stat) => {
+                let title_key = match stat {
+                    PlayingStat::Attack => "general.attack",
+                    PlayingStat::Defense => "general.defense",
+                    PlayingStat::Initiative => "general.initiative",
+                    _ => "",
+                };
+                let mut lines = vec![localization.get(format!("{title_key}_desc"), lang)];
+                lines.extend(combat_breakdown(*stat, &player, &localization, lang));
+                (localization.get(title_key, lang), lines)
+            },
+            InfoTooltip::CombatOpponent(stat) => {
                 let title_key = match stat {
                     PlayingStat::Attack => "general.attack",
                     PlayingStat::Defense => "general.defense",
@@ -1968,7 +1995,7 @@ pub fn info_tooltip_system(
                 };
                 (
                     localization.get(title_key, lang),
-                    combat_breakdown(*stat, &player, &localization, lang),
+                    vec![localization.get(format!("{title_key}_desc"), lang)],
                 )
             },
             InfoTooltip::Action(_) | InfoTooltip::Pet => unreachable!(),

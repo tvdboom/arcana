@@ -6,6 +6,18 @@ use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MonsterArchetype {
+    Berserker,
+    Necromancer,
+    Knight,
+    Assassin,
+    Leech,
+    Mage,
+    #[default]
+    Beast,
+}
+
 #[derive(EnumIter, Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MonsterKind {
     #[default]
@@ -20,6 +32,9 @@ pub struct Monster {
     pub image: String,
     pub level: u32,
     pub kind: MonsterKind,
+    /// Governs the telegraphed move rotation used by this monster in PvE combat.
+    #[serde(default)]
+    pub archetype: MonsterArchetype,
     pub health: u32,
     pub max_health: u32,
     pub attack: u32,

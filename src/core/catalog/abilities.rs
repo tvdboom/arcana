@@ -7,6 +7,26 @@ use crate::core::settings::Language;
 use crate::utils::NameFromEnum;
 use serde::Deserialize;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AbilityRole {
+    Primer,
+    Payoff,
+    Reaction,
+    Sustain,
+}
+
+impl AbilityRole {
+    /// Returns the localization key for this tactical role.
+    pub const fn localization_key(self) -> &'static str {
+        match self {
+            Self::Primer => "combat.role_primer",
+            Self::Payoff => "combat.role_payoff",
+            Self::Reaction => "combat.role_reaction",
+            Self::Sustain => "combat.role_sustain",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct Ability {
     /// Name of the ability (matches the english name)
@@ -39,6 +59,49 @@ pub struct Ability {
 }
 
 impl Ability {
+    /// Classifies this ability by how it participates in combat decisions.
+    pub fn role(&self) -> AbilityRole {
+        let has_reaction = self.effects.iter().any(|effect| {
+            matches!(
+                effect,
+                Effect::Heal { .. }
+                    | Effect::Purge
+                    | Effect::Fortify { .. }
+                    | Effect::MonarchShield { .. }
+                    | Effect::Stun { .. }
+                    | Effect::Silence { .. }
+                    | Effect::Taunt { .. }
+            )
+        });
+        if has_reaction {
+            return AbilityRole::Reaction;
+        }
+        let has_payoff = self.effects.iter().any(|effect| {
+            matches!(effect, Effect::Pierce { .. } | Effect::Cleave { .. } | Effect::Bleed { .. })
+        });
+        if has_payoff {
+            return AbilityRole::Payoff;
+        }
+        let has_primer = self.effects.iter().any(|effect| {
+            matches!(
+                effect,
+                Effect::Blind { .. }
+                    | Effect::Burn { .. }
+                    | Effect::Curse { .. }
+                    | Effect::Freeze { .. }
+                    | Effect::Immobilize { .. }
+                    | Effect::Paranoia { .. }
+                    | Effect::Poison { .. }
+                    | Effect::Vulnerability { .. }
+            )
+        });
+        if has_primer {
+            AbilityRole::Primer
+        } else {
+            AbilityRole::Sustain
+        }
+    }
+
     /// Performs the description operation.
     pub fn description(&self, _language: Language, _localization: &Localization) -> String {
         let mut parts = vec![
@@ -60,6 +123,7 @@ impl Ability {
         let mana_label = localization.get("general.mana", language);
         let cooldown_label = localization.get("general.cooldown", language);
         let kind_label = localization.get("general.kind", language);
+        let role_label = localization.get("combat.role", language);
         let target_label = localization.get("general.target", language);
         let aoe_label = localization.get("general.aoe", language);
         let abilities_label = localization.get("general.abilities", language);
@@ -85,6 +149,11 @@ impl Ability {
         lines.push(format!("[mana] {}: {}", mana_label, self.mana_cost));
         lines.push(format!("[cooldown] {}: {:.1}s", cooldown_label, self.cooldown));
         lines.push(format!("[{}] {}: {}", self.kind.to_lowername(), kind_label, kind_name));
+        lines.push(format!(
+            "[ability] {}: {}",
+            role_label,
+            localization.get(self.role().localization_key(), language)
+        ));
         lines.push(format!("[target] {}: {}", target_label, target_val));
         lines.push(format!("[aoe] {}: {}", aoe_label, aoe_val));
         lines.push(format!("[ability] {}:", abilities_label));
@@ -92,5 +161,55 @@ impl Ability {
             lines.push(format!("• {}", e.description(language, localization)));
         }
         lines
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Ability, AbilityRole};
+    use crate::core::catalog::effects::Effect;
+    use crate::core::catalog::equipment::Kind;
+
+    /// Builds a minimal ability around the supplied effects.
+    fn ability_with(effects: Vec<Effect>) -> Ability {
+        Ability {
+            name: "Test Ability".to_string(),
+            image: "test".to_string(),
+            level: 1,
+            kind: Kind::Physical,
+            mana_cost: 1,
+            cooldown: 2.0,
+            on_self: false,
+            is_aoe: false,
+            effects,
+        }
+    }
+
+    #[test]
+    /// Verifies tactical roles prioritize reactions before damage classifications.
+    fn reactions_take_role_precedence() {
+        let ability = ability_with(vec![
+            Effect::Pierce {
+                damage: 5,
+            },
+            Effect::Stun {
+                duration: 2.0,
+            },
+        ]);
+        assert_eq!(ability.role(), AbilityRole::Reaction);
+    }
+
+    #[test]
+    /// Verifies primers and payoffs retain distinct tactical classifications.
+    fn primers_and_payoffs_have_distinct_roles() {
+        let primer = ability_with(vec![Effect::Freeze {
+            attack_speed_pct: -20.0,
+            duration: 3.0,
+        }]);
+        let payoff = ability_with(vec![Effect::Pierce {
+            damage: 8,
+        }]);
+        assert_eq!(primer.role(), AbilityRole::Primer);
+        assert_eq!(payoff.role(), AbilityRole::Payoff);
     }
 }

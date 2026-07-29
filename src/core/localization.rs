@@ -623,8 +623,31 @@ pub fn update_localized_text(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::catalog::catalog::{all_abilities, all_perks, all_weapons};
+    use crate::core::catalog::catalog::{
+        all_abilities, all_artifacts, all_consumables, all_perks, all_weapons, all_wearables,
+    };
     use strum::IntoEnumIterator;
+
+    #[test]
+    /// Verifies every supported language contains the same complete set of nonempty keys.
+    fn translation_tables_have_identical_nonempty_keys() {
+        let localization = Localization::from_world(&mut World::new());
+
+        assert_eq!(localization.en.len(), localization.es.len());
+        assert_eq!(localization.en.len(), localization.nl.len());
+        for key in localization.en.keys() {
+            for (language, translations) in [
+                ("English", &localization.en),
+                ("Spanish", &localization.es),
+                ("Dutch", &localization.nl),
+            ] {
+                let value = translations
+                    .get(key)
+                    .unwrap_or_else(|| panic!("{language} is missing localization key {key}"));
+                assert!(!value.trim().is_empty(), "{language} localization key {key} is empty");
+            }
+        }
+    }
 
     /// Verifies every generated monster name has a translation in every supported language.
     #[test]
@@ -645,8 +668,8 @@ mod tests {
     }
 
     #[test]
-    /// Verifies every playable catalog name has an exact English, Spanish, and Dutch entry.
-    fn equipment_abilities_and_perks_have_complete_translations() {
+    /// Verifies every catalog name has an exact English, Spanish, and Dutch entry.
+    fn catalog_names_have_complete_translations() {
         let localization = Localization::from_world(&mut World::new());
         let languages = [Language::English, Language::Spanish, Language::Dutch];
         let catalogs = [
@@ -656,6 +679,18 @@ mod tests {
                 all_abilities().iter().map(|entry| entry.name.as_str()).collect::<Vec<_>>(),
             ),
             ("perk", all_perks().iter().map(|entry| entry.name.as_str()).collect::<Vec<_>>()),
+            (
+                "wearable",
+                all_wearables().iter().map(|entry| entry.name.as_str()).collect::<Vec<_>>(),
+            ),
+            (
+                "consumable",
+                all_consumables().iter().map(|entry| entry.name.as_str()).collect::<Vec<_>>(),
+            ),
+            (
+                "artifact",
+                all_artifacts().iter().map(|entry| entry.name.as_str()).collect::<Vec<_>>(),
+            ),
         ];
 
         for (prefix, names) in catalogs {
@@ -669,6 +704,15 @@ mod tests {
                 }
             }
         }
+
+        assert_eq!(
+            localization.catalog_name("artifact", "Smoked Meat", Language::Spanish),
+            "carne ahumada"
+        );
+        assert_eq!(
+            localization.catalog_name("artifact", "Smoked Meat", Language::Dutch),
+            "gerookt vlees"
+        );
     }
 
     /// Verifies alignment formatting omits deity names and handles true neutral naturally.

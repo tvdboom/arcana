@@ -60,10 +60,12 @@ use crate::core::audio::*;
 use crate::core::camera::*;
 use crate::core::combat::mechanics::{
     animate_death_skulls, animate_floating_text, cleanup_any_combat_artifacts,
-    cleanup_combat_on_exit, combat_effect_tooltip_system, combat_input, combat_tick,
+    cleanup_combat_on_exit, combat_effect_tooltip_system, combat_input,
+    combat_tactic_tooltip_system, combat_tick, refresh_combat_translation_cache,
     setup_combat_state, sync_combat_continue_with_pet_button, sync_combat_effect_icons,
     sync_consumable_cards, update_combat_equipment_slots, update_combat_pause_indicator,
-    update_combat_speed_label, update_combat_visuals, CombatSpeed, DuelActive,
+    update_combat_speed_label, update_combat_tactics_visuals, update_combat_visuals, CombatSpeed,
+    DuelActive,
 };
 use crate::core::combat::ui::setup_combat_ui;
 use crate::core::game_state::ShopUiState;
@@ -220,6 +222,7 @@ impl Plugin for GamePlugin {
                     update_scrollbar_x_system.run_if(in_state(AppState::Game)),
                     reveal_menu_content_when_bg_ready
                         .run_if(in_state(AppState::MainMenu).or_else(in_state(AppState::Settings))),
+                    tick_gold_toasts.run_if(in_state(AppState::MainMenu)),
                     animate_loading_text.run_if(in_state(AppState::Loading)),
                     complete_loading_when_ready.run_if(in_state(AppState::Loading)),
                 ),
@@ -432,6 +435,7 @@ impl Plugin for GamePlugin {
                     combat_input.run_if(not(resource_exists::<DuelActive>)),
                     combat_tick.run_if(not(resource_exists::<DuelActive>)),
                     update_combat_visuals,
+                    update_combat_tactics_visuals,
                     sync_combat_continue_with_pet_button,
                     update_combat_equipment_slots,
                     update_combat_pause_indicator,
@@ -440,12 +444,25 @@ impl Plugin for GamePlugin {
                     animate_floating_text,
                     sync_combat_effect_icons,
                     combat_effect_tooltip_system,
+                    combat_tactic_tooltip_system,
+                    info_tooltip_system,
                     sync_consumable_cards,
                     tooltip_follow_cursor_system,
                     right_column_tooltip_system,
                     equip_slot_tooltip_system,
                 )
                     .run_if(in_state(GameState::Combat)),
+            )
+            .add_systems(
+                Update,
+                (
+                    refresh_combat_translation_cache,
+                    update_combat_visuals,
+                    update_combat_tactics_visuals,
+                )
+                    .run_if(resource_changed::<Settings>)
+                    .run_if(resource_exists::<crate::core::combat::mechanics::CombatState>)
+                    .run_if(not(in_state(GameState::Combat))),
             )
             .add_systems(OnExit(GameState::Combat), cleanup_combat_on_exit)
             // Quest Systems

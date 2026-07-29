@@ -2,6 +2,7 @@
 
 use bevy::prelude::*;
 use rand::{rng, RngExt};
+use std::collections::HashMap;
 
 use crate::core::actions::hunt::{hunt_pet_chance, PendingHuntPet, PendingHuntXp};
 use crate::core::audio::PlayAudioMsg;
@@ -11,12 +12,16 @@ use crate::core::catalog::equipment::Equipment;
 use crate::core::catalog::equipment::Kind;
 use crate::core::catalog::modifiers::Modifier;
 use crate::core::catalog::weapons::{Category, Weapon};
+use crate::core::combat::tactics::{
+    ability_poise_damage, enemy_move_rotation, CombatStance, EnemyMove, EnemyMoveKind,
+    EnemyMoveTarget,
+};
 use crate::core::combat::ui::{
     CombatCmp, CombatContinueWithPetButton, CombatContinueWithPetSlot, CombatEffectIcon,
     CombatPetName, CombatPortraitLevel, CombatPortraitName, CombatStatLabel,
 };
 use crate::core::menu::systems::{CombatMenuSuspended, GameMenuOrigin};
-use crate::core::monsters::{ActiveMonster, Monster};
+use crate::core::monsters::{ActiveMonster, Monster, MonsterArchetype};
 use crate::core::player::{Attribute, Player};
 use crate::core::races::Mutation;
 use crate::core::states::GameState;
@@ -39,6 +44,10 @@ pub const CONSUMABLE_HOTKEYS: [KeyCode; 8] = [
     KeyCode::KeyK,
 ];
 
+pub const GUARD_HOTKEY: KeyCode = KeyCode::KeyZ;
+pub const STANCE_HOTKEYS: [KeyCode; 4] =
+    [KeyCode::Digit1, KeyCode::Digit2, KeyCode::Digit3, KeyCode::Digit4];
+
 const BAR_LERP_SPEED: f32 = 6.0;
 const ATTACK_PERIOD_MULTIPLIER: f32 = 2.0;
 const ABILITY_MANA_COST_MULTIPLIER: u32 = 2;
@@ -60,6 +69,16 @@ const DODGE_BASE_CHANCE: f32 = 0.18;
 const DODGE_POINT_MULTIPLIER: f32 = 0.018;
 const DODGE_CHANCE_MIN: f32 = 0.08;
 const DODGE_CHANCE_MAX: f32 = 0.70;
+/// Maximum number of copies of one consumable available in a single combat.
+pub const MAX_COMBAT_CONSUMABLES_PER_TYPE: usize = 5;
+const GUARD_DURATION: f32 = 0.90;
+pub const GUARD_MANA_COST_PER_LEVEL: f32 = 5.0;
+const GUARD_DAMAGE_REDUCTION: f32 = 0.62;
+const PERFECT_GUARD_DAMAGE_REDUCTION: f32 = 0.92;
+const PERFECT_GUARD_POISE_DAMAGE: f32 = 28.0;
+const BREAK_STUN_DURATION: f32 = 1.6;
+const BREAK_VULNERABILITY_DURATION: f32 = 3.2;
+const BREAK_VULNERABILITY_PERCENT: f32 = 25.0;
 
 /// Adjustable time multiplier for combat, persisted across battles. Controlled
 /// with Ctrl+Shift+Left/Right and applied to every time-driven combat system.
@@ -111,6 +130,8 @@ pub struct CombatSpeedText;
 pub enum CombatCard {
     Ability(usize),
     Consumable(String),
+    Guard,
+    Stance(CombatStance),
 }
 
 /// Dark overlay child of an ability card. Its height encodes cooldown progress.
@@ -621,6 +642,23 @@ pub struct AbilitySlot {
     pub mana_cost: u32,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct EnemyCast {
+    pub movement: EnemyMove,
+    pub elapsed: f32,
+}
+
+#[derive(Clone, Debug)]
+pub struct EnemyTactics {
+    pub archetype: MonsterArchetype,
+    pub rotation: Vec<EnemyMove>,
+    pub next_index: usize,
+    pub recovery: f32,
+    pub recovery_max: f32,
+    pub active_cast: Option<EnemyCast>,
+    pub phase_two: bool,
+}
+
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum CombatStatus {
     Ongoing,
@@ -635,6 +673,15 @@ pub struct CombatState {
     pub enemy_pet: Option<Fighter>,
     pub abilities: Vec<AbilitySlot>,
     pub enemy_abilities: Vec<AbilitySlot>,
+    pub player_consumables: HashMap<String, usize>,
+    pub enemy_consumables: HashMap<String, usize>,
+    pub stance: CombatStance,
+    pub guard_remaining: f32,
+    pub perfect_guard_remaining: f32,
+    pub enemy_poise: f32,
+    pub enemy_max_poise: f32,
+    pub enemy_break_remaining: f32,
+    pub enemy_tactics: Option<EnemyTactics>,
     pub status: CombatStatus,
     pub player_won: bool,
     pub player_level: u32,
@@ -645,6 +692,15 @@ pub struct CombatState {
     pub dodge_word: String,
     pub miss_word: String,
     pub xp_word: String,
+    pub guard_word: String,
+    pub parry_word: String,
+    pub break_word: String,
+    pub shatter_word: String,
+    pub detonate_word: String,
+    pub doom_word: String,
+    pub exploit_word: String,
+    pub cleanse_word: String,
+    pub phase_word: String,
 }
 
 impl CombatState {
@@ -656,6 +712,32 @@ impl CombatState {
         let diff = self.enemy_level as i32 - self.player_level as i32;
         (2 + diff).max(0) as u32
     }
+}
+
+/// Selects equipped consumables for combat without removing excess stock from the inventory.
+fn select_combat_consumables(player: &Player) -> HashMap<String, usize> {
+    player
+        .equipped_consumables
+        .iter()
+        .filter(|key| matches!(get_equipment(key), Some(Equipment::Consumable(_))))
+        .map(|key| {
+            let count = player.inventory.iter().filter(|item| *item == key).count();
+            (key.clone(), count.min(MAX_COMBAT_CONSUMABLES_PER_TYPE))
+        })
+        .filter(|(_, count)| *count > 0)
+        .collect()
+}
+
+/// Takes one consumable from combat stock, returning whether one was available.
+fn take_combat_consumable(stock: &mut HashMap<String, usize>, key: &str) -> bool {
+    let Some(remaining) = stock.get_mut(key) else {
+        return false;
+    };
+    if *remaining == 0 {
+        return false;
+    }
+    *remaining -= 1;
+    true
 }
 
 /// Collects offensive weapon effects and defensive equipment effects for combat.
@@ -935,11 +1017,23 @@ pub fn setup_combat_state(
             .collect::<Vec<_>>()
     };
     let abilities = build_ability_slots(&player.active_abilities);
+    let player_consumables = select_combat_consumables(&player);
+    let enemy_consumables = opponent.map(select_combat_consumables).unwrap_or_default();
     let enemy_abilities = duel_state
         .as_ref()
         .and_then(|duel| duel.opponent.as_ref())
         .map(|opp| build_ability_slots(&opp.active_abilities))
         .unwrap_or_default();
+    let enemy_max_poise = 42.0 + monster.level as f32 * 4.0;
+    let enemy_tactics = opponent.is_none().then(|| EnemyTactics {
+        archetype: monster.archetype,
+        rotation: enemy_move_rotation(monster.archetype, monster.level),
+        next_index: 0,
+        recovery: 2.6,
+        recovery_max: 2.6,
+        active_cast: None,
+        phase_two: false,
+    });
 
     commands.insert_resource(CombatState {
         player: player_fighter,
@@ -948,6 +1042,15 @@ pub fn setup_combat_state(
         enemy_pet: enemy_pet_fighter,
         abilities,
         enemy_abilities,
+        player_consumables,
+        enemy_consumables,
+        stance: CombatStance::Aggressive,
+        guard_remaining: 0.0,
+        perfect_guard_remaining: 0.0,
+        enemy_poise: enemy_max_poise,
+        enemy_max_poise,
+        enemy_break_remaining: 0.0,
+        enemy_tactics,
         status: CombatStatus::Ongoing,
         player_won: false,
         player_level: player.level(),
@@ -961,6 +1064,15 @@ pub fn setup_combat_state(
         dodge_word: localization.get("general.dodge", settings.language),
         miss_word: localization.get("general.miss", settings.language),
         xp_word: localization.get("general.xp", settings.language),
+        guard_word: localization.get("combat.guard", settings.language),
+        parry_word: localization.get("combat.parry", settings.language),
+        break_word: localization.get("combat.break", settings.language),
+        shatter_word: localization.get("combat.combo_shatter", settings.language),
+        detonate_word: localization.get("combat.combo_detonate", settings.language),
+        doom_word: localization.get("combat.combo_doom", settings.language),
+        exploit_word: localization.get("combat.combo_exploit", settings.language),
+        cleanse_word: localization.get("combat.combo_cleanse", settings.language),
+        phase_word: localization.get("combat.phase_two", settings.language),
     });
 }
 
@@ -997,7 +1109,7 @@ fn compute_damage(attack: f32, defense: f32, crit: bool, incoming_mult: f32) -> 
     dmg.max(1.0)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Who {
     Player,
     Pet,
@@ -1151,7 +1263,12 @@ fn resolve_basic_attack(
         return Some((attack_style, AttackOutcome::Dodge));
     }
 
-    let crit = rng.random_bool((crit_chance + extra_crit).clamp(0.0, 1.0) as f64);
+    let stance_crit = if attacker == Who::Player {
+        state.stance.critical_chance_bonus()
+    } else {
+        0.0
+    };
+    let crit = rng.random_bool((crit_chance + extra_crit + stance_crit).clamp(0.0, 1.0) as f64);
 
     // Bleed: consume a one-shot bleed buff on the attacker for bonus damage.
     let mut bonus_pct = 0.0;
@@ -1171,6 +1288,13 @@ fn resolve_basic_attack(
     let mut dmg =
         compute_damage(atk, def, crit, incoming_mult) * outgoing_multiplier * resistance_multiplier;
     dmg *= 1.0 + bonus_pct;
+    if attacker == Who::Player {
+        dmg *= state.stance.attack_damage_multiplier();
+    }
+    if defender == Who::Player {
+        dmg *= state.stance.incoming_damage_multiplier();
+        dmg = mitigate_with_guard(state, dmg, play_audio_msg);
+    }
 
     if let Some(d) = state.get_mut(defender) {
         d.take_damage(dmg);
@@ -1185,6 +1309,15 @@ fn resolve_basic_attack(
             Color::srgb(1.0, 0.4, 0.4)
         },
     });
+
+    if attacker == Who::Player {
+        let poise_damage = state.stance.poise_damage();
+        if matches!(defender, Who::Enemy | Who::EnemyPet) {
+            damage_enemy_poise(state, poise_damage, play_audio_msg);
+        }
+    } else if attacker == Who::Pet && matches!(defender, Who::Enemy | Who::EnemyPet) {
+        damage_enemy_poise(state, 3.0, play_audio_msg);
+    }
 
     // Lifesteal heals the attacker.
     if lifesteal > 0.0 {
@@ -1250,6 +1383,83 @@ fn side_of(who: Who) -> FxSide {
     match who {
         Who::Player | Who::Pet => FxSide::Player,
         Who::Enemy | Who::EnemyPet => FxSide::Enemy,
+    }
+}
+
+/// Damages enemy Poise and triggers a vulnerable break when it is exhausted.
+fn damage_enemy_poise(
+    state: &mut CombatState,
+    amount: f32,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) {
+    if state.enemy_break_remaining > 0.0 || !state.enemy.alive {
+        return;
+    }
+    state.enemy_poise = (state.enemy_poise - amount.max(0.0)).max(0.0);
+    if state.enemy_poise > 0.0 {
+        return;
+    }
+
+    state.enemy_break_remaining = BREAK_STUN_DURATION;
+    if let Some(tactics) = state.enemy_tactics.as_mut() {
+        tactics.active_cast = None;
+        tactics.recovery = BREAK_STUN_DURATION + 1.0;
+        tactics.recovery_max = tactics.recovery;
+    }
+    push_timed(
+        state,
+        Who::Enemy,
+        Effect::Stun {
+            duration: BREAK_STUN_DURATION,
+        },
+        1.0,
+    );
+    push_timed(
+        state,
+        Who::Enemy,
+        Effect::Vulnerability {
+            damage_pct: BREAK_VULNERABILITY_PERCENT,
+            duration: BREAK_VULNERABILITY_DURATION,
+        },
+        1.0,
+    );
+    state.fx.push(CombatFx {
+        side: FxSide::Enemy,
+        text: state.break_word.clone(),
+        color: Color::srgb(0.85, 0.55, 1.0),
+    });
+    play_audio_msg.write(PlayAudioMsg::new("sword_clash"));
+}
+
+/// Reduces an incoming player hit when Guard is active and resolves perfect parries.
+fn mitigate_with_guard(
+    state: &mut CombatState,
+    damage: f32,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) -> f32 {
+    if state.guard_remaining <= 0.0 {
+        return damage;
+    }
+    let perfect = state.perfect_guard_remaining > 0.0;
+    state.guard_remaining = 0.0;
+    state.perfect_guard_remaining = 0.0;
+    if perfect {
+        damage_enemy_poise(state, PERFECT_GUARD_POISE_DAMAGE, play_audio_msg);
+        state.fx.push(CombatFx {
+            side: FxSide::Player,
+            text: state.parry_word.clone(),
+            color: Color::srgb(1.0, 0.86, 0.35),
+        });
+        play_audio_msg.write(PlayAudioMsg::new("sword_clash"));
+        damage * (1.0 - PERFECT_GUARD_DAMAGE_REDUCTION)
+    } else {
+        state.fx.push(CombatFx {
+            side: FxSide::Player,
+            text: state.guard_word.clone(),
+            color: Color::srgb(0.45, 0.75, 1.0),
+        });
+        play_audio_msg.write(PlayAudioMsg::new("armor_impact"));
+        damage * (1.0 - GUARD_DAMAGE_REDUCTION)
     }
 }
 
@@ -1660,6 +1870,792 @@ fn tick_fighter_effects(fighter: &mut Fighter, dt: f32) -> Vec<(FxSide, String, 
     fx
 }
 
+/// Returns the live fighter targeted by a telegraphed enemy move.
+fn enemy_move_target(state: &CombatState, target: EnemyMoveTarget) -> Who {
+    match target {
+        EnemyMoveTarget::Player => Who::Player,
+        EnemyMoveTarget::Pet if state.pet.as_ref().is_some_and(|fighter| fighter.alive) => Who::Pet,
+        EnemyMoveTarget::Pet => Who::Player,
+        EnemyMoveTarget::SelfSide => Who::Enemy,
+    }
+}
+
+/// Deals a telegraphed enemy move's direct damage through defense, stance, and Guard.
+fn deal_enemy_move_damage(
+    state: &mut CombatState,
+    target: Who,
+    attack_multiplier: f32,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) -> f32 {
+    let attack = state.enemy.eff_attack_for(state.enemy.base_attack) * attack_multiplier;
+    let Some(defender) = state.get(target) else {
+        return 0.0;
+    };
+    let mut damage =
+        compute_damage(attack, defender.eff_defense(), false, defender.incoming_multiplier());
+    if target == Who::Player {
+        damage *= state.stance.incoming_damage_multiplier();
+        damage = mitigate_with_guard(state, damage, play_audio_msg);
+    }
+    if let Some(defender) = state.get_mut(target) {
+        defender.take_damage(damage);
+    }
+    state.fx.push(CombatFx {
+        side: side_of(target),
+        text: format!("-{}", damage.round() as i32),
+        color: Color::srgb(1.0, 0.25, 0.18),
+    });
+    damage
+}
+
+/// Resolves one completed telegraphed enemy move.
+fn resolve_enemy_move(
+    state: &mut CombatState,
+    movement: EnemyMove,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) {
+    let level = state.enemy_level;
+    let target = enemy_move_target(state, movement.target);
+    match movement.kind {
+        EnemyMoveKind::CrushingBlow => {
+            deal_enemy_move_damage(state, target, 1.65, play_audio_msg);
+            play_audio_msg.write(PlayAudioMsg::new("armor_impact"));
+        },
+        EnemyMoveKind::DarkRitual => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Berserk {
+                    attack_pct: 24.0 + level as f32,
+                    duration: 6.0,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Haste {
+                    initiative_pct: 18.0 + level as f32 * 0.5,
+                    duration: 6.0,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("curse"));
+        },
+        EnemyMoveKind::VenomSpray => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Poison {
+                    damage: 1 + level.div_ceil(3),
+                    duration: 5.0,
+                },
+                Kind::Nature,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("curse"));
+        },
+        EnemyMoveKind::DefensiveShell => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Fortify {
+                    defense_pct: 38.0 + level as f32,
+                    duration: 6.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Thorns {
+                    damage_reflected_pct: 12.0 + level as f32 * 0.6,
+                    duration: 6.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("armor_impact"));
+        },
+        EnemyMoveKind::Execution => {
+            let low_health = state
+                .get(target)
+                .is_some_and(|fighter| fighter.health <= fighter.max_health * 0.35);
+            deal_enemy_move_damage(
+                state,
+                target,
+                if low_health {
+                    2.35
+                } else {
+                    0.90
+                },
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("sword_slice_violent"));
+        },
+        EnemyMoveKind::DevourCompanion => {
+            let damage = deal_enemy_move_damage(
+                state,
+                target,
+                if target == Who::Pet {
+                    1.75
+                } else {
+                    1.05
+                },
+                play_audio_msg,
+            );
+            state.enemy.heal(damage * 0.65);
+            play_audio_msg.write(PlayAudioMsg::new("sword_slice_violent"));
+        },
+        EnemyMoveKind::DrainLife => {
+            let damage = deal_enemy_move_damage(state, target, 1.05, play_audio_msg);
+            state.enemy.heal(damage * 0.80);
+            play_audio_msg.write(PlayAudioMsg::new("curse"));
+        },
+        EnemyMoveKind::WitheringHex => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Curse {
+                    damage: 4 + level * 2,
+                    timer: 4,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Vulnerability {
+                    damage_pct: 14.0 + level as f32 * 0.6,
+                    duration: 5.0,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("curse"));
+        },
+        EnemyMoveKind::GlacialBreath => {
+            deal_enemy_move_damage(state, target, 1.20, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Freeze {
+                    attack_speed_pct: -(18.0 + level as f32),
+                    duration: 5.0,
+                },
+                Kind::Ice,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("cast"));
+        },
+        EnemyMoveKind::SmokeVeil => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Player,
+                &Effect::Blind {
+                    miss_pct: 20.0 + level as f32,
+                    duration: 5.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Haste {
+                    initiative_pct: 24.0 + level as f32,
+                    duration: 5.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("curse"));
+        },
+        EnemyMoveKind::SunderArmor => {
+            deal_enemy_move_damage(state, target, 1.25, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Vulnerability {
+                    damage_pct: 12.0 + level as f32 * 0.5,
+                    duration: 5.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("armor_impact"));
+        },
+        EnemyMoveKind::FlameBreath => {
+            deal_enemy_move_damage(state, target, 1.15, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Burn {
+                    damage: 1 + level.div_ceil(3),
+                    duration: 5.0,
+                },
+                Kind::Fire,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("cast"));
+        },
+        EnemyMoveKind::EntanglingRoots => {
+            deal_enemy_move_damage(state, target, 0.85, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Immobilize {
+                    duration: 3.0,
+                },
+                Kind::Nature,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("cast"));
+        },
+        EnemyMoveKind::BloodFeast => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Regen {
+                    heal: 1 + level.div_ceil(3),
+                    duration: 6.0,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Lifesteal {
+                    percentage: 18.0 + level as f32 * 0.5,
+                    duration: 6.0,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("curse"));
+        },
+        EnemyMoveKind::ArcaneRupture => {
+            deal_enemy_move_damage(state, target, 1.10, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::ManaBurn {
+                    amount: 4 + level * 2,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("cast"));
+        },
+        EnemyMoveKind::WarCry => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Berserk {
+                    attack_pct: 18.0 + level as f32,
+                    duration: 6.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Haste {
+                    initiative_pct: 14.0 + level as f32 * 0.5,
+                    duration: 6.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("horn"));
+        },
+        EnemyMoveKind::Earthshatter => {
+            deal_enemy_move_damage(state, target, 1.45, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Stun {
+                    duration: 1.2 + level as f32 * 0.02,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("armor_impact"));
+        },
+        EnemyMoveKind::GraveChill => {
+            deal_enemy_move_damage(state, target, 1.0, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Freeze {
+                    attack_speed_pct: -(14.0 + level as f32),
+                    duration: 5.0,
+                },
+                Kind::Ice,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Curse {
+                    damage: 3 + level,
+                    timer: 4,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("curse"));
+        },
+        EnemyMoveKind::SoulSiphon => {
+            let damage = deal_enemy_move_damage(state, target, 1.20, play_audio_msg);
+            state.enemy.heal(damage * 0.65);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::ManaBurn {
+                    amount: 3 + level * 2,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("curse"));
+        },
+        EnemyMoveKind::ShieldBash => {
+            deal_enemy_move_damage(state, target, 1.10, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Stun {
+                    duration: 0.8 + level as f32 * 0.015,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("armor_impact"));
+        },
+        EnemyMoveKind::IronBulwark => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Fortify {
+                    defense_pct: 45.0 + level as f32,
+                    duration: 6.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Thorns {
+                    damage_reflected_pct: 16.0 + level as f32 * 0.6,
+                    duration: 6.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("armor_impact"));
+        },
+        EnemyMoveKind::FanOfKnives => {
+            deal_enemy_move_damage(state, target, 1.0, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Poison {
+                    damage: 1 + level.div_ceil(4),
+                    duration: 6.0,
+                },
+                Kind::Nature,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("sword_slice_violent"));
+        },
+        EnemyMoveKind::Shadowstep => {
+            deal_enemy_move_damage(state, target, 1.55, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Blind {
+                    miss_pct: 18.0 + level as f32 * 0.7,
+                    duration: 4.0,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("sword_slice_violent"));
+        },
+        EnemyMoveKind::CorrosiveBite => {
+            deal_enemy_move_damage(state, target, 1.20, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Poison {
+                    damage: 1 + level.div_ceil(3),
+                    duration: 6.0,
+                },
+                Kind::Nature,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Vulnerability {
+                    damage_pct: 10.0 + level as f32 * 0.5,
+                    duration: 5.0,
+                },
+                Kind::Nature,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("sword_slice_violent"));
+        },
+        EnemyMoveKind::ParasiticBloom => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Regen {
+                    heal: 2 + level.div_ceil(3),
+                    duration: 7.0,
+                },
+                Kind::Nature,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                Who::Enemy,
+                &Effect::Fortify {
+                    defense_pct: 24.0 + level as f32,
+                    duration: 7.0,
+                },
+                Kind::Nature,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("curse"));
+        },
+        EnemyMoveKind::Meteor => {
+            deal_enemy_move_damage(state, target, 1.70, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Burn {
+                    damage: 2 + level.div_ceil(3),
+                    duration: 6.0,
+                },
+                Kind::Fire,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("cast"));
+        },
+        EnemyMoveKind::TemporalLock => {
+            deal_enemy_move_damage(state, target, 0.75, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Stun {
+                    duration: 1.8 + level as f32 * 0.02,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Paranoia {
+                    initiative_pct: -(18.0 + level as f32),
+                    duration: 5.0,
+                },
+                Kind::Shadow,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("cast"));
+        },
+        EnemyMoveKind::SavagePounce => {
+            deal_enemy_move_damage(state, target, 1.40, play_audio_msg);
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Immobilize {
+                    duration: 2.5,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("sword_slice_violent"));
+        },
+        EnemyMoveKind::TerrifyingRoar => {
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Paranoia {
+                    initiative_pct: -(20.0 + level as f32),
+                    duration: 6.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            apply_effect(
+                state,
+                Who::Enemy,
+                target,
+                &Effect::Vulnerability {
+                    damage_pct: 12.0 + level as f32 * 0.5,
+                    duration: 6.0,
+                },
+                Kind::Physical,
+                None,
+                play_audio_msg,
+            );
+            play_audio_msg.write(PlayAudioMsg::new("horn"));
+        },
+    }
+}
+
+/// Triggers the one-time low-health phase associated with an enemy archetype.
+fn trigger_enemy_phase(
+    state: &mut CombatState,
+    archetype: MonsterArchetype,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) {
+    let duration = 14.0;
+    match archetype {
+        MonsterArchetype::Berserker => push_timed(
+            state,
+            Who::Enemy,
+            Effect::Berserk {
+                attack_pct: 38.0,
+                duration,
+            },
+            1.0,
+        ),
+        MonsterArchetype::Beast => push_timed(
+            state,
+            Who::Enemy,
+            Effect::BeastFrenzy {
+                attack_pct: 25.0,
+                attack_speed_pct: 28.0,
+                duration,
+            },
+            1.0,
+        ),
+        MonsterArchetype::Necromancer | MonsterArchetype::Leech => {
+            state.enemy.heal(state.enemy.max_health * 0.18);
+            push_timed(
+                state,
+                Who::Enemy,
+                Effect::Lifesteal {
+                    percentage: 24.0,
+                    duration,
+                },
+                1.0,
+            );
+        },
+        MonsterArchetype::Knight => {
+            push_timed(
+                state,
+                Who::Enemy,
+                Effect::Fortify {
+                    defense_pct: 42.0,
+                    duration,
+                },
+                1.0,
+            );
+            push_timed(
+                state,
+                Who::Enemy,
+                Effect::Thorns {
+                    damage_reflected_pct: 24.0,
+                    duration,
+                },
+                1.0,
+            );
+        },
+        MonsterArchetype::Assassin => {
+            push_timed(
+                state,
+                Who::Enemy,
+                Effect::Haste {
+                    initiative_pct: 35.0,
+                    duration,
+                },
+                1.0,
+            );
+            push_timed(
+                state,
+                Who::Enemy,
+                Effect::Focus {
+                    crit_chance_pct: 25.0,
+                    duration,
+                },
+                1.0,
+            );
+        },
+        MonsterArchetype::Mage => {
+            push_timed(
+                state,
+                Who::Enemy,
+                Effect::Empower {
+                    damage_pct: 32.0,
+                    duration,
+                },
+                1.0,
+            );
+            push_timed(
+                state,
+                Who::Enemy,
+                Effect::Haste {
+                    initiative_pct: 25.0,
+                    duration,
+                },
+                1.0,
+            );
+        },
+    }
+    state.fx.push(CombatFx {
+        side: FxSide::Enemy,
+        text: state.phase_word.clone(),
+        color: Color::srgb(1.0, 0.32, 0.22),
+    });
+    play_audio_msg.write(PlayAudioMsg::new("warning"));
+}
+
+/// Advances the deterministic PvE intent rotation and resolves completed casts.
+fn tick_enemy_tactics(
+    state: &mut CombatState,
+    dt: f32,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) {
+    if state.enemy_tactics.is_none() || !state.enemy.alive {
+        return;
+    }
+    let phase_archetype = state.enemy_tactics.as_ref().and_then(|tactics| {
+        (!tactics.phase_two && state.enemy.health <= state.enemy.max_health * 0.50)
+            .then_some(tactics.archetype)
+    });
+    if let Some(archetype) = phase_archetype {
+        if let Some(tactics) = state.enemy_tactics.as_mut() {
+            tactics.phase_two = true;
+            if tactics.recovery > 0.8 {
+                tactics.recovery = 0.8;
+                tactics.recovery_max = 0.8;
+            }
+        }
+        trigger_enemy_phase(state, archetype, play_audio_msg);
+    }
+    if state.enemy_break_remaining > 0.0 {
+        return;
+    }
+    let enemy_can_cast = state.enemy.can_cast();
+    let mut completed = None;
+    if let Some(tactics) = state.enemy_tactics.as_mut() {
+        if let Some(active_cast) = tactics.active_cast.as_mut() {
+            active_cast.elapsed += dt;
+            if active_cast.elapsed >= active_cast.movement.cast_time {
+                completed = tactics.active_cast.take().map(|cast| cast.movement);
+            }
+        } else if enemy_can_cast {
+            tactics.recovery = (tactics.recovery - dt).max(0.0);
+            if tactics.recovery <= 0.0 && !tactics.rotation.is_empty() {
+                let movement = tactics.rotation[tactics.next_index % tactics.rotation.len()];
+                tactics.next_index = (tactics.next_index + 1) % tactics.rotation.len();
+                tactics.active_cast = Some(EnemyCast {
+                    movement,
+                    elapsed: 0.0,
+                });
+                play_audio_msg.write(PlayAudioMsg::new("warning"));
+            }
+        }
+    }
+    if let Some(movement) = completed {
+        resolve_enemy_move(state, movement, play_audio_msg);
+        if let Some(tactics) = state.enemy_tactics.as_mut() {
+            tactics.recovery = movement.recovery
+                * if tactics.phase_two {
+                    0.78
+                } else {
+                    1.0
+                };
+            tactics.recovery_max = tactics.recovery;
+        }
+    }
+}
+
 /// Advance the combat simulation by `dt` seconds, mutating only the
 /// [`CombatState`]. Shared by single-player combat and networked duels (where
 /// the host drives this directly and streams the result to the client).
@@ -1673,6 +2669,17 @@ pub fn step_combat(
     }
     if state.paused {
         return;
+    }
+
+    state.guard_remaining = (state.guard_remaining - dt).max(0.0);
+    state.perfect_guard_remaining = (state.perfect_guard_remaining - dt).max(0.0);
+    if state.enemy_break_remaining > 0.0 {
+        state.enemy_break_remaining = (state.enemy_break_remaining - dt).max(0.0);
+        if state.enemy_break_remaining <= 0.0 {
+            state.enemy_poise = state.enemy_max_poise;
+        }
+    } else if state.enemy_tactics.as_ref().is_some_and(|tactics| tactics.active_cast.is_none()) {
+        state.enemy_poise = (state.enemy_poise + dt * 4.0).min(state.enemy_max_poise);
     }
 
     // Ability cooldowns.
@@ -1694,6 +2701,8 @@ pub fn step_combat(
             }
         }
     }
+
+    tick_enemy_tactics(state, dt, play_audio_msg);
 
     // Damage/heal over time + effect expiry.
     for who in [Who::Player, Who::Pet, Who::Enemy, Who::EnemyPet] {
@@ -1735,11 +2744,13 @@ pub fn step_combat(
         (Who::Enemy, enemy_target),
         (Who::EnemyPet, enemy_target),
     ] {
+        let enemy_is_casting = attacker == Who::Enemy
+            && state.enemy_tactics.as_ref().is_some_and(|tactics| tactics.active_cast.is_some());
         let num_weapons = {
             let Some(f) = state.get(attacker) else {
                 continue;
             };
-            if !f.alive || !f.can_act() {
+            if !f.alive || !f.can_act() || enemy_is_casting {
                 if let Some(f_mut) = state.get_mut(attacker) {
                     for w in &mut f_mut.weapons {
                         w.attack_timer = 0.0;
@@ -1752,13 +2763,18 @@ pub fn step_combat(
 
         for weapon_index in 0..num_weapons {
             let ready = {
+                let stance_speed = if attacker == Who::Player {
+                    state.stance.attack_speed_multiplier()
+                } else {
+                    1.0
+                };
                 let Some(f) = state.get_mut(attacker) else {
                     continue;
                 };
                 let Some(w) = f.weapons.get(weapon_index) else {
                     continue;
                 };
-                let speed = w.attack_speed;
+                let speed = w.attack_speed * stance_speed;
                 let period = f.attack_period_for(speed);
                 let w_mut = f.weapons.get_mut(weapon_index).unwrap();
                 w_mut.attack_timer += dt;
@@ -1894,6 +2910,171 @@ pub fn combat_tick(
 // Casting abilities & using consumables
 // ---------------------------------------------------------------------------
 
+/// Deals bonus combo damage and emits its tactical payoff label.
+fn deal_combo_damage(state: &mut CombatState, damage: f32, kind: Kind, label: String) {
+    let scaled = damage
+        * state.player.outgoing_damage_multiplier(kind, None)
+        * state.enemy.incoming_damage_multiplier(kind, None)
+        * state.enemy.incoming_multiplier();
+    state.enemy.take_damage(scaled);
+    state.fx.push(CombatFx {
+        side: FxSide::Enemy,
+        text: format!("{label} -{}", scaled.round() as i32),
+        color: Color::srgb(1.0, 0.68, 0.18),
+    });
+}
+
+/// Consumes compatible enemy primers and returns bonus Poise damage for a payoff cast.
+fn resolve_ability_combos(
+    state: &mut CombatState,
+    ability: &crate::core::catalog::abilities::Ability,
+) -> f32 {
+    let direct_power = ability
+        .effects
+        .iter()
+        .map(|effect| match effect {
+            Effect::Pierce {
+                damage,
+            } => *damage as f32,
+            Effect::Cleave {
+                damage_pct,
+                ..
+            } => state.player.base_attack * damage_pct / 100.0,
+            _ => 0.0,
+        })
+        .sum::<f32>();
+    if direct_power <= 0.0 {
+        return 0.0;
+    }
+
+    let mut bonus_poise = 0.0;
+    if matches!(ability.kind, Kind::Physical | Kind::Ice) {
+        if let Some(index) = state
+            .enemy
+            .effects
+            .iter()
+            .position(|timed| matches!(timed.effect, Effect::Freeze { .. }))
+        {
+            state.enemy.effects.remove(index);
+            deal_combo_damage(state, direct_power * 0.55, ability.kind, state.shatter_word.clone());
+            bonus_poise += 20.0;
+        }
+    }
+    if ability.kind == Kind::Fire {
+        if let Some(index) =
+            state.enemy.effects.iter().position(|timed| matches!(timed.effect, Effect::Burn { .. }))
+        {
+            let timed = state.enemy.effects.remove(index);
+            let pending_damage = match timed.effect {
+                Effect::Burn {
+                    damage,
+                    ..
+                } => damage as f32 * timed.remaining.max(1.0) * timed.magnitude_multiplier,
+                _ => 0.0,
+            };
+            deal_combo_damage(
+                state,
+                pending_damage * 0.75 + direct_power * 0.25,
+                Kind::Fire,
+                state.detonate_word.clone(),
+            );
+            bonus_poise += 10.0;
+        }
+    }
+    if ability.kind == Kind::Shadow {
+        if let Some(index) = state
+            .enemy
+            .effects
+            .iter()
+            .position(|timed| matches!(timed.effect, Effect::Curse { .. }))
+        {
+            let timed = state.enemy.effects.remove(index);
+            let curse_damage = match timed.effect {
+                Effect::Curse {
+                    damage,
+                    ..
+                } => damage as f32 * timed.magnitude_multiplier,
+                _ => 0.0,
+            };
+            deal_combo_damage(
+                state,
+                curse_damage + direct_power * 0.35,
+                Kind::Shadow,
+                state.doom_word.clone(),
+            );
+            bonus_poise += 12.0;
+        }
+    }
+    if ability.kind == Kind::Physical
+        && state
+            .enemy
+            .effects
+            .iter()
+            .any(|timed| matches!(timed.effect, Effect::Immobilize { .. } | Effect::Blind { .. }))
+    {
+        deal_combo_damage(state, direct_power * 0.30, Kind::Physical, state.exploit_word.clone());
+        bonus_poise += 15.0;
+    }
+    bonus_poise
+}
+
+/// Rewards a successful self-cleanse based on the number of removed debuffs.
+fn reward_purge_combo(state: &mut CombatState, removed_debuffs: usize) {
+    if removed_debuffs == 0 {
+        return;
+    }
+    let healing = state.player.max_health * 0.04 * removed_debuffs as f32;
+    state.player.heal(healing);
+    state.fx.push(CombatFx {
+        side: FxSide::Player,
+        text: state.cleanse_word.clone(),
+        color: Color::srgb(0.45, 1.0, 0.72),
+    });
+}
+
+/// Returns Guard's Mana cost for a player level.
+pub fn guard_mana_cost(player_level: u32) -> f32 {
+    player_level.max(1) as f32 * GUARD_MANA_COST_PER_LEVEL
+}
+
+/// Pays Guard's Mana cost and opens its short defensive window.
+fn begin_guard(state: &mut CombatState) -> bool {
+    let mana_cost = guard_mana_cost(state.player_level);
+    if state.status == CombatStatus::Over
+        || state.paused
+        || !state.player.can_act()
+        || state.guard_remaining > 0.0
+        || state.player.mana < mana_cost
+    {
+        return false;
+    }
+    state.player.mana -= mana_cost;
+    state.guard_remaining = GUARD_DURATION;
+    state.perfect_guard_remaining = state.stance.perfect_guard_window();
+    true
+}
+
+/// Activates the player's short Guard window when its Mana cost can be paid.
+pub fn try_guard(state: &mut CombatState, play_audio_msg: &mut MessageWriter<PlayAudioMsg>) {
+    if !begin_guard(state) {
+        return;
+    }
+    play_audio_msg.write(PlayAudioMsg::new("sword_clash"));
+}
+
+/// Switches the player's auto-attack stance without interrupting attack progress.
+pub fn set_combat_stance(
+    state: &mut CombatState,
+    stance: CombatStance,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) {
+    if state.status == CombatStatus::Over || state.paused || state.stance == stance {
+        return;
+    }
+    state.stance = stance;
+    play_audio_msg.write(PlayAudioMsg::new("click"));
+}
+
 /// Performs the try cast ability operation.
 pub fn try_cast_ability(
     state: &mut CombatState,
@@ -1927,8 +3108,13 @@ pub fn try_cast_ability(
     } else {
         None
     };
-
     state.player.mana -= effective_cost;
+    let purge_targets_player = ability.effects.iter().any(|effect| matches!(effect, Effect::Purge));
+    let debuffs_before_purge = if purge_targets_player {
+        state.player.effects.iter().filter(|timed| !is_positive(&timed.effect)).count()
+    } else {
+        0
+    };
 
     // Allies that beneficial effects land on (self, plus the pet when AoE).
     let mut allies = vec![Who::Player];
@@ -1957,6 +3143,11 @@ pub fn try_cast_ability(
             color: Color::srgb(0.85, 0.85, 0.4),
         });
     }
+    let combo_poise = if !enemy_dodged && state.enemy_tactics.is_some() {
+        resolve_ability_combos(state, &ability)
+    } else {
+        0.0
+    };
 
     // Route each effect to its proper target based on the effect's nature so a
     // bundled self-buff never benefits the enemy (and vice versa).
@@ -1986,6 +3177,21 @@ pub fn try_cast_ability(
                 play_audio_msg,
             );
         }
+    }
+    if purge_targets_player {
+        reward_purge_combo(state, debuffs_before_purge);
+    }
+    if !enemy_dodged && state.enemy_tactics.is_some() && has_offensive {
+        let control_interrupt = ability
+            .effects
+            .iter()
+            .any(|effect| matches!(effect, Effect::Stun { .. } | Effect::Silence { .. }));
+        let poise_damage = if control_interrupt {
+            state.enemy_poise
+        } else {
+            ability_poise_damage(&ability) + combo_poise
+        };
+        damage_enemy_poise(state, poise_damage, play_audio_msg);
     }
 
     if let Some(slot_mut) = state.abilities.get_mut(index) {
@@ -2020,6 +3226,9 @@ pub fn try_use_consumable(
     let Some(Equipment::Consumable(consumable)) = get_equipment(key) else {
         return;
     };
+    if !take_combat_consumable(&mut state.player_consumables, key) {
+        return;
+    }
 
     for effect in &consumable.effects {
         // Beneficial effects buff the player; any offensive effect is thrown at
@@ -2184,6 +3393,9 @@ pub fn enemy_use_consumable(
     let Some(Equipment::Consumable(consumable)) = get_equipment(key) else {
         return;
     };
+    if !take_combat_consumable(&mut state.enemy_consumables, key) {
+        return;
+    }
 
     for effect in &consumable.effects {
         if effect_targets_self(effect) {
@@ -2248,6 +3460,10 @@ pub fn handle_combat_card_click(
             for entity in &tooltip_q {
                 commands.entity(entity).try_despawn();
             }
+        },
+        CombatCard::Guard => try_guard(state, &mut play_audio_msg),
+        CombatCard::Stance(stance) => {
+            set_combat_stance(state, stance, &mut play_audio_msg);
         },
     }
 }
@@ -2315,8 +3531,16 @@ pub fn combat_input(
             try_cast_ability(state, i, &mut play_audio_msg);
         }
     }
+    if keyboard.just_pressed(GUARD_HOTKEY) {
+        try_guard(state, &mut play_audio_msg);
+    }
+    for (index, hotkey) in STANCE_HOTKEYS.iter().enumerate() {
+        if keyboard.just_pressed(*hotkey) {
+            set_combat_stance(state, CombatStance::ALL[index], &mut play_audio_msg);
+        }
+    }
 
-    let equipped: Vec<String> = consumable_card_order(&player);
+    let equipped: Vec<String> = consumable_card_order(&player, &state.player_consumables);
     for (i, hotkey) in CONSUMABLE_HOTKEYS.iter().enumerate() {
         if keyboard.just_pressed(*hotkey) {
             if let Some(key) = equipped.get(i) {
@@ -2328,11 +3552,14 @@ pub fn combat_input(
 }
 
 /// The order consumables appear on screen (mirrors combat::ui spawn order).
-pub fn consumable_card_order(player: &Player) -> Vec<String> {
+pub fn consumable_card_order(
+    player: &Player,
+    combat_stock: &HashMap<String, usize>,
+) -> Vec<String> {
     let mut consumables: Vec<(String, u32, String)> = player
         .equipped_consumables
         .iter()
-        .filter(|key| player.inventory.iter().any(|inv| inv == *key))
+        .filter(|key| combat_stock.get(*key).copied().unwrap_or(0) > 0)
         .filter_map(|key| match get_equipment(key) {
             Some(Equipment::Consumable(item)) => Some((key.clone(), item.level, item.name)),
             _ => None,
@@ -2372,6 +3599,30 @@ pub fn update_combat_speed_label(
             text.0 = label;
         }
     }
+}
+
+/// Refreshes cached combat-event words after the language changes mid-battle.
+pub fn refresh_combat_translation_cache(
+    state: Option<ResMut<CombatState>>,
+    settings: Res<crate::core::settings::Settings>,
+    localization: Res<crate::core::localization::Localization>,
+) {
+    let Some(mut state) = state else {
+        return;
+    };
+    let language = settings.language;
+    state.dodge_word = localization.get("general.dodge", language);
+    state.miss_word = localization.get("general.miss", language);
+    state.xp_word = localization.get("general.xp", language);
+    state.guard_word = localization.get("combat.guard", language);
+    state.parry_word = localization.get("combat.parry", language);
+    state.break_word = localization.get("combat.break", language);
+    state.shatter_word = localization.get("combat.combo_shatter", language);
+    state.detonate_word = localization.get("combat.combo_detonate", language);
+    state.doom_word = localization.get("combat.combo_doom", language);
+    state.exploit_word = localization.get("combat.combo_exploit", language);
+    state.cleanse_word = localization.get("combat.combo_cleanse", language);
+    state.phase_word = localization.get("combat.phase_two", language);
 }
 
 #[derive(bevy::ecs::system::SystemParam)]
@@ -2739,16 +3990,16 @@ pub fn update_combat_visuals(
         }
     }
     for (ability, mut image) in &mut ability_image_q {
-        let out_of_mana = state
-            .abilities
+        let (slots, mana) = if ability.is_player {
+            (&state.abilities, state.player.mana)
+        } else {
+            (&state.enemy_abilities, state.enemy.mana)
+        };
+        let out_of_resources = slots
             .get(ability.slot)
-            .map(|slot| {
-                slot.key.is_some()
-                    && slot.remaining <= 0.0
-                    && state.player.mana < slot.mana_cost as f32
-            })
+            .map(|slot| slot.key.is_some() && slot.remaining <= 0.0 && mana < slot.mana_cost as f32)
             .unwrap_or(false);
-        image.color = if out_of_mana {
+        image.color = if out_of_resources {
             Color::srgba(0.45, 0.45, 0.45, 1.0)
         } else {
             Color::WHITE
@@ -2772,6 +4023,248 @@ pub fn update_combat_visuals(
     let fx: Vec<CombatFx> = state.fx.drain(..).collect();
     for f in fx {
         spawn_floating_text(&mut commands, &assets, &f, player_portrait);
+    }
+}
+
+/// Synchronizes Guard, stances, Poise, and telegraphed enemy intents.
+#[allow(clippy::too_many_arguments)]
+pub fn update_combat_tactics_visuals(
+    state: Option<Res<CombatState>>,
+    assets: Res<crate::core::assets::WorldAssets>,
+    localization: Res<crate::core::localization::Localization>,
+    settings: Res<crate::core::settings::Settings>,
+    mut poise_fill_q: Query<
+        &mut Node,
+        (
+            With<crate::core::combat::ui::CombatPoiseFill>,
+            Without<CombatCard>,
+            Without<crate::core::combat::ui::CombatPoiseBreakFill>,
+            Without<crate::core::combat::ui::CombatEnemyCastFill>,
+            Without<crate::core::combat::ui::CombatEnemyRecoveryFill>,
+        ),
+    >,
+    mut poise_break_fill_q: Query<
+        &mut Node,
+        (
+            With<crate::core::combat::ui::CombatPoiseBreakFill>,
+            Without<CombatCard>,
+            Without<crate::core::combat::ui::CombatPoiseFill>,
+            Without<crate::core::combat::ui::CombatEnemyCastFill>,
+            Without<crate::core::combat::ui::CombatEnemyRecoveryFill>,
+        ),
+    >,
+    mut poise_text_q: Query<
+        &mut Text,
+        (
+            With<crate::core::combat::ui::CombatPoiseText>,
+            Without<crate::core::combat::ui::CombatEnemyIntentName>,
+            Without<crate::core::combat::ui::CombatEnemyIntentDescription>,
+            Without<crate::core::combat::ui::CombatEnemyCastText>,
+        ),
+    >,
+    mut tactic_card_q: Query<
+        (&CombatCard, &mut Node, &mut BorderColor, &mut BackgroundColor, &mut ImageNode),
+        (
+            Without<crate::core::combat::ui::AbilityCardImage>,
+            Without<crate::core::combat::ui::CombatEnemyIntentImage>,
+        ),
+    >,
+    mut intent_image_q: Query<
+        &mut ImageNode,
+        (
+            With<crate::core::combat::ui::CombatEnemyIntentImage>,
+            Without<crate::core::combat::ui::AbilityCardImage>,
+            Without<CombatCard>,
+        ),
+    >,
+    mut intent_name_q: Query<
+        &mut Text,
+        (
+            With<crate::core::combat::ui::CombatEnemyIntentName>,
+            Without<crate::core::combat::ui::CombatPoiseText>,
+            Without<crate::core::combat::ui::CombatEnemyIntentDescription>,
+            Without<crate::core::combat::ui::CombatEnemyCastText>,
+        ),
+    >,
+    mut intent_desc_q: Query<
+        &mut Text,
+        (
+            With<crate::core::combat::ui::CombatEnemyIntentDescription>,
+            Without<crate::core::combat::ui::CombatEnemyIntentName>,
+            Without<crate::core::combat::ui::CombatPoiseText>,
+            Without<crate::core::combat::ui::CombatEnemyCastText>,
+        ),
+    >,
+    mut cast_fill_q: Query<
+        &mut Node,
+        (
+            With<crate::core::combat::ui::CombatEnemyCastFill>,
+            Without<CombatCard>,
+            Without<crate::core::combat::ui::CombatPoiseFill>,
+            Without<crate::core::combat::ui::CombatPoiseBreakFill>,
+            Without<crate::core::combat::ui::CombatEnemyRecoveryFill>,
+        ),
+    >,
+    mut recovery_fill_q: Query<
+        &mut Node,
+        (
+            With<crate::core::combat::ui::CombatEnemyRecoveryFill>,
+            Without<CombatCard>,
+            Without<crate::core::combat::ui::CombatPoiseFill>,
+            Without<crate::core::combat::ui::CombatPoiseBreakFill>,
+            Without<crate::core::combat::ui::CombatEnemyCastFill>,
+        ),
+    >,
+    mut cast_text_q: Query<
+        &mut Text,
+        (
+            With<crate::core::combat::ui::CombatEnemyCastText>,
+            Without<crate::core::combat::ui::CombatEnemyIntentName>,
+            Without<crate::core::combat::ui::CombatEnemyIntentDescription>,
+            Without<crate::core::combat::ui::CombatPoiseText>,
+        ),
+    >,
+) {
+    let Some(state) = state else {
+        return;
+    };
+    let language = settings.language;
+    if let Ok(mut fill) = poise_fill_q.single_mut() {
+        fill.width =
+            Val::Percent((state.enemy_poise / state.enemy_max_poise).clamp(0.0, 1.0) * 100.0);
+    }
+    if let Ok(mut fill) = poise_break_fill_q.single_mut() {
+        fill.width = Val::Percent(
+            (state.enemy_break_remaining / BREAK_STUN_DURATION).clamp(0.0, 1.0) * 100.0,
+        );
+    }
+    if let Ok(mut text) = poise_text_q.single_mut() {
+        text.0 = if state.enemy_break_remaining > 0.0 {
+            format!(
+                "{} - {:.1}s",
+                localization.get("combat.broken", language),
+                state.enemy_break_remaining
+            )
+        } else {
+            format!(
+                "{:.0} / {:.0} {}",
+                state.enemy_poise,
+                state.enemy_max_poise,
+                localization.get("combat.poise", language)
+            )
+        };
+    }
+    for (card, mut node, mut border, mut background, mut image) in &mut tactic_card_q {
+        match card {
+            CombatCard::Guard => {
+                let affordable = state.player.mana >= guard_mana_cost(state.player_level);
+                image.color = if affordable {
+                    Color::WHITE
+                } else {
+                    Color::srgb(0.42, 0.42, 0.46)
+                };
+                node.border = UiRect::all(Val::Px(if state.guard_remaining > 0.0 {
+                    4.0
+                } else {
+                    2.0
+                }));
+                *border = BorderColor::all(if state.guard_remaining > 0.0 {
+                    Color::srgb(1.0, 0.82, 0.30)
+                } else {
+                    crate::core::constants::BUTTON_BORDER_COLOR
+                });
+                background.0 = if state.guard_remaining > 0.0 {
+                    Color::srgba(0.34, 0.21, 0.04, 0.96)
+                } else if !affordable {
+                    Color::srgba(0.03, 0.03, 0.04, 0.82)
+                } else {
+                    Color::srgba(0.05, 0.05, 0.08, 0.72)
+                };
+            },
+            CombatCard::Stance(stance) => {
+                let selected = *stance == state.stance;
+                node.border = UiRect::all(Val::Px(if selected {
+                    4.0
+                } else {
+                    2.0
+                }));
+                image.color = if selected {
+                    Color::WHITE
+                } else {
+                    Color::srgb(0.50, 0.50, 0.54)
+                };
+                *border = BorderColor::all(if selected {
+                    Color::srgb(1.0, 0.72, 0.22)
+                } else {
+                    crate::core::constants::BUTTON_BORDER_COLOR
+                });
+                background.0 = Color::srgba(0.05, 0.05, 0.08, 0.72);
+            },
+            CombatCard::Ability(_) | CombatCard::Consumable(_) => {},
+        }
+    }
+
+    let Some(tactics) = state.enemy_tactics.as_ref() else {
+        return;
+    };
+    let preview = tactics.active_cast.map(|cast| cast.movement).or_else(|| {
+        (!tactics.rotation.is_empty())
+            .then(|| tactics.rotation[tactics.next_index % tactics.rotation.len()])
+    });
+    let Some(movement) = preview else {
+        return;
+    };
+    if let Ok(mut image) = intent_image_q.single_mut() {
+        image.image = assets.image(movement.kind.image_key());
+    }
+    if let Ok(mut text) = intent_name_q.single_mut() {
+        text.0 = if tactics.active_cast.is_some() {
+            localization.get(movement.kind.name_key(), language)
+        } else {
+            format!(
+                "{}: {}",
+                localization.get("combat.next", language),
+                localization.get(movement.kind.name_key(), language)
+            )
+        };
+    }
+    if let Ok(mut text) = intent_desc_q.single_mut() {
+        let target_key = match movement.target {
+            EnemyMoveTarget::Player => "combat.target_player",
+            EnemyMoveTarget::Pet if state.pet.as_ref().is_some_and(|pet| pet.alive) => {
+                "combat.target_pet"
+            },
+            EnemyMoveTarget::Pet => "combat.target_player",
+            EnemyMoveTarget::SelfSide => "combat.target_self",
+        };
+        text.0 = format!(
+            "{}\n{}: {}",
+            localization.get(movement.kind.description_key(), language),
+            localization.get("general.target", language),
+            localization.get(target_key, language)
+        );
+    }
+    let (cast_progress, recovery_progress, cast_text) =
+        if let Some(active_cast) = tactics.active_cast {
+            let progress = (active_cast.elapsed / active_cast.movement.cast_time).clamp(0.0, 1.0);
+            let remaining = (active_cast.movement.cast_time - active_cast.elapsed).max(0.0);
+            (progress, 0.0, format!("{remaining:.1}s"))
+        } else {
+            let progress = if tactics.recovery_max > 0.0 {
+                (tactics.recovery / tactics.recovery_max).clamp(0.0, 1.0)
+            } else {
+                0.0
+            };
+            (0.0, progress, format!("{:.1}s", tactics.recovery.max(0.0)))
+        };
+    if let Ok(mut fill) = cast_fill_q.single_mut() {
+        fill.width = Val::Percent(cast_progress * 100.0);
+    }
+    if let Ok(mut fill) = recovery_fill_q.single_mut() {
+        fill.width = Val::Percent(recovery_progress * 100.0);
+    }
+    if let Ok(mut text) = cast_text_q.single_mut() {
+        text.0 = cast_text;
     }
 }
 
@@ -3018,17 +4511,20 @@ pub fn animate_floating_text(
 /// Despawns consumable cards whose stock is exhausted.
 pub fn sync_consumable_cards(
     mut commands: Commands,
-    player: Res<Player>,
+    state: Option<Res<CombatState>>,
     q: Query<(Entity, &ConsumableCardRoot)>,
     mut count_q: Query<(&ConsumableCardCount, &mut Text)>,
     tooltip_q: Query<Entity, With<TooltipNode>>,
 ) {
-    if !player.is_changed() {
+    let Some(state) = state else {
+        return;
+    };
+    if !state.is_changed() {
         return;
     }
 
     for (card, mut text) in &mut count_q {
-        let count = player.inventory.iter().filter(|item| *item == &card.key).count();
+        let count = state.player_consumables.get(&card.key).copied().unwrap_or(0);
         **text = count.to_string();
     }
 
@@ -3037,8 +4533,7 @@ pub fn sync_consumable_cards(
         if !card.is_player {
             continue;
         }
-        let available =
-            player.inventory.contains(&card.key) && player.equipped_consumables.contains(&card.key);
+        let available = state.player_consumables.get(&card.key).copied().unwrap_or(0) > 0;
         if !available {
             commands.entity(entity).despawn();
             despawned_any = true;
@@ -3405,6 +4900,80 @@ pub fn combat_effect_tooltip_system(
     }
 }
 
+/// Shows tactical descriptions when hovering Guard or an auto-attack stance.
+pub fn combat_tactic_tooltip_system(
+    mut commands: Commands,
+    state: Option<Res<CombatState>>,
+    assets: Res<crate::core::assets::WorldAssets>,
+    localization: Res<crate::core::localization::Localization>,
+    settings: Res<crate::core::settings::Settings>,
+    card_q: Query<
+        (&Interaction, &CombatCard),
+        Without<crate::core::ui::playing::RightColumnTooltip>,
+    >,
+    changed_q: Query<
+        (),
+        (
+            With<CombatCard>,
+            Changed<Interaction>,
+            Without<crate::core::ui::playing::RightColumnTooltip>,
+        ),
+    >,
+    tooltip_q: Query<Entity, With<TooltipNode>>,
+    windows: Query<&Window>,
+) {
+    if changed_q.is_empty() {
+        return;
+    }
+    let Some(state) = state else {
+        return;
+    };
+    let hovered = card_q.iter().find_map(|(interaction, card)| {
+        matches!(*interaction, Interaction::Hovered | Interaction::Pressed).then_some(card)
+    });
+    for entity in tooltip_q.iter() {
+        commands.entity(entity).try_despawn();
+    }
+    let Some(card) = hovered else {
+        return;
+    };
+    let language = settings.language;
+    let (title, description, image) = match card {
+        CombatCard::Guard => (
+            localization.get("combat.guard_name", language),
+            localization
+                .get("combat.guard_desc", language)
+                .replace("{window}", &format!("{:.2}", state.stance.perfect_guard_window()))
+                .replace("{mana}", &format!("{:.0}", guard_mana_cost(state.player_level))),
+            Some("combat_guard".to_string()),
+        ),
+        CombatCard::Stance(stance) => (
+            localization.get(stance.name_key(), language),
+            localization.get(
+                match stance {
+                    CombatStance::Aggressive => "combat.stance_aggressive_desc",
+                    CombatStance::Defensive => "combat.stance_defensive_desc",
+                    CombatStance::Precise => "combat.stance_precise_desc",
+                    CombatStance::Disruptive => "combat.stance_disruptive_desc",
+                },
+                language,
+            ),
+            Some(stance.image_key().to_string()),
+        ),
+        CombatCard::Ability(_) | CombatCard::Consumable(_) => return,
+    };
+    crate::core::ui::tooltip::spawn_item_tooltip(
+        &mut commands,
+        &assets,
+        title,
+        vec![description],
+        &windows,
+        None,
+        image,
+        0.0,
+    );
+}
+
 /// Updates combat equipment slots.
 pub fn update_combat_equipment_slots(
     player: Res<Player>,
@@ -3537,10 +5106,30 @@ pub fn update_combat_equipment_slots(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::catalog::catalog::{all_weapons, all_wearables};
+    use crate::core::catalog::catalog::{all_consumables, all_weapons, all_wearables};
     use crate::core::catalog::wearables::WearableSlot;
     use crate::core::classes::Class;
     use crate::core::deities::Deity;
+
+    #[test]
+    /// Verifies combat selects five copies per type while preserving excess inventory stock.
+    fn combat_consumable_selection_caps_each_type_at_five() {
+        let key =
+            all_consumables().first().expect("consumable catalog should not be empty").name.clone();
+        let mut player = Player::default();
+        player.equipped_consumables.push(key.clone());
+        player.inventory.extend(std::iter::repeat_n(key.clone(), 8));
+
+        let mut selected = select_combat_consumables(&player);
+
+        assert_eq!(selected.get(&key), Some(&MAX_COMBAT_CONSUMABLES_PER_TYPE));
+        assert_eq!(player.inventory.iter().filter(|item| *item == &key).count(), 8);
+        for _ in 0..MAX_COMBAT_CONSUMABLES_PER_TYPE {
+            assert!(take_combat_consumable(&mut selected, &key));
+        }
+        assert!(!take_combat_consumable(&mut selected, &key));
+        assert_eq!(player.inventory.iter().filter(|item| *item == &key).count(), 8);
+    }
 
     /// Returns a neutral fighter suitable for isolated combat-mechanics tests.
     fn test_fighter() -> Fighter {
@@ -3579,6 +5168,15 @@ mod tests {
             enemy_pet: None,
             abilities: Vec::new(),
             enemy_abilities: Vec::new(),
+            player_consumables: HashMap::new(),
+            enemy_consumables: HashMap::new(),
+            stance: CombatStance::Aggressive,
+            guard_remaining: 0.0,
+            perfect_guard_remaining: 0.0,
+            enemy_poise: 50.0,
+            enemy_max_poise: 50.0,
+            enemy_break_remaining: 0.0,
+            enemy_tactics: None,
             status: CombatStatus::Ongoing,
             player_won: false,
             player_level: 1,
@@ -3589,7 +5187,150 @@ mod tests {
             dodge_word: "Dodge".to_string(),
             miss_word: "Miss".to_string(),
             xp_word: "XP".to_string(),
+            guard_word: "Guard".to_string(),
+            parry_word: "Parry".to_string(),
+            break_word: "Break".to_string(),
+            shatter_word: "Shatter".to_string(),
+            detonate_word: "Detonate".to_string(),
+            doom_word: "Doom".to_string(),
+            exploit_word: "Exploit".to_string(),
+            cleanse_word: "Cleanse".to_string(),
+            phase_word: "Phase Two".to_string(),
         }
+    }
+
+    #[test]
+    /// Verifies Guard spends Mana and cannot activate when its cost is unavailable.
+    fn guard_requires_and_spends_mana() {
+        let mut state = test_combat_state();
+        state.player_level = 10;
+        state.player.mana = 100.0;
+        let starting_mana = state.player.mana;
+        let mana_cost = guard_mana_cost(state.player_level);
+
+        assert!(begin_guard(&mut state));
+        assert_eq!(state.player.mana, starting_mana - mana_cost);
+        assert_eq!(state.guard_remaining, GUARD_DURATION);
+
+        state.guard_remaining = 0.0;
+        state.perfect_guard_remaining = 0.0;
+        state.player.mana = mana_cost - 1.0;
+        assert!(!begin_guard(&mut state));
+        assert_eq!(state.guard_remaining, 0.0);
+    }
+
+    /// Advances an integration-test combat by a large deterministic time slice.
+    fn advance_test_combat(
+        mut state: ResMut<CombatState>,
+        mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    ) {
+        step_combat(&mut state, 3.0, &mut play_audio_msg);
+    }
+
+    #[test]
+    /// Verifies a telegraphed move is announced before it resolves damage.
+    fn enemy_moves_telegraph_before_resolving() {
+        let mut state = test_combat_state();
+        state.enemy_tactics = Some(EnemyTactics {
+            archetype: MonsterArchetype::Berserker,
+            rotation: vec![EnemyMove {
+                kind: EnemyMoveKind::CrushingBlow,
+                cast_time: 2.0,
+                recovery: 3.0,
+                target: EnemyMoveTarget::Player,
+            }],
+            next_index: 0,
+            recovery: 0.0,
+            recovery_max: 0.0,
+            active_cast: None,
+            phase_two: false,
+        });
+        let starting_health = state.player.health;
+        let mut app = App::new();
+        app.add_message::<PlayAudioMsg>()
+            .insert_resource(state)
+            .add_systems(Update, advance_test_combat);
+
+        app.update();
+        assert_eq!(app.world().resource::<CombatState>().player.health, starting_health);
+        assert!(app
+            .world()
+            .resource::<CombatState>()
+            .enemy_tactics
+            .as_ref()
+            .is_some_and(|tactics| tactics.active_cast.is_some()));
+
+        app.update();
+        assert!(app.world().resource::<CombatState>().player.health < starting_health);
+        let tactics = app.world().resource::<CombatState>().enemy_tactics.as_ref().unwrap();
+        assert_eq!(tactics.recovery, 3.0);
+        assert_eq!(tactics.recovery_max, tactics.recovery);
+    }
+
+    #[test]
+    /// Verifies the tactical HUD's mutable UI queries remain explicitly disjoint.
+    fn combat_tactics_visual_queries_are_disjoint() {
+        let mut world = World::new();
+        let mut system = IntoSystem::into_system(update_combat_tactics_visuals);
+
+        system.initialize(&mut world);
+    }
+
+    #[test]
+    /// Verifies a physical payoff consumes Freeze and inflicts Shatter damage.
+    fn physical_payoff_shatters_freeze() {
+        let mut state = test_combat_state();
+        state.enemy.effects.push(TimedEffect {
+            effect: Effect::Freeze {
+                attack_speed_pct: -20.0,
+                duration: 4.0,
+            },
+            remaining: 4.0,
+            tick_acc: 0.0,
+            magnitude_multiplier: 1.0,
+        });
+        let ability = crate::core::catalog::abilities::Ability {
+            name: "Shatter Test".to_string(),
+            image: "test".to_string(),
+            level: 1,
+            kind: Kind::Physical,
+            mana_cost: 1,
+            cooldown: 2.0,
+            on_self: false,
+            is_aoe: false,
+            effects: vec![Effect::Pierce {
+                damage: 10,
+            }],
+        };
+        let health_before = state.enemy.health;
+
+        let bonus_poise = resolve_ability_combos(&mut state, &ability);
+
+        assert!(state.enemy.health < health_before);
+        assert!(bonus_poise >= 20.0);
+        assert!(!state
+            .enemy
+            .effects
+            .iter()
+            .any(|timed| matches!(timed.effect, Effect::Freeze { .. })));
+    }
+
+    #[test]
+    /// Verifies Purge converts removed pressure into health.
+    fn purge_rewards_scale_with_removed_debuffs() {
+        let mut state = test_combat_state();
+        state.player.health = 50.0;
+
+        reward_purge_combo(&mut state, 2);
+
+        assert!(state.player.health > 50.0);
+    }
+
+    #[test]
+    /// Verifies pet-targeting enemy moves fall back to the player when no pet lives.
+    fn pet_target_falls_back_to_player() {
+        let state = test_combat_state();
+        assert_eq!(enemy_move_target(&state, EnemyMoveTarget::Pet), Who::Player);
     }
 
     #[test]

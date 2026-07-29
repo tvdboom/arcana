@@ -7,15 +7,18 @@ use std::io::{Read, Write};
 use std::mem::size_of;
 
 use crate::core::actions::shop::ShopInventory;
-use crate::core::audio::ChangeAudioMsg;
+use crate::core::assets::WorldAssets;
+use crate::core::audio::{ChangeAudioMsg, PlayAudioMsg};
 use crate::core::classes::{ClassSpecialization, PetChoice};
 use crate::core::deities::Deity;
+use crate::core::localization::Localization;
 use crate::core::menu::systems::PendingGameStart;
 use crate::core::monsters::Monster;
 use crate::core::player::{AgeStage, Player, Sex, Training};
 use crate::core::races::ElfHeritage;
 use crate::core::settings::Settings;
 use crate::core::states::{AppState, GameState};
+use crate::core::ui::toast::{spawn_toast, ToastContainer};
 use bevy::prelude::*;
 use bincode::config::standard;
 use bincode::serde::{decode_from_slice, encode_to_vec};
@@ -356,7 +359,12 @@ pub fn load_game(
     mut commands: Commands,
     mut load_game_msg: MessageReader<LoadCharacterMsg>,
     mut change_audio_msg: MessageWriter<ChangeAudioMsg>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut next_app_state: ResMut<NextState<AppState>>,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
     for _ in load_game_msg.read() {
         if let Some(file_path) = FileDialog::new().pick_file() {
@@ -365,6 +373,18 @@ pub fn load_game(
                 Ok(data) => data,
                 Err(error) => {
                     error!("Failed to load save {}: {error}", file_path.display());
+                    play_audio_msg.write(PlayAudioMsg::new("error"));
+                    if let Some(container) = toast_container_q.iter().next() {
+                        spawn_toast(
+                            &mut commands,
+                            &assets,
+                            localization.get("load_character_failed", settings.language),
+                            Color::srgba(0.20, 0.05, 0.05, 0.93),
+                            Color::srgb(0.85, 0.20, 0.20),
+                            Color::srgb(1.0, 0.80, 0.80),
+                            container,
+                        );
+                    }
                     continue;
                 },
             };

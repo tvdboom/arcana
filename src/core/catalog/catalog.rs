@@ -127,6 +127,7 @@ mod tests {
     use crate::core::catalog::equipment::Kind;
     use crate::core::catalog::weapons::Category;
     use crate::core::classes::{Ajah, Class};
+    use crate::core::combat::tactics::enemy_move_rotation;
     use std::collections::HashSet;
     use std::path::Path;
     use strum::IntoEnumIterator;
@@ -387,6 +388,101 @@ mod tests {
             );
             assert!(monster.attack_speed > 0.0, "{} cannot attack", monster.name);
             assert_image_exists(&monster.image);
+            let rotation = enemy_move_rotation(monster.archetype, monster.level);
+            assert!(!rotation.is_empty(), "{} has no tactical move rotation", monster.name);
+            for movement in rotation {
+                assert_image_exists(movement.kind.image_key());
+            }
+        }
+    }
+
+    #[test]
+    /// Verifies every wearable has a distinct build and comparable items have distinct prices.
+    fn wearables_have_distinct_gameplay_profiles() {
+        let mut profiles = HashSet::new();
+        let mut comparable_prices = HashSet::new();
+
+        for wearable in all_wearables() {
+            let profile = format!(
+                "{:?}|{:?}|{:?}|{:?}",
+                wearable.kind, wearable.slot, wearable.modifiers, wearable.effects
+            );
+            assert!(
+                profiles.insert(profile),
+                "{} duplicates another wearable's powers",
+                wearable.name
+            );
+
+            let price = format!(
+                "{:?}|{:?}|{}|{}",
+                wearable.kind, wearable.slot, wearable.level, wearable.price
+            );
+            assert!(
+                comparable_prices.insert(price),
+                "{} costs the same as another wearable of its kind, slot, and level",
+                wearable.name
+            );
+        }
+
+        let runed = all_wearables()
+            .iter()
+            .find(|item| item.name == "Runed Mail Bracers")
+            .expect("Runed Mail Bracers are catalogued");
+        let warlord = all_wearables()
+            .iter()
+            .find(|item| item.name == "Veteran's Cloth Bracers Of The Warlord")
+            .expect("Veteran's Cloth Bracers Of The Warlord are catalogued");
+        assert_ne!(runed.price, warlord.price);
+        assert_ne!(runed.modifiers, warlord.modifiers);
+        assert_ne!(runed.effects, warlord.effects);
+    }
+
+    #[test]
+    /// Verifies weapons and consumables also retain distinct gameplay identities.
+    fn remaining_equipment_has_distinct_gameplay_profiles() {
+        let mut weapon_profiles = HashSet::new();
+        let mut weapon_prices = HashSet::new();
+        for weapon in all_weapons() {
+            let profile = format!(
+                "{:?}|{:?}|{:?}|{}|{:.2}|{:.2}|{:?}|{:?}",
+                weapon.kind,
+                weapon.category,
+                weapon.hand,
+                weapon.attack,
+                weapon.attack_speed,
+                weapon.crit_chance,
+                weapon.modifiers,
+                weapon.effects
+            );
+            assert!(
+                weapon_profiles.insert(profile),
+                "{} duplicates another weapon's powers",
+                weapon.name
+            );
+            let price = format!(
+                "{:?}|{:?}|{:?}|{}|{}",
+                weapon.kind, weapon.category, weapon.hand, weapon.level, weapon.price
+            );
+            assert!(
+                weapon_prices.insert(price),
+                "{} costs the same as a comparable weapon",
+                weapon.name
+            );
+        }
+
+        let mut consumable_profiles = HashSet::new();
+        let mut consumable_prices = HashSet::new();
+        for item in all_consumables() {
+            assert!(
+                consumable_profiles.insert(format!("{:?}", item.effects)),
+                "{} duplicates another consumable's powers",
+                item.name
+            );
+            assert!(
+                consumable_prices.insert((item.level, item.price)),
+                "{} costs the same as another consumable at its level",
+                item.name
+            );
         }
     }
 

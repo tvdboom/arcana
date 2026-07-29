@@ -168,6 +168,14 @@ fn expansion_portrait_paths() -> Vec<(String, String)> {
     portraits
 }
 
+const COMBAT_IMAGE_PATHS: [(&str, &str); 5] = [
+    ("combat_guard", "images/combat/guard.webp"),
+    ("combat_stance_aggressive", "images/combat/stance_aggressive.webp"),
+    ("combat_stance_defensive", "images/combat/stance_defensive.webp"),
+    ("combat_stance_precise", "images/combat/stance_precise.webp"),
+    ("combat_stance_disruptive", "images/combat/stance_disruptive.webp"),
+];
+
 #[derive(Resource)]
 pub struct WorldAssets {
     pub audio: HashMap<&'static str, Handle<AudioSource>>,
@@ -461,6 +469,10 @@ impl FromWorld for WorldAssets {
             ("action_expedition", load_linear(assets, "images/actions/expedition.webp")),
             ("action_odyssey", load_linear(assets, "images/actions/odyssey.webp")),
         ]);
+
+        for (key, path) in COMBAT_IMAGE_PATHS {
+            images.insert(key, load_linear(assets, path));
+        }
 
         for (key, path) in expansion_portrait_paths() {
             images.insert(leak_str(key), assets.load(path));

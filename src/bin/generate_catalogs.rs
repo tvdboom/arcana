@@ -1297,6 +1297,60 @@ fn monster_effects(name: &str, level: u32) -> Vec<String> {
     effs
 }
 
+/// Assigns a deterministic tactical archetype from a monster's identity and family.
+fn monster_archetype(name: &str, kind: &str) -> &'static str {
+    let lower = name.to_lowercase();
+    if kind == "Pet"
+        || contains_any(
+            &lower,
+            &[
+                "beast",
+                "bear",
+                "boar",
+                "crocodile",
+                "griffin",
+                "hound",
+                "hydra",
+                "manticore",
+                "owlbear",
+                "tarrasque",
+                "tiger",
+                "wolf",
+                "worg",
+                "wyrm",
+            ],
+        )
+    {
+        "Beast"
+    } else if contains_any(
+        &lower,
+        &["lich", "skeleton", "grave", "wraith", "hag", "zombie", "bone colossus"],
+    ) {
+        "Necromancer"
+    } else if contains_any(
+        &lower,
+        &["golem", "knight", "warden", "minotaur", "lizardfolk", "empyrean"],
+    ) {
+        "Knight"
+    } else if contains_any(
+        &lower,
+        &["drow", "reaver", "harpy", "wererat", "medusa", "rakshasa", "yuan-ti"],
+    ) {
+        "Assassin"
+    } else if contains_any(
+        &lower,
+        &["vampire", "aboleth", "mind flayer", "leech", "mire", "kuo-toa"],
+    ) {
+        "Leech"
+    } else if kind == "Dragon"
+        || contains_any(&lower, &["imp", "basilisk", "formicid", "gnoll", "goblin", "mage"])
+    {
+        "Mage"
+    } else {
+        "Berserker"
+    }
+}
+
 /// Performs the classify artifact kind operation.
 fn classify_artifact_kind(name: &str) -> &'static str {
     let name_lower = name.to_lowercase();
@@ -2083,43 +2137,245 @@ fn power_fraction(level: u32) -> f32 {
     level as f32 * 0.35
 }
 
-/// Builds a restrained on-hit or defensive effect for higher-level weapons.
-fn weapon_effects(kind: &str, category: &str, level: u32) -> Vec<String> {
+/// Adds a title- and category-driven specialty so visually distinct weapons play differently.
+fn weapon_identity_modifier(
+    filename: &str,
+    name: &str,
+    kind: &str,
+    category: &str,
+    level: u32,
+    variant: usize,
+) -> String {
+    let identity = format!("{filename} {name}").to_lowercase();
+    let stat = 1 + level / 5;
+    let resource = 1 + level / 7;
+    let percent = 1.5 + level as f32 * 0.35;
+
+    if contains_any(&identity, &["warlord", "great", "heavy", "brutal"]) {
+        format!("AttackModifier({stat})")
+    } else if category == "Shield" || contains_any(&identity, &["sentinel", "vanguard", "guard"]) {
+        format!("DefenseModifier({stat})")
+    } else if category == "Finesse" || contains_any(&identity, &["duelist", "honed", "assassin"]) {
+        format!("CritChanceModifier({percent:.1})")
+    } else if category == "Range" || contains_any(&identity, &["hunter", "recurved"]) {
+        format!("InitiativeModifier({stat})")
+    } else if matches!(category, "Book" | "Magical")
+        || contains_any(&identity, &["runed", "rune", "arcane"])
+    {
+        format!("ManaRegen({resource})")
+    } else {
+        match variant % 6 {
+            0 => format!("AttackModifier({stat})"),
+            1 => format!("CritChanceModifier({percent:.1})"),
+            2 => format!("InitiativeModifier({stat})"),
+            3 => format!("MaxHealthModifier({})", level * 3),
+            4 if kind == "Physical" => format!("AttackSpeedModifier({percent:.1})"),
+            4 => format!("KindPowerMultiplier({kind}, {percent:.1})"),
+            _ => format!("MaxManaModifier({})", level * 2),
+        }
+    }
+}
+
+/// Builds a varied on-hit or defensive effect for higher-level weapons.
+fn weapon_effects(kind: &str, category: &str, level: u32, variant: usize) -> Vec<String> {
     if level < 8 {
         return Vec::new();
     }
     let power = level as f32;
     let effect = match kind {
+        "Fire" if variant.is_multiple_of(3) => {
+            format!("Berserk(attack_pct: {:.1}, duration: 3.0)", 5.0 + power * 0.6)
+        },
         "Fire" => format!("Burn(damage: {}, duration: 3.0)", 1 + level.div_ceil(3)),
+        "Ice" if variant.is_multiple_of(3) => {
+            format!("Fortify(defense_pct: {:.1}, duration: 3.0)", 7.0 + power * 0.7)
+        },
         "Ice" => format!("Freeze(attack_speed_pct: -{:.1}, duration: 3.0)", 6.0 + power * 0.7),
+        "Nature" if variant.is_multiple_of(3) => {
+            format!("Regen(heal: {}, duration: 3.0)", 1 + level.div_ceil(5))
+        },
         "Nature" => format!("Poison(damage: {}, duration: 4.0)", 1 + level.div_ceil(4)),
-        "Shadow" => format!("Vulnerability(damage_pct: {:.1}, duration: 3.0)", 5.0 + power * 0.6),
+        "Shadow" if variant.is_multiple_of(3) => {
+            format!("Lifesteal(percentage: {:.1}, duration: 3.0)", 3.0 + power * 0.35)
+        },
+        "Shadow" => {
+            format!("Vulnerability(damage_pct: {:.1}, duration: 3.0)", 5.0 + power * 0.6)
+        },
+        "Holy" if variant.is_multiple_of(3) => {
+            format!("Fortify(defense_pct: {:.1}, duration: 3.0)", 8.0 + power * 0.7)
+        },
         "Holy" => format!("Regen(heal: {}, duration: 3.0)", 1 + level.div_ceil(5)),
         _ => match category {
-            "Shield" => format!("Thorns(damage_reflected_pct: {:.1}, duration: 3.0)", 5.0 + power),
-            "Book" | "Magical" => "Clearcasting(reduction_pct: 20.0, duration: 3.0)".to_string(),
-            "Finesse" => format!("Lifesteal(percentage: {:.1}, duration: 3.0)", 3.0 + power * 0.35),
+            "Shield" if variant.is_multiple_of(2) => {
+                format!("Fortify(defense_pct: {:.1}, duration: 3.0)", 7.0 + power * 0.7)
+            },
+            "Shield" => {
+                format!("Thorns(damage_reflected_pct: {:.1}, duration: 3.0)", 5.0 + power)
+            },
+            "Book" | "Magical" if variant.is_multiple_of(2) => {
+                format!("Empower(damage_pct: {:.1}, duration: 3.0)", 5.0 + power * 0.5)
+            },
+            "Book" | "Magical" => {
+                format!("Clearcasting(reduction_pct: {:.1}, duration: 3.0)", 12.0 + power * 0.5)
+            },
+            "Finesse" if variant.is_multiple_of(2) => {
+                format!("Focus(crit_chance_pct: {:.1}, duration: 3.0)", 4.0 + power * 0.4)
+            },
+            "Finesse" => {
+                format!("Lifesteal(percentage: {:.1}, duration: 3.0)", 3.0 + power * 0.35)
+            },
+            "Range" if variant.is_multiple_of(2) => {
+                format!("Pierce(damage: {})", 1 + level.div_ceil(3))
+            },
             "Range" => format!("Blind(miss_pct: {:.1}, duration: 2.5)", 8.0 + power * 0.6),
+            _ if variant.is_multiple_of(2) => {
+                format!("Cleave(damage_pct: {:.1}, duration: 3.0)", 8.0 + power * 0.6)
+            },
             _ => format!("Bleed(damage_pct: {:.1})", 10.0 + power),
         },
     };
     vec![effect]
 }
 
-/// Builds an on-being-hit effect appropriate to a wearable's elemental kind.
-fn wearable_effects(kind: &str, level: u32) -> Vec<String> {
+/// Adds a small deterministic specialty when two weapons would otherwise share a build.
+fn make_weapon_profile_unique(
+    fixed_profile: &str,
+    modifiers: &mut Vec<String>,
+    effects: &[String],
+    profiles: &mut HashSet<String>,
+) {
+    let mut collision = 0u32;
+    loop {
+        let profile = format!("{fixed_profile}|{}|{}", modifiers.join(","), effects.join(","));
+        if profiles.insert(profile) {
+            break;
+        }
+        collision += 1;
+        modifiers.push(match collision % 4 {
+            1 => format!("AttackModifier({collision})"),
+            2 => format!("InitiativeModifier({collision})"),
+            3 => format!("MaxHealthModifier({collision})"),
+            _ => format!("MaxManaModifier({collision})"),
+        });
+    }
+}
+
+/// Adds a material- or title-driven specialty so visually distinct wearables play differently.
+fn wearable_identity_modifier(
+    filename: &str,
+    name: &str,
+    kind: &str,
+    level: u32,
+    variant: usize,
+) -> String {
+    let identity = format!("{filename} {name}").to_lowercase();
+    let stat = 1 + level / 5;
+    let resource = 1 + level / 7;
+    let percent = 1.5 + level as f32 * 0.35;
+
+    if contains_any(&identity, &["warlord", "veteran", "berserk", "war "]) {
+        format!("AttackModifier({stat})")
+    } else if contains_any(&identity, &["sentinel", "vanguard", "guard", "tower"]) {
+        format!("DefenseModifier({stat})")
+    } else if contains_any(&identity, &["duelist", "assassin", "hunter", "ranger"]) {
+        format!("CritChanceModifier({percent:.1})")
+    } else if contains_any(&identity, &["cloth", "runed", "rune", "arcane", "scholar"]) {
+        format!("ManaRegen({resource})")
+    } else if contains_any(&identity, &["mail", "chain", "plate", "iron", "steel"]) {
+        format!("MaxHealthModifier({})", level * 3)
+    } else if contains_any(&identity, &["leather", "hide", "swift", "speed"]) {
+        format!("InitiativeModifier({stat})")
+    } else {
+        match variant % 8 {
+            0 => format!("AttackModifier({stat})"),
+            1 => format!("DefenseModifier({stat})"),
+            2 => format!("InitiativeModifier({stat})"),
+            3 => format!("CritChanceModifier({percent:.1})"),
+            4 => format!("MaxHealthModifier({})", level * 3),
+            5 => format!("MaxManaModifier({})", level * 2),
+            6 => format!("HealthRegen({resource})"),
+            _ if kind == "Physical" => format!("AttackSpeedModifier({percent:.1})"),
+            _ => format!("KindPowerMultiplier({kind}, {percent:.1})"),
+        }
+    }
+}
+
+/// Builds a varied on-being-hit effect appropriate to a wearable's identity and element.
+fn wearable_effects(
+    kind: &str,
+    filename: &str,
+    name: &str,
+    slot: &str,
+    level: u32,
+    variant: usize,
+) -> Vec<String> {
     if level < 8 {
         return Vec::new();
     }
+    let identity = format!("{filename} {name}").to_lowercase();
     let power = level as f32;
-    vec![match kind {
+    let effect = match kind {
+        "Fire" if variant.is_multiple_of(3) => {
+            format!("Burn(damage: {}, duration: 3.0)", 1 + level.div_ceil(4))
+        },
         "Fire" => format!("Berserk(attack_pct: {:.1}, duration: 3.0)", 6.0 + power * 0.7),
+        "Ice" if variant.is_multiple_of(3) => {
+            format!("Fortify(defense_pct: {:.1}, duration: 3.0)", 7.0 + power * 0.7)
+        },
         "Ice" => format!("Freeze(attack_speed_pct: -{:.1}, duration: 2.5)", 6.0 + power * 0.6),
+        "Nature" if variant.is_multiple_of(3) => {
+            format!("Poison(damage: {}, duration: 4.0)", 1 + level.div_ceil(5))
+        },
         "Nature" => format!("Regen(heal: {}, duration: 3.0)", 1 + level.div_ceil(5)),
-        "Shadow" => format!("Paranoia(initiative_pct: -{:.1}, duration: 3.0)", 5.0 + power * 0.6),
+        "Shadow" if variant.is_multiple_of(3) => {
+            format!("Lifesteal(percentage: {:.1}, duration: 3.0)", 3.0 + power * 0.35)
+        },
+        "Shadow" => {
+            format!("Paranoia(initiative_pct: -{:.1}, duration: 3.0)", 5.0 + power * 0.6)
+        },
+        "Holy" if variant.is_multiple_of(3) => {
+            format!("Regen(heal: {}, duration: 3.0)", 1 + level.div_ceil(5))
+        },
         "Holy" => format!("Fortify(defense_pct: {:.1}, duration: 3.0)", 8.0 + power * 0.8),
+        _ if contains_any(&identity, &["warlord", "veteran", "berserk"]) => {
+            format!("Berserk(attack_pct: {:.1}, duration: 3.0)", 5.0 + power * 0.65)
+        },
+        _ if contains_any(&identity, &["cloth", "runed", "rune", "arcane"]) => {
+            format!("Clearcasting(reduction_pct: {:.1}, duration: 3.0)", 8.0 + power * 0.5)
+        },
+        _ if contains_any(&identity, &["mail", "chain", "plate", "sentinel", "vanguard"]) => {
+            format!("Fortify(defense_pct: {:.1}, duration: 3.0)", 7.0 + power * 0.7)
+        },
+        _ if slot == "Boots" || contains_any(&identity, &["leather", "swift", "speed"]) => {
+            format!("Haste(initiative_pct: {:.1}, duration: 3.0)", 6.0 + power * 0.7)
+        },
         _ => format!("Thorns(damage_reflected_pct: {:.1}, duration: 3.0)", 4.0 + power * 0.8),
-    }]
+    };
+    vec![effect]
+}
+
+/// Adds a small deterministic specialty when two wearables would otherwise share a build.
+fn make_wearable_profile_unique(
+    kind: &str,
+    slot: &str,
+    modifiers: &mut Vec<String>,
+    effects: &[String],
+    profiles: &mut HashSet<String>,
+) {
+    let mut collision = 0u32;
+    loop {
+        let profile = format!("{kind}|{slot}|{}|{}", modifiers.join(","), effects.join(","));
+        if profiles.insert(profile) {
+            break;
+        }
+        collision += 1;
+        modifiers.push(match collision % 4 {
+            1 => format!("MaxHealthModifier({collision})"),
+            2 => format!("MaxManaModifier({collision})"),
+            3 => format!("InitiativeModifier({collision})"),
+            _ => format!("AttackModifier({collision})"),
+        });
+    }
 }
 
 /// Derives consumable potency from size labels, sequence, and special rarity terms.
@@ -2746,6 +3002,8 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     let total_wps = weapons_files.len();
     let chunk_wps = total_wps as f64 / 20.0;
     let mut weapons_ron = String::from("[\n");
+    let mut weapon_profiles = HashSet::new();
+    let mut weapon_prices = HashSet::new();
 
     for (idx, (filename, _)) in weapons_files.iter().enumerate() {
         let mut level = (idx as f64 / chunk_wps) as u32 + 1;
@@ -2849,7 +3107,10 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         if kind != "Physical" {
             modifiers.push(format!("KindPowerMultiplier({kind}, {:.1})", 3.0 + level as f32 * 0.6));
         }
-        let effects = weapon_effects(kind, category, level);
+        modifiers.push(weapon_identity_modifier(filename, &name, kind, category, level, idx));
+        let effects = weapon_effects(kind, category, level, idx);
+        let fixed_profile = format!("{kind}|{category}|{hand}|{attack}|{speed:.2}|{crit:.2}");
+        make_weapon_profile_unique(&fixed_profile, &mut modifiers, &effects, &mut weapon_profiles);
         let mut price = 20.0 + (level * level * 18) as f32;
         if hand == "TwoHand" {
             price *= 1.55;
@@ -2863,7 +3124,10 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         if !effects.is_empty() {
             price *= 1.10;
         }
-        let price = price.round().max(1.0) as u32;
+        let mut price = price.round().max(1.0) as u32;
+        while !weapon_prices.insert(format!("{kind}|{category}|{hand}|{level}|{price}")) {
+            price += 1;
+        }
 
         weapons_ron.push_str(&format!(
             "    (\n        name: \"{name}\",\n        image: \"images/catalog/equipment/weapon/{img}\",\n        kind: {kind},\n        category: {category},\n        hand: {hand},\n        level: {level},\n        price: {price},\n        attack: {attack},\n        attack_speed: {speed:.2},\n        crit_chance: {crit:.2},\n        modifiers: [{mods}],\n        effects: [{effects}],\n    ),\n",
@@ -2901,6 +3165,8 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
     let total_arm = armor_files.len();
     let chunk_arm = total_arm as f64 / 20.0;
     let mut armor_ron = String::from("[\n");
+    let mut wearable_profiles = HashSet::new();
+    let mut wearable_prices = HashSet::new();
 
     for (idx, (filename, _, folder, slot)) in armor_files.iter().enumerate() {
         let mut level = (idx as f64 / chunk_arm) as u32 + 1;
@@ -2976,7 +3242,9 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             modifiers
                 .push(format!("KindResistanceMultiplier({kind}, {:.1})", 3.0 + level as f32 * 0.5));
         }
-        let effects = wearable_effects(kind, level);
+        modifiers.push(wearable_identity_modifier(filename, &name, kind, level, idx));
+        let effects = wearable_effects(kind, filename, &name, slot, level, idx);
+        make_wearable_profile_unique(kind, slot, &mut modifiers, &effects, &mut wearable_profiles);
         let slot_multiplier = match slot.as_str() {
             "Chestplate" => 1.30,
             "Helmet" => 1.10,
@@ -2993,12 +3261,15 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         } else {
             1.10
         };
-        let price = ((15 + level * level * 16) as f32
+        let mut price = ((15 + level * level * 16) as f32
             * slot_multiplier
             * magic_multiplier
             * effect_multiplier)
             .round()
             .max(1.0) as u32;
+        while !wearable_prices.insert(format!("{kind}|{slot}|{level}|{price}")) {
+            price += 1;
+        }
 
         armor_ron.push_str(&format!(
             "    (\n        name: \"{name}\",\n        image: \"images/catalog/equipment/{folder}/{img}\",\n        kind: {kind},\n        price: {price},\n        slot: {slot},\n        modifiers: [{mods}],\n        effects: [{effects}],\n        level: {level},\n    ),\n",
@@ -3021,13 +3292,26 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
 
     let total_cons = consumables_files.len();
     let mut consumables_ron = String::from("[\n");
+    let mut consumable_profiles = HashSet::new();
+    let mut consumable_prices = HashSet::new();
 
     for (idx, filename) in consumables_files.iter().enumerate() {
         let level = consumable_level(filename);
         let base_name = consumable_base_name(filename, idx);
         let name = unique_consumable_name(&base_name, level, idx, &mut equipment_names);
-        let price = 4 + level * 3 + level * level * 3;
-        let effects = consumable_effects(filename, level);
+        let mut price = 4 + level * 3 + level * level * 3;
+        while !consumable_prices.insert(format!("{level}|{price}")) {
+            price += 1;
+        }
+        let mut effects = consumable_effects(filename, level);
+        let mut collision = 0u32;
+        while !consumable_profiles.insert(effects.join(",")) {
+            collision += 1;
+            effects.push(format!(
+                "Focus(crit_chance_pct: {:.1}, duration: 5.0)",
+                1.0 + collision as f32
+            ));
+        }
 
         consumables_ron.push_str(&format!(
             "    (\n        name: \"{name}\",\n        image: \"images/catalog/consumable/{img}\",\n        level: {level},\n        price: {price},\n        effects: [{effects}],\n        craft: [],\n    ),\n",
@@ -3074,12 +3358,14 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         let (max_hp, attack, defense, initiative, attack_speed, regen) =
             monster_stats(&name, *level, "Creature");
         let effects = monster_effects(&name, *level);
+        let archetype = monster_archetype(&name, "Creature");
 
         monsters_ron.push_str(&format!(
-            "    (\n        name: \"{name}\",\n        image: \"images/monsters/creatures/{img}\",\n        level: {level},\n        kind: Creature,\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: {attack_speed:.2},\n        health_regen: {regen},\n        modifiers: [],\n        effects: [{effs}],\n    ),\n",
+            "    (\n        name: \"{name}\",\n        image: \"images/monsters/creatures/{img}\",\n        level: {level},\n        kind: Creature,\n        archetype: {archetype},\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: {attack_speed:.2},\n        health_regen: {regen},\n        modifiers: [],\n        effects: [{effs}],\n    ),\n",
             name = name,
             img = img,
             level = *level,
+            archetype = archetype,
             max_hp = max_hp,
             attack = attack,
             defense = defense,
@@ -3097,12 +3383,14 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
         let (max_hp, attack, defense, initiative, attack_speed, regen) =
             monster_stats(&name, *level, "Pet");
         let effects = monster_effects(&name, *level);
+        let archetype = monster_archetype(&name, "Pet");
 
         monsters_ron.push_str(&format!(
-            "    (\n        name: \"{name}\",\n        image: \"images/monsters/pets/{img}\",\n        level: {level},\n        kind: Pet,\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: {attack_speed:.2},\n        health_regen: {regen},\n        modifiers: [],\n        effects: [{effs}],\n    ),\n",
+            "    (\n        name: \"{name}\",\n        image: \"images/monsters/pets/{img}\",\n        level: {level},\n        kind: Pet,\n        archetype: {archetype},\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: {attack_speed:.2},\n        health_regen: {regen},\n        modifiers: [],\n        effects: [{effs}],\n    ),\n",
             name = name,
             img = img,
             level = *level,
+            archetype = archetype,
             max_hp = max_hp,
             attack = attack,
             defense = defense,
@@ -3133,12 +3421,14 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             let (max_hp, attack, defense, initiative, attack_speed, regen) =
                 monster_stats(&name, level, "Dragon");
             let effects = monster_effects(&name, level);
+            let archetype = monster_archetype(&name, "Dragon");
 
             monsters_ron.push_str(&format!(
-                "    (\n        name: \"{name}\",\n        image: \"images/monsters/dragons/{img}\",\n        level: {level},\n        kind: Dragon,\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: {attack_speed:.2},\n        health_regen: {regen},\n        modifiers: [],\n        effects: [{effs}],\n    ),\n",
+                "    (\n        name: \"{name}\",\n        image: \"images/monsters/dragons/{img}\",\n        level: {level},\n        kind: Dragon,\n        archetype: {archetype},\n        health: {max_hp},\n        max_health: {max_hp},\n        attack: {attack},\n        defense: {defense},\n        initiative: {initiative},\n        attack_speed: {attack_speed:.2},\n        health_regen: {regen},\n        modifiers: [],\n        effects: [{effs}],\n    ),\n",
                 name = name,
                 img = img,
                 level = level,
+                archetype = archetype,
                 max_hp = max_hp,
                 attack = attack,
                 defense = defense,
@@ -3167,4 +3457,19 @@ fn main() {
     let img_ext = "png";
 
     run("assets-src/images", "assets/catalog", img_ext);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::monster_archetype;
+
+    #[test]
+    /// Verifies tactical archetypes follow stable semantic monster families.
+    fn monster_archetypes_are_semantically_stable() {
+        assert_eq!(monster_archetype("Lich", "Creature"), "Necromancer");
+        assert_eq!(monster_archetype("Stone Golem", "Creature"), "Knight");
+        assert_eq!(monster_archetype("Vampire", "Creature"), "Leech");
+        assert_eq!(monster_archetype("Red Dragon", "Dragon"), "Mage");
+        assert_eq!(monster_archetype("Wolf", "Pet"), "Beast");
+    }
 }

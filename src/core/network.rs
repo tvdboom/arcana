@@ -27,7 +27,7 @@ use crate::core::combat::mechanics::{
     FxSide, ABILITY_HOTKEYS, CONSUMABLE_HOTKEYS,
 };
 use crate::core::localization::Localization;
-use crate::core::monsters::{ActiveMonster, Monster, MonsterKind};
+use crate::core::monsters::{ActiveMonster, Monster, MonsterArchetype, MonsterKind};
 use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::states::GameState;
@@ -773,6 +773,7 @@ fn player_to_monster(opponent: &Player) -> Monster {
         image: portrait_key(opponent),
         level: opponent.level(),
         kind: MonsterKind::Creature,
+        archetype: MonsterArchetype::Beast,
         health: opponent.health(),
         max_health: opponent.max_health(),
         attack: opponent.attack(),
@@ -1003,7 +1004,7 @@ pub fn duel_host_combat(
                 try_cast_ability(state, i, &mut play_audio_msg);
             }
         }
-        let equipped = consumable_card_order(&player);
+        let equipped = consumable_card_order(&player, &state.player_consumables);
         for (i, hotkey) in CONSUMABLE_HOTKEYS.iter().enumerate() {
             if keyboard.just_pressed(*hotkey) {
                 if let Some(key) = equipped.get(i) {
@@ -1211,6 +1212,13 @@ pub fn duel_client_combat(
     for (i, key) in ABILITY_HOTKEYS.iter().enumerate() {
         if keyboard.just_pressed(*key) {
             if let Some(Some(ability_key)) = player.active_abilities.get(i).cloned() {
+                let Some(slot) = state.abilities.get(i) else {
+                    continue;
+                };
+                if slot.remaining > 0.0 {
+                    play_audio_msg.write(PlayAudioMsg::new("error"));
+                    continue;
+                }
                 client_send
                     .write(ClientSendMsg::new(ClientMessage::CastAbility(ability_key.clone())));
                 if let Some(slot) = state.abilities.get_mut(i) {
@@ -1222,13 +1230,14 @@ pub fn duel_client_combat(
     }
 
     // Consumables: forward to the host and consume one locally.
-    let equipped = consumable_card_order(&player);
+    let equipped = consumable_card_order(&player, &state.player_consumables);
     for (i, hotkey) in CONSUMABLE_HOTKEYS.iter().enumerate() {
         if keyboard.just_pressed(*hotkey) {
             if let Some(key) = equipped.get(i).cloned() {
-                client_send.write(ClientSendMsg::new(ClientMessage::UseConsumable(key.clone())));
-                consume_one(&mut player, &key);
-                play_audio_msg.write(PlayAudioMsg::new("drink"));
+                if consume_one_in_combat(state, &mut player, &key) {
+                    client_send.write(ClientSendMsg::new(ClientMessage::UseConsumable(key)));
+                    play_audio_msg.write(PlayAudioMsg::new("drink"));
+                }
             }
         }
     }
@@ -1264,6 +1273,13 @@ pub fn duel_combat_card_click(
             if duel.is_host() {
                 try_cast_ability(state, index, &mut play_audio_msg);
             } else if let Some(Some(ability_key)) = player.active_abilities.get(index).cloned() {
+                let Some(slot) = state.abilities.get(index) else {
+                    return;
+                };
+                if slot.remaining > 0.0 {
+                    play_audio_msg.write(PlayAudioMsg::new("error"));
+                    return;
+                }
                 client_send.write(ClientSendMsg::new(ClientMessage::CastAbility(ability_key)));
                 if let Some(slot) = state.abilities.get_mut(index) {
                     slot.remaining = slot.cooldown;
@@ -1275,15 +1291,17 @@ pub fn duel_combat_card_click(
             if duel.is_host() {
                 try_use_consumable(state, &mut player, &key, &mut play_audio_msg);
             } else {
-                client_send.write(ClientSendMsg::new(ClientMessage::UseConsumable(key.clone())));
-                consume_one(&mut player, &key);
-                play_audio_msg.write(PlayAudioMsg::new("drink"));
+                if consume_one_in_combat(state, &mut player, &key) {
+                    client_send.write(ClientSendMsg::new(ClientMessage::UseConsumable(key)));
+                    play_audio_msg.write(PlayAudioMsg::new("drink"));
+                }
             }
             // Clear any open tooltip so it disappears on use.
             for entity in &tooltip_q {
                 commands.entity(entity).try_despawn();
             }
         },
+        CombatCard::Guard | CombatCard::Stance(_) => {},
     }
 }
 
@@ -1295,6 +1313,19 @@ fn consume_one(player: &mut Player, key: &str) {
     if !player.inventory.iter().any(|k| k == key) {
         player.equipped_consumables.retain(|k| k != key);
     }
+}
+
+/// Consumes one locally owned item only when it remains in the combat selection.
+fn consume_one_in_combat(state: &mut CombatState, player: &mut Player, key: &str) -> bool {
+    let Some(remaining) = state.player_consumables.get_mut(key) else {
+        return false;
+    };
+    if *remaining == 0 || !player.inventory.iter().any(|item| item == key) {
+        return false;
+    }
+    *remaining -= 1;
+    consume_one(player, key);
+    true
 }
 
 /// Collect floating-text events generated since `from` and split them by side.
