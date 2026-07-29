@@ -169,6 +169,12 @@ impl Localization {
     pub fn monster_name(&self, name: &str, language: Language) -> Option<String> {
         self.get_opt(&format!("monster.{name}"), language)
     }
+
+    /// Returns a localized weapon, ability, or perk name from its English catalog name.
+    pub fn catalog_name(&self, prefix: &str, name: &str, language: Language) -> String {
+        let key = format!("{}.{}", prefix, name.replace(' ', "_").to_lowercase());
+        self.get(&key, language)
+    }
 }
 
 /// Marks a text entity with the localization key so it can be updated on language change.
@@ -617,6 +623,7 @@ pub fn update_localized_text(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::catalog::catalog::{all_abilities, all_perks, all_weapons};
     use strum::IntoEnumIterator;
 
     /// Verifies every generated monster name has a translation in every supported language.
@@ -635,6 +642,33 @@ mod tests {
         }
 
         assert_eq!(localization.monster_name("Fox", Language::Dutch).as_deref(), Some("Vos"));
+    }
+
+    #[test]
+    /// Verifies every playable catalog name has an exact English, Spanish, and Dutch entry.
+    fn equipment_abilities_and_perks_have_complete_translations() {
+        let localization = Localization::from_world(&mut World::new());
+        let languages = [Language::English, Language::Spanish, Language::Dutch];
+        let catalogs = [
+            ("weapon", all_weapons().iter().map(|entry| entry.name.as_str()).collect::<Vec<_>>()),
+            (
+                "ability",
+                all_abilities().iter().map(|entry| entry.name.as_str()).collect::<Vec<_>>(),
+            ),
+            ("perk", all_perks().iter().map(|entry| entry.name.as_str()).collect::<Vec<_>>()),
+        ];
+
+        for (prefix, names) in catalogs {
+            for name in names {
+                for language in languages {
+                    let localized = localization.catalog_name(prefix, name, language);
+                    assert!(
+                        !localized.trim().is_empty(),
+                        "empty {language:?} translation for {prefix}.{name}"
+                    );
+                }
+            }
+        }
     }
 
     /// Verifies alignment formatting omits deity names and handles true neutral naturally.

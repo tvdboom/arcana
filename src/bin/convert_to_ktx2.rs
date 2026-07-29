@@ -9,7 +9,8 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 
-const IMAGE_SETTINGS_VERSION: &str = "webp-q82-v1";
+const IMAGE_SETTINGS_VERSION: &str = "webp-q82-class-portrait-88-v2";
+const CLASS_PORTRAIT_WIDTH_PERCENT: u32 = 88;
 
 /// Performs the mtime operation.
 fn mtime(path: &Path) -> Option<SystemTime> {
@@ -79,10 +80,26 @@ fn remove_stale_images(src_root: &Path, dst_root: &Path, keep_converted: bool) {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-/// Converts single.
-fn convert_single(src: &Path, dst: &Path) {
-    let image =
+/// Crops a square class illustration to the playing-page portrait aspect ratio.
+fn normalize_class_portrait(image: image::RgbaImage) -> image::RgbaImage {
+    let (width, height) = image.dimensions();
+    let target_width = height.saturating_mul(CLASS_PORTRAIT_WIDTH_PERCENT) / 100;
+    if target_width == 0 || target_width >= width {
+        return image;
+    }
+
+    image::imageops::crop_imm(&image, (width - target_width) / 2, 0, target_width, height)
+        .to_image()
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+/// Converts one PNG, applying the standard crop to playable class portraits.
+fn convert_single(src: &Path, dst: &Path, normalize_portrait: bool) {
+    let mut image =
         image::open(src).unwrap_or_else(|err| panic!("decode {:?}: {err}", src)).into_rgba8();
+    if normalize_portrait {
+        image = normalize_class_portrait(image);
+    }
     let (width, height) = image.dimensions();
     let encoded = webp::Encoder::from_rgba(image.as_raw(), width, height).encode(82.0);
     fs::write(dst, encoded.as_ref()).unwrap_or_else(|err| panic!("write WebP {:?}: {err}", dst));
@@ -90,7 +107,7 @@ fn convert_single(src: &Path, dst: &Path) {
 
 #[cfg(target_arch = "wasm32")]
 /// Converts single.
-fn convert_single(_src: &Path, _dst: &Path) {
+fn convert_single(_src: &Path, _dst: &Path, _normalize_portrait: bool) {
     panic!("asset conversion tools cannot run as WebAssembly");
 }
 
@@ -98,6 +115,7 @@ enum AssetTask {
     Convert {
         src: PathBuf,
         dst: PathBuf,
+        normalize_portrait: bool,
     },
     Copy {
         src: PathBuf,
@@ -152,9 +170,11 @@ pub fn run(src_root: &str, dst_root: &str) {
                         dst: dst_path,
                     });
                 } else {
+                    let normalize_portrait = relative.parent() == Some(Path::new("images/classes"));
                     tasks.push(AssetTask::Convert {
                         src: src_path,
                         dst: dst_path,
+                        normalize_portrait,
                     });
                 }
             }
@@ -202,11 +222,12 @@ pub fn run(src_root: &str, dst_root: &str) {
                     AssetTask::Convert {
                         src,
                         dst,
+                        normalize_portrait,
                     } => {
                         let name = src.strip_prefix(src_root).unwrap_or(&src).to_string_lossy();
                         pb.set_message(format!("Converting: {}", name));
                         fs::create_dir_all(dst.parent().unwrap()).unwrap();
-                        convert_single(&src, &dst);
+                        convert_single(&src, &dst, normalize_portrait);
                     },
                     AssetTask::Copy {
                         src,
@@ -286,4 +307,19 @@ pub fn copy_only(src_root: &str, dst_root: &str) {
 /// Runs the convert-to-ktx2 entry point.
 fn main() {
     run("assets-src", "assets");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use image::{Rgba, RgbaImage};
+
+    #[test]
+    /// Verifies class portraits are center-cropped to the playing-page frame ratio.
+    fn class_portrait_normalization_uses_standard_dimensions() {
+        let source = RgbaImage::from_pixel(1_254, 1_254, Rgba([0, 0, 0, 255]));
+        let normalized = normalize_class_portrait(source);
+
+        assert_eq!(normalized.dimensions(), (1_103, 1_254));
+    }
 }

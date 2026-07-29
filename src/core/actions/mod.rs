@@ -23,7 +23,7 @@ use crate::core::settings::Settings;
 use crate::core::states::{is_panel_state, GameState};
 use crate::core::ui::level_up::LevelUpPending;
 use crate::core::ui::toast::{spawn_toast, ToastContainer};
-use crate::utils::{capitalize_words, NameFromEnum};
+use crate::utils::NameFromEnum;
 use bevy::prelude::*;
 use rand::prelude::IndexedRandom;
 use rand::seq::SliceRandom;
@@ -739,7 +739,7 @@ pub fn handle_study_card_clicks(
                         .collect();
 
                     if let Some(ability) = candidates.choose(&mut rng) {
-                        let name = capitalize_words(&ability.name.to_string());
+                        let name = localization.catalog_name("ability", &ability.name, lang);
                         player.abilities.push(ability.name.to_string());
                         spawn_toast(
                             &mut commands,
@@ -763,7 +763,7 @@ pub fn handle_study_card_clicks(
                             .collect();
 
                         if let Some(ability) = candidates_any.choose(&mut rng) {
-                            let name = capitalize_words(&ability.name.to_string());
+                            let name = localization.catalog_name("ability", &ability.name, lang);
                             player.abilities.push(ability.name.to_string());
                             spawn_toast(
                                 &mut commands,
@@ -814,7 +814,7 @@ pub fn handle_study_card_clicks(
                         .collect();
 
                     if let Some(perk) = candidates.choose(&mut rng) {
-                        let name = capitalize_words(&perk.name.to_string());
+                        let name = localization.catalog_name("perk", &perk.name, lang);
                         player.perks.push(perk.name.to_string());
                         spawn_toast(
                             &mut commands,
@@ -836,7 +836,7 @@ pub fn handle_study_card_clicks(
                             .collect();
 
                         if let Some(perk) = candidates_any.choose(&mut rng) {
-                            let name = capitalize_words(&perk.name.to_string());
+                            let name = localization.catalog_name("perk", &perk.name, lang);
                             player.perks.push(perk.name.to_string());
                             spawn_toast(
                                 &mut commands,

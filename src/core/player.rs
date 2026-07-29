@@ -1226,7 +1226,7 @@ mod tests {
             ..default()
         };
         assert_eq!(nyxara.attack(), 7);
-        assert_eq!(nyxara.max_mana(), 125);
+        assert_eq!(nyxara.max_mana(), 115);
     }
 
     #[test]
@@ -1380,11 +1380,13 @@ mod tests {
     fn monk_has_only_an_attack_speed_bonus() {
         let player = Player {
             class: Class::Monk,
+            specialization: ClassSpecialization::Druid(PetChoice::Rat),
             wisdom: START_CHARACTERISTIC + 2,
             ..default()
         };
         let baseline = Player {
             class: Class::Warrior,
+            specialization: ClassSpecialization::Druid(PetChoice::Rat),
             wisdom: START_CHARACTERISTIC + 2,
             ..default()
         };
@@ -1611,7 +1613,7 @@ mod tests {
     }
 
     #[test]
-    /// Verifies that Warrior callings apply their advertised tradeoffs.
+    /// Verifies that Warrior callings apply their advertised strengths.
     fn warrior_callings_change_combat_stats() {
         let paladin = Player {
             class: Class::Warrior,
@@ -1628,7 +1630,7 @@ mod tests {
         };
 
         assert_eq!(berserker.attack(), paladin.attack().saturating_add(1));
-        assert_eq!(berserker.defense().saturating_add(1), paladin.defense());
+        assert_eq!(berserker.defense(), paladin.defense());
         assert_eq!(templar.defense(), paladin.defense().saturating_add(3));
     }
 
@@ -1648,8 +1650,9 @@ mod tests {
             ..balanced.clone()
         };
 
-        assert_eq!(tyrant.attack(), balanced.attack().saturating_add(2));
-        assert_eq!(tyrant.defense().saturating_add(3), balanced.defense());
+        assert_eq!(tyrant.attack(), balanced.attack().saturating_add(1));
+        assert_eq!(tyrant.defense(), balanced.defense());
         assert_eq!(hearthmother.health_regen(), balanced.health_regen().saturating_add(1));
+        assert_eq!(hearthmother.max_mana(), balanced.max_mana().saturating_add(5));
     }
 }

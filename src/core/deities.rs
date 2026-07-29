@@ -92,6 +92,7 @@ impl Deity {
             },
             Deity::Serapha => IdentityBonuses {
                 health_regen: 1,
+                max_mana: 20,
                 ..Default::default()
             },
             Deity::Aurion => IdentityBonuses {
@@ -114,18 +115,17 @@ impl Deity {
                 ..Default::default()
             },
             Deity::Kharos => IdentityBonuses {
-                attack: 2,
-                defense: -3,
+                attack: 1,
+                max_health: 5,
                 ..Default::default()
             },
             Deity::Nyxara => IdentityBonuses {
                 attack: 1,
-                max_mana: 15,
+                max_mana: 5,
                 ..Default::default()
             },
             Deity::Vhal => IdentityBonuses {
-                initiative: -1,
-                max_health: 30,
+                max_health: 25,
                 ..Default::default()
             },
         }
@@ -167,6 +167,52 @@ mod tests {
         assert!(maximum / minimum <= 1.07, "deity ratings diverged: {ratings:?}");
     }
 
+    /// Returns whether `left` is no worse in any field and better in at least one.
+    fn strictly_dominates(left: IdentityBonuses, right: IdentityBonuses) -> bool {
+        let no_worse = left.attack >= right.attack
+            && left.defense >= right.defense
+            && left.initiative >= right.initiative
+            && left.max_health >= right.max_health
+            && left.max_mana >= right.max_mana
+            && left.health_regen >= right.health_regen
+            && left.mana_regen >= right.mana_regen
+            && left.crit_chance >= right.crit_chance
+            && left.attack_speed >= right.attack_speed
+            && left.melee_attack >= right.melee_attack
+            && left.finesse_attack >= right.finesse_attack
+            && left.ranged_attack >= right.ranged_attack;
+        no_worse && left != right
+    }
+
+    #[test]
+    /// Verifies every deity is a meaningful choice without penalties or strict domination.
+    fn deity_bonuses_are_non_negative_and_not_dominated() {
+        let deities = Deity::iter().collect::<Vec<_>>();
+        for deity in &deities {
+            let bonuses = deity.bonuses();
+            assert!(
+                bonuses.attack >= 0
+                    && bonuses.defense >= 0
+                    && bonuses.initiative >= 0
+                    && bonuses.max_health >= 0
+                    && bonuses.max_mana >= 0
+                    && bonuses.health_regen >= 0
+                    && bonuses.mana_regen >= 0
+                    && bonuses.crit_chance >= 0.0
+                    && bonuses.attack_speed >= 0.0,
+                "{deity:?} has a punitive bonus package: {bonuses:?}"
+            );
+            for other in &deities {
+                if deity != other {
+                    assert!(
+                        !strictly_dominates(other.bonuses(), bonuses),
+                        "{deity:?} is strictly dominated by {other:?}"
+                    );
+                }
+            }
+        }
+    }
+
     /// Counts the non-zero modifiers in a divine bonus package.
     fn active_modifier_count(bonuses: IdentityBonuses) -> usize {
         usize::from(bonuses.attack != 0)
@@ -200,6 +246,6 @@ mod tests {
         let bonuses = Deity::Nyxara.bonuses();
 
         assert_eq!(bonuses.attack, 1);
-        assert_eq!(bonuses.max_mana, 15);
+        assert_eq!(bonuses.max_mana, 5);
     }
 }

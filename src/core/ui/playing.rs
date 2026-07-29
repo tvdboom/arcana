@@ -246,8 +246,7 @@ pub fn name_with_level(
     localization: &Localization,
     lang: Language,
 ) -> String {
-    let key = format!("{}.{}", prefix, name.replace(" ", "_").to_lowercase());
-    let raw_name = localization.get_opt(&key, lang).unwrap_or_else(|| name.to_string());
+    let raw_name = localization.catalog_name(prefix, name, lang);
     capitalize_words(&raw_name)
 }
 
@@ -4241,7 +4240,7 @@ mod tests {
                 "[strength] Strength: +0",
                 "[race] Orc: +1",
                 "[class] Warrior: +1",
-                "[deity] Kharos, the Ash Tyrant: +2",
+                "[deity] Kharos, the Ash Tyrant: +1",
             ]
         );
     }
@@ -4288,8 +4287,8 @@ mod tests {
             combat_breakdown(PlayingStat::Defense, &wood_elf, &localization, Language::English);
 
         assert!(attack.iter().any(|line| line == "[race] Wood Elf: -1"));
-        assert!(attack.iter().any(|line| line == "[deity] Kharos, the Ash Tyrant: +2"));
-        assert!(defense.iter().any(|line| line == "[deity] Kharos, the Ash Tyrant: -3"));
+        assert!(attack.iter().any(|line| line == "[deity] Kharos, the Ash Tyrant: +1"));
+        assert!(!defense.iter().any(|line| line.starts_with("[deity]")));
     }
 
     #[test]

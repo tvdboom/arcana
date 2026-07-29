@@ -218,6 +218,7 @@ impl ClassSpecialization {
             ClassSpecialization::Warrior(path) => match path {
                 WarriorPath::Paladin => IdentityBonuses {
                     health_regen: 1,
+                    max_mana: 20,
                     ..Default::default()
                 },
                 WarriorPath::Templar => IdentityBonuses {
@@ -226,7 +227,6 @@ impl ClassSpecialization {
                 },
                 WarriorPath::Berserker => IdentityBonuses {
                     attack: 1,
-                    defense: -1,
                     ..Default::default()
                 },
                 WarriorPath::Warden => IdentityBonuses {
@@ -315,22 +315,51 @@ mod tests {
         assert!(maximum / minimum <= 1.06, "specialization ratings diverged: {ratings:?}");
     }
 
+    /// Returns whether `left` is at least as strong in every bonus and stronger in one.
+    fn strictly_dominates(left: IdentityBonuses, right: IdentityBonuses) -> bool {
+        let no_worse = left.attack >= right.attack
+            && left.defense >= right.defense
+            && left.initiative >= right.initiative
+            && left.max_health >= right.max_health
+            && left.max_mana >= right.max_mana
+            && left.health_regen >= right.health_regen
+            && left.mana_regen >= right.mana_regen
+            && left.crit_chance >= right.crit_chance
+            && left.attack_speed >= right.attack_speed
+            && left.melee_attack >= right.melee_attack
+            && left.finesse_attack >= right.finesse_attack
+            && left.ranged_attack >= right.ranged_attack;
+        no_worse && left != right
+    }
+
+    /// Ensures no choice grants every bonus of another choice plus an additional benefit.
+    fn assert_no_dominated_choice(family: &[ClassSpecialization]) {
+        for (index, choice) in family.iter().enumerate() {
+            for (other_index, other) in family.iter().enumerate() {
+                if index != other_index {
+                    assert!(
+                        !strictly_dominates(other.bonuses(), choice.bonuses()),
+                        "{choice:?} is strictly dominated by {other:?}"
+                    );
+                }
+            }
+        }
+    }
+
     #[test]
     /// Verifies each class's specialization options stay within a narrow combat-value band.
     fn specialization_families_have_comparable_combat_value() {
-        assert_balanced_family(
-            &AssassinPath::iter().map(ClassSpecialization::Assassin).collect::<Vec<_>>(),
-        );
-        assert_balanced_family(
-            &WarriorPath::iter().map(ClassSpecialization::Warrior).collect::<Vec<_>>(),
-        );
-        assert_balanced_family(
-            &MonkSchool::iter().map(ClassSpecialization::Monk).collect::<Vec<_>>(),
-        );
-        assert_balanced_family(
-            &BardStyle::iter().map(ClassSpecialization::Bard).collect::<Vec<_>>(),
-        );
-        assert_balanced_family(&Ajah::iter().map(ClassSpecialization::Mage).collect::<Vec<_>>());
+        let families = [
+            AssassinPath::iter().map(ClassSpecialization::Assassin).collect::<Vec<_>>(),
+            WarriorPath::iter().map(ClassSpecialization::Warrior).collect::<Vec<_>>(),
+            MonkSchool::iter().map(ClassSpecialization::Monk).collect::<Vec<_>>(),
+            BardStyle::iter().map(ClassSpecialization::Bard).collect::<Vec<_>>(),
+            Ajah::iter().map(ClassSpecialization::Mage).collect::<Vec<_>>(),
+        ];
+        for family in &families {
+            assert_balanced_family(family);
+            assert_no_dominated_choice(family);
+        }
     }
 
     #[test]

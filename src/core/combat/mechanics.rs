@@ -3144,12 +3144,9 @@ pub fn handle_continue_with_pet_button_click(
     next_game_state.set(GameState::Playing);
 }
 
-/// Queues the post-combat mutation choice for half of eligible encounters.
+/// Queues the post-combat mutation choice for every eligible encounter.
 fn maybe_queue_mutation_offer(commands: &mut Commands, candidate: Option<Mutation>) {
-    let Some(candidate) = candidate else {
-        return;
-    };
-    if rng().random_bool(0.5) {
+    if let Some(candidate) = candidate {
         commands.insert_resource(crate::core::ui::mutation::PendingMutationOffer(candidate));
     }
 }
@@ -3811,5 +3808,21 @@ mod tests {
             damage: 5,
             duration: 3.0,
         }));
+    }
+
+    #[test]
+    /// Verifies every eligible combat queues its mutation offer without a random roll.
+    fn eligible_combat_always_queues_mutation_offer() {
+        let mut app = App::new();
+        app.add_systems(Update, |mut commands: Commands| {
+            maybe_queue_mutation_offer(&mut commands, Some(Mutation::Werewolf));
+        });
+
+        app.update();
+
+        assert_eq!(
+            app.world().resource::<crate::core::ui::mutation::PendingMutationOffer>().0,
+            Mutation::Werewolf
+        );
     }
 }
