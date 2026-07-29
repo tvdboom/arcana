@@ -18,6 +18,15 @@ pub struct PlayScreenColumns2And3;
 #[derive(Component)]
 pub struct PlayScreenColumnsContainer;
 
+#[derive(Component)]
+pub struct PlayingContentFrame;
+
+#[derive(Component)]
+pub struct PlayingPrimaryColumn;
+
+#[derive(Component)]
+pub struct PlayingActionBar;
+
 pub const SLIDER_WIDTH: f32 = 280.0;
 pub const SLIDER_VALUE_WIDTH: f32 = 120.0;
 

@@ -24,7 +24,7 @@ pub fn add_root_node(block: bool) -> (Node, Pickable) {
     (
         Node {
             width: Val::Vw(100.),
-            height: Val::Vh(100.),
+            height: Val::VMin(100.),
             position_type: PositionType::Absolute,
             flex_direction: FlexDirection::Column,
             align_content: AlignContent::Center,
@@ -55,7 +55,7 @@ pub fn add_text(
         Text::new(text),
         TextFont {
             font: FontSource::Handle(assets.font(font)),
-            font_size: FontSize::Vh(font_size),
+            font_size: FontSize::VMin(font_size),
             ..default()
         },
     )
@@ -109,8 +109,8 @@ pub fn spawn_rich_text_row(
 
                     parent.spawn((
                         Node {
-                            width: Val::Vh(font_size * 1.35),
-                            height: Val::Vh(font_size * 1.35),
+                            width: Val::VMin(font_size * 1.35),
+                            height: Val::VMin(font_size * 1.35),
                             align_self: AlignSelf::Center,
                             ..default()
                         },

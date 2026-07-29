@@ -39,7 +39,7 @@ const HEALTH_COLOR: Color = Color::srgb_u8(170, 35, 35);
 const MANA_COLOR: Color = Color::srgb_u8(40, 80, 185);
 
 // Viewport-relative icon sizes (scale with window width)
-const ICON_ACTION: Val = Val::Vh(8.5); // action button circles
+const ICON_ACTION: Val = Val::VMin(8.5); // action button circles
 const ICON_BADGE: Val = Val::Vw(1.9); // equipped badge overlay
 
 const EMPTY_SLOT_COLOR: Color = Color::srgba(0.08, 0.08, 0.14, 0.8);
@@ -842,31 +842,38 @@ pub fn setup_playing_screen(
 
             // Content column: maintains aspect ratio on wide screens, centered horizontally
             parent
-                .spawn(Node {
-                    height: percent(100.),
-                    max_width: percent(100.),
-                    aspect_ratio: Some(16. / 9.),
-                    flex_direction: FlexDirection::Column,
-                    justify_content: JustifyContent::FlexStart,
-                    align_items: AlignItems::Stretch,
-                    row_gap: Val::Px(4.),
-                    align_self: AlignSelf::Center,
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        height: percent(100.),
+                        max_width: percent(100.),
+                        aspect_ratio: Some(16. / 9.),
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::FlexStart,
+                        align_items: AlignItems::Stretch,
+                        row_gap: Val::Px(4.),
+                        align_self: AlignSelf::Center,
+                        ..default()
+                    },
+                    ScrollPosition::default(),
+                    Interaction::default(),
+                    bevy::ui::RelativeCursorPosition::default(),
+                    crate::core::ui::scrollbar::ScrollableContainer,
+                    crate::core::ui::utils::PlayingContentFrame,
+                ))
                 .with_children(|parent| {
                     // Character name, top centered with banner background.
                     parent
                         .spawn(Node {
                             align_self: AlignSelf::Center,
                             width: Val::Auto,
-                            min_width: Val::Vh(50.0),
-                            height: Val::Vh(7.11),
+                            min_width: Val::VMin(50.0),
+                            height: Val::VMin(7.11),
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::Center,
                             padding: UiRect::horizontal(Val::Px(100.0)),
                             margin: UiRect {
-                                top: Val::Vh(2.67),
-                                bottom: Val::Vh(1.78),
+                                top: Val::VMin(2.67),
+                                bottom: Val::VMin(1.78),
                                 ..default()
                             },
                             ..default()
@@ -923,20 +930,21 @@ pub fn setup_playing_screen(
                         .spawn((
                             Node {
                                 width: percent(100.),
-                                height: Val::Vh(14.5),
+                                height: Val::VMin(14.5),
                                 flex_shrink: 0.,
                                 flex_direction: FlexDirection::Row,
                                 justify_content: JustifyContent::Center,
                                 align_items: AlignItems::Center,
                                 column_gap: Val::Px(4.),
                                 padding: UiRect {
-                                    top: Val::Vh(6.5),
+                                    top: Val::VMin(6.5),
                                     bottom: Val::Px(0.),
                                     ..default()
                                 },
                                 ..default()
                             },
                             GlobalZIndex(890),
+                            crate::core::ui::utils::PlayingActionBar,
                         ))
                         .with_children(|parent| {
                             spawn_playing_action_button(
@@ -1015,13 +1023,16 @@ pub fn spawn_image_column(
     player: &Player,
     z_index: Option<GlobalZIndex>,
 ) {
-    let mut cmd = parent.spawn(Node {
-        width: percent(33.5),
-        flex_direction: FlexDirection::Column,
-        align_items: AlignItems::Stretch,
-        padding: UiRect::all(Val::Px(6.)),
-        ..default()
-    });
+    let mut cmd = parent.spawn((
+        Node {
+            width: percent(33.5),
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Stretch,
+            padding: UiRect::all(Val::Px(6.)),
+            ..default()
+        },
+        crate::core::ui::utils::PlayingPrimaryColumn,
+    ));
 
     if let Some(z) = z_index {
         cmd.insert(z);
@@ -1128,7 +1139,7 @@ pub fn spawn_image_column(
                         }
                     });
 
-                // Pet image, bottom-left overlay — larger
+                // Pet image, bottom-left overlay â€” larger
                 if let Some(pet) = &player.pet {
                     parent
                         .spawn((

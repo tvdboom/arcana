@@ -152,17 +152,17 @@ pub fn spawn_menu_button(
     let label = localization.get(&key, language);
 
     let (min_width, height) = match btn {
-        MenuBtn::Back => (Val::Vh(22.22), Val::Vh(5.0)),
+        MenuBtn::Back => (Val::VMin(22.22), Val::VMin(5.0)),
         MenuBtn::NewCharacter | MenuBtn::Settings | MenuBtn::Quit | MenuBtn::Continue => {
-            (Val::Vh(46.67), Val::Vh(8.33))
+            (Val::VMin(46.67), Val::VMin(8.33))
         },
         #[cfg(not(target_arch = "wasm32"))]
-        MenuBtn::LoadCharacter | MenuBtn::SaveCharacter => (Val::Vh(46.67), Val::Vh(8.33)),
+        MenuBtn::LoadCharacter | MenuBtn::SaveCharacter => (Val::VMin(46.67), Val::VMin(8.33)),
         #[allow(unreachable_patterns)]
-        _ => (Val::Vh(33.33), Val::Vh(6.11)),
+        _ => (Val::VMin(33.33), Val::VMin(6.11)),
     };
 
-    let margin = UiRect::all(Val::Vh(0.89));
+    let margin = UiRect::all(Val::VMin(0.89));
 
     parent
         .spawn((
@@ -173,10 +173,10 @@ pub fn spawn_menu_button(
                 height,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                padding: UiRect::horizontal(Val::Vh(1.33)),
+                padding: UiRect::horizontal(Val::VMin(1.33)),
                 margin,
-                border: UiRect::all(Val::Vh(0.22)),
-                border_radius: BorderRadius::all(Val::Vh(0.44)),
+                border: UiRect::all(Val::VMin(0.22)),
+                border_radius: BorderRadius::all(Val::VMin(0.44)),
                 ..default()
             },
             BackgroundColor(NORMAL_BUTTON_COLOR),

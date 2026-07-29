@@ -159,6 +159,14 @@ pub struct CombatContinueWithPetSlot;
 #[derive(Component)]
 pub struct CombatContinueWithPetButton;
 
+#[derive(Component)]
+pub struct CombatColumns;
+
+#[derive(Component)]
+pub struct CombatSidePanel {
+    pub desktop_width: f32,
+}
+
 /// Sets up combat ui.
 pub fn setup_combat_ui(
     mut commands: Commands,
@@ -205,16 +213,23 @@ pub fn setup_combat_ui(
         ))
         .with_children(|parent| {
             parent
-                .spawn(Node {
-                    width: percent(100.),
-                    height: percent(100.),
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_items: AlignItems::Stretch,
-                    padding: UiRect::vertical(Val::Px(8.)),
-                    column_gap: Val::Px(8.),
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        width: percent(100.),
+                        height: percent(100.),
+                        flex_direction: FlexDirection::Row,
+                        justify_content: JustifyContent::SpaceBetween,
+                        align_items: AlignItems::Stretch,
+                        padding: UiRect::vertical(Val::Px(8.)),
+                        column_gap: Val::Px(8.),
+                        ..default()
+                    },
+                    ScrollPosition::default(),
+                    Interaction::default(),
+                    bevy::ui::RelativeCursorPosition::default(),
+                    crate::core::ui::scrollbar::ScrollableContainer,
+                    CombatColumns,
+                ))
                 .with_children(|parent| {
                     spawn_player_panel(parent, &assets, &localization, lang, &player, is_pvp);
                     spawn_monster_panel(
@@ -233,7 +248,7 @@ pub fn setup_combat_ui(
                     Node {
                         position_type: PositionType::Absolute,
                         left: Val::Percent(50.),
-                        margin: UiRect::left(Val::Vh(-9.0)),
+                        margin: UiRect::left(Val::VMin(-9.0)),
                         bottom: Val::Px(24.),
                         flex_direction: FlexDirection::Row,
                         align_items: AlignItems::Center,
@@ -272,13 +287,13 @@ pub fn setup_combat_ui(
                                 // The combat label changes with both language and battle
                                 // state, so its width must follow the text rather than
                                 // truncate longer translations.
-                                min_width: Val::Vh(18.0),
-                                height: Val::Vh(5.0),
+                                min_width: Val::VMin(18.0),
+                                height: Val::VMin(5.0),
                                 align_items: AlignItems::Center,
                                 justify_content: JustifyContent::Center,
-                                padding: UiRect::horizontal(Val::Vh(1.0)),
-                                border: UiRect::all(Val::Vh(0.22)),
-                                border_radius: BorderRadius::all(Val::Vh(0.44)),
+                                padding: UiRect::horizontal(Val::VMin(1.0)),
+                                border: UiRect::all(Val::VMin(0.22)),
+                                border_radius: BorderRadius::all(Val::VMin(0.44)),
                                 ..default()
                             },
                             BackgroundColor(NORMAL_BUTTON_COLOR),
@@ -354,13 +369,13 @@ fn spawn_continue_with_pet_button(
     parent
         .spawn((
             Node {
-                min_width: Val::Vh(26.0),
-                height: Val::Vh(5.0),
+                min_width: Val::VMin(26.0),
+                height: Val::VMin(5.0),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                padding: UiRect::horizontal(Val::Vh(1.0)),
-                border: UiRect::all(Val::Vh(0.22)),
-                border_radius: BorderRadius::all(Val::Vh(0.44)),
+                padding: UiRect::horizontal(Val::VMin(1.0)),
+                border: UiRect::all(Val::VMin(0.22)),
+                border_radius: BorderRadius::all(Val::VMin(0.44)),
                 ..default()
             },
             BackgroundColor(NORMAL_BUTTON_COLOR),
@@ -402,14 +417,19 @@ fn spawn_player_panel(
     is_pvp: bool,
 ) {
     parent
-        .spawn(Node {
-            width: percent(LEFT_PANEL_WIDTH),
-            height: percent(100.),
-            flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(6.),
-            align_items: AlignItems::Stretch,
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(LEFT_PANEL_WIDTH),
+                height: percent(100.),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(6.),
+                align_items: AlignItems::Stretch,
+                ..default()
+            },
+            CombatSidePanel {
+                desktop_width: LEFT_PANEL_WIDTH,
+            },
+        ))
         .with_children(|parent| {
             parent
                 .spawn(Node {
@@ -428,7 +448,7 @@ fn spawn_player_panel(
                     }
                     parent
                         .spawn(Node {
-                            width: Val::Vh(COMBAT_PORTRAIT_WIDTH),
+                            width: Val::VMin(COMBAT_PORTRAIT_WIDTH),
                             flex_direction: FlexDirection::Column,
                             row_gap: Val::Px(0.),
                             align_items: AlignItems::Stretch,
@@ -501,7 +521,7 @@ fn spawn_character_portrait(
     parent
         .spawn((
             Node {
-                width: Val::Vh(COMBAT_PORTRAIT_WIDTH),
+                width: Val::VMin(COMBAT_PORTRAIT_WIDTH),
                 aspect_ratio: Some(COMBAT_PORTRAIT_ASPECT),
                 position_type: PositionType::Relative,
                 border: UiRect::all(Val::Px(3.)),
@@ -1138,7 +1158,7 @@ fn spawn_tactical_controls(parent: &mut ChildSpawnerCommands, assets: &WorldAsse
 
     parent
         .spawn(Node {
-            width: Val::Vh(COMBAT_TACTIC_CARD_SIZE),
+            width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.),
             flex_shrink: 0.0,
@@ -1195,7 +1215,7 @@ fn spawn_tactical_controls(parent: &mut ChildSpawnerCommands, assets: &WorldAsse
 /// Reserves the tactical-card column so mirrored combatants stay aligned.
 fn spawn_tactical_spacer(parent: &mut ChildSpawnerCommands) {
     parent.spawn(Node {
-        width: Val::Vh(COMBAT_TACTIC_CARD_SIZE),
+        width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
         height: Val::Px(1.0),
         flex_shrink: 0.0,
         ..default()
@@ -1336,8 +1356,8 @@ fn spawn_hover_card(
     };
     let mut cmd = parent.spawn((
         Node {
-            width: Val::Vh(card_size),
-            height: Val::Vh(card_size),
+            width: Val::VMin(card_size),
+            height: Val::VMin(card_size),
             position_type: PositionType::Relative,
             border: if has_border {
                 UiRect::all(Val::Px(2.))
@@ -1519,14 +1539,19 @@ fn spawn_monster_panel(
     opponent: Option<&Player>,
 ) {
     parent
-        .spawn(Node {
-            width: percent(RIGHT_PANEL_WIDTH),
-            height: percent(100.),
-            flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(6.),
-            align_items: AlignItems::Stretch,
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(RIGHT_PANEL_WIDTH),
+                height: percent(100.),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(6.),
+                align_items: AlignItems::Stretch,
+                ..default()
+            },
+            CombatSidePanel {
+                desktop_width: RIGHT_PANEL_WIDTH,
+            },
+        ))
         .with_children(|parent| {
             parent
                 .spawn(Node {
@@ -1570,7 +1595,7 @@ fn spawn_monster_panel(
 
                     parent
                         .spawn(Node {
-                            width: Val::Vh(COMBAT_PORTRAIT_WIDTH),
+                            width: Val::VMin(COMBAT_PORTRAIT_WIDTH),
                             flex_direction: FlexDirection::Column,
                             row_gap: Val::Px(0.),
                             align_items: AlignItems::Stretch,
@@ -1631,7 +1656,7 @@ fn spawn_monster_portrait(
     parent
         .spawn((
             Node {
-                width: Val::Vh(COMBAT_PORTRAIT_WIDTH),
+                width: Val::VMin(COMBAT_PORTRAIT_WIDTH),
                 aspect_ratio: Some(COMBAT_PORTRAIT_ASPECT),
                 position_type: PositionType::Relative,
                 border: UiRect::all(Val::Px(3.)),

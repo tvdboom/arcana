@@ -129,11 +129,11 @@ pub fn spawn_label(
     parent
         .spawn(Node {
             width: percent(100.),
-            height: Val::Vh(7.22),
+            height: Val::VMin(7.22),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             flex_direction: FlexDirection::Row,
-            margin: UiRect::bottom(Val::Vh(1.67)),
+            margin: UiRect::bottom(Val::VMin(1.67)),
             ..default()
         })
         .with_children(|parent| {
@@ -145,14 +145,14 @@ pub fn spawn_label(
                         Node {
                             // Keep the standard size for short labels while allowing
                             // localized setting names to determine a wider button.
-                            min_width: Val::Vh(13.33),
-                            height: Val::Vh(5.0),
+                            min_width: Val::VMin(13.33),
+                            height: Val::VMin(5.0),
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::Center,
-                            padding: UiRect::horizontal(Val::Vh(0.67)),
-                            margin: UiRect::horizontal(Val::Vh(0.89)),
-                            border: UiRect::all(Val::Vh(0.22)),
-                            border_radius: BorderRadius::all(Val::Vh(0.44)),
+                            padding: UiRect::horizontal(Val::VMin(0.67)),
+                            margin: UiRect::horizontal(Val::VMin(0.89)),
+                            border: UiRect::all(Val::VMin(0.22)),
+                            border_radius: BorderRadius::all(Val::VMin(0.44)),
                             ..default()
                         },
                         BackgroundColor(if match_setting(item, settings) {
@@ -199,7 +199,7 @@ pub fn spawn_volume_slider(
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                margin: UiRect::bottom(Val::Vh(1.67)),
+                margin: UiRect::bottom(Val::VMin(1.67)),
                 display: if settings.audio == AudioSettings::Mute {
                     Display::None
                 } else {

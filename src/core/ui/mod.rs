@@ -8,6 +8,7 @@ pub mod level_up;
 pub mod modal;
 pub mod mutation;
 pub mod playing;
+pub mod responsive;
 pub mod scrollbar;
 pub mod toast;
 pub mod tooltip;

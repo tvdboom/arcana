@@ -83,6 +83,7 @@ use crate::core::ui::dropdown::{shop_close_dropdown_on_outside_click, OpenDropdo
 use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpOverlayCmp};
 use crate::core::ui::modal::{modal_input_system, ActiveModal};
 use crate::core::ui::playing::*;
+use crate::core::ui::responsive::{touch_scroll_system, update_responsive_layout};
 use crate::core::ui::scrollbar::{
     scroll_system, update_scrollbar_system, update_scrollbar_x_system,
 };
@@ -213,6 +214,8 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     check_keys_menu,
+                    update_responsive_layout,
+                    touch_scroll_system,
                     apply_level_up_system,
                     modal_input_system,
                     update_localized_text.run_if(resource_changed::<Settings>),

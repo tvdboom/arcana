@@ -99,8 +99,8 @@ fn setup_defeat_screen_inner(
                         flex_direction: FlexDirection::Column,
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
-                        row_gap: Val::Vh(3.),
-                        padding: UiRect::all(Val::Vh(4.)),
+                        row_gap: Val::VMin(3.),
+                        padding: UiRect::all(Val::VMin(4.)),
                         ..default()
                     },
                     BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.65)),
@@ -130,8 +130,8 @@ fn setup_defeat_screen_inner(
                     Node {
                         position_type: PositionType::Absolute,
                         right: Val::Vw(8.),
-                        bottom: Val::Vh(8.),
-                        padding: UiRect::axes(Val::Vw(2.), Val::Vh(1.5)),
+                        bottom: Val::VMin(8.),
+                        padding: UiRect::axes(Val::Vw(2.), Val::VMin(1.5)),
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
                         border: UiRect::all(Val::Px(2.)),

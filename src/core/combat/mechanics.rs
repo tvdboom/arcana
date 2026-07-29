@@ -4735,13 +4735,13 @@ fn spawn_continue_with_pet_button(
         parent
             .spawn((
                 Node {
-                    min_width: Val::Vh(26.0),
-                    height: Val::Vh(5.0),
+                    min_width: Val::VMin(26.0),
+                    height: Val::VMin(5.0),
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
-                    padding: UiRect::horizontal(Val::Vh(1.0)),
-                    border: UiRect::all(Val::Vh(0.22)),
-                    border_radius: BorderRadius::all(Val::Vh(0.44)),
+                    padding: UiRect::horizontal(Val::VMin(1.0)),
+                    border: UiRect::all(Val::VMin(0.22)),
+                    border_radius: BorderRadius::all(Val::VMin(0.44)),
                     ..default()
                 },
                 BackgroundColor(crate::core::constants::NORMAL_BUTTON_COLOR),
@@ -4843,8 +4843,8 @@ pub fn sync_combat_effect_icons(
                 };
                 parent.spawn((
                     Node {
-                        width: Val::Vh(5.5),
-                        height: Val::Vh(5.5),
+                        width: Val::VMin(5.5),
+                        height: Val::VMin(5.5),
                         ..default()
                     },
                     ImageNode::new(assets.image(key)).with_mode(NodeImageMode::Stretch),

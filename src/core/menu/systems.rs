@@ -102,7 +102,8 @@ pub fn setup_menu(
                     AppState::Settings => {
                         parent
                             .spawn((Node {
-                                width: percent(40.),
+                                width: percent(90.),
+                                max_width: Val::VMin(72.),
                                 flex_direction: FlexDirection::Column,
                                 align_items: AlignItems::Center,
                                 justify_content: JustifyContent::Center,
@@ -326,12 +327,12 @@ pub fn setup_game_menu(
             parent
                 .spawn((
                     Node {
-                        width: Val::Vh(66.67),
-                        height: Val::Vh(62.22),
+                        width: Val::VMin(66.67),
+                        height: Val::VMin(62.22),
                         flex_direction: FlexDirection::Column,
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
-                        padding: UiRect::all(Val::Vh(2.78)),
+                        padding: UiRect::all(Val::VMin(2.78)),
                         ..default()
                     },
                     ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
@@ -407,12 +408,12 @@ pub fn setup_game_settings(
             parent
                 .spawn((
                     Node {
-                        width: Val::Vh(64.44),
-                        height: Val::Vh(75.56),
+                        width: Val::VMin(64.44),
+                        height: Val::VMin(75.56),
                         flex_direction: FlexDirection::Column,
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
-                        padding: UiRect::all(Val::Vh(2.78)),
+                        padding: UiRect::all(Val::VMin(2.78)),
                         ..default()
                     },
                     ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
@@ -446,7 +447,7 @@ pub fn setup_game_settings(
 
                     // Spacer to push the back button lower down
                     parent.spawn(Node {
-                        height: Val::Vh(3.0),
+                        height: Val::VMin(3.0),
                         ..default()
                     });
 

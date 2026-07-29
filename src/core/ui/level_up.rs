@@ -355,7 +355,7 @@ fn spawn_level_up_overlay(
             Node {
                 position_type: PositionType::Absolute,
                 width: Val::Vw(100.),
-                height: Val::Vh(100.),
+                height: Val::VMin(100.),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
@@ -375,7 +375,7 @@ fn spawn_level_up_overlay(
                 .spawn((
                     Node {
                         width: Val::Vw(88.),
-                        height: Val::Vh(100.),
+                        height: Val::VMin(100.),
                         flex_direction: FlexDirection::Column,
                         align_items: AlignItems::Stretch,
                         justify_content: JustifyContent::SpaceBetween,

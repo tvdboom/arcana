@@ -125,8 +125,8 @@ fn setup_mutation_overlay(
                         flex_direction: FlexDirection::Column,
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
-                        row_gap: Val::Vh(3.),
-                        padding: UiRect::all(Val::Vh(4.)),
+                        row_gap: Val::VMin(3.),
+                        padding: UiRect::all(Val::VMin(4.)),
                         border: UiRect::all(Val::Px(2.)),
                         ..default()
                     },
@@ -183,7 +183,7 @@ fn spawn_choice_button(
     parent
         .spawn((
             Node {
-                padding: UiRect::axes(Val::Vw(2.5), Val::Vh(1.5)),
+                padding: UiRect::axes(Val::Vw(2.5), Val::VMin(1.5)),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 border: UiRect::all(Val::Px(2.)),

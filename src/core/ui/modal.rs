@@ -88,17 +88,17 @@ pub fn spawn_modal(
             parent
                 .spawn((
                     Node {
-                        width: Val::Vh(85.0),
-                        height: Val::Vh(40.0),
+                        width: Val::VMin(85.0),
+                        height: Val::VMin(40.0),
                         flex_direction: FlexDirection::Column,
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
-                        row_gap: Val::Vh(5.5),
+                        row_gap: Val::VMin(5.5),
                         padding: UiRect {
-                            left: Val::Vh(6.0),
-                            right: Val::Vh(6.0),
-                            top: Val::Vh(6.0),
-                            bottom: Val::Vh(6.0),
+                            left: Val::VMin(6.0),
+                            right: Val::VMin(6.0),
+                            top: Val::VMin(6.0),
+                            bottom: Val::VMin(6.0),
                         },
                         ..default()
                     },
@@ -115,7 +115,7 @@ pub fn spawn_modal(
                         .spawn(Node {
                             flex_direction: FlexDirection::Column,
                             align_items: AlignItems::Center,
-                            row_gap: Val::Vh(1.5),
+                            row_gap: Val::VMin(1.5),
                             ..default()
                         })
                         .with_children(|parent| {
@@ -130,7 +130,7 @@ pub fn spawn_modal(
                                 add_text(body_text, "medium", 2.2, assets),
                                 TextColor(Color::WHITE),
                                 Node {
-                                    max_width: Val::Vh(72.0),
+                                    max_width: Val::VMin(72.0),
                                     ..default()
                                 },
                             ));
@@ -140,7 +140,7 @@ pub fn spawn_modal(
                     parent
                         .spawn(Node {
                             flex_direction: FlexDirection::Row,
-                            column_gap: Val::Vh(4.0),
+                            column_gap: Val::VMin(4.0),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
                             ..default()
