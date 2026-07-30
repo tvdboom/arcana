@@ -7,6 +7,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 use crate::core::combat::ui::{CombatColumns, CombatSidePanel};
+use crate::core::ui::creation::CreationLayoutNode;
 use crate::core::ui::scrollbar::{HorizontalWheelScroll, ScrollableContainer};
 use crate::core::ui::utils::{
     PanelCmp, PlayScreenColumns2And3, PlayScreenColumnsContainer, PlayingActionBar,
@@ -195,6 +196,240 @@ pub fn update_responsive_layout(
     }
 }
 
+/// Applies phone layouts to character creation and horizontal selection screens.
+pub fn update_creation_responsive_layout(
+    window_q: Query<&Window, With<PrimaryWindow>>,
+    mut nodes: Query<(&mut Node, &CreationLayoutNode)>,
+) {
+    let Ok(window) = window_q.single() else {
+        return;
+    };
+    let portrait = uses_portrait_layout(window.width(), window.height());
+
+    for (mut node, layout) in &mut nodes {
+        apply_creation_layout(&mut node, *layout, portrait);
+    }
+}
+
+/// Applies one responsive creation rule to a UI node.
+fn apply_creation_layout(node: &mut Node, layout: CreationLayoutNode, portrait: bool) {
+    let zero_rect = UiRect::all(Val::Px(0.));
+
+    match layout {
+        CreationLayoutNode::CharacterScreen => {
+            node.overflow = if portrait {
+                Overflow::scroll_y()
+            } else {
+                Overflow::visible()
+            };
+            node.padding = if portrait {
+                UiRect::horizontal(Val::Px(6.))
+            } else {
+                zero_rect
+            };
+            node.row_gap = if portrait {
+                Val::Px(8.)
+            } else {
+                Val::Px(0.)
+            };
+        },
+        CreationLayoutNode::CharacterTitle => {
+            node.margin = if portrait {
+                UiRect {
+                    top: Val::Px(12.),
+                    bottom: Val::Px(6.),
+                    ..default()
+                }
+            } else {
+                UiRect {
+                    top: percent(5.),
+                    bottom: percent(3.),
+                    ..default()
+                }
+            };
+        },
+        CreationLayoutNode::CharacterContent => {
+            node.width = if portrait {
+                percent(100.)
+            } else {
+                percent(55.)
+            };
+            node.height = if portrait {
+                Val::Auto
+            } else {
+                percent(65.)
+            };
+            node.flex_direction = if portrait {
+                FlexDirection::Column
+            } else {
+                FlexDirection::Row
+            };
+            node.justify_content = if portrait {
+                JustifyContent::FlexStart
+            } else {
+                JustifyContent::SpaceBetween
+            };
+            node.row_gap = if portrait {
+                Val::Px(12.)
+            } else {
+                Val::Px(0.)
+            };
+            node.flex_shrink = if portrait {
+                0.
+            } else {
+                1.
+            };
+        },
+        CreationLayoutNode::IdentityColumn => {
+            node.width = if portrait {
+                percent(100.)
+            } else {
+                percent(45.)
+            };
+            node.height = if portrait {
+                Val::Auto
+            } else {
+                percent(100.)
+            };
+            node.min_height = if portrait {
+                Val::Px(285.)
+            } else {
+                Val::Auto
+            };
+            node.justify_content = if portrait {
+                JustifyContent::FlexStart
+            } else {
+                JustifyContent::Center
+            };
+            node.flex_shrink = if portrait {
+                0.
+            } else {
+                1.
+            };
+        },
+        CreationLayoutNode::AttributesColumn => {
+            node.width = if portrait {
+                percent(100.)
+            } else {
+                percent(45.)
+            };
+            node.height = if portrait {
+                Val::Auto
+            } else {
+                percent(100.)
+            };
+            node.min_height = if portrait {
+                Val::Px(385.)
+            } else {
+                Val::Auto
+            };
+            node.justify_content = if portrait {
+                JustifyContent::FlexStart
+            } else {
+                JustifyContent::Center
+            };
+            node.flex_shrink = if portrait {
+                0.
+            } else {
+                1.
+            };
+        },
+        CreationLayoutNode::CharacterFooter => {
+            node.position_type = if portrait {
+                PositionType::Relative
+            } else {
+                PositionType::Absolute
+            };
+            node.bottom = if portrait {
+                Val::Auto
+            } else {
+                percent(4.)
+            };
+            node.min_height = if portrait {
+                Val::Px(64.)
+            } else {
+                Val::Auto
+            };
+            node.margin = if portrait {
+                UiRect::bottom(Val::Px(12.))
+            } else {
+                zero_rect
+            };
+            node.align_items = AlignItems::Center;
+            node.flex_shrink = if portrait {
+                0.
+            } else {
+                1.
+            };
+        },
+        CreationLayoutNode::SelectionTitle => {
+            node.margin = if portrait {
+                UiRect {
+                    top: Val::Px(12.),
+                    bottom: Val::Px(6.),
+                    ..default()
+                }
+            } else {
+                UiRect {
+                    top: percent(3.),
+                    bottom: percent(3.),
+                    ..default()
+                }
+            };
+        },
+        CreationLayoutNode::SelectionWrapper => {
+            node.width = if portrait {
+                percent(100.)
+            } else {
+                percent(96.)
+            };
+            node.height = if portrait {
+                percent(82.)
+            } else {
+                percent(72.)
+            };
+        },
+        CreationLayoutNode::SelectionViewport {
+            center_cards,
+        } => {
+            node.height = if portrait {
+                percent(98.)
+            } else {
+                percent(96.)
+            };
+            node.justify_content = if portrait || !center_cards {
+                JustifyContent::FlexStart
+            } else {
+                JustifyContent::Center
+            };
+        },
+        CreationLayoutNode::SelectionCard => {
+            node.width = if portrait {
+                percent(82.)
+            } else {
+                percent(22.)
+            };
+            node.height = if portrait {
+                percent(96.)
+            } else {
+                percent(94.)
+            };
+            node.margin = UiRect::horizontal(if portrait {
+                percent(4.)
+            } else {
+                percent(1.5)
+            });
+        },
+        CreationLayoutNode::SelectionFooter => {
+            node.bottom = if portrait {
+                percent(1.)
+            } else {
+                percent(3.)
+            };
+        },
+    }
+}
+
 /// Converts one-finger drags over a scrollable area into vertical or horizontal scrolling.
 pub fn touch_scroll_system(
     mut touch_events: MessageReader<TouchInput>,
@@ -243,5 +478,20 @@ mod tests {
     fn viewport_classification_matches_phone_and_desktop() {
         assert!(uses_portrait_layout(390.0, 844.0));
         assert!(!uses_portrait_layout(1280.0, 720.0));
+    }
+
+    #[test]
+    /// Verifies character creation stacks vertically and selection cards remain touch-sized.
+    fn phone_creation_layout_uses_vertical_full_width_content() {
+        let mut content = Node::default();
+        apply_creation_layout(&mut content, CreationLayoutNode::CharacterContent, true);
+        assert_eq!(content.width, percent(100.));
+        assert_eq!(content.height, Val::Auto);
+        assert_eq!(content.flex_direction, FlexDirection::Column);
+
+        let mut card = Node::default();
+        apply_creation_layout(&mut card, CreationLayoutNode::SelectionCard, true);
+        assert_eq!(card.width, percent(82.));
+        assert_eq!(card.height, percent(96.));
     }
 }

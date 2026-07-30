@@ -24,7 +24,7 @@ pub fn add_root_node(block: bool) -> (Node, Pickable) {
     (
         Node {
             width: Val::Vw(100.),
-            height: Val::VMin(100.),
+            height: Val::Vh(100.),
             position_type: PositionType::Absolute,
             flex_direction: FlexDirection::Column,
             align_content: AlignContent::Center,
@@ -128,4 +128,18 @@ pub fn spawn_rich_text_row(
                 parent.spawn((add_text(remaining, font, font_size, assets), TextColor(color)));
             }
         });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    /// Verifies portrait screens use viewport height instead of collapsing to viewport width.
+    fn root_node_fills_the_viewport_height() {
+        let (node, _) = add_root_node(true);
+
+        assert_eq!(node.width, Val::Vw(100.));
+        assert_eq!(node.height, Val::Vh(100.));
+    }
 }

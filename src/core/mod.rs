@@ -83,7 +83,9 @@ use crate::core::ui::dropdown::{shop_close_dropdown_on_outside_click, OpenDropdo
 use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpOverlayCmp};
 use crate::core::ui::modal::{modal_input_system, ActiveModal};
 use crate::core::ui::playing::*;
-use crate::core::ui::responsive::{touch_scroll_system, update_responsive_layout};
+use crate::core::ui::responsive::{
+    touch_scroll_system, update_creation_responsive_layout, update_responsive_layout,
+};
 use crate::core::ui::scrollbar::{
     scroll_system, update_scrollbar_system, update_scrollbar_x_system,
 };
@@ -157,6 +159,7 @@ impl Plugin for GamePlugin {
             .init_resource::<CombatSpeed>()
             .init_resource::<GameMenuOrigin>()
             .init_resource::<CombatMenuSuspended>()
+            .init_resource::<SelectionGestureState>()
             .init_resource::<crate::core::ui::defeat::PendingAutoRest>()
             .init_resource::<RightTabScroll>();
 
@@ -215,6 +218,7 @@ impl Plugin for GamePlugin {
                 (
                     check_keys_menu,
                     update_responsive_layout,
+                    update_creation_responsive_layout,
                     touch_scroll_system,
                     apply_level_up_system,
                     modal_input_system,
@@ -234,11 +238,15 @@ impl Plugin for GamePlugin {
                 OnEnter(GameState::CreateCharacter),
                 setup_character_creation.run_if(in_state(AppState::Game)),
             )
-            .add_systems(OnExit(GameState::CreateCharacter), despawn::<MenuCmp>)
+            .add_systems(
+                OnExit(GameState::CreateCharacter),
+                (close_mobile_name_editor, despawn::<MenuCmp>),
+            )
             .add_systems(
                 Update,
                 (
                     handle_name_input,
+                    sync_mobile_name_input,
                     update_character_creation_continue_btn,
                     update_attribute_buttons,
                     update_sex_button_colors,

@@ -34,12 +34,55 @@ use rand::{rng, RngExt};
 
 const AGE_SLIDER_WIDTH: f32 = 280.0;
 const AGE_VALUE_WIDTH: f32 = 240.0;
+const MAX_CHARACTER_NAME_CHARS: usize = 16;
+const SELECTION_DRAG_SUPPRESSION_SECONDS: f64 = 0.25;
+#[cfg(target_arch = "wasm32")]
+const MOBILE_NAME_EDITOR_ID: &str = "arcana-name-editor";
+#[cfg(target_arch = "wasm32")]
+const MOBILE_NAME_INPUT_ID: &str = "arcana-character-name";
+
+#[derive(Component, Clone, Copy)]
+pub enum CreationLayoutNode {
+    CharacterScreen,
+    CharacterTitle,
+    CharacterContent,
+    IdentityColumn,
+    AttributesColumn,
+    CharacterFooter,
+    SelectionTitle,
+    SelectionWrapper,
+    SelectionViewport {
+        center_cards: bool,
+    },
+    SelectionCard,
+    SelectionFooter,
+}
+
+#[derive(Resource, Default)]
+pub struct SelectionGestureState {
+    suppress_click_until: f64,
+}
+
+impl SelectionGestureState {
+    /// Suppresses selection clicks briefly after a card drag.
+    fn suppress_after_drag(&mut self, now: f64) {
+        self.suppress_click_until = now + SELECTION_DRAG_SUPPRESSION_SECONDS;
+    }
+
+    /// Returns whether a drag should still block the synthetic release click.
+    fn suppresses_click(&self, now: f64) -> bool {
+        now < self.suppress_click_until
+    }
+}
 
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
 pub struct SexButton(pub Sex);
 
 #[derive(Component)]
 pub struct CharacterNameText;
+
+#[derive(Component)]
+struct CharacterNameField;
 
 #[derive(Component, Clone, Copy)]
 pub enum AttributeAction {
@@ -183,7 +226,22 @@ fn on_sex_button_click(
     }
 }
 
-/// Handles name input.
+/// Appends valid characters without exceeding the character-name limit.
+fn append_character_name_text(name: &mut String, input: &str) {
+    let remaining = MAX_CHARACTER_NAME_CHARS.saturating_sub(name.chars().count());
+    name.extend(sanitize_character_name(input).chars().take(remaining));
+}
+
+/// Filters browser text input to the character-name contract.
+fn sanitize_character_name(input: &str) -> String {
+    input
+        .chars()
+        .filter(|character| character.is_alphanumeric() || *character == ' ')
+        .take(MAX_CHARACTER_NAME_CHARS)
+        .collect()
+}
+
+/// Handles keyboard name input on native and hardware-keyboard web sessions.
 pub fn handle_name_input(
     mut events: MessageReader<KeyboardInput>,
     mut player: ResMut<Player>,
@@ -197,22 +255,17 @@ pub fn handle_name_input(
 
         match &event.logical_key {
             Key::Character(c) => {
-                // limit name to 16 characters
-                if player.name.len() < 16 {
-                    // Only allow alphanumeric characters or spaces
-                    if c.chars().all(|ch| ch.is_alphanumeric() || ch == ' ') {
-                        player.name.push_str(c);
-                        changed = true;
-                    }
-                }
+                let old_len = player.name.len();
+                append_character_name_text(&mut player.name, c);
+                changed |= player.name.len() != old_len;
             },
             Key::Backspace => {
-                player.name.pop();
-                changed = true;
+                changed |= player.name.pop().is_some();
             },
-            Key::Space if player.name.len() < 16 => {
-                player.name.push(' ');
-                changed = true;
+            Key::Space => {
+                let old_len = player.name.len();
+                append_character_name_text(&mut player.name, " ");
+                changed |= player.name.len() != old_len;
             },
             _ => {},
         }
@@ -223,6 +276,102 @@ pub fn handle_name_input(
             text.0 = player.name.clone();
         }
     }
+}
+
+/// Opens the browser's native character-name editor after tapping the name field.
+fn on_character_name_field_click(_: On<Pointer<Click>>, player: Res<Player>) {
+    #[cfg(target_arch = "wasm32")]
+    {
+        use wasm_bindgen::JsCast;
+
+        let Some(document) = web_sys::window().and_then(|window| window.document()) else {
+            return;
+        };
+        let Some(editor) = document.get_element_by_id(MOBILE_NAME_EDITOR_ID) else {
+            return;
+        };
+        let Some(input) = document
+            .get_element_by_id(MOBILE_NAME_INPUT_ID)
+            .and_then(|element| element.dyn_into::<web_sys::HtmlInputElement>().ok())
+        else {
+            return;
+        };
+
+        input.set_value(&player.name);
+        let _ = editor.remove_attribute("hidden");
+        let _ = input.focus();
+        input.select();
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    let _ = player;
+}
+
+/// Synchronizes the browser text field into the Bevy player and label.
+#[cfg(target_arch = "wasm32")]
+pub fn sync_mobile_name_input(
+    mut player: ResMut<Player>,
+    mut text_q: Query<&mut Text, With<CharacterNameText>>,
+) {
+    use wasm_bindgen::JsCast;
+
+    let Some(input) = web_sys::window()
+        .and_then(|window| window.document())
+        .and_then(|document| document.get_element_by_id(MOBILE_NAME_INPUT_ID))
+        .and_then(|element| element.dyn_into::<web_sys::HtmlInputElement>().ok())
+    else {
+        return;
+    };
+
+    let browser_value = input.value();
+    let sanitized = sanitize_character_name(&browser_value);
+    if sanitized != browser_value {
+        input.set_value(&sanitized);
+    }
+    if sanitized == player.name {
+        return;
+    }
+
+    player.name.clone_from(&sanitized);
+    for mut text in &mut text_q {
+        text.0.clone_from(&sanitized);
+    }
+}
+
+/// No-op counterpart for native builds without an HTML text field.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn sync_mobile_name_input() {}
+
+/// Hides and unfocuses the browser character-name editor.
+#[cfg(target_arch = "wasm32")]
+pub fn close_mobile_name_editor() {
+    use wasm_bindgen::JsCast;
+
+    let Some(document) = web_sys::window().and_then(|window| window.document()) else {
+        return;
+    };
+    if let Some(input) = document
+        .get_element_by_id(MOBILE_NAME_INPUT_ID)
+        .and_then(|element| element.dyn_into::<web_sys::HtmlInputElement>().ok())
+    {
+        let _ = input.blur();
+    }
+    if let Some(editor) = document.get_element_by_id(MOBILE_NAME_EDITOR_ID) {
+        let _ = editor.set_attribute("hidden", "");
+    }
+}
+
+/// No-op counterpart for native builds without an HTML text field.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn close_mobile_name_editor() {}
+
+/// Marks a card drag so its release cannot activate the card.
+fn suppress_selection_click_after_drag(
+    _: On<Pointer<Drag>>,
+    time: Res<Time>,
+    mut gesture: ResMut<SelectionGestureState>,
+) {
+    gesture.suppress_after_drag(time.elapsed_secs_f64());
 }
 
 /// Handles attribute button click.
@@ -507,8 +656,9 @@ pub fn setup_character_creation(
     player: Res<Player>,
 ) {
     let lang = settings.language;
-    let (mut root_node, pickable) = add_root_node(true);
+    let (mut root_node, mut pickable) = add_root_node(true);
     root_node.justify_content = JustifyContent::FlexStart;
+    pickable.is_hoverable = true;
 
     commands
         .spawn((
@@ -521,18 +671,26 @@ pub fn setup_character_creation(
                 ..default()
             },
             MenuCmp,
+            CreationLayoutNode::CharacterScreen,
+            ScrollableContainer,
+            ScrollPosition::default(),
+            Interaction::default(),
+            bevy::ui::RelativeCursorPosition::default(),
         ))
         .with_children(|parent| {
             // Title container
             parent
-                .spawn(Node {
-                    margin: UiRect {
-                        top: percent(5.),
-                        bottom: percent(3.),
+                .spawn((
+                    Node {
+                        margin: UiRect {
+                            top: percent(5.),
+                            bottom: percent(3.),
+                            ..default()
+                        },
                         ..default()
                     },
-                    ..default()
-                })
+                    CreationLayoutNode::CharacterTitle,
+                ))
                 .with_children(|parent| {
                     parent.spawn((
                         add_text(
@@ -548,25 +706,31 @@ pub fn setup_character_creation(
 
             // Main container (Horizontal row with name selection on the left, attributes on the right)
             parent
-                .spawn(Node {
-                    width: percent(55.),
-                    height: percent(65.),
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_items: AlignItems::Center,
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        width: percent(55.),
+                        height: percent(65.),
+                        flex_direction: FlexDirection::Row,
+                        justify_content: JustifyContent::SpaceBetween,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    CreationLayoutNode::CharacterContent,
+                ))
                 .with_children(|parent| {
                     // Left Column: Name selection
                     parent
-                        .spawn(Node {
-                            width: percent(45.),
-                            height: percent(100.),
-                            flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::Center,
-                            justify_content: JustifyContent::Center,
-                            ..default()
-                        })
+                        .spawn((
+                            Node {
+                                width: percent(45.),
+                                height: percent(100.),
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
+                                ..default()
+                            },
+                            CreationLayoutNode::IdentityColumn,
+                        ))
                         .with_children(|parent| {
                             parent.spawn((
                                 add_text(
@@ -597,7 +761,14 @@ pub fn setup_character_creation(
                                     },
                                     BackgroundColor(NORMAL_BUTTON_COLOR),
                                     BorderColor::all(BUTTON_BORDER_COLOR),
+                                    Button,
+                                    Interaction::default(),
+                                    Pickable::default(),
+                                    CharacterNameField,
                                 ))
+                                .observe(cursor::<Over>(SystemCursorIcon::Text))
+                                .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                .observe(on_character_name_field_click)
                                 .with_children(|parent| {
                                     parent.spawn((
                                         add_text(
@@ -873,14 +1044,17 @@ pub fn setup_character_creation(
 
                     // Right Column: Attribute allocation
                     parent
-                        .spawn(Node {
-                            width: percent(45.),
-                            height: percent(100.),
-                            flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::Center,
-                            justify_content: JustifyContent::Center,
-                            ..default()
-                        })
+                        .spawn((
+                            Node {
+                                width: percent(45.),
+                                height: percent(100.),
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
+                                ..default()
+                            },
+                            CreationLayoutNode::AttributesColumn,
+                        ))
                         .with_children(|parent| {
                             // Points remaining
                             let current_sum = (player.strength
@@ -1013,14 +1187,17 @@ pub fn setup_character_creation(
 
             // Bottom Buttons (Back and Continue)
             parent
-                .spawn(Node {
-                    position_type: PositionType::Absolute,
-                    width: percent(100.),
-                    bottom: percent(4.),
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        width: percent(100.),
+                        bottom: percent(4.),
+                        flex_direction: FlexDirection::Row,
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    },
+                    CreationLayoutNode::CharacterFooter,
+                ))
                 .with_children(|parent| {
                     // Back button
                     spawn_menu_button(parent, MenuBtn::Back, &assets, &localization, lang);
@@ -1683,14 +1860,17 @@ pub fn setup_selection_screen<T: SelectionItem>(
         .with_children(|parent| {
             // Title container
             parent
-                .spawn(Node {
-                    margin: UiRect {
-                        top: percent(3.),
-                        bottom: percent(3.),
+                .spawn((
+                    Node {
+                        margin: UiRect {
+                            top: percent(3.),
+                            bottom: percent(3.),
+                            ..default()
+                        },
                         ..default()
                     },
-                    ..default()
-                })
+                    CreationLayoutNode::SelectionTitle,
+                ))
                 .with_children(|parent| {
                     parent.spawn((
                         add_text(
@@ -1707,14 +1887,17 @@ pub fn setup_selection_screen<T: SelectionItem>(
             // Scrollable card viewport. Four cards fit exactly; additional entries extend the
             // content width and reveal the draggable horizontal scrollbar.
             parent
-                .spawn(Node {
-                    width: percent(96.),
-                    height: percent(72.),
-                    position_type: PositionType::Relative,
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        width: percent(96.),
+                        height: percent(72.),
+                        position_type: PositionType::Relative,
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    CreationLayoutNode::SelectionWrapper,
+                ))
                 .with_children(|wrapper| {
                     let container_entity = wrapper
                         .spawn((
@@ -1738,6 +1921,9 @@ pub fn setup_selection_screen<T: SelectionItem>(
                             Interaction::default(),
                             Pickable::default(),
                             bevy::ui::RelativeCursorPosition::default(),
+                            CreationLayoutNode::SelectionViewport {
+                                center_cards,
+                            },
                         ))
                         .with_children(|parent| {
                             for item in items {
@@ -1771,6 +1957,7 @@ pub fn setup_selection_screen<T: SelectionItem>(
                                             ..default()
                                         },
                                         BackgroundColor(NORMAL_BUTTON_COLOR),
+                                        CreationLayoutNode::SelectionCard,
                                     ))
                                     .with_children(|parent| {
                                         parent
@@ -1868,6 +2055,7 @@ pub fn setup_selection_screen<T: SelectionItem>(
                                             .observe(reimage::<Out>(assets.image("border")))
                                             .observe(cursor::<Over>(SystemCursorIcon::Pointer))
                                             .observe(cursor::<Out>(SystemCursorIcon::Default))
+                                            .observe(suppress_selection_click_after_drag)
                                             .observe(
                                                 move |_: On<Pointer<Click>>,
                                                       mut player: ResMut<Player>,
@@ -1876,7 +2064,14 @@ pub fn setup_selection_screen<T: SelectionItem>(
                                                 >,
                                                       mut next_game_state: ResMut<
                                                     NextState<GameState>,
-                                                >| {
+                                                >,
+                                                      time: Res<Time>,
+                                                      gesture: Res<SelectionGestureState>| {
+                                                    if gesture.suppresses_click(
+                                                        time.elapsed_secs_f64(),
+                                                    ) {
+                                                        return;
+                                                    }
                                                     play_audio_msg
                                                         .write(PlayAudioMsg::new("button"));
 
@@ -1936,13 +2131,16 @@ pub fn setup_selection_screen<T: SelectionItem>(
             // Back button container centered horizontally at the bottom of the screen
             if has_back_button {
                 parent
-                    .spawn(Node {
-                        position_type: PositionType::Absolute,
-                        width: percent(100.),
-                        bottom: percent(3.),
-                        justify_content: JustifyContent::Center,
-                        ..default()
-                    })
+                    .spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            width: percent(100.),
+                            bottom: percent(3.),
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        },
+                        CreationLayoutNode::SelectionFooter,
+                    ))
                     .with_children(|parent| {
                         spawn_menu_button(parent, MenuBtn::Back, &assets, &localization, lang);
                     });
@@ -2511,6 +2709,28 @@ fn on_deity_choice_click(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Verifies browser and hardware-keyboard names share filtering and character limits.
+    #[test]
+    fn character_name_input_is_filtered_and_character_limited() {
+        assert_eq!(sanitize_character_name("Éowyn! 42"), "Éowyn 42");
+        assert_eq!(sanitize_character_name("abcdefghijklmnopq"), "abcdefghijklmnop");
+
+        let mut name = "Hero".to_string();
+        append_character_name_text(&mut name, " of Arcana! 123456789");
+        assert_eq!(name, "Hero of Arcana 1");
+        assert_eq!(name.chars().count(), MAX_CHARACTER_NAME_CHARS);
+    }
+
+    /// Verifies a release click is ignored briefly after dragging a selection card.
+    #[test]
+    fn selection_drag_suppresses_only_the_release_click_window() {
+        let mut gesture = SelectionGestureState::default();
+        gesture.suppress_after_drag(10.0);
+
+        assert!(gesture.suppresses_click(10.1));
+        assert!(!gesture.suppresses_click(10.3));
+    }
 
     /// Verifies every warrior calling selects a race- and sex-specific portrait.
     #[test]
