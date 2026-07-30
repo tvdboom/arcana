@@ -176,11 +176,20 @@ const COMBAT_IMAGE_PATHS: [(&str, &str); 5] = [
     ("combat_stance_disruptive", "images/combat/stance_disruptive.webp"),
 ];
 
+/// Records image paths without starting an asset request.
+struct DeferredImagePaths;
+
+impl DeferredImagePaths {
+    /// Returns an owned path for the deferred image registry.
+    fn load(&self, path: impl Into<String>) -> String {
+        path.into()
+    }
+}
+
 #[derive(Resource)]
 pub struct WorldAssets {
     pub audio: HashMap<&'static str, Handle<AudioSource>>,
     pub fonts: HashMap<&'static str, Handle<Font>>,
-    pub images: HashMap<&'static str, Handle<Image>>,
     asset_server: AssetServer,
     image_paths: HashMap<&'static str, String>,
     lazy_images: Mutex<HashMap<String, Handle<Image>>>,
@@ -211,10 +220,6 @@ impl WorldAssets {
     /// Performs the image operation.
     pub fn image(&self, name: impl Into<String>) -> Handle<Image> {
         let name = name.into();
-        if let Some(image) = self.images.get(name.as_str()) {
-            return image.clone();
-        }
-
         let path = self
             .image_paths
             .get(name.as_str())
@@ -274,7 +279,12 @@ impl FromWorld for WorldAssets {
             ("medium", assets.load("fonts/FiraMono-Medium.ttf")),
         ]);
 
-        let mut images: HashMap<&'static str, Handle<Image>> = HashMap::from([
+        // Keep the registration table path-only. Calling `AssetServer::load` for
+        // every portrait here decoded hundreds of unused textures during web startup.
+        let deferred_images = DeferredImagePaths;
+        let assets = &deferred_images;
+        let load_linear = |_: &DeferredImagePaths, path: &str| path.to_string();
+        let mut image_paths: HashMap<&'static str, String> = HashMap::from([
             // Icons
             ("mute", assets.load("images/icons/mute.webp")),
             ("sound", assets.load("images/icons/sound.webp")),
@@ -471,14 +481,12 @@ impl FromWorld for WorldAssets {
         ]);
 
         for (key, path) in COMBAT_IMAGE_PATHS {
-            images.insert(key, load_linear(assets, path));
+            image_paths.insert(key, load_linear(assets, path));
         }
 
         for (key, path) in expansion_portrait_paths() {
-            images.insert(leak_str(key), assets.load(path));
+            image_paths.insert(leak_str(key), assets.load(path));
         }
-
-        let mut image_paths = HashMap::new();
 
         for ability in all_abilities() {
             insert_image_aliases(
@@ -544,7 +552,6 @@ impl FromWorld for WorldAssets {
         Self {
             audio,
             fonts,
-            images,
             asset_server,
             image_paths,
             lazy_images: Mutex::new(HashMap::new()),

@@ -2,8 +2,9 @@
 //!
 //! itch.io's HTML channel limits uploads to ~1000 files, but `assets/` contains
 //! 25k+ files and rejects individual files over 200 MiB. Packing the assets into
-//! 190 MiB shards keeps us under both limits while
-//! the runtime [`PakAssetReader`](../asset_pak.rs) serves individual files back
+//! 32 MiB shards keeps us under both limits while limiting the memory cost if a
+//! web host ignores byte-range requests. The runtime
+//! [`PakAssetReader`](../asset_pak.rs) serves individual files back
 //! out of the shards (via seek-read on native, HTTP range requests on wasm).
 //!
 //! Run with:
@@ -28,8 +29,8 @@ use std::path::{Path, PathBuf};
 
 /// Magic marker stored at the very end of the archive.
 const MAGIC: &[u8; 8] = b"ARCPAK02";
-/// Leave enough headroom below itch.io's 200 MiB per-file limit.
-const SHARD_LIMIT: u64 = 190 * 1024 * 1024;
+/// Keeps full-response fallbacks small enough for memory-constrained mobile browsers.
+const SHARD_LIMIT: u64 = 32 * 1024 * 1024;
 
 struct Entry {
     /// Forward-slash path relative to the source root (e.g. `images/icons/gold.webp`).
