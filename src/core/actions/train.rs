@@ -77,9 +77,17 @@ pub fn setup_train_ui(
             card_ents = c;
         });
 
-        commands.entity(track_ent).observe(handle_train_slider_clicks_track);
+        commands
+            .entity(track_ent)
+            .observe(handle_train_slider_clicks_track)
+            .observe(handle_train_slider_drag)
+            .observe(handle_train_slider_release);
         for stage in stage_ents {
-            commands.entity(stage).observe(handle_train_slider_clicks);
+            commands
+                .entity(stage)
+                .observe(handle_train_slider_clicks)
+                .observe(handle_train_slider_drag)
+                .observe(handle_train_slider_release);
         }
         commands
             .entity(handle_ent)
@@ -126,9 +134,17 @@ pub fn update_train_ui(
                 card_ents = c;
             });
 
-            commands.entity(track_ent).observe(handle_train_slider_clicks_track);
+            commands
+                .entity(track_ent)
+                .observe(handle_train_slider_clicks_track)
+                .observe(handle_train_slider_drag)
+                .observe(handle_train_slider_release);
             for stage in stage_ents {
-                commands.entity(stage).observe(handle_train_slider_clicks);
+                commands
+                    .entity(stage)
+                    .observe(handle_train_slider_clicks)
+                    .observe(handle_train_slider_drag)
+                    .observe(handle_train_slider_release);
             }
             commands
                 .entity(handle_ent)
@@ -232,16 +248,21 @@ pub fn build_train_content_inner(
 
     // Top Row
     parent
-        .spawn(Node {
-            width: percent(100.),
-            height: Val::Px(75.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            position_type: PositionType::Relative,
-            margin: UiRect::bottom(Val::Px(10.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: Val::Px(75.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                position_type: PositionType::Relative,
+                margin: UiRect::bottom(Val::Px(10.)),
+                ..default()
+            },
+            PanelHeader {
+                has_slider: true,
+            },
+        ))
         .with_children(|parent| {
             // Left: Title
             parent.spawn((
@@ -252,6 +273,7 @@ pub fn build_train_content_inner(
                 },
                 add_text(localization.get("general.train", lang), "bold", 3.6, assets),
                 TextColor(crate::core::constants::BUTTON_TEXT_COLOR),
+                PanelTitle,
             ));
 
             // Center: Slider
@@ -275,14 +297,17 @@ pub fn build_train_content_inner(
 
             // Right: Active Stat, Gold, AP
             parent
-                .spawn(Node {
-                    position_type: PositionType::Absolute,
-                    right: Val::Px(30.),
-                    flex_direction: FlexDirection::Row,
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(20.),
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        right: Val::Px(30.),
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(20.),
+                        ..default()
+                    },
+                    PanelResources,
+                ))
                 .with_children(|parent| {
                     // Item 1: Active Stat
                     let (stat_icon, stat_val, stat_tooltip) = match slider_val {
@@ -386,16 +411,24 @@ pub fn build_train_content_inner(
 
     // Center Cards Row
     parent
-        .spawn(Node {
-            width: percent(100.),
-            height: percent(78.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            column_gap: Val::Px(20.),
-            margin: UiRect::top(Val::Px(15.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: percent(78.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(20.),
+                margin: UiRect::top(Val::Px(15.)),
+                ..default()
+            },
+            PanelCardRow,
+            ScrollableContainer,
+            HorizontalWheelScroll,
+            ScrollPosition::default(),
+            Interaction::default(),
+            bevy::ui::RelativeCursorPosition::default(),
+        ))
         .with_children(|parent| {
             // Card 1: Melee / Combat Training
             let title1 = localization.get("general.offense_training_title", lang);
@@ -542,6 +575,8 @@ pub fn handle_train_slider_release(
 /// Handles train card clicks.
 pub fn handle_train_card_clicks(
     event: On<Pointer<Click>>,
+    time: Res<Time>,
+    gesture: Res<crate::core::ui::creation::SelectionGestureState>,
     mut commands: Commands,
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
@@ -554,6 +589,9 @@ pub fn handle_train_card_clicks(
     settings: Res<Settings>,
     _next_game_state: ResMut<NextState<GameState>>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     if let Ok(marker) = card_q.get(event.entity) {
         let slider_val = slider_state.0;
         let ap_cost = 1;

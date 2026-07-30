@@ -129,16 +129,21 @@ pub fn build_rest_content_inner(
 
     // Top Row
     parent
-        .spawn(Node {
-            width: percent(100.),
-            height: Val::Px(75.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::SpaceBetween,
-            align_items: AlignItems::Center,
-            position_type: PositionType::Relative,
-            margin: UiRect::bottom(Val::Px(10.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: Val::Px(75.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::SpaceBetween,
+                align_items: AlignItems::Center,
+                position_type: PositionType::Relative,
+                margin: UiRect::bottom(Val::Px(10.)),
+                ..default()
+            },
+            PanelHeader {
+                has_slider: false,
+            },
+        ))
         .with_children(|parent| {
             // Left: Title
             parent.spawn((
@@ -149,18 +154,22 @@ pub fn build_rest_content_inner(
                 },
                 add_text(localization.get("rest", lang), "bold", 3.6, assets),
                 TextColor(crate::core::constants::BUTTON_TEXT_COLOR),
+                PanelTitle,
             ));
 
             // Right: Resources Display (AP + Gold)
             parent
-                .spawn(Node {
-                    position_type: PositionType::Absolute,
-                    right: Val::Px(30.),
-                    flex_direction: FlexDirection::Row,
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(15.),
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        right: Val::Px(30.),
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(15.),
+                        ..default()
+                    },
+                    PanelResources,
+                ))
                 .with_children(|parent| {
                     // Gold Display
                     parent
@@ -219,16 +228,24 @@ pub fn build_rest_content_inner(
 
     // Center Cards Row
     parent
-        .spawn(Node {
-            width: percent(100.),
-            height: percent(78.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            column_gap: Val::Px(20.),
-            margin: UiRect::top(Val::Px(15.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: percent(78.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(20.),
+                margin: UiRect::top(Val::Px(15.)),
+                ..default()
+            },
+            PanelCardRow,
+            ScrollableContainer,
+            HorizontalWheelScroll,
+            ScrollPosition::default(),
+            Interaction::default(),
+            bevy::ui::RelativeCursorPosition::default(),
+        ))
         .with_children(|parent| {
             // Card 1: Rough Rest (Costs 1 AP)
             let title1 = localization.get("rough_rest", lang);
@@ -309,6 +326,7 @@ pub fn spawn_rest_card_ui<M: Component>(
                 ..default()
             },
             BackgroundColor(crate::core::constants::NORMAL_BUTTON_COLOR),
+            PanelCard,
         ))
         .with_children(|parent| {
             parent
@@ -471,6 +489,8 @@ pub fn spawn_rest_card_ui<M: Component>(
 /// Handles rest card clicks.
 pub fn handle_rest_card_clicks(
     event: On<Pointer<Click>>,
+    time: Res<Time>,
+    gesture: Res<crate::core::ui::creation::SelectionGestureState>,
     mut commands: Commands,
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
@@ -482,6 +502,9 @@ pub fn handle_rest_card_clicks(
     settings: Res<Settings>,
     _next_game_state: ResMut<NextState<GameState>>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     if let Ok(marker) = card_q.get(event.entity) {
         let lang = settings.language;
         let toast = toast_container_q.single().unwrap();

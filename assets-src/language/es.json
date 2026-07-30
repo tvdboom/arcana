@@ -84,6 +84,7 @@
   "combat.stance_defensive_desc": "Inflige un 16% menos con ataques básicos y recibe un 16% menos de daño. Guardia tiene una ventana de parada perfecta mayor.",
   "combat.stance_disruptive": "Disruptiva",
   "combat.stance_disruptive_desc": "Los ataques básicos infligen un 22% menos de daño, pero 16 de Estabilidad para quebrar lanzamientos.",
+  "combat.stance_disruptive_pvp_desc": "Los ataques básicos infligen un 22% menos de daño, pero cada golpe retrasa 0,45 segundos todas las habilidades del oponente.",
   "combat.stance_precise": "Precisa",
   "combat.stance_precise_desc": "Ataca un 10% más lento e inflige un 5% menos de daño, pero obtiene un 18% de crítico. Cada golpe inflige 7 de Estabilidad.",
   "combat.target_pet": "Mascota",

@@ -49,6 +49,18 @@ pub struct LevelUpPerkChoiceBtn(pub usize);
 #[derive(Component)]
 pub struct LevelUpConfirmBtn;
 
+#[derive(Component, Clone, Copy)]
+pub enum LevelUpLayoutNode {
+    Overlay,
+    Panel,
+    Content,
+    Header,
+    Columns,
+    Attributes,
+    Choices,
+    Footer,
+}
+
 /// Performs the attr to idx operation.
 fn attr_to_idx(attr: Attribute) -> usize {
     match attr {
@@ -355,7 +367,7 @@ fn spawn_level_up_overlay(
             Node {
                 position_type: PositionType::Absolute,
                 width: Val::Vw(100.),
-                height: Val::VMin(100.),
+                height: Val::Vh(100.),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
@@ -368,6 +380,7 @@ fn spawn_level_up_overlay(
                 is_hoverable: true,
             },
             LevelUpOverlayCmp,
+            LevelUpLayoutNode::Overlay,
         ))
         .with_children(|parent| {
             // Main Panel - Made larger (Vw 88, Vh 96) with increased padding around panel to fit everything inside the background frame
@@ -388,30 +401,42 @@ fn spawn_level_up_overlay(
                         ..default()
                     },
                     ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
+                    LevelUpLayoutNode::Panel,
+                    crate::core::ui::scrollbar::ScrollableContainer,
+                    ScrollPosition::default(),
+                    Interaction::default(),
+                    Pickable::default(),
+                    bevy::ui::RelativeCursorPosition::default(),
                 ))
                 .with_children(|parent| {
                     // Main Content Area (not header/title)
                     parent
-                        .spawn(Node {
-                            flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::Stretch,
-                            flex_grow: 1.0,
-                            row_gap: Val::Px(12.),
-                            ..default()
-                        })
+                        .spawn((
+                            Node {
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::Stretch,
+                                flex_grow: 1.0,
+                                row_gap: Val::Px(12.),
+                                ..default()
+                            },
+                            LevelUpLayoutNode::Content,
+                        ))
                         .with_children(|parent| {
                             // Header / Title moved down inside content (added margin top to move it down significantly)
                             parent
-                                .spawn(Node {
-                                    flex_direction: FlexDirection::Column,
-                                    align_items: AlignItems::Center,
-                                    margin: UiRect {
-                                        top: Val::Px(64.),
-                                        bottom: Val::Px(16.),
+                                .spawn((
+                                    Node {
+                                        flex_direction: FlexDirection::Column,
+                                        align_items: AlignItems::Center,
+                                        margin: UiRect {
+                                            top: Val::Px(64.),
+                                            bottom: Val::Px(16.),
+                                            ..default()
+                                        },
                                         ..default()
                                     },
-                                    ..default()
-                                })
+                                    LevelUpLayoutNode::Header,
+                                ))
                                 .with_children(|parent| {
                                     parent.spawn((
                                         add_text(
@@ -430,22 +455,28 @@ fn spawn_level_up_overlay(
 
                             // Two-Column Grid Area (centered to reduce space between columns and move attributes to the right)
                             parent
-                                .spawn(Node {
-                                    flex_direction: FlexDirection::Row,
-                                    justify_content: JustifyContent::Center,
-                                    align_items: AlignItems::FlexStart,
-                                    flex_grow: 1.0,
-                                    column_gap: Val::Px(32.),
-                                    ..default()
-                                })
+                                .spawn((
+                                    Node {
+                                        flex_direction: FlexDirection::Row,
+                                        justify_content: JustifyContent::Center,
+                                        align_items: AlignItems::FlexStart,
+                                        flex_grow: 1.0,
+                                        column_gap: Val::Px(32.),
+                                        ..default()
+                                    },
+                                    LevelUpLayoutNode::Columns,
+                                ))
                                 .with_children(|parent| {
                                     parent
-                                        .spawn(Node {
-                                            width: percent(32.),
-                                            flex_direction: FlexDirection::Column,
-                                            row_gap: Val::Px(4.),
-                                            ..default()
-                                        })
+                                        .spawn((
+                                            Node {
+                                                width: percent(32.),
+                                                flex_direction: FlexDirection::Column,
+                                                row_gap: Val::Px(4.),
+                                                ..default()
+                                            },
+                                            LevelUpLayoutNode::Attributes,
+                                        ))
                                         .with_children(|parent| {
                                             parent.spawn((
                                                 add_text(
@@ -757,13 +788,16 @@ fn spawn_level_up_overlay(
 
                                     // --- RIGHT COLUMN: Abilities & Perks (Reduced width to 42% so cards fit within the background) ---
                                     parent
-                                        .spawn(Node {
-                                            width: percent(42.),
-                                            flex_direction: FlexDirection::Column,
-                                            row_gap: Val::Px(4.),
-                                            justify_content: JustifyContent::FlexStart,
-                                            ..default()
-                                        })
+                                        .spawn((
+                                            Node {
+                                                width: percent(42.),
+                                                flex_direction: FlexDirection::Column,
+                                                row_gap: Val::Px(4.),
+                                                justify_content: JustifyContent::FlexStart,
+                                                ..default()
+                                            },
+                                            LevelUpLayoutNode::Choices,
+                                        ))
                                         .with_children(|parent| {
                                             // --- Abilities Section (row_gap reduced from 8 to 4) ---
                                             if !level_up.ability_choices.is_empty() {
@@ -866,15 +900,18 @@ fn spawn_level_up_overlay(
                     };
 
                     parent
-                        .spawn(Node {
-                            flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::Center,
-                            row_gap: Val::Px(4.),
-                            height: Val::Px(70.), // Fixed height to prevent button shifting
-                            justify_content: JustifyContent::Center,
-                            margin: UiRect::bottom(Val::Px(48.)), // Move confirm button up more (from 32px to 48px)
-                            ..default()
-                        })
+                        .spawn((
+                            Node {
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::Center,
+                                row_gap: Val::Px(4.),
+                                height: Val::Px(70.),
+                                justify_content: JustifyContent::Center,
+                                margin: UiRect::bottom(Val::Px(48.)),
+                                ..default()
+                            },
+                            LevelUpLayoutNode::Footer,
+                        ))
                         .with_children(|parent| {
                             let bg_color = if confirm_ready {
                                 NORMAL_BUTTON_COLOR

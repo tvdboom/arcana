@@ -42,46 +42,30 @@
         #arcana-name-editor {
             position: fixed;
             z-index: 1000;
-            top: calc(env(safe-area-inset-top, 0px) + 72px);
+            top: 0;
             left: 50%;
-            width: min(90vw, 420px);
-            min-height: 52px;
-            padding: 7px;
+            width: 1px;
+            height: 1px;
             transform: translateX(-50%);
-            display: flex;
-            gap: 7px;
-            border: 2px solid rgb(216, 187, 117);
-            border-radius: 8px;
-            box-sizing: border-box;
-            background: rgba(25, 22, 30, 0.97);
-            box-shadow: 0 5px 24px rgba(0, 0, 0, 0.55);
-            touch-action: manipulation;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
         }
         #arcana-name-editor[hidden] {
             display: none;
         }
         #arcana-character-name {
-            min-width: 0;
-            flex: 1;
-            padding: 8px 10px;
-            border: 1px solid rgb(216, 187, 117);
-            border-radius: 5px;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            border: 0;
             outline: none;
-            color: white;
-            background: rgb(43, 39, 52);
+            color: transparent;
+            background: transparent;
             font: 16px system-ui, sans-serif;
-            touch-action: manipulation;
             -webkit-user-select: text;
             user-select: text;
-        }
-        #arcana-name-done {
-            padding: 8px 13px;
-            border: 1px solid rgb(216, 187, 117);
-            border-radius: 5px;
-            color: white;
-            background: rgb(74, 62, 82);
-            font: 600 16px system-ui, sans-serif;
-            touch-action: manipulation;
         }
         .loader {
             border: 16px solid #f3f3f3;
@@ -120,7 +104,6 @@
         aria-label="Character name"
         placeholder="Character name"
     />
-    <button id="arcana-name-done" type="button">Done</button>
 </div>
 <script type="module">
     import init from './arcana.js';
@@ -128,12 +111,10 @@
 
     const nameEditor = document.querySelector('#arcana-name-editor');
     const nameInput = document.querySelector('#arcana-character-name');
-    const nameDone = document.querySelector('#arcana-name-done');
     const closeNameEditor = () => {
         nameInput.blur();
         nameEditor.hidden = true;
     };
-    nameDone.addEventListener('click', closeNameEditor);
     nameInput.addEventListener('keydown', (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();

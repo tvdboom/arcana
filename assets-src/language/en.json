@@ -84,6 +84,7 @@
   "combat.stance_defensive_desc": "Deal 16% less basic-attack damage and take 16% less damage. Guard has a wider perfect-parry window.",
   "combat.stance_disruptive": "Disruptive",
   "combat.stance_disruptive_desc": "Basic attacks deal 22% less damage but inflict 16 Stability damage, rapidly breaking telegraphed casts.",
+  "combat.stance_disruptive_pvp_desc": "Basic attacks deal 22% less damage, but each hit delays all of the opponent's abilities by 0.45 seconds.",
   "combat.stance_precise": "Precise",
   "combat.stance_precise_desc": "Attack 10% slower and deal 5% less damage, but gain 18% critical chance. Each hit deals 7 Stability damage.",
   "combat.target_pet": "Pet",

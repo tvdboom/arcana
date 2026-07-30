@@ -15,6 +15,7 @@ use crate::core::menu::utils::{add_root_node, add_text, recolor};
 use crate::core::player::Player;
 use crate::core::races::Mutation;
 use crate::core::settings::Settings;
+use crate::core::ui::utils::ResponsiveOverlayCard;
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 
@@ -132,6 +133,10 @@ fn setup_mutation_overlay(
                     },
                     BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.72)),
                     BorderColor::all(BUTTON_BORDER_COLOR),
+                    ResponsiveOverlayCard {
+                        desktop_width: Val::Vw(64.),
+                        desktop_height: Val::Auto,
+                    },
                 ))
                 .with_children(|parent| {
                     parent.spawn((

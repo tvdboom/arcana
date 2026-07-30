@@ -12,6 +12,7 @@ use crate::core::player::Player;
 use crate::core::settings::Language;
 use crate::core::ui::button::spawn_action_button;
 use crate::core::ui::playing::{unequip_item, EquipSlot};
+use crate::core::ui::utils::ResponsiveOverlayCard;
 use crate::core::utils::cursor;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -105,6 +106,10 @@ pub fn spawn_modal(
                     ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
                     Interaction::default(),
                     Pickable::default(),
+                    ResponsiveOverlayCard {
+                        desktop_width: Val::VMin(85.0),
+                        desktop_height: Val::VMin(40.0),
+                    },
                 ))
                 .observe(|mut ev: On<Pointer<Click>>| {
                     ev.propagate(false);

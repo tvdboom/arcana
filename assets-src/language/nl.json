@@ -84,6 +84,7 @@
   "combat.stance_defensive_desc": "Doe 16% minder basisaanvalschade en ontvang 16% minder schade. Blokkeren heeft een ruimer perfect pareervenster.",
   "combat.stance_disruptive": "Ontregelend",
   "combat.stance_disruptive_desc": "Basisaanvallen doen 22% minder schade, maar 16 Stabiliteitsschade om aangekondigde aanvallen snel te breken.",
+  "combat.stance_disruptive_pvp_desc": "Basisaanvallen doen 22% minder schade, maar elke treffer vertraagt alle vaardigheden van de tegenstander met 0,45 seconde.",
   "combat.stance_precise": "Nauwkeurig",
   "combat.stance_precise_desc": "Val 10% langzamer aan en doe 5% minder schade, maar krijg 18% kritieke kans. Elke treffer doet 7 Stabiliteitsschade.",
   "combat.target_pet": "Huisdier",

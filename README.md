@@ -8,12 +8,12 @@
 <br><br>
 </div>
 
-<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s1.png?raw=true" alt="scenery1">
-<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s2.png?raw=true" alt="scenery2">
-<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s3.png?raw=true" alt="scenery3">
-<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s4.png?raw=true" alt="scenery4">
-<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s5.png?raw=true" alt="scenery4">
-<img src="https://github.com/tvdboom/arcana/blob/master/assets-src/images/bg/s6.png?raw=true" alt="scenery4">
+<img src="images/s1.png" alt="Arcana race selection">
+<img src="images/s2.png" alt="Arcana main playing screen">
+<img src="images/s3.png" alt="Arcana study action">
+<img src="images/s4.png" alt="Arcana shop">
+<img src="images/s5.png" alt="Arcana PvP combat">
+<img src="images/s6.png" alt="Arcana monster combat">
 
 <br>
 

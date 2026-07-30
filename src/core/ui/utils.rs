@@ -5,12 +5,46 @@ use crate::core::localization::Localization;
 use crate::core::menu::utils::add_text;
 use crate::core::settings::Language;
 use crate::core::states::{is_panel_state, GameState};
+pub use crate::core::ui::scrollbar::{HorizontalWheelScroll, ScrollableContainer};
 use crate::core::utils::cursor;
 use bevy::prelude::*;
 use bevy::window::SystemCursorIcon;
 
 #[derive(Component)]
 pub struct PanelCmp;
+
+#[derive(Component, Clone, Copy)]
+pub struct PanelHeader {
+    pub has_slider: bool,
+}
+
+#[derive(Component)]
+pub struct PanelTitle;
+
+#[derive(Component)]
+pub struct PanelResources;
+
+#[derive(Component)]
+pub struct PanelIntensitySlider;
+
+#[derive(Component)]
+pub struct PanelCardRow;
+
+#[derive(Component)]
+pub struct PanelCard;
+
+#[derive(Component, Clone, Copy)]
+pub struct ResponsiveOverlayCard {
+    pub desktop_width: Val,
+    pub desktop_height: Val,
+}
+
+#[derive(Component, Clone, Copy)]
+pub struct ResponsiveSettingsPanel {
+    pub desktop_width: Val,
+    pub desktop_height: Val,
+    pub desktop_max_width: Val,
+}
 
 #[derive(Component)]
 pub struct PlayScreenColumns2And3;
@@ -147,6 +181,9 @@ pub fn spawn_panel_base(
                     should_block_lower: true,
                     is_hoverable: true,
                 },
+                ScrollableContainer,
+                ScrollPosition::default(),
+                bevy::ui::RelativeCursorPosition::default(),
                 GlobalZIndex(910),
                 PanelCmp,
             ))
@@ -209,20 +246,23 @@ pub fn spawn_intensity_slider<
     let mut handle_id = Entity::PLACEHOLDER;
 
     parent
-        .spawn(Node {
-            width: Val::Px(SLIDER_WIDTH),
-            height: Val::Px(68.),
-            position_type: PositionType::Relative,
-            flex_direction: FlexDirection::Column,
-            align_items: AlignItems::Center,
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: Val::Px(SLIDER_WIDTH),
+                height: Val::Px(76.),
+                position_type: PositionType::Relative,
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            PanelIntensitySlider,
+        ))
         .with_children(|parent| {
             track_id = parent
                 .spawn((
                     Node {
                         width: Val::Px(SLIDER_WIDTH),
-                        height: Val::Px(30.),
+                        height: Val::Px(44.),
                         position_type: PositionType::Relative,
                         align_items: AlignItems::Center,
                         ..default()
@@ -240,7 +280,7 @@ pub fn spawn_intensity_slider<
                         Node {
                             position_type: PositionType::Absolute,
                             left: Val::Px(0.),
-                            top: Val::Px(12.),
+                            top: Val::Px(19.),
                             width: percent(100.),
                             height: Val::Px(6.),
                             border_radius: BorderRadius::all(Val::Px(3.)),
@@ -256,7 +296,7 @@ pub fn spawn_intensity_slider<
                             Node {
                                 position_type: PositionType::Absolute,
                                 left: Val::Px(notch_x - 2.),
-                                top: Val::Px(5.),
+                                top: Val::Px(12.),
                                 width: Val::Px(4.),
                                 height: Val::Px(20.),
                                 border_radius: BorderRadius::all(Val::Px(2.)),
@@ -290,7 +330,7 @@ pub fn spawn_intensity_slider<
                                     left: Val::Px(left),
                                     top: Val::Px(0.),
                                     width: Val::Px(width),
-                                    height: Val::Px(30.),
+                                    height: Val::Px(44.),
                                     ..default()
                                 },
                                 Button,
@@ -312,7 +352,7 @@ pub fn spawn_intensity_slider<
                                 position_type: PositionType::Absolute,
                                 width: Val::Px(24.),
                                 height: Val::Px(24.),
-                                top: Val::Px(3.),
+                                top: Val::Px(10.),
                                 left: Val::Px(initial_frac * SLIDER_WIDTH - 12.),
                                 border: UiRect::all(Val::Px(2.)),
                                 border_radius: BorderRadius::all(Val::Px(12.)),
@@ -336,7 +376,7 @@ pub fn spawn_intensity_slider<
                 .spawn((
                     Node {
                         position_type: PositionType::Absolute,
-                        top: Val::Px(34.),
+                        top: Val::Px(50.),
                         left: Val::Px(initial_frac * SLIDER_WIDTH - SLIDER_VALUE_WIDTH / 2.),
                         width: Val::Px(SLIDER_VALUE_WIDTH),
                         justify_content: JustifyContent::Center,
@@ -389,6 +429,7 @@ pub fn spawn_card_ui<M: Component>(
                 ..default()
             },
             BackgroundColor(crate::core::constants::NORMAL_BUTTON_COLOR),
+            PanelCard,
         ))
         .with_children(|parent| {
             parent

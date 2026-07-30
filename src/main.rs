@@ -61,6 +61,10 @@ fn main() {
                     position: WindowPosition::Automatic,
                     resolution: WindowResolution::new(1600, 900),
 
+                    // Reuse the page's canvas so a transparent placeholder cannot
+                    // intercept mobile pointer and touch input.
+                    canvas: Some("#arcana".into()),
+
                     // Tells Wasm to resize the window according to the available canvas
                     fit_canvas_to_parent: true,
 

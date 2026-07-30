@@ -384,16 +384,21 @@ fn build_quest_content_inner(
     let mut card_ents = Vec::new();
 
     parent
-        .spawn(Node {
-            width: percent(100.),
-            height: Val::Px(75.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            position_type: PositionType::Relative,
-            margin: UiRect::bottom(Val::Px(10.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: Val::Px(75.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                position_type: PositionType::Relative,
+                margin: UiRect::bottom(Val::Px(10.)),
+                ..default()
+            },
+            PanelHeader {
+                has_slider: false,
+            },
+        ))
         .with_children(|parent| {
             parent.spawn((
                 Node {
@@ -403,6 +408,7 @@ fn build_quest_content_inner(
                 },
                 add_text(localization.get("quest", lang), "bold", 3.6, assets),
                 TextColor(crate::core::constants::BUTTON_TEXT_COLOR),
+                PanelTitle,
             ));
 
             parent
@@ -418,6 +424,7 @@ fn build_quest_content_inner(
                     Interaction::default(),
                     Pickable::default(),
                     InfoTooltip::ActionPoints,
+                    PanelResources,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
@@ -436,16 +443,24 @@ fn build_quest_content_inner(
         });
 
     parent
-        .spawn(Node {
-            width: percent(100.),
-            height: percent(78.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            column_gap: Val::Px(20.),
-            margin: UiRect::top(Val::Px(15.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: percent(78.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(20.),
+                margin: UiRect::top(Val::Px(15.)),
+                ..default()
+            },
+            PanelCardRow,
+            ScrollableContainer,
+            HorizontalWheelScroll,
+            ScrollPosition::default(),
+            Interaction::default(),
+            bevy::ui::RelativeCursorPosition::default(),
+        ))
         .with_children(|parent| {
             let title1 = localization.get("general.errand_title", lang);
             let desc1 = localization.get("general.errand_desc", lang);
@@ -509,6 +524,7 @@ fn spawn_quest_card(
                 ..default()
             },
             BackgroundColor(crate::core::constants::NORMAL_BUTTON_COLOR),
+            PanelCard,
         ))
         .with_children(|parent| {
             parent
@@ -635,6 +651,8 @@ fn spawn_quest_card(
 /// Handles quest card clicks.
 pub fn handle_quest_card_clicks(
     event: On<Pointer<Click>>,
+    time: Res<Time>,
+    gesture: Res<crate::core::ui::creation::SelectionGestureState>,
     mut commands: Commands,
     assets: Res<WorldAssets>,
     localization: Res<Localization>,
@@ -648,6 +666,9 @@ pub fn handle_quest_card_clicks(
     card_q: Query<&QuestCardMarker>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     let Ok(marker) = card_q.get(event.entity) else {
         return;
     };

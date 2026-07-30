@@ -673,8 +673,12 @@ pub struct CombatState {
     pub player_consumables: HashMap<String, usize>,
     pub enemy_consumables: HashMap<String, usize>,
     pub stance: CombatStance,
+    pub enemy_stance: CombatStance,
+    pub is_pvp: bool,
     pub guard_remaining: f32,
     pub perfect_guard_remaining: f32,
+    pub enemy_guard_remaining: f32,
+    pub enemy_perfect_guard_remaining: f32,
     pub enemy_poise: f32,
     pub enemy_max_poise: f32,
     pub enemy_break_remaining: f32,
@@ -701,6 +705,15 @@ pub struct CombatState {
 }
 
 impl CombatState {
+    /// Returns the stance owned by a player-controlled combatant.
+    fn combatant_stance(&self, who: Who) -> Option<CombatStance> {
+        match who {
+            Who::Player => Some(self.stance),
+            Who::Enemy if self.is_pvp => Some(self.enemy_stance),
+            Who::Pet | Who::Enemy | Who::EnemyPet => None,
+        }
+    }
+
     /// Performs the xp reward operation.
     pub fn xp_reward(&self) -> u32 {
         if !self.player_won {
@@ -1021,7 +1034,12 @@ pub fn setup_combat_state(
         .and_then(|duel| duel.opponent.as_ref())
         .map(|opp| build_ability_slots(&opp.active_abilities))
         .unwrap_or_default();
-    let enemy_max_poise = 42.0 + monster.level as f32 * 4.0;
+    let is_pvp = opponent.is_some();
+    let enemy_max_poise = if is_pvp {
+        0.0
+    } else {
+        42.0 + monster.level as f32 * 4.0
+    };
     let enemy_tactics = opponent.is_none().then(|| EnemyTactics {
         archetype: monster.archetype,
         rotation: enemy_move_rotation(monster.archetype, monster.level),
@@ -1042,8 +1060,12 @@ pub fn setup_combat_state(
         player_consumables,
         enemy_consumables,
         stance: CombatStance::Aggressive,
+        enemy_stance: CombatStance::Aggressive,
+        is_pvp,
         guard_remaining: 0.0,
         perfect_guard_remaining: 0.0,
+        enemy_guard_remaining: 0.0,
+        enemy_perfect_guard_remaining: 0.0,
         enemy_poise: enemy_max_poise,
         enemy_max_poise,
         enemy_break_remaining: 0.0,
@@ -1260,11 +1282,9 @@ fn resolve_basic_attack(
         return Some((attack_style, AttackOutcome::Dodge));
     }
 
-    let stance_crit = if attacker == Who::Player {
-        state.stance.critical_chance_bonus()
-    } else {
-        0.0
-    };
+    let attacker_stance = state.combatant_stance(attacker);
+    let defender_stance = state.combatant_stance(defender);
+    let stance_crit = attacker_stance.map_or(0.0, CombatStance::critical_chance_bonus);
     let crit = rng.random_bool((crit_chance + extra_crit + stance_crit).clamp(0.0, 1.0) as f64);
 
     // Bleed: consume a one-shot bleed buff on the attacker for bonus damage.
@@ -1285,12 +1305,14 @@ fn resolve_basic_attack(
     let mut dmg =
         compute_damage(atk, def, crit, incoming_mult) * outgoing_multiplier * resistance_multiplier;
     dmg *= 1.0 + bonus_pct;
-    if attacker == Who::Player {
-        dmg *= state.stance.attack_damage_multiplier();
+    if let Some(stance) = attacker_stance {
+        dmg *= stance.attack_damage_multiplier();
     }
-    if defender == Who::Player {
-        dmg *= state.stance.incoming_damage_multiplier();
-        dmg = mitigate_with_guard(state, dmg, play_audio_msg);
+    if let Some(stance) = defender_stance {
+        dmg *= stance.incoming_damage_multiplier();
+    }
+    if matches!(defender, Who::Player | Who::Enemy) {
+        dmg = mitigate_with_guard(state, defender, dmg, play_audio_msg);
     }
 
     if let Some(d) = state.get_mut(defender) {
@@ -1307,7 +1329,9 @@ fn resolve_basic_attack(
         },
     });
 
-    if attacker == Who::Player {
+    if state.is_pvp && attacker_stance == Some(CombatStance::Disruptive) {
+        delay_pvp_ability_cooldowns(state, defender, CombatStance::Disruptive.pvp_cooldown_delay());
+    } else if attacker == Who::Player {
         let poise_damage = state.stance.poise_damage();
         if matches!(defender, Who::Enemy | Who::EnemyPet) {
             damage_enemy_poise(state, poise_damage, play_audio_msg);
@@ -1383,13 +1407,27 @@ fn side_of(who: Who) -> FxSide {
     }
 }
 
+/// Delays the defending PvP side's equipped abilities without using monster Stability.
+fn delay_pvp_ability_cooldowns(state: &mut CombatState, defender: Who, delay: f32) {
+    if !state.is_pvp || delay <= 0.0 {
+        return;
+    }
+    let slots = match defender {
+        Who::Player | Who::Pet => &mut state.abilities,
+        Who::Enemy | Who::EnemyPet => &mut state.enemy_abilities,
+    };
+    for slot in slots.iter_mut().filter(|slot| slot.key.is_some()) {
+        slot.remaining = (slot.remaining + delay).min(slot.cooldown);
+    }
+}
+
 /// Damages enemy Poise and triggers a vulnerable break when it is exhausted.
 fn damage_enemy_poise(
     state: &mut CombatState,
     amount: f32,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
 ) {
-    if state.enemy_break_remaining > 0.0 || !state.enemy.alive {
+    if state.is_pvp || state.enemy_break_remaining > 0.0 || !state.enemy.alive {
         return;
     }
     state.enemy_poise = (state.enemy_poise - amount.max(0.0)).max(0.0);
@@ -1428,22 +1466,41 @@ fn damage_enemy_poise(
     play_audio_msg.write(PlayAudioMsg::new("sword_clash"));
 }
 
-/// Reduces an incoming player hit when Guard is active and resolves perfect parries.
+/// Reduces an incoming guarded hit and resolves perfect parries for either PvP side.
 fn mitigate_with_guard(
     state: &mut CombatState,
+    defender: Who,
     damage: f32,
     play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
 ) -> f32 {
-    if state.guard_remaining <= 0.0 {
+    let (guard_remaining, perfect_remaining) = match defender {
+        Who::Player => (state.guard_remaining, state.perfect_guard_remaining),
+        Who::Enemy if state.is_pvp => {
+            (state.enemy_guard_remaining, state.enemy_perfect_guard_remaining)
+        },
+        Who::Pet | Who::Enemy | Who::EnemyPet => return damage,
+    };
+    if guard_remaining <= 0.0 {
         return damage;
     }
-    let perfect = state.perfect_guard_remaining > 0.0;
-    state.guard_remaining = 0.0;
-    state.perfect_guard_remaining = 0.0;
+    let perfect = perfect_remaining > 0.0;
+    match defender {
+        Who::Player => {
+            state.guard_remaining = 0.0;
+            state.perfect_guard_remaining = 0.0;
+        },
+        Who::Enemy => {
+            state.enemy_guard_remaining = 0.0;
+            state.enemy_perfect_guard_remaining = 0.0;
+        },
+        Who::Pet | Who::EnemyPet => {},
+    }
     if perfect {
-        damage_enemy_poise(state, PERFECT_GUARD_POISE_DAMAGE, play_audio_msg);
+        if defender == Who::Player {
+            damage_enemy_poise(state, PERFECT_GUARD_POISE_DAMAGE, play_audio_msg);
+        }
         state.fx.push(CombatFx {
-            side: FxSide::Player,
+            side: side_of(defender),
             text: state.parry_word.clone(),
             color: Color::srgb(1.0, 0.86, 0.35),
         });
@@ -1451,7 +1508,7 @@ fn mitigate_with_guard(
         damage * (1.0 - PERFECT_GUARD_DAMAGE_REDUCTION)
     } else {
         state.fx.push(CombatFx {
-            side: FxSide::Player,
+            side: side_of(defender),
             text: state.guard_word.clone(),
             color: Color::srgb(0.45, 0.75, 1.0),
         });
@@ -1892,7 +1949,7 @@ fn deal_enemy_move_damage(
         compute_damage(attack, defender.eff_defense(), false, defender.incoming_multiplier());
     if target == Who::Player {
         damage *= state.stance.incoming_damage_multiplier();
-        damage = mitigate_with_guard(state, damage, play_audio_msg);
+        damage = mitigate_with_guard(state, Who::Player, damage, play_audio_msg);
     }
     if let Some(defender) = state.get_mut(target) {
         defender.take_damage(damage);
@@ -2670,6 +2727,8 @@ pub fn step_combat(
 
     state.guard_remaining = (state.guard_remaining - dt).max(0.0);
     state.perfect_guard_remaining = (state.perfect_guard_remaining - dt).max(0.0);
+    state.enemy_guard_remaining = (state.enemy_guard_remaining - dt).max(0.0);
+    state.enemy_perfect_guard_remaining = (state.enemy_perfect_guard_remaining - dt).max(0.0);
     if state.enemy_break_remaining > 0.0 {
         state.enemy_break_remaining = (state.enemy_break_remaining - dt).max(0.0);
         if state.enemy_break_remaining <= 0.0 {
@@ -2756,11 +2815,9 @@ pub fn step_combat(
 
         for weapon_index in 0..num_weapons {
             let ready = {
-                let stance_speed = if attacker == Who::Player {
-                    state.stance.attack_speed_multiplier()
-                } else {
-                    1.0
-                };
+                let stance_speed = state
+                    .combatant_stance(attacker)
+                    .map_or(1.0, CombatStance::attack_speed_multiplier);
                 let Some(f) = state.get_mut(attacker) else {
                     continue;
                 };
@@ -3039,29 +3096,66 @@ pub fn guard_mana_cost(player_level: u32) -> f32 {
     player_level.max(1) as f32 * GUARD_MANA_COST_PER_LEVEL
 }
 
-/// Pays Guard's Mana cost and opens its short defensive window.
-fn begin_guard(state: &mut CombatState) -> bool {
-    let mana_cost = guard_mana_cost(state.player_level);
+/// Pays Guard's Mana cost and opens its short defensive window for one player side.
+fn begin_guard_for(state: &mut CombatState, who: Who) -> bool {
+    let (level, stance, guard_remaining) = match who {
+        Who::Player => (state.player_level, state.stance, state.guard_remaining),
+        Who::Enemy if state.is_pvp => {
+            (state.enemy_level, state.enemy_stance, state.enemy_guard_remaining)
+        },
+        Who::Pet | Who::Enemy | Who::EnemyPet => return false,
+    };
+    let mana_cost = guard_mana_cost(level);
+    let Some(fighter) = state.get(who) else {
+        return false;
+    };
     if state.status == CombatStatus::Over
         || state.paused
-        || !state.player.can_act()
-        || state.guard_remaining > 0.0
-        || state.player.mana < mana_cost
+        || !fighter.can_act()
+        || guard_remaining > 0.0
+        || fighter.mana < mana_cost
     {
         return false;
     }
-    state.player.mana -= mana_cost;
-    state.guard_remaining = GUARD_DURATION;
-    state.perfect_guard_remaining = state.stance.perfect_guard_window();
+    if let Some(fighter) = state.get_mut(who) {
+        fighter.mana -= mana_cost;
+    }
+    match who {
+        Who::Player => {
+            state.guard_remaining = GUARD_DURATION;
+            state.perfect_guard_remaining = stance.perfect_guard_window();
+        },
+        Who::Enemy => {
+            state.enemy_guard_remaining = GUARD_DURATION;
+            state.enemy_perfect_guard_remaining = stance.perfect_guard_window();
+        },
+        Who::Pet | Who::EnemyPet => {},
+    }
     true
 }
 
 /// Activates the player's short Guard window when its Mana cost can be paid.
-pub fn try_guard(state: &mut CombatState, play_audio_msg: &mut MessageWriter<PlayAudioMsg>) {
-    if !begin_guard(state) {
-        return;
+pub fn try_guard(
+    state: &mut CombatState,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) -> bool {
+    if !begin_guard_for(state, Who::Player) {
+        return false;
     }
     play_audio_msg.write(PlayAudioMsg::new("sword_clash"));
+    true
+}
+
+/// Activates the opposing PvP player's Guard on the authoritative host.
+pub fn enemy_try_guard(
+    state: &mut CombatState,
+    play_audio_msg: &mut MessageWriter<PlayAudioMsg>,
+) -> bool {
+    if !begin_guard_for(state, Who::Enemy) {
+        return false;
+    }
+    play_audio_msg.write(PlayAudioMsg::new("sword_clash"));
+    true
 }
 
 /// Switches the player's auto-attack stance without interrupting attack progress.
@@ -3463,7 +3557,9 @@ pub fn handle_combat_card_click(
                 commands.entity(entity).try_despawn();
             }
         },
-        CombatCard::Guard => try_guard(state, &mut play_audio_msg),
+        CombatCard::Guard => {
+            try_guard(state, &mut play_audio_msg);
+        },
         CombatCard::Stance(stance) => {
             set_combat_stance(state, stance, &mut play_audio_msg);
         },
@@ -4069,6 +4165,25 @@ pub fn update_combat_tactics_visuals(
         (
             Without<crate::core::combat::ui::AbilityCardImage>,
             Without<crate::core::combat::ui::CombatEnemyIntentImage>,
+            Without<crate::core::combat::ui::CombatEnemyTacticCard>,
+        ),
+    >,
+    mut enemy_tactic_card_q: Query<
+        (
+            &crate::core::combat::ui::CombatEnemyTacticCard,
+            &mut Node,
+            &mut BorderColor,
+            &mut BackgroundColor,
+            &mut ImageNode,
+        ),
+        (
+            Without<CombatCard>,
+            Without<crate::core::combat::ui::AbilityCardImage>,
+            Without<crate::core::combat::ui::CombatEnemyIntentImage>,
+            Without<crate::core::combat::ui::CombatPoiseFill>,
+            Without<crate::core::combat::ui::CombatPoiseBreakFill>,
+            Without<crate::core::combat::ui::CombatEnemyCastFill>,
+            Without<crate::core::combat::ui::CombatEnemyRecoveryFill>,
         ),
     >,
     mut intent_image_q: Query<
@@ -4160,49 +4275,43 @@ pub fn update_combat_tactics_visuals(
         match card {
             CombatCard::Guard => {
                 let affordable = state.player.mana >= guard_mana_cost(state.player_level);
-                image.color = if affordable {
-                    Color::WHITE
-                } else {
-                    Color::srgb(0.42, 0.42, 0.46)
-                };
-                node.border = UiRect::all(Val::Px(if state.guard_remaining > 0.0 {
-                    4.0
-                } else {
-                    2.0
-                }));
-                *border = BorderColor::all(if state.guard_remaining > 0.0 {
-                    Color::srgb(1.0, 0.82, 0.30)
-                } else {
-                    crate::core::constants::BUTTON_BORDER_COLOR
-                });
-                background.0 = if state.guard_remaining > 0.0 {
-                    Color::srgba(0.34, 0.21, 0.04, 0.96)
-                } else if !affordable {
-                    Color::srgba(0.03, 0.03, 0.04, 0.82)
-                } else {
-                    Color::srgba(0.05, 0.05, 0.08, 0.72)
-                };
+                style_guard_card(
+                    affordable,
+                    state.guard_remaining > 0.0,
+                    &mut node,
+                    &mut border,
+                    &mut background,
+                    &mut image,
+                );
             },
             CombatCard::Stance(stance) => {
                 let selected = *stance == state.stance;
-                node.border = UiRect::all(Val::Px(if selected {
-                    4.0
-                } else {
-                    2.0
-                }));
-                image.color = if selected {
-                    Color::WHITE
-                } else {
-                    Color::srgb(0.50, 0.50, 0.54)
-                };
-                *border = BorderColor::all(if selected {
-                    Color::srgb(1.0, 0.72, 0.22)
-                } else {
-                    crate::core::constants::BUTTON_BORDER_COLOR
-                });
-                background.0 = Color::srgba(0.05, 0.05, 0.08, 0.72);
+                style_stance_card(selected, &mut node, &mut border, &mut background, &mut image);
             },
             CombatCard::Ability(_) | CombatCard::Consumable(_) => {},
+        }
+    }
+    for (card, mut node, mut border, mut background, mut image) in &mut enemy_tactic_card_q {
+        match card {
+            crate::core::combat::ui::CombatEnemyTacticCard::Guard => {
+                style_guard_card(
+                    state.enemy.mana >= guard_mana_cost(state.enemy_level),
+                    state.enemy_guard_remaining > 0.0,
+                    &mut node,
+                    &mut border,
+                    &mut background,
+                    &mut image,
+                );
+            },
+            crate::core::combat::ui::CombatEnemyTacticCard::Stance(stance) => {
+                style_stance_card(
+                    *stance == state.enemy_stance,
+                    &mut node,
+                    &mut border,
+                    &mut background,
+                    &mut image,
+                );
+            },
         }
     }
 
@@ -4268,6 +4377,65 @@ pub fn update_combat_tactics_visuals(
     if let Ok(mut text) = cast_text_q.single_mut() {
         text.0 = cast_text;
     }
+}
+
+/// Applies affordability and active-window styling to a Guard card.
+fn style_guard_card(
+    affordable: bool,
+    active: bool,
+    node: &mut Node,
+    border: &mut BorderColor,
+    background: &mut BackgroundColor,
+    image: &mut ImageNode,
+) {
+    image.color = if affordable {
+        Color::WHITE
+    } else {
+        Color::srgb(0.42, 0.42, 0.46)
+    };
+    node.border = UiRect::all(Val::Px(if active {
+        4.0
+    } else {
+        2.0
+    }));
+    *border = BorderColor::all(if active {
+        Color::srgb(1.0, 0.82, 0.30)
+    } else {
+        crate::core::constants::BUTTON_BORDER_COLOR
+    });
+    background.0 = if active {
+        Color::srgba(0.34, 0.21, 0.04, 0.96)
+    } else if !affordable {
+        Color::srgba(0.03, 0.03, 0.04, 0.82)
+    } else {
+        Color::srgba(0.05, 0.05, 0.08, 0.72)
+    };
+}
+
+/// Applies selected or inactive styling to a combat stance card.
+fn style_stance_card(
+    selected: bool,
+    node: &mut Node,
+    border: &mut BorderColor,
+    background: &mut BackgroundColor,
+    image: &mut ImageNode,
+) {
+    node.border = UiRect::all(Val::Px(if selected {
+        4.0
+    } else {
+        2.0
+    }));
+    image.color = if selected {
+        Color::WHITE
+    } else {
+        Color::srgb(0.50, 0.50, 0.54)
+    };
+    *border = BorderColor::all(if selected {
+        Color::srgb(1.0, 0.72, 0.22)
+    } else {
+        crate::core::constants::BUTTON_BORDER_COLOR
+    });
+    background.0 = Color::srgba(0.05, 0.05, 0.08, 0.72);
 }
 
 /// Spawns floating text.
@@ -4956,6 +5124,7 @@ pub fn combat_tactic_tooltip_system(
                     CombatStance::Aggressive => "combat.stance_aggressive_desc",
                     CombatStance::Defensive => "combat.stance_defensive_desc",
                     CombatStance::Precise => "combat.stance_precise_desc",
+                    CombatStance::Disruptive if state.is_pvp => "combat.stance_disruptive_pvp_desc",
                     CombatStance::Disruptive => "combat.stance_disruptive_desc",
                 },
                 language,
@@ -5173,8 +5342,12 @@ mod tests {
             player_consumables: HashMap::new(),
             enemy_consumables: HashMap::new(),
             stance: CombatStance::Aggressive,
+            enemy_stance: CombatStance::Aggressive,
+            is_pvp: false,
             guard_remaining: 0.0,
             perfect_guard_remaining: 0.0,
+            enemy_guard_remaining: 0.0,
+            enemy_perfect_guard_remaining: 0.0,
             enemy_poise: 50.0,
             enemy_max_poise: 50.0,
             enemy_break_remaining: 0.0,
@@ -5202,6 +5375,63 @@ mod tests {
     }
 
     #[test]
+    /// Verifies duel combat resolves a distinct stance for each player-controlled side.
+    fn pvp_stances_are_side_specific() {
+        let mut state = test_combat_state();
+        state.is_pvp = true;
+        state.stance = CombatStance::Defensive;
+        state.enemy_stance = CombatStance::Precise;
+
+        assert_eq!(state.combatant_stance(Who::Player), Some(CombatStance::Defensive));
+        assert_eq!(state.combatant_stance(Who::Enemy), Some(CombatStance::Precise));
+        assert_eq!(state.combatant_stance(Who::Pet), None);
+        assert_eq!(state.combatant_stance(Who::EnemyPet), None);
+    }
+
+    #[test]
+    /// Verifies Disruptive delays either PvP side's abilities without a Stability resource.
+    fn pvp_disruptive_delays_opposing_ability_cooldowns() {
+        let slot = AbilitySlot {
+            key: Some("test ability".to_string()),
+            cooldown: 8.0,
+            remaining: 1.0,
+            mana_cost: 0,
+        };
+        let mut state = test_combat_state();
+        state.is_pvp = true;
+        state.enemy_poise = 0.0;
+        state.enemy_max_poise = 0.0;
+        state.abilities = vec![slot.clone()];
+        state.enemy_abilities = vec![slot];
+
+        delay_pvp_ability_cooldowns(
+            &mut state,
+            Who::Enemy,
+            CombatStance::Disruptive.pvp_cooldown_delay(),
+        );
+        delay_pvp_ability_cooldowns(
+            &mut state,
+            Who::Player,
+            CombatStance::Disruptive.pvp_cooldown_delay(),
+        );
+
+        assert_eq!(state.abilities[0].remaining, 1.45);
+        assert_eq!(state.enemy_abilities[0].remaining, 1.45);
+        assert_eq!(state.enemy_poise, 0.0);
+        assert_eq!(state.enemy_max_poise, 0.0);
+    }
+
+    #[test]
+    /// Verifies single-player monsters do not inherit the duel opponent's stance logic.
+    fn pve_enemy_has_no_player_stance() {
+        let mut state = test_combat_state();
+        state.enemy_stance = CombatStance::Defensive;
+
+        assert_eq!(state.combatant_stance(Who::Player), Some(CombatStance::Aggressive));
+        assert_eq!(state.combatant_stance(Who::Enemy), None);
+    }
+
+    #[test]
     /// Verifies Guard spends Mana and cannot activate when its cost is unavailable.
     fn guard_requires_and_spends_mana() {
         let mut state = test_combat_state();
@@ -5210,15 +5440,36 @@ mod tests {
         let starting_mana = state.player.mana;
         let mana_cost = guard_mana_cost(state.player_level);
 
-        assert!(begin_guard(&mut state));
+        assert!(begin_guard_for(&mut state, Who::Player));
         assert_eq!(state.player.mana, starting_mana - mana_cost);
         assert_eq!(state.guard_remaining, GUARD_DURATION);
 
         state.guard_remaining = 0.0;
         state.perfect_guard_remaining = 0.0;
         state.player.mana = mana_cost - 1.0;
-        assert!(!begin_guard(&mut state));
+        assert!(!begin_guard_for(&mut state, Who::Player));
         assert_eq!(state.guard_remaining, 0.0);
+    }
+
+    #[test]
+    /// Verifies a PvP opponent owns an independent Mana-funded Guard window.
+    fn pvp_enemy_guard_is_independent() {
+        let mut state = test_combat_state();
+        state.is_pvp = true;
+        state.enemy_level = 10;
+        state.enemy_stance = CombatStance::Defensive;
+        state.enemy.mana = 100.0;
+        let starting_mana = state.enemy.mana;
+
+        assert!(begin_guard_for(&mut state, Who::Enemy));
+        assert_eq!(state.enemy.mana, starting_mana - guard_mana_cost(state.enemy_level));
+        assert_eq!(state.enemy_guard_remaining, GUARD_DURATION);
+        assert_eq!(
+            state.enemy_perfect_guard_remaining,
+            CombatStance::Defensive.perfect_guard_window()
+        );
+        assert_eq!(state.guard_remaining, 0.0);
+        assert_eq!(state.perfect_guard_remaining, 0.0);
     }
 
     #[test]
@@ -5428,6 +5679,8 @@ mod tests {
         };
 
         let combat_weapons = player_combat_weapons(&player);
+        let speed_multiplier = player.attack_speed_multiplier();
+        let non_weapon_crit = player.non_weapon_crit_chance();
         assert_eq!(combat_weapons.len(), 2);
         assert!(
             (combat_weapons.iter().map(|weapon| weapon.attack).sum::<f32>()
@@ -5437,11 +5690,11 @@ mod tests {
         );
         for (combat_weapon, catalog_weapon) in combat_weapons.iter().zip(weapons) {
             assert!(
-                (combat_weapon.attack_speed - catalog_weapon.attack_speed * 1.1).abs()
+                (combat_weapon.attack_speed - catalog_weapon.attack_speed * speed_multiplier).abs()
                     < f32::EPSILON
             );
             assert!(
-                (combat_weapon.crit_chance - (catalog_weapon.crit_chance + 0.12)).abs()
+                (combat_weapon.crit_chance - (catalog_weapon.crit_chance + non_weapon_crit)).abs()
                     < f32::EPSILON
             );
         }

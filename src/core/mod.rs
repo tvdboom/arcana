@@ -67,7 +67,7 @@ use crate::core::combat::mechanics::{
     update_combat_speed_label, update_combat_tactics_visuals, update_combat_visuals, CombatSpeed,
     DuelActive,
 };
-use crate::core::combat::ui::setup_combat_ui;
+use crate::core::combat::ui::{setup_combat_ui, sync_enemy_combat_loadout};
 use crate::core::game_state::ShopUiState;
 use crate::core::localization::{update_localized_text, Localization};
 use crate::core::menu::buttons::MenuCmp;
@@ -84,7 +84,10 @@ use crate::core::ui::level_up::{apply_level_up_system, ApplyLevelUpMsg, LevelUpO
 use crate::core::ui::modal::{modal_input_system, ActiveModal};
 use crate::core::ui::playing::*;
 use crate::core::ui::responsive::{
-    touch_scroll_system, update_creation_responsive_layout, update_responsive_layout,
+    reset_playing_scroll_position, touch_scroll_system, update_craft_responsive_layout,
+    update_creation_responsive_layout, update_level_up_responsive_layout,
+    update_panel_responsive_layout, update_responsive_layout, update_responsive_typography,
+    update_shop_responsive_layout,
 };
 use crate::core::ui::scrollbar::{
     scroll_system, update_scrollbar_system, update_scrollbar_x_system,
@@ -207,10 +210,11 @@ impl Plugin for GamePlugin {
         for state in GameState::iter() {
             if !is_panel_state(state) {
                 app.add_systems(OnEnter(state), reset_cursor);
+            } else {
+                app.add_systems(OnEnter(state), reset_playing_scroll_position);
             }
         }
         app.add_systems(Update, start_new_game_message.run_if(not(in_state(AppState::Game))));
-
         app
             // Utilities
             .add_systems(
@@ -219,6 +223,11 @@ impl Plugin for GamePlugin {
                     check_keys_menu,
                     update_responsive_layout,
                     update_creation_responsive_layout,
+                    update_panel_responsive_layout,
+                    update_craft_responsive_layout,
+                    update_level_up_responsive_layout,
+                    update_shop_responsive_layout,
+                    update_responsive_typography,
                     touch_scroll_system,
                     apply_level_up_system,
                     modal_input_system,
@@ -458,6 +467,7 @@ impl Plugin for GamePlugin {
                     combat_tactic_tooltip_system,
                     info_tooltip_system,
                     sync_consumable_cards,
+                    sync_enemy_combat_loadout,
                     tooltip_follow_cursor_system,
                     right_column_tooltip_system,
                     equip_slot_tooltip_system,

@@ -116,9 +116,17 @@ pub fn setup_work_ui(
             card_ents = c;
         });
 
-        commands.entity(track_ent).observe(handle_work_slider_clicks_track);
+        commands
+            .entity(track_ent)
+            .observe(handle_work_slider_clicks_track)
+            .observe(handle_work_slider_drag)
+            .observe(handle_work_slider_release);
         for stage in stage_ents {
-            commands.entity(stage).observe(handle_work_slider_clicks);
+            commands
+                .entity(stage)
+                .observe(handle_work_slider_clicks)
+                .observe(handle_work_slider_drag)
+                .observe(handle_work_slider_release);
         }
         commands
             .entity(handle_ent)
@@ -165,9 +173,17 @@ pub fn update_work_ui(
                 card_ents = c;
             });
 
-            commands.entity(track_ent).observe(handle_work_slider_clicks_track);
+            commands
+                .entity(track_ent)
+                .observe(handle_work_slider_clicks_track)
+                .observe(handle_work_slider_drag)
+                .observe(handle_work_slider_release);
             for stage in stage_ents {
-                commands.entity(stage).observe(handle_work_slider_clicks);
+                commands
+                    .entity(stage)
+                    .observe(handle_work_slider_clicks)
+                    .observe(handle_work_slider_drag)
+                    .observe(handle_work_slider_release);
             }
             commands
                 .entity(handle_ent)
@@ -239,16 +255,21 @@ pub fn build_work_content_inner(
 
     // Top Row
     parent
-        .spawn(Node {
-            width: percent(100.),
-            height: Val::Px(75.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            position_type: PositionType::Relative,
-            margin: UiRect::bottom(Val::Px(10.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: Val::Px(75.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                position_type: PositionType::Relative,
+                margin: UiRect::bottom(Val::Px(10.)),
+                ..default()
+            },
+            PanelHeader {
+                has_slider: true,
+            },
+        ))
         .with_children(|parent| {
             // Left: Title
             parent.spawn((
@@ -259,6 +280,7 @@ pub fn build_work_content_inner(
                 },
                 add_text(localization.get("work", lang), "bold", 3.6, assets),
                 TextColor(crate::core::constants::BUTTON_TEXT_COLOR),
+                PanelTitle,
             ));
 
             // Center: Slider
@@ -303,6 +325,7 @@ pub fn build_work_content_inner(
                             Interaction::default(),
                             Pickable::default(),
                             crate::core::ui::playing::InfoTooltip::Gold,
+                            PanelResources,
                         ))
                         .with_children(|parent| {
                             parent.spawn((
@@ -353,16 +376,24 @@ pub fn build_work_content_inner(
 
     // Center Cards Row
     parent
-        .spawn(Node {
-            width: percent(100.),
-            height: percent(78.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            column_gap: Val::Px(20.),
-            margin: UiRect::top(Val::Px(15.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(100.),
+                height: percent(78.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                column_gap: Val::Px(20.),
+                margin: UiRect::top(Val::Px(15.)),
+                ..default()
+            },
+            PanelCardRow,
+            ScrollableContainer,
+            HorizontalWheelScroll,
+            ScrollPosition::default(),
+            Interaction::default(),
+            bevy::ui::RelativeCursorPosition::default(),
+        ))
         .with_children(|parent| {
             // Card 1: Clerical Labor
             let title1 = localization.get("clerical_labor_title", lang);

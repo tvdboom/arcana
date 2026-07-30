@@ -12,6 +12,7 @@ use crate::core::menu::utils::{add_text, recolor};
 use crate::core::player::Player;
 use crate::core::settings::{Language, Settings};
 use crate::core::states::GameState;
+use crate::core::ui::creation::SelectionGestureState;
 use crate::core::ui::level_up::LevelUpPending;
 use crate::core::ui::playing::{equip_item, name_with_level, InfoTooltip};
 use crate::core::ui::scrollbar::{
@@ -38,6 +39,12 @@ pub struct CraftItemSelection {
 
 #[derive(Component)]
 pub struct CraftContentWrapper;
+
+#[derive(Component)]
+pub struct CraftColumns;
+
+#[derive(Component, Clone, Copy)]
+pub struct CraftColumn(pub f32);
 
 #[derive(Component, Debug, Clone)]
 pub struct LeftArtifactBtn {
@@ -244,16 +251,21 @@ pub fn build_craft_content_inner(
 ) {
     // 1. Top row: stats
     parent
-        .spawn(Node {
-            width: Val::Percent(100.),
-            height: Val::Px(75.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            position_type: PositionType::Relative,
-            margin: UiRect::bottom(Val::Px(10.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: Val::Percent(100.),
+                height: Val::Px(75.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                position_type: PositionType::Relative,
+                margin: UiRect::bottom(Val::Px(10.)),
+                ..default()
+            },
+            PanelHeader {
+                has_slider: false,
+            },
+        ))
         .with_children(|parent| {
             // Left: Title
             parent.spawn((
@@ -264,18 +276,22 @@ pub fn build_craft_content_inner(
                 },
                 add_text(localization.get("craft", lang), "bold", 3.6, assets),
                 TextColor(BUTTON_TEXT_COLOR),
+                PanelTitle,
             ));
 
             // Right: Resources Display (Mana + Gold + AP)
             parent
-                .spawn(Node {
-                    position_type: PositionType::Absolute,
-                    right: Val::Px(30.),
-                    flex_direction: FlexDirection::Row,
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(15.),
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        right: Val::Px(30.),
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(15.),
+                        ..default()
+                    },
+                    PanelResources,
+                ))
                 .with_children(|parent| {
                     // Mana icon + text (Only total mana, no cost/total)
                     parent
@@ -363,15 +379,23 @@ pub fn build_craft_content_inner(
 
     // 2. Main Three-Column Layout
     parent
-        .spawn(Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(82.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::SpaceBetween,
-            column_gap: Val::Px(10.),
-            overflow: Overflow::clip(),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: Val::Percent(100.),
+                height: Val::Percent(82.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::SpaceBetween,
+                column_gap: Val::Px(10.),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            CraftColumns,
+            ScrollableContainer,
+            HorizontalWheelScroll,
+            ScrollPosition::default(),
+            Interaction::default(),
+            bevy::ui::RelativeCursorPosition::default(),
+        ))
         .with_children(|parent| {
             // --- LEFT COLUMN: Current Artifacts ---
             let mut col1_cmd = parent.spawn((
@@ -387,6 +411,7 @@ pub fn build_craft_content_inner(
                 },
                 BackgroundColor(Color::srgba_u8(10, 10, 20, 220)),
                 BorderColor::all(BUTTON_BORDER_COLOR),
+                CraftColumn(32.),
             ));
             col1_cmd.with_children(|parent| {
                 parent
@@ -646,6 +671,7 @@ pub fn build_craft_content_inner(
                 },
                 BackgroundColor(Color::srgba_u8(10, 10, 20, 220)),
                 BorderColor::all(BUTTON_BORDER_COLOR),
+                CraftColumn(34.),
             ));
             col2_cmd.with_children(|parent| {
                 let total_selected_price: u32 = selection
@@ -1070,6 +1096,7 @@ pub fn build_craft_content_inner(
                 },
                 BackgroundColor(Color::srgba_u8(10, 10, 20, 220)),
                 BorderColor::all(BUTTON_BORDER_COLOR),
+                CraftColumn(32.),
             ));
             col3_cmd.with_children(|parent| {
                 parent
@@ -1498,7 +1525,12 @@ pub fn handle_left_artifact_click(
     mut selection: ResMut<CraftSelection>,
     btn_q: Query<&LeftArtifactBtn>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    time: Res<Time>,
+    gesture: Res<SelectionGestureState>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     if let Ok(btn) = btn_q.get(event.entity) {
         selection.selected.push(btn.name.clone());
         play_audio_msg.write(PlayAudioMsg::new("click"));
@@ -1511,7 +1543,12 @@ pub fn handle_middle_artifact_click(
     mut selection: ResMut<CraftSelection>,
     btn_q: Query<&MiddleArtifactBtn>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    time: Res<Time>,
+    gesture: Res<SelectionGestureState>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     if let Ok(btn) = btn_q.get(event.entity) {
         if let Some(pos) = selection.selected.iter().position(|x| x == &btn.name) {
             selection.selected.remove(pos);
@@ -1528,7 +1565,12 @@ pub fn handle_craft_item_select(
     mut item_selection: ResMut<CraftItemSelection>,
     btn_q: Query<&CraftItemBtn>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    time: Res<Time>,
+    gesture: Res<SelectionGestureState>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     if let Ok(btn) = btn_q.get(event.entity) {
         if let Some(pos) = item_selection.items.iter().position(|x| x == &btn.item_name) {
             item_selection.items.remove(pos);

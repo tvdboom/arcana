@@ -13,6 +13,7 @@ use crate::core::player::Player;
 use crate::core::settings::Settings;
 use crate::core::states::{AppState, GameState};
 use crate::core::ui::toast::ToastContainer;
+use crate::core::ui::utils::ResponsiveSettingsPanel;
 #[derive(Message)]
 pub struct StartNewCharacterMsg;
 
@@ -101,14 +102,24 @@ pub fn setup_menu(
                     },
                     AppState::Settings => {
                         parent
-                            .spawn((Node {
-                                width: percent(90.),
-                                max_width: Val::VMin(72.),
-                                flex_direction: FlexDirection::Column,
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::Center,
-                                ..default()
-                            },))
+                            .spawn((
+                                Node {
+                                    width: percent(90.),
+                                    max_width: Val::VMin(72.),
+                                    flex_direction: FlexDirection::Column,
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::Center,
+                                    padding: UiRect::all(Val::VMin(2.78)),
+                                    ..default()
+                                },
+                                ImageNode::new(assets.image("banner_large"))
+                                    .with_mode(NodeImageMode::Stretch),
+                                ResponsiveSettingsPanel {
+                                    desktop_width: percent(90.),
+                                    desktop_height: Val::Auto,
+                                    desktop_max_width: Val::VMin(72.),
+                                },
+                            ))
                             .with_children(|parent| {
                                 spawn_label(
                                     parent,
@@ -336,6 +347,11 @@ pub fn setup_game_menu(
                         ..default()
                     },
                     ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
+                    ResponsiveSettingsPanel {
+                        desktop_width: Val::VMin(64.44),
+                        desktop_height: Val::VMin(75.56),
+                        desktop_max_width: Val::Auto,
+                    },
                 ))
                 .with_children(|parent| {
                     spawn_menu_button(parent, MenuBtn::Continue, &assets, &localization, lang);
@@ -417,6 +433,11 @@ pub fn setup_game_settings(
                         ..default()
                     },
                     ImageNode::new(assets.image("banner_large")).with_mode(NodeImageMode::Stretch),
+                    ResponsiveSettingsPanel {
+                        desktop_width: Val::VMin(64.44),
+                        desktop_height: Val::VMin(75.56),
+                        desktop_max_width: Val::Auto,
+                    },
                 ))
                 .with_children(|parent| {
                     spawn_label(

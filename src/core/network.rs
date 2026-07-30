@@ -22,10 +22,12 @@ use crate::core::assets::WorldAssets;
 use crate::core::audio::PlayAudioMsg;
 use crate::core::catalog::equipment::Equipment;
 use crate::core::combat::mechanics::{
-    consumable_card_order, enemy_cast_ability, enemy_use_consumable, step_combat, try_cast_ability,
-    try_use_consumable, CombatCard, CombatFx, CombatSpeed, CombatState, CombatStatus, Fighter,
-    FxSide, ABILITY_HOTKEYS, CONSUMABLE_HOTKEYS,
+    consumable_card_order, enemy_cast_ability, enemy_try_guard, enemy_use_consumable,
+    set_combat_stance, step_combat, try_cast_ability, try_guard, try_use_consumable, CombatCard,
+    CombatFx, CombatSpeed, CombatState, CombatStatus, Fighter, FxSide, ABILITY_HOTKEYS,
+    CONSUMABLE_HOTKEYS, GUARD_HOTKEY, STANCE_HOTKEYS,
 };
+use crate::core::combat::tactics::CombatStance;
 use crate::core::localization::Localization;
 use crate::core::monsters::{ActiveMonster, Monster, MonsterArchetype, MonsterKind};
 use crate::core::player::Player;
@@ -146,6 +148,16 @@ pub struct DuelSnapshot {
     pub host_ability_remaining: Vec<f32>,
     /// Remaining cooldowns for the client's active abilities.
     pub client_ability_remaining: Vec<f32>,
+    /// Host player's authoritative stance.
+    pub host_stance: CombatStance,
+    /// Client player's authoritative stance.
+    pub client_stance: CombatStance,
+    /// Remaining host Guard and perfect-Guard windows.
+    pub host_guard_remaining: f32,
+    pub host_perfect_guard_remaining: f32,
+    /// Remaining client Guard and perfect-Guard windows.
+    pub client_guard_remaining: f32,
+    pub client_perfect_guard_remaining: f32,
 }
 
 // ---------------------------------------------------------------------------
@@ -215,6 +227,10 @@ pub enum ClientMessage {
     CastAbility(String),
     /// Combat input: use the consumable with the given key.
     UseConsumable(String),
+    /// Combat input: switch the client's auto-attack stance.
+    SetStance(CombatStance),
+    /// Combat input: activate the client's Guard window.
+    Guard,
     /// Combat input: request pause / resume (ownership enforced by host).
     Pause(bool),
     /// A player declined the duel.
@@ -567,6 +583,18 @@ pub fn server_lobby_recv(
                         enemy_use_consumable(s, &key, &mut play_audio_msg);
                     }
                 },
+                ClientMessage::SetStance(stance) => {
+                    if let Some(s) = state.as_mut() {
+                        if s.status != CombatStatus::Over && !s.paused {
+                            s.enemy_stance = stance;
+                        }
+                    }
+                },
+                ClientMessage::Guard => {
+                    if let Some(s) = state.as_mut() {
+                        enemy_try_guard(s, &mut play_audio_msg);
+                    }
+                },
                 ClientMessage::Pause(p) => {
                     if let Some(s) = state.as_mut() {
                         set_pause(duel, s, p, DuelRole::Client, &mut server_send);
@@ -831,6 +859,15 @@ fn apply_snapshot(state: &mut CombatState, snap: &DuelSnapshot) {
     for (index, slot) in state.enemy_abilities.iter_mut().enumerate() {
         slot.remaining = snap.host_ability_remaining.get(index).copied().unwrap_or(0.0);
     }
+    let (local_stance, enemy_stance) = client_snapshot_stances(snap);
+    state.stance = local_stance;
+    state.enemy_stance = enemy_stance;
+    let (local_guard, local_perfect_guard, enemy_guard, enemy_perfect_guard) =
+        client_snapshot_guard_windows(snap);
+    state.guard_remaining = local_guard;
+    state.perfect_guard_remaining = local_perfect_guard;
+    state.enemy_guard_remaining = enemy_guard;
+    state.enemy_perfect_guard_remaining = enemy_perfect_guard;
     if snap.over {
         state.status = CombatStatus::Over;
         state.player_won = !snap.host_won;
@@ -849,6 +886,21 @@ fn apply_snapshot(state: &mut CombatState, snap: &DuelSnapshot) {
             color: Color::WHITE,
         });
     }
+}
+
+/// Returns the local and opposing stances from a client's snapshot perspective.
+fn client_snapshot_stances(snap: &DuelSnapshot) -> (CombatStance, CombatStance) {
+    (snap.client_stance, snap.host_stance)
+}
+
+/// Returns local and opposing Guard windows from a client's snapshot perspective.
+fn client_snapshot_guard_windows(snap: &DuelSnapshot) -> (f32, f32, f32, f32) {
+    (
+        snap.client_guard_remaining,
+        snap.client_perfect_guard_remaining,
+        snap.host_guard_remaining,
+        snap.host_perfect_guard_remaining,
+    )
 }
 
 /// Apply a pause/resume request, honouring the rule that only the player who
@@ -999,6 +1051,14 @@ pub fn duel_host_combat(
 
     // Host abilities / consumables (applied locally; the host is authoritative).
     if !state.paused {
+        if keyboard.just_pressed(GUARD_HOTKEY) {
+            try_guard(state, &mut play_audio_msg);
+        }
+        for (index, hotkey) in STANCE_HOTKEYS.iter().enumerate() {
+            if keyboard.just_pressed(*hotkey) {
+                set_combat_stance(state, CombatStance::ALL[index], &mut play_audio_msg);
+            }
+        }
         for (i, key) in ABILITY_HOTKEYS.iter().enumerate() {
             if keyboard.just_pressed(*key) {
                 try_cast_ability(state, i, &mut play_audio_msg);
@@ -1039,6 +1099,12 @@ pub fn duel_host_combat(
         fx_client,
         host_ability_remaining: state.abilities.iter().map(|slot| slot.remaining).collect(),
         client_ability_remaining: state.enemy_abilities.iter().map(|slot| slot.remaining).collect(),
+        host_stance: state.stance,
+        client_stance: state.enemy_stance,
+        host_guard_remaining: state.guard_remaining,
+        host_perfect_guard_remaining: state.perfect_guard_remaining,
+        client_guard_remaining: state.enemy_guard_remaining,
+        client_perfect_guard_remaining: state.enemy_perfect_guard_remaining,
     };
     server_send.write(ServerSendMsg::new(ServerMessage::Snapshot(snap), None));
 }
@@ -1077,6 +1143,12 @@ fn resolve_host_result(
                 .iter()
                 .map(|slot| slot.remaining)
                 .collect(),
+            host_stance: state.stance,
+            client_stance: state.enemy_stance,
+            host_guard_remaining: state.guard_remaining,
+            host_perfect_guard_remaining: state.perfect_guard_remaining,
+            client_guard_remaining: state.enemy_guard_remaining,
+            client_perfect_guard_remaining: state.enemy_perfect_guard_remaining,
         };
         server_send.write(ServerSendMsg::new(ServerMessage::Snapshot(snap), None));
 
@@ -1208,6 +1280,21 @@ pub fn duel_client_combat(
         return;
     }
 
+    // Stances: update immediately for responsive visuals and send the choice to the host.
+    if keyboard.just_pressed(GUARD_HOTKEY) && try_guard(state, &mut play_audio_msg) {
+        client_send.write(ClientSendMsg::new(ClientMessage::Guard));
+    }
+    for (index, hotkey) in STANCE_HOTKEYS.iter().enumerate() {
+        if keyboard.just_pressed(*hotkey) {
+            let stance = CombatStance::ALL[index];
+            let previous = state.stance;
+            set_combat_stance(state, stance, &mut play_audio_msg);
+            if state.stance != previous {
+                client_send.write(ClientSendMsg::new(ClientMessage::SetStance(stance)));
+            }
+        }
+    }
+
     // Abilities: forward to the host and optimistically show the cooldown.
     for (i, key) in ABILITY_HOTKEYS.iter().enumerate() {
         if keyboard.just_pressed(*key) {
@@ -1301,7 +1388,24 @@ pub fn duel_combat_card_click(
                 commands.entity(entity).try_despawn();
             }
         },
-        CombatCard::Guard | CombatCard::Stance(_) => {},
+        CombatCard::Stance(stance) => {
+            if duel.is_host() {
+                set_combat_stance(state, stance, &mut play_audio_msg);
+            } else {
+                let previous = state.stance;
+                set_combat_stance(state, stance, &mut play_audio_msg);
+                if state.stance != previous {
+                    client_send.write(ClientSendMsg::new(ClientMessage::SetStance(stance)));
+                }
+            }
+        },
+        CombatCard::Guard => {
+            if duel.is_host() {
+                try_guard(state, &mut play_audio_msg);
+            } else if try_guard(state, &mut play_audio_msg) {
+                client_send.write(ClientSendMsg::new(ClientMessage::Guard));
+            }
+        },
     }
 }
 
@@ -1408,5 +1512,41 @@ impl Plugin for NetworkPlugin {
             )
                 .run_if(in_state(GameState::Duel)),
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        client_snapshot_guard_windows, client_snapshot_stances, CombatStance, DuelSnapshot,
+    };
+
+    #[test]
+    /// Verifies a client maps authoritative host and client stances to its local perspective.
+    fn snapshot_stances_map_to_client_perspective() {
+        let snapshot = DuelSnapshot {
+            host_stance: CombatStance::Disruptive,
+            client_stance: CombatStance::Defensive,
+            ..Default::default()
+        };
+
+        assert_eq!(
+            client_snapshot_stances(&snapshot),
+            (CombatStance::Defensive, CombatStance::Disruptive)
+        );
+    }
+
+    #[test]
+    /// Verifies a client maps authoritative Guard windows to its local perspective.
+    fn snapshot_guard_windows_map_to_client_perspective() {
+        let snapshot = DuelSnapshot {
+            host_guard_remaining: 0.8,
+            host_perfect_guard_remaining: 0.2,
+            client_guard_remaining: 0.6,
+            client_perfect_guard_remaining: 0.1,
+            ..Default::default()
+        };
+
+        assert_eq!(client_snapshot_guard_windows(&snapshot), (0.6, 0.1, 0.8, 0.2));
     }
 }

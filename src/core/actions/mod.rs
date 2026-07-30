@@ -327,6 +327,8 @@ pub fn handle_playing_action_clicks(
 /// Handles work card clicks.
 pub fn handle_work_card_clicks(
     event: On<Pointer<Click>>,
+    time: Res<Time>,
+    gesture: Res<crate::core::ui::creation::SelectionGestureState>,
     mut commands: Commands,
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
@@ -337,6 +339,9 @@ pub fn handle_work_card_clicks(
     localization: Res<Localization>,
     settings: Res<Settings>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     if let Ok(marker) = card_q.get(event.entity) {
         let slider_val = slider_state.0;
         let ap_cost = slider_val + 1;
@@ -653,6 +658,8 @@ pub fn handle_work_card_clicks(
 /// Handles study card clicks.
 pub fn handle_study_card_clicks(
     event: On<Pointer<Click>>,
+    time: Res<Time>,
+    gesture: Res<crate::core::ui::creation::SelectionGestureState>,
     mut commands: Commands,
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
@@ -663,6 +670,9 @@ pub fn handle_study_card_clicks(
     localization: Res<Localization>,
     settings: Res<Settings>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     if let Ok(marker) = card_q.get(event.entity) {
         let slider_val = slider_state.0;
         let ap_cost = slider_val + 1;

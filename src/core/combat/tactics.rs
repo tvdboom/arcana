@@ -3,8 +3,9 @@
 use crate::core::catalog::abilities::Ability;
 use crate::core::catalog::effects::Effect;
 use crate::core::monsters::MonsterArchetype;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CombatStance {
     #[default]
     Aggressive,
@@ -88,6 +89,14 @@ impl CombatStance {
             Self::Defensive => 4.0,
             Self::Precise => 7.0,
             Self::Disruptive => 16.0,
+        }
+    }
+
+    /// Returns the PvP ability-cooldown delay inflicted by one basic attack.
+    pub const fn pvp_cooldown_delay(self) -> f32 {
+        match self {
+            Self::Disruptive => 0.45,
+            Self::Aggressive | Self::Defensive | Self::Precise => 0.0,
         }
     }
 
@@ -449,6 +458,7 @@ mod tests {
         assert!(CombatStance::Defensive.incoming_damage_multiplier() < 1.0);
         assert!(CombatStance::Precise.critical_chance_bonus() > 0.0);
         assert!(CombatStance::Disruptive.poise_damage() > CombatStance::Aggressive.poise_damage());
+        assert!(CombatStance::Disruptive.pvp_cooldown_delay() > 0.0);
     }
 
     #[test]

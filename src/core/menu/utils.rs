@@ -6,6 +6,9 @@ use std::fmt::Debug;
 use crate::core::assets::WorldAssets;
 use bevy::prelude::*;
 
+#[derive(Component, Clone, Copy)]
+pub struct ResponsiveText(pub f32);
+
 /// Change the background color of an entity
 pub fn recolor<E: Debug + Clone + Reflect>(
     color: Color,
@@ -50,7 +53,7 @@ pub fn add_text(
     font: &str,
     font_size: f32,
     assets: &WorldAssets,
-) -> (Text, TextFont) {
+) -> (Text, TextFont, ResponsiveText) {
     (
         Text::new(text),
         TextFont {
@@ -58,6 +61,7 @@ pub fn add_text(
             font_size: FontSize::VMin(font_size),
             ..default()
         },
+        ResponsiveText(font_size),
     )
 }
 

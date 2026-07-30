@@ -56,6 +56,11 @@ pub enum CreationLayoutNode {
     },
     SelectionCard,
     SelectionFooter,
+    DeityScreen,
+    DeityTitle,
+    DeityCards,
+    DeityCard,
+    DeityFooter,
 }
 
 #[derive(Resource, Default)]
@@ -65,12 +70,12 @@ pub struct SelectionGestureState {
 
 impl SelectionGestureState {
     /// Suppresses selection clicks briefly after a card drag.
-    fn suppress_after_drag(&mut self, now: f64) {
+    pub(crate) fn suppress_after_drag(&mut self, now: f64) {
         self.suppress_click_until = now + SELECTION_DRAG_SUPPRESSION_SECONDS;
     }
 
     /// Returns whether a drag should still block the synthetic release click.
-    fn suppresses_click(&self, now: f64) -> bool {
+    pub(crate) fn suppresses_click(&self, now: f64) -> bool {
         now < self.suppress_click_until
     }
 }
@@ -865,7 +870,7 @@ pub fn setup_character_creation(
                             parent
                                 .spawn(Node {
                                     width: Val::Px(AGE_SLIDER_WIDTH),
-                                    height: Val::Px(68.),
+                                    height: Val::Px(76.),
                                     position_type: PositionType::Relative,
                                     flex_direction: FlexDirection::Column,
                                     align_items: AlignItems::Center,
@@ -877,7 +882,7 @@ pub fn setup_character_creation(
                                         .spawn((
                                             Node {
                                                 width: Val::Px(AGE_SLIDER_WIDTH),
-                                                height: Val::Px(30.),
+                                                height: Val::Px(44.),
                                                 position_type: PositionType::Relative,
                                                 align_items: AlignItems::Center,
                                                 ..default()
@@ -891,13 +896,15 @@ pub fn setup_character_creation(
                                         .observe(cursor::<Over>(SystemCursorIcon::Pointer))
                                         .observe(cursor::<Out>(SystemCursorIcon::Default))
                                         .observe(on_age_slider_click)
+                                        .observe(on_age_slider_drag)
+                                        .observe(on_age_slider_release)
                                         .with_children(|parent| {
                                             // Track visual bar
                                             parent.spawn((
                                                 Node {
                                                     position_type: PositionType::Absolute,
                                                     left: Val::Px(0.),
-                                                    top: Val::Px(12.),
+                                                    top: Val::Px(19.),
                                                     width: percent(100.),
                                                     height: Val::Px(6.),
                                                     border_radius: BorderRadius::all(Val::Px(3.)),
@@ -914,7 +921,7 @@ pub fn setup_character_creation(
                                                     Node {
                                                         position_type: PositionType::Absolute,
                                                         left: Val::Px(notch_x - 2.),
-                                                        top: Val::Px(5.),
+                                                        top: Val::Px(12.),
                                                         width: Val::Px(4.),
                                                         height: Val::Px(20.),
                                                         border_radius: BorderRadius::all(Val::Px(
@@ -950,7 +957,7 @@ pub fn setup_character_creation(
                                                             left: Val::Px(left),
                                                             top: Val::Px(0.),
                                                             width: Val::Px(width),
-                                                            height: Val::Px(30.),
+                                                            height: Val::Px(44.),
                                                             ..default()
                                                         },
                                                         Button,
@@ -967,7 +974,9 @@ pub fn setup_character_creation(
                                                     .observe(cursor::<Out>(
                                                         SystemCursorIcon::Default,
                                                     ))
-                                                    .observe(on_age_stage_click);
+                                                    .observe(on_age_stage_click)
+                                                    .observe(on_age_slider_drag)
+                                                    .observe(on_age_slider_release);
                                             }
 
                                             // Handle (visual only)
@@ -977,7 +986,7 @@ pub fn setup_character_creation(
                                                         position_type: PositionType::Absolute,
                                                         width: Val::Px(24.),
                                                         height: Val::Px(24.),
-                                                        top: Val::Px(3.),
+                                                        top: Val::Px(10.),
                                                         left: Val::Px(
                                                             player.stage.frac() * AGE_SLIDER_WIDTH
                                                                 - 12.,
@@ -1006,7 +1015,7 @@ pub fn setup_character_creation(
                                         .spawn((
                                             Node {
                                                 position_type: PositionType::Absolute,
-                                                top: Val::Px(34.),
+                                                top: Val::Px(50.),
                                                 left: Val::Px(
                                                     AGE_SLIDER_WIDTH / 2. - AGE_VALUE_WIDTH / 2.,
                                                 ),
@@ -2305,6 +2314,7 @@ pub fn setup_deity_selection(
             pickable,
             ImageNode::new(assets.image("bg2")).with_mode(NodeImageMode::Stretch),
             MenuCmp,
+            CreationLayoutNode::DeityScreen,
         ))
         .with_children(|parent| {
             parent.spawn((
@@ -2315,18 +2325,28 @@ pub fn setup_deity_selection(
                 add_text(localization.get("choose deity", lang), "bold", TITLE_TEXT_SIZE, &assets),
                 TextColor(BUTTON_TEXT_COLOR),
                 LocalizedText("choose deity".to_string()),
+                CreationLayoutNode::DeityTitle,
             ));
 
             parent
-                .spawn(Node {
-                    width: percent(90.),
-                    height: percent(76.),
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Stretch,
-                    column_gap: percent(2.),
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        width: percent(90.),
+                        height: percent(76.),
+                        flex_direction: FlexDirection::Row,
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Stretch,
+                        column_gap: percent(2.),
+                        ..default()
+                    },
+                    CreationLayoutNode::DeityCards,
+                    ScrollableContainer,
+                    HorizontalWheelScroll,
+                    ScrollPosition::default(),
+                    Interaction::default(),
+                    Pickable::default(),
+                    bevy::ui::RelativeCursorPosition::default(),
+                ))
                 .with_children(|cards| {
                     for moral in MoralAlignment::iter() {
                         let shown_deity = Deity::from_alignment(moral, EthicalAlignment::Neutral);
@@ -2342,15 +2362,18 @@ pub fn setup_deity_selection(
                 });
 
             parent
-                .spawn(Node {
-                    position_type: PositionType::Absolute,
-                    width: percent(100.),
-                    bottom: percent(2.),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    column_gap: Val::Px(24.),
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        width: percent(100.),
+                        bottom: percent(2.),
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        column_gap: Val::Px(24.),
+                        ..default()
+                    },
+                    CreationLayoutNode::DeityFooter,
+                ))
                 .with_children(|buttons| {
                     spawn_menu_button(buttons, MenuBtn::Back, &assets, &localization, lang);
                 });
@@ -2377,6 +2400,7 @@ fn spawn_deity_alignment_card(
                 ..default()
             },
             BackgroundColor(NORMAL_BUTTON_COLOR),
+            CreationLayoutNode::DeityCard,
         ))
         .with_children(|card| {
             card.spawn(Node {
@@ -2692,11 +2716,16 @@ fn refresh_deity_card(
 /// Commits the clicked deity and completes character creation.
 fn on_deity_choice_click(
     event: On<Pointer<Click>>,
+    time: Res<Time>,
+    gesture: Res<SelectionGestureState>,
     choice_q: Query<&DeityChoiceButton>,
     mut player: ResMut<Player>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     let Ok(choice) = choice_q.get(event.entity) else {
         return;
     };

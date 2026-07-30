@@ -38,6 +38,21 @@ pub struct ShopScrollContainer;
 #[derive(Component)]
 pub struct ShopItemsScroll;
 
+#[derive(Component)]
+pub struct ShopHeader;
+
+#[derive(Component)]
+pub struct ShopTabs;
+
+#[derive(Component)]
+pub struct ShopHeaderGold;
+
+#[derive(Component)]
+pub struct ShopFiltersPanel;
+
+#[derive(Component)]
+pub struct ShopItemRow;
+
 #[derive(Resource, Clone, Serialize, Deserialize, Default, Debug)]
 pub struct ShopInventory {
     pub items: Vec<String>,
@@ -355,26 +370,38 @@ pub fn build_shop_content_inner(
     initial_scroll: f32,
 ) {
     parent
-        .spawn(Node {
-            width: percent(100.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::SpaceBetween,
-            align_items: AlignItems::Center,
-            margin: UiRect::bottom(Val::Px(10.)),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: percent(100.),
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::SpaceBetween,
+                align_items: AlignItems::Center,
+                margin: UiRect::bottom(Val::Px(10.)),
+                ..default()
+            },
+            ShopHeader,
+        ))
         .with_children(|parent| {
             parent
-                .spawn(Node {
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(4.),
-                    margin: UiRect {
-                        left: Val::Px(15.),
-                        top: Val::Px(15.),
+                .spawn((
+                    Node {
+                        flex_direction: FlexDirection::Row,
+                        column_gap: Val::Px(4.),
+                        margin: UiRect {
+                            left: Val::Px(15.),
+                            top: Val::Px(15.),
+                            ..default()
+                        },
+                        overflow: Overflow::clip(),
                         ..default()
                     },
-                    ..default()
-                })
+                    ShopTabs,
+                    ScrollableContainer,
+                    HorizontalWheelScroll,
+                    ScrollPosition::default(),
+                    Interaction::default(),
+                    bevy::ui::RelativeCursorPosition::default(),
+                ))
                 .with_children(|parent| {
                     for tab in [
                         ShopTab::Weapons,
@@ -391,6 +418,7 @@ pub fn build_shop_content_inner(
                                 Node {
                                     padding: UiRect::axes(Val::Px(10.), Val::Px(5.)),
                                     border: UiRect::all(Val::Px(1.)),
+                                    flex_shrink: 0.,
                                     ..default()
                                 },
                                 BackgroundColor(NORMAL_BUTTON_COLOR),
@@ -428,6 +456,7 @@ pub fn build_shop_content_inner(
                     Interaction::default(),
                     Pickable::default(),
                     crate::core::ui::playing::InfoTooltip::Gold,
+                    ShopHeaderGold,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
@@ -572,15 +601,18 @@ pub fn build_shop_content_inner(
 
                 for chunk in matching.chunks(4) {
                     parent
-                        .spawn(Node {
-                            width: percent(100.),
-                            flex_direction: FlexDirection::Row,
-                            flex_shrink: 0.,
-                            align_items: AlignItems::FlexStart,
-                            column_gap: percent(1.5),
-                            overflow: Overflow::clip(),
-                            ..default()
-                        })
+                        .spawn((
+                            Node {
+                                width: percent(100.),
+                                flex_direction: FlexDirection::Row,
+                                flex_shrink: 0.,
+                                align_items: AlignItems::FlexStart,
+                                column_gap: percent(1.5),
+                                overflow: Overflow::clip(),
+                                ..default()
+                            },
+                            ShopItemRow,
+                        ))
                         .with_children(|parent| {
                             for equipment in chunk {
                                 spawn_shop_item_card(parent, assets, localization, lang, equipment);
@@ -598,19 +630,22 @@ pub fn build_shop_content_inner(
 
             // Sidebar for weapon filters
             parent
-                .spawn(Node {
-                    width: percent(11.),
-                    height: percent(100.),
-                    margin: UiRect {
-                        left: Val::Px(5.),
-                        right: Val::Px(10.),
+                .spawn((
+                    Node {
+                        width: percent(11.),
+                        height: percent(100.),
+                        margin: UiRect {
+                            left: Val::Px(5.),
+                            right: Val::Px(10.),
+                            ..default()
+                        },
+                        flex_direction: FlexDirection::Column,
+                        row_gap: Val::Px(12.),
+                        align_items: AlignItems::Stretch,
                         ..default()
                     },
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(12.),
-                    align_items: AlignItems::Stretch,
-                    ..default()
-                })
+                    ShopFiltersPanel,
+                ))
                 .with_children(|parent| {
                     if filters.tab == ShopTab::Weapons {
                         spawn_dropdown_type(parent, assets, filters.weapon_type, open_dropdown);
@@ -782,12 +817,17 @@ pub struct ShopTabButton(pub ShopTab);
 /// Handles shop tab click.
 pub fn handle_shop_tab_click(
     event: On<Pointer<Click>>,
+    time: Res<Time>,
+    gesture: Res<crate::core::ui::creation::SelectionGestureState>,
     mut shop_ui_state: ResMut<ShopUiState>,
     mut tab_click_guard: ResMut<ShopTabClickGuard>,
     scroll_q: Query<&ScrollPosition, With<ShopItemsScroll>>,
     btn_q: Query<&ShopTabButton>,
     mut play_audio_msg: MessageWriter<PlayAudioMsg>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     if let Ok(btn) = btn_q.get(event.entity) {
         let old_tab = shop_ui_state.active_tab;
         let clicking_current_tab = old_tab == btn.0;
@@ -814,6 +854,8 @@ pub fn remember_shop_scroll_position(
 /// Handles shop item card click.
 pub fn handle_shop_item_card_click(
     event: On<Pointer<Click>>,
+    time: Res<Time>,
+    gesture: Res<crate::core::ui::creation::SelectionGestureState>,
     mut commands: Commands,
     assets: Res<WorldAssets>,
     mut player: ResMut<Player>,
@@ -823,6 +865,9 @@ pub fn handle_shop_item_card_click(
     scroll_q: Query<&bevy::ui::RelativeCursorPosition, With<ShopItemsScroll>>,
     toast_container_q: Query<Entity, With<ToastContainer>>,
 ) {
+    if gesture.suppresses_click(time.elapsed_secs_f64()) {
+        return;
+    }
     if tab_click_guard.suppress_next_item_click {
         tab_click_guard.suppress_next_item_click = false;
         return;

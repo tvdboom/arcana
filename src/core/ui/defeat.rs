@@ -13,6 +13,7 @@ use crate::core::localization::Localization;
 use crate::core::menu::utils::{add_root_node, add_text, recolor};
 use crate::core::settings::Settings;
 use crate::core::states::GameState;
+use crate::core::ui::utils::ResponsiveOverlayCard;
 use crate::core::utils::cursor;
 
 /// Marker for all entities belonging to the defeat ("severely injured") screen.
@@ -105,6 +106,10 @@ fn setup_defeat_screen_inner(
                     },
                     BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.65)),
                     BorderColor::all(BUTTON_BORDER_COLOR),
+                    ResponsiveOverlayCard {
+                        desktop_width: Val::Vw(60.),
+                        desktop_height: Val::Auto,
+                    },
                 ))
                 .with_children(|parent| {
                     parent.spawn((

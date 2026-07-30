@@ -2,16 +2,8 @@
 
 use bevy::prelude::*;
 
-#[cfg(not(target_arch = "wasm32"))]
-use crate::core::network::DuelState;
-
-#[cfg(target_arch = "wasm32")]
-#[derive(Resource)]
-pub struct DuelState {
-    pub opponent: Option<crate::core::player::Player>,
-}
-
 use crate::core::combat::mechanics::DuelActive;
+use crate::core::network::DuelState;
 
 use crate::core::actions::hunt::PendingHuntPet;
 use crate::core::assets::WorldAssets;
@@ -75,6 +67,18 @@ pub struct CombatEnemyManaFill;
 
 #[derive(Component)]
 pub struct CombatEnemyManaText;
+
+#[derive(Component)]
+pub struct CombatEnemyLoadout;
+
+#[derive(Component)]
+pub struct CombatEnemyLoadoutPopulated;
+
+#[derive(Component, Clone, Copy)]
+pub enum CombatEnemyTacticCard {
+    Guard,
+    Stance(crate::core::combat::tactics::CombatStance),
+}
 
 #[derive(Component)]
 pub struct CombatPoiseFill;
@@ -231,7 +235,7 @@ pub fn setup_combat_ui(
                     CombatColumns,
                 ))
                 .with_children(|parent| {
-                    spawn_player_panel(parent, &assets, &localization, lang, &player, is_pvp);
+                    spawn_player_panel(parent, &assets, &localization, lang, &player);
                     spawn_monster_panel(
                         parent,
                         &assets,
@@ -414,7 +418,6 @@ fn spawn_player_panel(
     localization: &Localization,
     lang: crate::core::settings::Language,
     player: &Player,
-    is_pvp: bool,
 ) {
     parent
         .spawn((
@@ -441,11 +444,7 @@ fn spawn_player_panel(
                     ..default()
                 })
                 .with_children(|parent| {
-                    if !is_pvp {
-                        spawn_tactical_controls(parent, assets);
-                    } else {
-                        spawn_tactical_spacer(parent);
-                    }
+                    spawn_tactical_controls(parent, assets, true);
                     parent
                         .spawn(Node {
                             width: Val::VMin(COMBAT_PORTRAIT_WIDTH),
@@ -1151,9 +1150,77 @@ fn spawn_equipment_slot_column(
         });
 }
 
-/// Spawns Guard and the four selectable auto-attack stance cards.
-fn spawn_tactical_controls(parent: &mut ChildSpawnerCommands, assets: &WorldAssets) {
+/// Spawns the selectable auto-attack stances and optional PvE Guard card.
+fn spawn_tactical_controls(
+    parent: &mut ChildSpawnerCommands,
+    assets: &WorldAssets,
+    include_guard: bool,
+) {
     use crate::core::combat::mechanics::CombatCard;
+    use crate::core::combat::tactics::CombatStance as Stance;
+
+    parent
+        .spawn(Node {
+            width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(4.),
+            flex_shrink: 0.0,
+            ..default()
+        })
+        .with_children(|parent| {
+            if include_guard {
+                spawn_hover_card(
+                    parent,
+                    assets,
+                    None,
+                    "combat_guard".to_string(),
+                    "Z",
+                    true,
+                    true,
+                    None,
+                    None,
+                    COMBAT_TACTIC_CARD_SIZE,
+                    true,
+                    None,
+                    Some(CombatCard::Guard),
+                    true,
+                    None,
+                );
+                parent.spawn((
+                    Node {
+                        width: percent(100.),
+                        height: Val::Px(1.),
+                        margin: UiRect::vertical(Val::Px(1.)),
+                        flex_shrink: 0.0,
+                        ..default()
+                    },
+                    BackgroundColor(BUTTON_BORDER_COLOR),
+                ));
+            }
+            for stance in Stance::ALL {
+                spawn_hover_card(
+                    parent,
+                    assets,
+                    None,
+                    stance.image_key().to_string(),
+                    stance.hotkey_label(),
+                    true,
+                    true,
+                    None,
+                    None,
+                    COMBAT_TACTIC_CARD_SIZE,
+                    true,
+                    None,
+                    Some(CombatCard::Stance(stance)),
+                    true,
+                    None,
+                );
+            }
+        });
+}
+
+/// Spawns a read-only Guard and stance column for the opposing PvP player.
+fn spawn_enemy_tactical_controls(parent: &mut ChildSpawnerCommands, assets: &WorldAssets) {
     use crate::core::combat::tactics::CombatStance as Stance;
 
     parent
@@ -1170,16 +1237,17 @@ fn spawn_tactical_controls(parent: &mut ChildSpawnerCommands, assets: &WorldAsse
                 assets,
                 None,
                 "combat_guard".to_string(),
-                "Z",
+                "",
                 true,
-                true,
+                false,
                 None,
                 None,
                 COMBAT_TACTIC_CARD_SIZE,
                 true,
                 None,
-                Some(CombatCard::Guard),
-                true,
+                None,
+                false,
+                Some(CombatEnemyTacticCard::Guard),
             );
             parent.spawn((
                 Node {
@@ -1197,16 +1265,17 @@ fn spawn_tactical_controls(parent: &mut ChildSpawnerCommands, assets: &WorldAsse
                     assets,
                     None,
                     stance.image_key().to_string(),
-                    stance.hotkey_label(),
+                    "",
                     true,
-                    true,
+                    false,
                     None,
                     None,
                     COMBAT_TACTIC_CARD_SIZE,
                     true,
                     None,
-                    Some(CombatCard::Stance(stance)),
-                    true,
+                    None,
+                    false,
+                    Some(CombatEnemyTacticCard::Stance(stance)),
                 );
             }
         });
@@ -1267,6 +1336,7 @@ fn spawn_active_abilities(
                             Some(index),
                             Some(crate::core::combat::mechanics::CombatCard::Ability(index)),
                             true,
+                            None,
                         );
                     }
                 });
@@ -1328,6 +1398,7 @@ fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, pl
                                 key.clone(),
                             )),
                             true,
+                            None,
                         );
                     }
                 });
@@ -1350,6 +1421,7 @@ fn spawn_hover_card(
     ability_overlay_slot: Option<usize>,
     combat_card: Option<crate::core::combat::mechanics::CombatCard>,
     is_player: bool,
+    enemy_tactic: Option<CombatEnemyTacticCard>,
 ) {
     use crate::core::combat::mechanics::{
         handle_combat_card_click, AbilityCooldownOverlay, CombatCard, ConsumableCardRoot,
@@ -1381,6 +1453,9 @@ fn spawn_hover_card(
 
     if let Some(tooltip) = tooltip {
         cmd.insert(tooltip);
+    }
+    if let Some(tactic) = enemy_tactic {
+        cmd.insert((tactic, Pickable::IGNORE));
     }
 
     cmd.insert(ImageNode::new(assets.image(image_key)).with_mode(NodeImageMode::Stretch))
@@ -1627,18 +1702,44 @@ fn spawn_monster_panel(
                             spawn_monster_health_bar(parent, assets, localization, lang, monster);
                             if is_pvp {
                                 spawn_enemy_mana_bar(parent, assets, localization, lang, opponent);
-                                if let Some(opp) = opponent {
-                                    spawn_enemy_active_abilities(parent, assets, opp);
-                                    spawn_enemy_consumables(parent, assets, opp);
-                                }
+                                parent.spawn((
+                                    Node {
+                                        width: percent(100.),
+                                        flex_direction: FlexDirection::Column,
+                                        ..default()
+                                    },
+                                    CombatEnemyLoadout,
+                                ));
                             } else {
                                 spawn_poise_bar(parent, assets, localization, lang, monster.level);
                                 spawn_enemy_intent(parent, assets, localization, lang);
                             }
                         });
-                    spawn_tactical_spacer(parent);
+                    if is_pvp {
+                        spawn_enemy_tactical_controls(parent, assets);
+                    } else {
+                        spawn_tactical_spacer(parent);
+                    }
                 });
         });
+}
+
+/// Populates a PvP opponent's abilities and consumables once its profile is available.
+pub fn sync_enemy_combat_loadout(
+    mut commands: Commands,
+    assets: Res<WorldAssets>,
+    duel_state: Option<Res<DuelState>>,
+    loadout_q: Query<Entity, (With<CombatEnemyLoadout>, Without<CombatEnemyLoadoutPopulated>)>,
+) {
+    let Some(opponent) = duel_state.as_ref().and_then(|duel| duel.opponent.as_ref()) else {
+        return;
+    };
+    for entity in &loadout_q {
+        commands.entity(entity).insert(CombatEnemyLoadoutPopulated).with_children(|parent| {
+            spawn_enemy_active_abilities(parent, &assets, opponent);
+            spawn_enemy_consumables(parent, &assets, opponent);
+        });
+    }
 }
 
 /// Spawns monster portrait.
@@ -2110,6 +2211,7 @@ fn spawn_enemy_active_abilities(
                             Some(index),
                             None,
                             false,
+                            None,
                         );
                     }
                 });
@@ -2169,6 +2271,7 @@ fn spawn_enemy_consumables(
                             None,
                             None,
                             false,
+                            None,
                         );
                     }
                 });
