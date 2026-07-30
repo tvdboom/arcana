@@ -45,10 +45,10 @@ install-wasm-prereqs:
 install-wasm: install-wasm-prereqs
     rustup target install wasm32-unknown-unknown
 
-run-wasm: install-wasm
+run-wasm: install-wasm pack-assets
     cargo run --release --target wasm32-unknown-unknown
 
-watch-wasm:
+watch-wasm: pack-assets
     cargo watch -cx "run --release --target wasm32-unknown-unknown"
 
 build-wasm: install-wasm

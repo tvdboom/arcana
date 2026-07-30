@@ -246,6 +246,11 @@ fn sanitize_character_name(input: &str) -> String {
         .collect()
 }
 
+/// Returns whether the browser editor is open and should update the player name.
+fn should_sync_mobile_name_input(editor_is_hidden: bool) -> bool {
+    !editor_is_hidden
+}
+
 /// Handles keyboard name input on native and hardware-keyboard web sessions.
 pub fn handle_name_input(
     mut events: MessageReader<KeyboardInput>,
@@ -320,9 +325,17 @@ pub fn sync_mobile_name_input(
 ) {
     use wasm_bindgen::JsCast;
 
-    let Some(input) = web_sys::window()
-        .and_then(|window| window.document())
-        .and_then(|document| document.get_element_by_id(MOBILE_NAME_INPUT_ID))
+    let Some(document) = web_sys::window().and_then(|window| window.document()) else {
+        return;
+    };
+    let Some(editor) = document.get_element_by_id(MOBILE_NAME_EDITOR_ID) else {
+        return;
+    };
+    if !should_sync_mobile_name_input(editor.has_attribute("hidden")) {
+        return;
+    }
+    let Some(input) = document
+        .get_element_by_id(MOBILE_NAME_INPUT_ID)
         .and_then(|element| element.dyn_into::<web_sys::HtmlInputElement>().ok())
     else {
         return;
@@ -2749,6 +2762,13 @@ mod tests {
         append_character_name_text(&mut name, " of Arcana! 123456789");
         assert_eq!(name, "Hero of Arcana 1");
         assert_eq!(name.chars().count(), MAX_CHARACTER_NAME_CHARS);
+    }
+
+    /// Verifies the hidden browser field cannot erase the generated character name.
+    #[test]
+    fn mobile_name_input_only_syncs_while_editor_is_open() {
+        assert!(!should_sync_mobile_name_input(true));
+        assert!(should_sync_mobile_name_input(false));
     }
 
     /// Verifies a release click is ignored briefly after dragging a selection card.
