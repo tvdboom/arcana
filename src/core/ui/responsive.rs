@@ -11,7 +11,9 @@ use crate::core::actions::shop::{
     ShopFiltersPanel, ShopHeader, ShopHeaderGold, ShopItemCard, ShopItemRow, ShopItemsScroll,
     ShopScrollContainer, ShopTabs,
 };
-use crate::core::combat::ui::{CombatColumns, CombatSidePanel};
+use crate::core::combat::ui::{
+    CombatColumns, CombatConsumablesRow, CombatSidePanel, COMBAT_CONSUMABLE_CARD_GAP,
+};
 use crate::core::menu::utils::ResponsiveText;
 use crate::core::states::{is_panel_state, GameState};
 use crate::core::ui::creation::{CreationLayoutNode, SelectionGestureState};
@@ -21,10 +23,11 @@ use crate::core::ui::level_up::{
 };
 use crate::core::ui::scrollbar::{HorizontalWheelScroll, ScrollableContainer};
 use crate::core::ui::utils::{
-    PanelCard, PanelCardRow, PanelCmp, PanelHeader, PanelIntensitySlider, PanelResources,
-    PanelTitle, PlayScreenColumns2And3, PlayScreenColumnsContainer, PlayingActionBar,
-    PlayingContentFrame, PlayingPrimaryColumn, ResponsiveOverlayCard, ResponsiveSettingsPanel,
-    SLIDER_WIDTH,
+    PanelCard, PanelCardCostBadge, PanelCardCostIcon, PanelCardCostRow, PanelCardRow, PanelCmp,
+    PanelHeader, PanelIntensitySlider, PanelResources, PanelTitle, PlayScreenColumns2And3,
+    PlayScreenColumnsContainer, PlayingActionBar, PlayingContentFrame, PlayingPrimaryColumn,
+    ResponsiveOverlayCard, ResponsiveProgressBar, ResponsiveSettingsPanel, ResponsiveSquare,
+    ResponsiveWidth, SLIDER_WIDTH,
 };
 
 /// Width below which the interface switches from three columns to a vertical flow.
@@ -33,6 +36,21 @@ const PORTRAIT_BREAKPOINT: f32 = 720.0;
 /// Returns whether the viewport needs the vertically flowing phone layout.
 fn uses_portrait_layout(width: f32, height: f32) -> bool {
     width < PORTRAIT_BREAKPOINT || height > width * 1.15
+}
+
+/// Resolves a design text size to the pixels used by the responsive typography system.
+pub fn responsive_font_size(width: f32, height: f32, design_size: f32) -> f32 {
+    if uses_portrait_layout(width, height) {
+        let phone_scale = (width / 390.0).clamp(0.9, 1.15);
+        (design_size * 5.0 * phone_scale).clamp(11.0, 26.0)
+    } else {
+        width.min(height) * design_size / 100.0
+    }
+}
+
+/// Returns a bounded action-card size that leaves surrounding phone UI visible.
+fn phone_panel_card_size(width: f32, height: f32) -> Vec2 {
+    Vec2::new((width * 0.78).clamp(250.0, 340.0), (height * 0.56).clamp(340.0, 500.0))
 }
 
 /// Applies phone-friendly vertical layouts while retaining the desktop layout on wide screens.
@@ -50,6 +68,7 @@ pub fn update_responsive_layout(
             Option<&PanelCmp>,
             Option<&CombatColumns>,
             Option<&CombatSidePanel>,
+            Option<&CombatConsumablesRow>,
         ),
         Or<(
             With<PlayingContentFrame>,
@@ -60,6 +79,7 @@ pub fn update_responsive_layout(
             With<PanelCmp>,
             With<CombatColumns>,
             With<CombatSidePanel>,
+            With<CombatConsumablesRow>,
         )>,
     >,
 ) {
@@ -78,6 +98,7 @@ pub fn update_responsive_layout(
         panel,
         combat_columns,
         combat_panel,
+        combat_consumables,
     ) in &mut nodes
     {
         if frame.is_some() {
@@ -222,6 +243,23 @@ pub fn update_responsive_layout(
                 percent(100.)
             };
         }
+        if combat_consumables.is_some() {
+            node.justify_content = if portrait {
+                JustifyContent::FlexStart
+            } else {
+                JustifyContent::Center
+            };
+            node.column_gap = Val::Px(if portrait {
+                4.
+            } else {
+                COMBAT_CONSUMABLE_CARD_GAP
+            });
+            node.overflow = if portrait {
+                Overflow::scroll_x()
+            } else {
+                Overflow::visible()
+            };
+        }
     }
 }
 
@@ -237,10 +275,120 @@ pub fn update_responsive_typography(
 
     for (mut font, responsive) in &mut text_q {
         font.font_size = if portrait {
-            FontSize::Px((responsive.0 * 5.25).max(12.0))
+            FontSize::Px(responsive_font_size(window.width(), window.height(), responsive.0))
         } else {
             FontSize::VMin(responsive.0)
         };
+    }
+}
+
+/// Keeps bars, icons, and card cost badges proportional to the phone viewport.
+pub fn update_responsive_element_sizes(
+    window_q: Query<&Window, With<PrimaryWindow>>,
+    mut nodes: Query<
+        (
+            &mut Node,
+            Option<&ResponsiveProgressBar>,
+            Option<&ResponsiveSquare>,
+            Option<&PanelCardCostRow>,
+            Option<&PanelCardCostBadge>,
+            Option<&PanelCardCostIcon>,
+            Option<&ResponsiveWidth>,
+        ),
+        Or<(
+            With<ResponsiveProgressBar>,
+            With<ResponsiveSquare>,
+            With<PanelCardCostRow>,
+            With<PanelCardCostBadge>,
+            With<PanelCardCostIcon>,
+            With<ResponsiveWidth>,
+        )>,
+    >,
+) {
+    let Ok(window) = window_q.single() else {
+        return;
+    };
+    let portrait = uses_portrait_layout(window.width(), window.height());
+
+    for (mut node, progress, square, cost_row, cost_badge, cost_icon, responsive_width) in
+        &mut nodes
+    {
+        if let Some(progress) = progress {
+            node.width = if portrait {
+                progress.phone_width
+            } else {
+                progress.desktop_width
+            };
+            node.height = if portrait {
+                progress.phone_height
+            } else {
+                progress.desktop_height
+            };
+        }
+        if let Some(square) = square {
+            let size = if portrait {
+                Val::Px(square.phone_size)
+            } else {
+                square.desktop_size
+            };
+            node.width = size;
+            node.height = size;
+        }
+        if let Some(responsive_width) = responsive_width {
+            node.width = if portrait {
+                responsive_width.phone_width
+            } else {
+                responsive_width.desktop_width
+            };
+        }
+        if cost_row.is_some() {
+            node.top = Val::Px(if portrait {
+                8.
+            } else {
+                10.
+            });
+            node.right = if portrait {
+                Val::Px(8.)
+            } else {
+                Val::Vw(1.9)
+            };
+            node.column_gap = Val::Px(if portrait {
+                4.
+            } else {
+                6.
+            });
+            node.max_width = if portrait {
+                Val::Px((window.width() - 32.).max(0.))
+            } else {
+                Val::Auto
+            };
+        }
+        if cost_badge.is_some() {
+            node.column_gap = Val::Px(if portrait {
+                3.
+            } else {
+                4.
+            });
+            node.padding = if portrait {
+                UiRect::axes(Val::Px(6.), Val::Px(3.))
+            } else {
+                UiRect::axes(Val::Px(8.), Val::Px(4.))
+            };
+            node.border_radius = BorderRadius::all(Val::Px(if portrait {
+                5.
+            } else {
+                6.
+            }));
+        }
+        if cost_icon.is_some() {
+            let size = Val::Px(if portrait {
+                16.
+            } else {
+                20.
+            });
+            node.width = size;
+            node.height = size;
+        }
     }
 }
 
@@ -284,6 +432,7 @@ pub fn update_panel_responsive_layout(
         return;
     };
     let portrait = uses_portrait_layout(window.width(), window.height());
+    let phone_card_size = phone_panel_card_size(window.width(), window.height());
 
     for (mut node, header, title, resources, slider, card_row, card, settings, overlay) in
         &mut nodes
@@ -352,7 +501,11 @@ pub fn update_panel_responsive_layout(
         }
         if card_row.is_some() {
             node.width = percent(100.);
-            node.height = percent(78.);
+            node.height = if portrait {
+                Val::Px(phone_card_size.y + 20.)
+            } else {
+                percent(78.)
+            };
             node.flex_direction = FlexDirection::Row;
             node.justify_content = if portrait {
                 JustifyContent::FlexStart
@@ -378,17 +531,17 @@ pub fn update_panel_responsive_layout(
         }
         if card.is_some() {
             node.width = if portrait {
-                percent(82.)
+                Val::Px(phone_card_size.x)
             } else {
                 percent(30.)
             };
             node.height = if portrait {
-                percent(96.)
+                Val::Px(phone_card_size.y)
             } else {
                 percent(98.)
             };
             node.margin = UiRect::horizontal(if portrait {
-                percent(4.)
+                Val::Px(8.)
             } else {
                 percent(1.)
             });
@@ -1205,6 +1358,24 @@ mod tests {
     fn viewport_classification_matches_phone_and_desktop() {
         assert!(uses_portrait_layout(390.0, 844.0));
         assert!(!uses_portrait_layout(1280.0, 720.0));
+    }
+
+    #[test]
+    /// Keeps phone typography readable without allowing small labels to crowd their controls.
+    fn responsive_font_size_is_bounded_on_phones() {
+        assert_eq!(responsive_font_size(390.0, 844.0, 1.4), 11.0);
+        assert_eq!(responsive_font_size(390.0, 844.0, 5.0), 25.0);
+        assert_eq!(responsive_font_size(1280.0, 720.0, 2.0), 14.4);
+    }
+
+    #[test]
+    /// Keeps phone action cards smaller than the viewport in both dimensions.
+    fn phone_action_card_size_leaves_context_visible() {
+        let card = phone_panel_card_size(390.0, 844.0);
+        assert!((card.x - 304.2).abs() < 0.01);
+        assert!((card.y - 472.64).abs() < 0.01);
+        assert!(card.x < 390.0);
+        assert!(card.y < 844.0);
     }
 
     #[test]

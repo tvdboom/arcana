@@ -247,6 +247,7 @@ fn sanitize_character_name(input: &str) -> String {
 }
 
 /// Returns whether the browser editor is open and should update the player name.
+#[cfg(any(target_arch = "wasm32", test))]
 fn should_sync_mobile_name_input(editor_is_hidden: bool) -> bool {
     !editor_is_hidden
 }

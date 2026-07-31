@@ -4,6 +4,7 @@ use crate::core::menu::buttons::DisabledButton;
 use std::fmt::Debug;
 
 use crate::core::assets::WorldAssets;
+use crate::core::ui::utils::ResponsiveSquare;
 use bevy::prelude::*;
 
 #[derive(Component, Clone, Copy)]
@@ -120,6 +121,10 @@ pub fn spawn_rich_text_row(
                         },
                         ImageNode::new(assets.image(&remaining[start_idx + 1..actual_end]))
                             .with_mode(NodeImageMode::Stretch),
+                        ResponsiveSquare {
+                            desktop_size: Val::VMin(font_size * 1.35),
+                            phone_size: (font_size * 6.25).clamp(14., 22.),
+                        },
                     ));
 
                     remaining = &remaining[actual_end + 1..];

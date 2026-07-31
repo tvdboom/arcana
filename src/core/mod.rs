@@ -86,8 +86,8 @@ use crate::core::ui::playing::*;
 use crate::core::ui::responsive::{
     reset_playing_scroll_position, touch_scroll_system, update_craft_responsive_layout,
     update_creation_responsive_layout, update_level_up_responsive_layout,
-    update_panel_responsive_layout, update_responsive_layout, update_responsive_typography,
-    update_shop_responsive_layout,
+    update_panel_responsive_layout, update_responsive_element_sizes, update_responsive_layout,
+    update_responsive_typography, update_shop_responsive_layout,
 };
 use crate::core::ui::scrollbar::{
     scroll_system, update_scrollbar_system, update_scrollbar_x_system,
@@ -227,7 +227,7 @@ impl Plugin for GamePlugin {
                     update_craft_responsive_layout,
                     update_level_up_responsive_layout,
                     update_shop_responsive_layout,
-                    update_responsive_typography,
+                    (update_responsive_typography, update_responsive_element_sizes),
                     touch_scroll_system,
                     apply_level_up_system,
                     modal_input_system,

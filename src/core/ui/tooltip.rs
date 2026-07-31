@@ -6,6 +6,7 @@ use crate::core::localization::Localization;
 use crate::core::menu::utils::{add_text, spawn_rich_text_row};
 use crate::core::player::Player;
 use crate::core::settings::Language;
+use crate::core::ui::responsive::responsive_font_size;
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -34,6 +35,62 @@ pub struct TooltipContent {
     pub extra_width: f32,
 }
 
+#[derive(Clone, Copy)]
+struct TooltipMetrics {
+    compact: bool,
+    max_width: f32,
+    min_width: f32,
+    padding: f32,
+    image_size: f32,
+    image_gap: f32,
+    badge_icon_size: f32,
+    title_font_size: f32,
+    description_font_size: f32,
+}
+
+/// Resolves tooltip geometry from the actual viewport and rendered text scale.
+fn tooltip_metrics(window_width: f32, window_height: f32, extra_width: f32) -> TooltipMetrics {
+    let compact = window_width < 720.0 || window_height > window_width * 1.15;
+    let viewport_width = (window_width - 24.0).max(1.0);
+    let max_width = if compact {
+        viewport_width.min(420.0)
+    } else {
+        (window_width * 0.35 + extra_width).min(viewport_width)
+    };
+
+    TooltipMetrics {
+        compact,
+        max_width,
+        min_width: if compact {
+            260.0_f32.min(max_width)
+        } else {
+            320.0_f32.min(max_width)
+        },
+        padding: if compact {
+            8.0
+        } else {
+            10.0
+        },
+        image_size: if compact {
+            72.0
+        } else {
+            144.0
+        },
+        image_gap: if compact {
+            10.0
+        } else {
+            16.0
+        },
+        badge_icon_size: if compact {
+            20.0
+        } else {
+            32.0
+        },
+        title_font_size: responsive_font_size(window_width, window_height, 2.4),
+        description_font_size: responsive_font_size(window_width, window_height, 1.8),
+    }
+}
+
 /// Spawns tooltip.
 pub fn spawn_tooltip(
     commands: &mut Commands,
@@ -47,25 +104,19 @@ pub fn spawn_tooltip(
         (1600., 900., None)
     };
 
-    let max_allowed_width = window_width * 0.35 + content.extra_width;
+    let metrics = tooltip_metrics(window_width, window_height, content.extra_width);
+    let char_width_desc = metrics.description_font_size * 0.60;
+    let char_width_desc_for_width = metrics.description_font_size * 0.68;
+    let line_height_title = metrics.title_font_size * 1.35;
+    let line_height_desc = metrics.description_font_size * 1.35;
+    let padding_width = metrics.padding * 2.0;
 
-    let font_size_title = window_height * 0.024;
-    let font_size_desc = window_height * 0.018;
-    let char_width_desc = font_size_desc * 0.60;
-    let char_width_desc_for_width = font_size_desc * 0.68;
-    let line_height_title = font_size_title * 1.35;
-    let line_height_desc = font_size_desc * 1.35;
-
-    // Total padding + safety margins = 48.0 px
-    let padding_width = 48.0_f32;
-
-    let mut text_allowed_width = max_allowed_width;
+    let mut text_allowed_width = metrics.max_width - padding_width;
     if content.image.is_some() {
-        text_allowed_width -= 144.0 + 16.0;
+        text_allowed_width -= metrics.image_size + metrics.image_gap;
     }
 
-    let max_chars_per_line =
-        ((text_allowed_width - padding_width) / char_width_desc).floor().max(15.0) as usize;
+    let max_chars_per_line = (text_allowed_width / char_width_desc).floor().max(12.0) as usize;
 
     // Wrap the description lines
     let mut wrapped_lines = Vec::new();
@@ -91,19 +142,21 @@ pub fn spawn_tooltip(
         wrapped_lines.iter().map(|line| visual_chars_count(line)).max().unwrap_or(0) as f32;
     let mut desc_width = desc_max_chars * char_width_desc_for_width;
     if content.image.is_some() {
-        desc_width += 144.0 + 16.0;
+        desc_width += metrics.image_size + metrics.image_gap;
     }
 
-    let char_width_title_for_width = font_size_title * 0.65;
+    let char_width_title_for_width = metrics.title_font_size * 0.65;
     let title_chars_width = content.title.chars().count() as f32 * char_width_title_for_width;
     let badge_width = if let Some(ref badge) = content.badge {
         match badge {
             TooltipBadge::Price(val) => {
-                32.0 + 12.0
+                metrics.badge_icon_size
+                    + 8.0
                     + (format!("{}", val).chars().count() as f32) * char_width_desc_for_width
             },
             TooltipBadge::ActionPoints(val) => {
-                32.0 + 12.0
+                metrics.badge_icon_size
+                    + 8.0
                     + (format!("{}", val).chars().count() as f32) * char_width_desc_for_width
             },
         }
@@ -117,19 +170,31 @@ pub fn spawn_tooltip(
     };
 
     let content_width = desc_width.max(title_row_width) * 1.15;
-    let tooltip_width =
-        (content_width + padding_width).clamp(320.0_f32.min(max_allowed_width), max_allowed_width);
+    let tooltip_width = (content_width + padding_width).clamp(metrics.min_width, metrics.max_width);
 
     // Calculate height
-    let mut tooltip_height =
-        line_height_title + (wrapped_lines.len() as f32) * line_height_desc + 36.0;
+    let available_title_width = (tooltip_width
+        - padding_width
+        - badge_width
+        - if badge_width > 0.0 {
+            12.0
+        } else {
+            0.0
+        })
+    .max(metrics.title_font_size * 4.0);
+    let title_lines = (title_chars_width / available_title_width).ceil().max(1.0);
+    let mut tooltip_height = title_lines * line_height_title
+        + (wrapped_lines.len() as f32) * line_height_desc
+        + padding_width
+        + 8.0;
     if content.image.is_some() {
-        tooltip_height = tooltip_height.max(144.0 + 36.0);
+        tooltip_height = tooltip_height.max(metrics.image_size + padding_width);
     }
     if content.pet_stats.is_some() {
-        let stat_box_height = tooltip_width * 0.32;
+        let stat_box_height = (tooltip_width - padding_width) * 0.32;
         tooltip_height += stat_box_height + 12.0;
     }
+    tooltip_height = tooltip_height.min((window_height - 24.0).max(1.0));
 
     let (left, top) = place_tooltip(
         cursor.unwrap_or(Vec2::new(100., 100.)),
@@ -145,13 +210,19 @@ pub fn spawn_tooltip(
                 position_type: PositionType::Absolute,
                 left: Val::Px(left),
                 top: Val::Px(top),
-                padding: UiRect::all(Val::Px(10.)),
-                border: UiRect::all(Val::Px(2.)),
+                padding: UiRect::all(Val::Px(metrics.padding)),
+                border: UiRect::all(Val::Px(if metrics.compact {
+                    1.
+                } else {
+                    2.
+                })),
                 width: Val::Px(tooltip_width),
                 height: Val::Auto,
                 max_width: Val::Px(tooltip_width),
+                max_height: Val::Px((window_height - 24.).max(1.)),
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(4.),
+                overflow: Overflow::scroll_y(),
                 ..default()
             },
             BackgroundColor(Color::srgba_u8(10, 18, 45, 245)),
@@ -168,8 +239,8 @@ pub fn spawn_tooltip(
                 parent
                     .spawn((Node {
                         position_type: PositionType::Absolute,
-                        right: Val::Px(10.),
-                        top: Val::Px(10.),
+                        right: Val::Px(metrics.padding),
+                        top: Val::Px(metrics.padding),
                         flex_direction: FlexDirection::Row,
                         align_items: AlignItems::Center,
                         column_gap: Val::Px(4.),
@@ -181,8 +252,8 @@ pub fn spawn_tooltip(
                                 // Gold icon
                                 parent.spawn((
                                     Node {
-                                        width: Val::Px(32.),
-                                        height: Val::Px(32.),
+                                        width: Val::Px(metrics.badge_icon_size),
+                                        height: Val::Px(metrics.badge_icon_size),
                                         ..default()
                                     },
                                     ImageNode::new(assets.image("gold"))
@@ -199,8 +270,8 @@ pub fn spawn_tooltip(
                                 // AP icon (larger!)
                                 parent.spawn((
                                     Node {
-                                        width: Val::Px(32.),
-                                        height: Val::Px(32.),
+                                        width: Val::Px(metrics.badge_icon_size),
+                                        height: Val::Px(metrics.badge_icon_size),
                                         ..default()
                                     },
                                     ImageNode::new(assets.image("ap"))
@@ -223,6 +294,10 @@ pub fn spawn_tooltip(
                 parent.spawn((
                     add_text(content.title.clone(), "bold", 2.4, assets),
                     TextColor(BUTTON_TEXT_COLOR),
+                    Node {
+                        max_width: Val::Px(available_title_width),
+                        ..default()
+                    },
                 ));
 
                 // Description
@@ -238,7 +313,11 @@ pub fn spawn_tooltip(
                                 if line.starts_with("• ") || line.starts_with("  ") {
                                     parent
                                         .spawn(Node {
-                                            padding: UiRect::left(Val::Px(32.)),
+                                            padding: UiRect::left(Val::Px(if metrics.compact {
+                                                14.
+                                            } else {
+                                                32.
+                                            })),
                                             ..default()
                                         })
                                         .with_children(|parent| {
@@ -270,7 +349,7 @@ pub fn spawn_tooltip(
                 parent
                     .spawn(Node {
                         flex_direction: FlexDirection::Row,
-                        column_gap: Val::Px(16.),
+                        column_gap: Val::Px(metrics.image_gap),
                         align_items: AlignItems::FlexStart,
                         width: Val::Percent(100.),
                         ..default()
@@ -280,8 +359,8 @@ pub fn spawn_tooltip(
                         parent
                             .spawn((
                                 Node {
-                                    width: Val::Px(144.),
-                                    height: Val::Px(144.),
+                                    width: Val::Px(metrics.image_size),
+                                    height: Val::Px(metrics.image_size),
                                     flex_shrink: 0.,
                                     border: UiRect::all(Val::Px(1.)),
                                     ..default()
@@ -305,7 +384,8 @@ pub fn spawn_tooltip(
                             .spawn(Node {
                                 flex_direction: FlexDirection::Column,
                                 row_gap: Val::Px(4.),
-                                width: Val::Percent(100.),
+                                flex_grow: 1.,
+                                min_width: Val::Px(0.),
                                 ..default()
                             })
                             .with_children(|parent| {
@@ -572,4 +652,32 @@ fn spawn_pet_stat_box(
             parent
                 .spawn((add_text(value.to_string(), "bold", 3.0, assets), TextColor(Color::WHITE)));
         });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    /// Keeps compact tooltips inside the phone viewport and scales embedded artwork down.
+    fn phone_tooltip_metrics_fit_the_viewport() {
+        let metrics = tooltip_metrics(390.0, 844.0, 100.0);
+        assert!(metrics.compact);
+        assert_eq!(metrics.max_width, 366.0);
+        assert_eq!(metrics.min_width, 260.0);
+        assert_eq!(metrics.image_size, 72.0);
+        assert_eq!(metrics.badge_icon_size, 20.0);
+    }
+
+    #[test]
+    /// Places a phone-width tooltip within the viewport margins at every cursor edge.
+    fn phone_tooltip_placement_stays_on_screen() {
+        for cursor in [Vec2::ZERO, Vec2::new(390.0, 0.0), Vec2::new(390.0, 844.0)] {
+            let (left, top) = place_tooltip(cursor, 366.0, 500.0, 390.0, 844.0);
+            assert!(left >= 12.0);
+            assert!(left + 366.0 <= 378.0);
+            assert!(top >= 12.0);
+            assert!(top + 500.0 <= 832.0);
+        }
+    }
 }

@@ -5021,6 +5021,10 @@ pub fn sync_combat_effect_icons(
                     CombatEffectIcon {
                         effect: effect.clone(),
                     },
+                    crate::core::ui::utils::ResponsiveSquare {
+                        desktop_size: Val::VMin(5.5),
+                        phone_size: 24.,
+                    },
                 ));
             }
         });

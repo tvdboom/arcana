@@ -188,6 +188,10 @@ pub fn build_rest_content_inner(
                                 },
                                 ImageNode::new(assets.image("gold"))
                                     .with_mode(NodeImageMode::Stretch),
+                                ResponsiveSquare {
+                                    desktop_size: Val::Vw(2.4),
+                                    phone_size: 20.,
+                                },
                             ));
                             parent.spawn((
                                 add_text(player.gold.to_string(), "bold", 2.4, assets),
@@ -217,6 +221,10 @@ pub fn build_rest_content_inner(
                                 },
                                 ImageNode::new(assets.image("ap"))
                                     .with_mode(NodeImageMode::Stretch),
+                                ResponsiveSquare {
+                                    desktop_size: Val::Vw(2.4),
+                                    phone_size: 20.,
+                                },
                             ));
                             parent.spawn((
                                 add_text(player.ap.to_string(), "bold", 2.4, assets),
@@ -395,6 +403,7 @@ pub fn spawn_rest_card_ui<M: Component>(
                         column_gap: Val::Px(6.),
                         ..default()
                     })
+                    .insert(PanelCardCostRow)
                     .with_children(|parent| {
                         if let Some(gold_cost) = gold_cost_opt {
                             parent
@@ -408,6 +417,7 @@ pub fn spawn_rest_card_ui<M: Component>(
                                         ..default()
                                     },
                                     BackgroundColor(Color::srgba(0., 0., 0., 0.85)),
+                                    PanelCardCostBadge,
                                 ))
                                 .with_children(|parent| {
                                     parent.spawn((
@@ -418,6 +428,7 @@ pub fn spawn_rest_card_ui<M: Component>(
                                         },
                                         ImageNode::new(assets.image("gold"))
                                             .with_mode(NodeImageMode::Stretch),
+                                        PanelCardCostIcon,
                                     ));
                                     parent.spawn((
                                         add_text(gold_cost.to_string(), "bold", 1.6, assets),
@@ -438,6 +449,7 @@ pub fn spawn_rest_card_ui<M: Component>(
                                         ..default()
                                     },
                                     BackgroundColor(Color::srgba(0., 0., 0., 0.85)),
+                                    PanelCardCostBadge,
                                 ))
                                 .with_children(|parent| {
                                     parent.spawn((
@@ -448,6 +460,7 @@ pub fn spawn_rest_card_ui<M: Component>(
                                         },
                                         ImageNode::new(assets.image("ap"))
                                             .with_mode(NodeImageMode::Stretch),
+                                        PanelCardCostIcon,
                                     ));
                                     parent.spawn((
                                         add_text(ap_cost.to_string(), "bold", 1.6, assets),

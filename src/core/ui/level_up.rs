@@ -13,6 +13,7 @@ use crate::core::menu::utils::{add_text, spawn_rich_text_row};
 use crate::core::player::{Attribute, Player};
 use crate::core::settings::Language;
 use crate::core::ui::playing::RightColumnTooltip;
+use crate::core::ui::utils::ResponsiveSquare;
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
 
@@ -1055,6 +1056,10 @@ fn spawn_choice_card(
                         .image
                 }))
                 .with_mode(NodeImageMode::Stretch),
+                ResponsiveSquare {
+                    desktop_size: ICON_ITEM,
+                    phone_size: 44.,
+                },
             ));
 
             // Text content

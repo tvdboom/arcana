@@ -310,6 +310,10 @@ pub fn build_craft_content_inner(
                                 },
                                 ImageNode::new(assets.image("mana"))
                                     .with_mode(NodeImageMode::Stretch),
+                                ResponsiveSquare {
+                                    desktop_size: Val::Vw(2.4),
+                                    phone_size: 20.,
+                                },
                             ));
                             parent.spawn((
                                 add_text(player.mana().to_string(), "bold", 2.4, assets),
@@ -339,6 +343,10 @@ pub fn build_craft_content_inner(
                                 },
                                 ImageNode::new(assets.image("gold"))
                                     .with_mode(NodeImageMode::Stretch),
+                                ResponsiveSquare {
+                                    desktop_size: Val::Vw(2.4),
+                                    phone_size: 20.,
+                                },
                             ));
                             parent.spawn((
                                 add_text(player.gold.to_string(), "bold", 2.4, assets),
@@ -368,6 +376,10 @@ pub fn build_craft_content_inner(
                                 },
                                 ImageNode::new(assets.image("ap"))
                                     .with_mode(NodeImageMode::Stretch),
+                                ResponsiveSquare {
+                                    desktop_size: Val::Vw(2.4),
+                                    phone_size: 20.,
+                                },
                             ));
                             parent.spawn((
                                 add_text(player.ap.to_string(), "bold", 2.4, assets),

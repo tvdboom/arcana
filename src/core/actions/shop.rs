@@ -466,6 +466,10 @@ pub fn build_shop_content_inner(
                             ..default()
                         },
                         ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                        ResponsiveSquare {
+                            desktop_size: Val::Vw(2.4),
+                            phone_size: 20.,
+                        },
                     ));
                     parent.spawn((
                         add_text(player_gold.to_string(), "bold", 3.0, assets),

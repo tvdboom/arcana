@@ -22,6 +22,7 @@ use crate::core::settings::Settings;
 use crate::core::ui::playing::{
     EquipSlot, InfoTooltip, PetHealthBarFill, RightColumnTooltip, StatLabel,
 };
+use crate::core::ui::utils::{ResponsiveProgressBar, ResponsiveSquare, ResponsiveWidth};
 use crate::core::PlayingStat;
 use crate::utils::capitalize_words;
 use bevy::window::SystemCursorIcon;
@@ -40,15 +41,30 @@ const COMBAT_PORTRAIT_WIDTH: f32 = 60.0;
 const COMBAT_STATS_COLUMN_WIDTH: f32 = 17.5;
 const COMBAT_TACTIC_CARD_SIZE: f32 = 6.4;
 const COMBAT_CONSUMABLE_CARD_SIZE: f32 = 7.68;
-const COMBAT_CONSUMABLE_CARD_GAP: f32 = 6.0;
+pub(crate) const COMBAT_CONSUMABLE_CARD_GAP: f32 = 6.0;
 const COMBAT_ABILITY_CARD_SIZE: f32 = 9.0;
 const COMBAT_RESOURCE_BAR_HEIGHT: f32 = 30.0;
 const COMBAT_POISE_BAR_HEIGHT: f32 = 28.0;
 const COMBAT_ENEMY_INTENT_HEIGHT: f32 = 76.0;
 const CONSUMABLE_HOTKEYS: [&str; 8] = ["A", "S", "D", "F", "G", "H", "J", "K"];
 
+/// Returns the touch-readable phone size for a combat card tier.
+fn phone_combat_card_size(desktop_size: f32) -> f32 {
+    if desktop_size <= COMBAT_TACTIC_CARD_SIZE {
+        36.
+    } else if desktop_size <= COMBAT_CONSUMABLE_CARD_SIZE {
+        40.
+    } else {
+        44.
+    }
+}
+
 #[derive(Component)]
 pub struct CombatCmp;
+
+/// Identifies a combat consumable strip that can scroll horizontally on phones.
+#[derive(Component)]
+pub struct CombatConsumablesRow;
 
 #[derive(Component)]
 pub struct CombatMonsterHealthFill;
@@ -1160,13 +1176,19 @@ fn spawn_tactical_controls(
     use crate::core::combat::tactics::CombatStance as Stance;
 
     parent
-        .spawn(Node {
-            width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
-            flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(4.),
-            flex_shrink: 0.0,
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(4.),
+                flex_shrink: 0.0,
+                ..default()
+            },
+            ResponsiveWidth {
+                desktop_width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
+                phone_width: Val::Px(phone_combat_card_size(COMBAT_TACTIC_CARD_SIZE)),
+            },
+        ))
         .with_children(|parent| {
             if include_guard {
                 spawn_hover_card(
@@ -1224,13 +1246,19 @@ fn spawn_enemy_tactical_controls(parent: &mut ChildSpawnerCommands, assets: &Wor
     use crate::core::combat::tactics::CombatStance as Stance;
 
     parent
-        .spawn(Node {
-            width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
-            flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(4.),
-            flex_shrink: 0.0,
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(4.),
+                flex_shrink: 0.0,
+                ..default()
+            },
+            ResponsiveWidth {
+                desktop_width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
+                phone_width: Val::Px(phone_combat_card_size(COMBAT_TACTIC_CARD_SIZE)),
+            },
+        ))
         .with_children(|parent| {
             spawn_hover_card(
                 parent,
@@ -1283,12 +1311,18 @@ fn spawn_enemy_tactical_controls(parent: &mut ChildSpawnerCommands, assets: &Wor
 
 /// Reserves the tactical-card column so mirrored combatants stay aligned.
 fn spawn_tactical_spacer(parent: &mut ChildSpawnerCommands) {
-    parent.spawn(Node {
-        width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
-        height: Val::Px(1.0),
-        flex_shrink: 0.0,
-        ..default()
-    });
+    parent.spawn((
+        Node {
+            width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
+            height: Val::Px(1.0),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        ResponsiveWidth {
+            desktop_width: Val::VMin(COMBAT_TACTIC_CARD_SIZE),
+            phone_width: Val::Px(phone_combat_card_size(COMBAT_TACTIC_CARD_SIZE)),
+        },
+    ));
 }
 
 /// Spawns active abilities.
@@ -1366,15 +1400,23 @@ fn spawn_consumables(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, pl
         })
         .with_children(|parent| {
             parent
-                .spawn(Node {
-                    width: percent(100.),
-                    flex_direction: FlexDirection::Row,
-                    flex_wrap: FlexWrap::NoWrap,
-                    justify_content: JustifyContent::Center,
-                    column_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
-                    row_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        width: percent(100.),
+                        flex_direction: FlexDirection::Row,
+                        flex_wrap: FlexWrap::NoWrap,
+                        justify_content: JustifyContent::Center,
+                        column_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
+                        row_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
+                        ..default()
+                    },
+                    CombatConsumablesRow,
+                    crate::core::ui::scrollbar::ScrollableContainer,
+                    crate::core::ui::scrollbar::HorizontalWheelScroll,
+                    ScrollPosition::default(),
+                    Interaction::default(),
+                    bevy::ui::RelativeCursorPosition::default(),
+                ))
                 .with_children(|parent| {
                     for (index, (key, item)) in
                         consumables.iter().take(CONSUMABLE_HOTKEYS.len()).enumerate()
@@ -1449,6 +1491,10 @@ fn spawn_hover_card(
         Interaction::default(),
         Button,
         Pickable::default(),
+        ResponsiveSquare {
+            desktop_size: Val::VMin(card_size),
+            phone_size: phone_combat_card_size(card_size),
+        },
     ));
 
     if let Some(tooltip) = tooltip {
@@ -1840,10 +1886,17 @@ fn spawn_monster_health_bar(
                     bottom: Val::Px(2.),
                 },
                 flex_shrink: 0.,
+                align_self: AlignSelf::Center,
                 ..default()
             },
             BackgroundColor(BAR_BG_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            ResponsiveProgressBar {
+                desktop_width: percent(100.),
+                desktop_height: Val::Px(COMBAT_RESOURCE_BAR_HEIGHT),
+                phone_width: percent(88.),
+                phone_height: Val::Px(20.),
+            },
             Interaction::default(),
             Pickable::default(),
             InfoTooltip::Health,
@@ -1917,10 +1970,17 @@ fn spawn_enemy_mana_bar(
                     bottom: Val::Px(2.),
                 },
                 flex_shrink: 0.,
+                align_self: AlignSelf::Center,
                 ..default()
             },
             BackgroundColor(BAR_BG_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            ResponsiveProgressBar {
+                desktop_width: percent(100.),
+                desktop_height: Val::Px(COMBAT_RESOURCE_BAR_HEIGHT),
+                phone_width: percent(88.),
+                phone_height: Val::Px(20.),
+            },
             Interaction::default(),
             Pickable::default(),
             InfoTooltip::Mana,
@@ -1995,10 +2055,17 @@ fn spawn_poise_bar(
                     bottom: Val::Px(2.),
                 },
                 flex_shrink: 0.0,
+                align_self: AlignSelf::Center,
                 ..default()
             },
             BackgroundColor(BAR_BG_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            ResponsiveProgressBar {
+                desktop_width: percent(100.),
+                desktop_height: Val::Px(COMBAT_POISE_BAR_HEIGHT),
+                phone_width: percent(88.),
+                phone_height: Val::Px(18.),
+            },
             Interaction::default(),
             Pickable::default(),
             InfoTooltip::Poise,
@@ -2245,15 +2312,23 @@ fn spawn_enemy_consumables(
         })
         .with_children(|parent| {
             parent
-                .spawn(Node {
-                    width: percent(100.),
-                    flex_direction: FlexDirection::Row,
-                    flex_wrap: FlexWrap::NoWrap,
-                    justify_content: JustifyContent::Center,
-                    column_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
-                    row_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        width: percent(100.),
+                        flex_direction: FlexDirection::Row,
+                        flex_wrap: FlexWrap::NoWrap,
+                        justify_content: JustifyContent::Center,
+                        column_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
+                        row_gap: Val::Px(COMBAT_CONSUMABLE_CARD_GAP),
+                        ..default()
+                    },
+                    CombatConsumablesRow,
+                    crate::core::ui::scrollbar::ScrollableContainer,
+                    crate::core::ui::scrollbar::HorizontalWheelScroll,
+                    ScrollPosition::default(),
+                    Interaction::default(),
+                    bevy::ui::RelativeCursorPosition::default(),
+                ))
                 .with_children(|parent| {
                     for (key, item) in consumables.iter().take(CONSUMABLE_HOTKEYS.len()) {
                         spawn_hover_card(
@@ -2304,10 +2379,17 @@ fn spawn_combat_resource_bar(
                     bottom: Val::Px(2.),
                 },
                 flex_shrink: 0.,
+                align_self: AlignSelf::Center,
                 ..default()
             },
             BackgroundColor(BAR_BG_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            ResponsiveProgressBar {
+                desktop_width: percent(100.),
+                desktop_height: bar_height,
+                phone_width: percent(88.),
+                phone_height: Val::Px(20.),
+            },
             Interaction::default(),
             Pickable::default(),
             if is_health {
@@ -2413,5 +2495,13 @@ mod tests {
             assert!(consumable_width <= portrait_width + COMBAT_TACTIC_CARD_SIZE * vh + 12.0);
             assert!(three_columns_width <= panel_width);
         }
+    }
+
+    #[test]
+    /// Verifies each combat control tier remains readable without dominating a phone row.
+    fn combat_cards_use_bounded_phone_sizes() {
+        assert_eq!(phone_combat_card_size(COMBAT_TACTIC_CARD_SIZE), 36.0);
+        assert_eq!(phone_combat_card_size(COMBAT_CONSUMABLE_CARD_SIZE), 40.0);
+        assert_eq!(phone_combat_card_size(COMBAT_ABILITY_CARD_SIZE), 44.0);
     }
 }

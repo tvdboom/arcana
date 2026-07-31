@@ -30,6 +30,7 @@ use crate::core::ui::scrollbar::{
 };
 pub use crate::core::ui::toast::ToastContainer;
 pub use crate::core::ui::tooltip::*;
+use crate::core::ui::utils::{ResponsiveProgressBar, ResponsiveSquare};
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
 use bevy::window::{CursorIcon, SystemCursorIcon};
@@ -615,6 +616,10 @@ fn spawn_placeholder(
         BackgroundColor(PLACEHOLDER_COLOR),
         BorderColor::all(BUTTON_BORDER_COLOR),
         ImageNode::new(assets.image(image_path)).with_mode(NodeImageMode::Stretch),
+        ResponsiveSquare {
+            desktop_size: size,
+            phone_size: 44.,
+        },
     ));
 }
 
@@ -679,6 +684,10 @@ fn spawn_card(
                             ..default()
                         },
                         ImageNode::new(assets.image("equipped")).with_mode(NodeImageMode::Stretch),
+                        ResponsiveSquare {
+                            desktop_size: ICON_BADGE,
+                            phone_size: 18.,
+                        },
                     ));
                 });
         }
@@ -1177,6 +1186,12 @@ pub fn spawn_image_column(
                                     },
                                     BackgroundColor(BAR_BG_COLOR),
                                     BorderColor::all(BUTTON_BORDER_COLOR),
+                                    ResponsiveProgressBar {
+                                        desktop_width: percent(90.),
+                                        desktop_height: Val::Px(24.),
+                                        phone_width: percent(86.),
+                                        phone_height: Val::Px(16.),
+                                    },
                                 ))
                                 .with_children(|parent| {
                                     // Health bar fill
@@ -1302,6 +1317,12 @@ pub fn spawn_stats_column(
                                     },
                                     BorderColor::all(BUTTON_BORDER_COLOR),
                                     BackgroundColor(BAR_BG_COLOR),
+                                    ResponsiveProgressBar {
+                                        desktop_width: Val::Px(80.),
+                                        desktop_height: Val::Px(14.),
+                                        phone_width: Val::Px(64.),
+                                        phone_height: Val::Px(10.),
+                                    },
                                 ))
                                 .with_children(|parent| {
                                     parent.spawn((
@@ -1363,6 +1384,10 @@ pub fn spawn_stats_column(
                                         },
                                         ImageNode::new(assets.image("gold"))
                                             .with_mode(NodeImageMode::Stretch),
+                                        ResponsiveSquare {
+                                            desktop_size: ICON_STAT,
+                                            phone_size: 20.,
+                                        },
                                     ));
                                     parent.spawn((
                                         add_text("", "bold", 2.4, assets),
@@ -1394,6 +1419,10 @@ pub fn spawn_stats_column(
                                         },
                                         ImageNode::new(assets.image("ap"))
                                             .with_mode(NodeImageMode::Stretch),
+                                        ResponsiveSquare {
+                                            desktop_size: ICON_STAT,
+                                            phone_size: 20.,
+                                        },
                                     ));
                                     parent.spawn((
                                         add_text(format!("{}", player.ap), "bold", 2.4, assets),
@@ -1614,11 +1643,18 @@ pub fn spawn_bar(parent: &mut ChildSpawnerCommands, assets: &WorldAssets, is_hea
                 height: bar_height,
                 position_type: PositionType::Relative,
                 border: UiRect::all(Val::Px(2.)),
+                align_self: AlignSelf::Center,
                 flex_shrink: 0.,
                 ..default()
             },
             BackgroundColor(BAR_BG_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            ResponsiveProgressBar {
+                desktop_width: percent(100.),
+                desktop_height: bar_height,
+                phone_width: percent(88.),
+                phone_height: Val::Px(20.),
+            },
         ))
         .with_children(|parent| {
             // Fill.
@@ -3189,6 +3225,10 @@ pub fn spawn_playing_action_button(
                         .with_mode(NodeImageMode::Stretch),
                     Button,
                     ActionButton(action),
+                    ResponsiveSquare {
+                        desktop_size: ICON_ACTION,
+                        phone_size: 48.,
+                    },
                 ))
                 .observe(handle_playing_action_clicks)
                 .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
@@ -3677,6 +3717,10 @@ pub fn spawn_equipment_card<'a>(
                             ..default()
                         },
                         ImageNode::new(assets.image("equipped")).with_mode(NodeImageMode::Stretch),
+                        ResponsiveSquare {
+                            desktop_size: ICON_BADGE,
+                            phone_size: 18.,
+                        },
                     ));
                 }
 
@@ -3688,6 +3732,10 @@ pub fn spawn_equipment_card<'a>(
                         ..default()
                     },
                     ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                    ResponsiveSquare {
+                        desktop_size: ICON_BADGE,
+                        phone_size: 18.,
+                    },
                 ));
 
                 // Price number (same color as weapon name)
@@ -3845,6 +3893,10 @@ fn spawn_active_hotkey_slot(
         bevy::ui::RelativeCursorPosition::default(),
         ActiveHotkeySlot {
             index,
+        },
+        ResponsiveSquare {
+            desktop_size: ACTIVE_HOTKEY_SLOT_SIZE,
+            phone_size: 44.,
         },
     ));
 
@@ -4032,6 +4084,10 @@ pub fn handle_hotkey_drag_start(
         GlobalZIndex(1200),
         Pickable::IGNORE,
         PrecombatDragGhost,
+        ResponsiveSquare {
+            desktop_size: ACTIVE_HOTKEY_SLOT_SIZE,
+            phone_size: 44.,
+        },
     ));
     commands.entity(*window_e).insert(CursorIcon::from(SystemCursorIcon::Move));
 

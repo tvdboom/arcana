@@ -434,6 +434,10 @@ fn build_quest_content_inner(
                             ..default()
                         },
                         ImageNode::new(assets.image("ap")).with_mode(NodeImageMode::Stretch),
+                        ResponsiveSquare {
+                            desktop_size: Val::Vw(2.4),
+                            phone_size: 20.,
+                        },
                     ));
                     parent.spawn((
                         add_text(player.ap.to_string(), "bold", 2.4, assets),
@@ -590,6 +594,7 @@ fn spawn_quest_card(
                     column_gap: Val::Px(6.),
                     ..default()
                 })
+                .insert(PanelCardCostRow)
                 .with_children(|parent| {
                     parent
                         .spawn((
@@ -602,6 +607,7 @@ fn spawn_quest_card(
                                 ..default()
                             },
                             BackgroundColor(Color::srgba(0., 0., 0., 0.85)),
+                            PanelCardCostBadge,
                         ))
                         .with_children(|parent| {
                             parent.spawn((
@@ -612,6 +618,7 @@ fn spawn_quest_card(
                                 },
                                 ImageNode::new(assets.image("ap"))
                                     .with_mode(NodeImageMode::Stretch),
+                                PanelCardCostIcon,
                             ));
                             parent.spawn((
                                 add_text(ap_cost.to_string(), "bold", 1.6, assets),

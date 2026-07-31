@@ -33,6 +33,35 @@ pub struct PanelCardRow;
 #[derive(Component)]
 pub struct PanelCard;
 
+#[derive(Component)]
+pub struct PanelCardCostRow;
+
+#[derive(Component)]
+pub struct PanelCardCostBadge;
+
+#[derive(Component)]
+pub struct PanelCardCostIcon;
+
+#[derive(Component, Clone, Copy)]
+pub struct ResponsiveProgressBar {
+    pub desktop_width: Val,
+    pub desktop_height: Val,
+    pub phone_width: Val,
+    pub phone_height: Val,
+}
+
+#[derive(Component, Clone, Copy)]
+pub struct ResponsiveSquare {
+    pub desktop_size: Val,
+    pub phone_size: f32,
+}
+
+#[derive(Component, Clone, Copy)]
+pub struct ResponsiveWidth {
+    pub desktop_width: Val,
+    pub phone_width: Val,
+}
+
 #[derive(Component, Clone, Copy)]
 pub struct ResponsiveOverlayCard {
     pub desktop_width: Val,
@@ -497,6 +526,7 @@ pub fn spawn_card_ui<M: Component>(
                         column_gap: Val::Px(6.),
                         ..default()
                     })
+                    .insert(PanelCardCostRow)
                     .with_children(|parent| {
                         if let Some((val, icon_key, color)) = secondary_cost_opt {
                             parent
@@ -510,6 +540,7 @@ pub fn spawn_card_ui<M: Component>(
                                         ..default()
                                     },
                                     BackgroundColor(Color::srgba(0., 0., 0., 0.85)),
+                                    PanelCardCostBadge,
                                 ))
                                 .with_children(|parent| {
                                     parent.spawn((
@@ -520,6 +551,7 @@ pub fn spawn_card_ui<M: Component>(
                                         },
                                         ImageNode::new(assets.image(icon_key))
                                             .with_mode(NodeImageMode::Stretch),
+                                        PanelCardCostIcon,
                                     ));
                                     parent.spawn((
                                         add_text(val.to_string(), "bold", 1.6, assets),
@@ -540,6 +572,7 @@ pub fn spawn_card_ui<M: Component>(
                                         ..default()
                                     },
                                     BackgroundColor(Color::srgba(0., 0., 0., 0.85)),
+                                    PanelCardCostBadge,
                                 ))
                                 .with_children(|parent| {
                                     parent.spawn((
@@ -550,6 +583,7 @@ pub fn spawn_card_ui<M: Component>(
                                         },
                                         ImageNode::new(assets.image("gold"))
                                             .with_mode(NodeImageMode::Stretch),
+                                        PanelCardCostIcon,
                                     ));
                                     parent.spawn((
                                         add_text(gold_cost.to_string(), "bold", 1.6, assets),
@@ -570,6 +604,7 @@ pub fn spawn_card_ui<M: Component>(
                                         ..default()
                                     },
                                     BackgroundColor(Color::srgba(0., 0., 0., 0.85)),
+                                    PanelCardCostBadge,
                                 ))
                                 .with_children(|parent| {
                                     parent.spawn((
@@ -580,6 +615,7 @@ pub fn spawn_card_ui<M: Component>(
                                         },
                                         ImageNode::new(assets.image("ap"))
                                             .with_mode(NodeImageMode::Stretch),
+                                        PanelCardCostIcon,
                                     ));
                                     parent.spawn((
                                         add_text(ap_cost.to_string(), "bold", 1.6, assets),
