@@ -26,7 +26,8 @@ use crate::core::states::GameState;
 pub use crate::core::ui::level_up::{manage_level_up_overlay, LevelUpPending};
 use crate::core::ui::modal::{spawn_modal, ActiveModal, ModalAction};
 use crate::core::ui::scrollbar::{
-    on_scrollbar_thumb_drag, ScrollableContainer, ScrollbarThumb, ScrollbarTrack,
+    on_scrollbar_thumb_drag, HorizontalWheelScroll, ScrollableContainer, ScrollbarThumb,
+    ScrollbarTrack,
 };
 pub use crate::core::ui::toast::ToastContainer;
 pub use crate::core::ui::tooltip::*;
@@ -164,6 +165,14 @@ pub struct ArtifactsList;
 /// hover/click on cards that are scrolled outside the visible (clipped) area.
 #[derive(Component)]
 pub struct RightColumnScroll;
+
+/// Marks the playing-page inventory column for compact height and padding rules.
+#[derive(Component)]
+pub struct PlayingRightColumn;
+
+/// Marks the horizontally scrollable inventory-category strip.
+#[derive(Component)]
+pub struct RightTabStrip;
 
 /// The equipment image-slots overlaid on the character portrait.
 #[derive(Component, Clone, Copy, PartialEq, Eq, Debug)]
@@ -952,7 +961,7 @@ pub fn setup_playing_screen(
                                 },
                                 ..default()
                             },
-                            GlobalZIndex(890),
+                            GlobalZIndex(930),
                             crate::core::ui::utils::PlayingActionBar,
                         ))
                         .with_children(|parent| {
@@ -2091,6 +2100,7 @@ fn spawn_right_column(
                 ..default()
             },
             crate::core::ui::utils::PlayScreenColumns2And3,
+            PlayingRightColumn,
         ))
         .with_children(|parent| {
             // Tab row + gold icon at the top
@@ -2107,11 +2117,22 @@ fn spawn_right_column(
                 .with_children(|parent| {
                     // Left: three tab buttons
                     parent
-                        .spawn(Node {
-                            flex_direction: FlexDirection::Row,
-                            column_gap: Val::Px(4.),
-                            ..default()
-                        })
+                        .spawn((
+                            Node {
+                                width: percent(100.),
+                                flex_direction: FlexDirection::Row,
+                                flex_wrap: FlexWrap::NoWrap,
+                                column_gap: Val::Px(4.),
+                                overflow: Overflow::scroll_x(),
+                                ..default()
+                            },
+                            RightTabStrip,
+                            ScrollableContainer,
+                            HorizontalWheelScroll,
+                            ScrollPosition::default(),
+                            Interaction::default(),
+                            bevy::ui::RelativeCursorPosition::default(),
+                        ))
                         .with_children(|parent| {
                             for (tab, key) in [
                                 (RightTab::Equipment, "general.equipment"),
@@ -2132,6 +2153,7 @@ fn spawn_right_column(
                                         Node {
                                             padding: UiRect::axes(Val::Px(10.), Val::Px(5.)),
                                             border: UiRect::all(Val::Px(1.)),
+                                            flex_shrink: 0.0,
                                             ..default()
                                         },
                                         BackgroundColor(bg_color),
@@ -3257,6 +3279,14 @@ pub struct EquipmentCard {
     pub price: u32,
 }
 
+/// Opens the sell confirmation for a card without triggering its equip action.
+#[derive(Component)]
+pub struct SellItemButton {
+    pub key: String,
+    pub is_equipped: bool,
+    pub price: u32,
+}
+
 /// Equips item.
 pub fn equip_item(player: &mut Player, key: &str) -> Option<&'static str> {
     let old_hp = player.max_health();
@@ -3454,6 +3484,35 @@ pub fn unequip_slot(player: &mut Player, slot: EquipSlot) -> bool {
     };
     player.update_health_mana(old_hp, old_mp);
     res
+}
+
+/// Opens a touch-accessible sell confirmation from an item's price badge.
+pub fn handle_sell_item_button_click(
+    mut event: On<Pointer<Click>>,
+    mut commands: Commands,
+    assets: Res<WorldAssets>,
+    localization: Res<Localization>,
+    settings: Res<Settings>,
+    button_q: Query<&SellItemButton>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+) {
+    event.propagate(false);
+    let Ok(button) = button_q.get(event.entity) else {
+        return;
+    };
+    spawn_modal(
+        &mut commands,
+        &assets,
+        &localization,
+        settings.language,
+        ModalAction::SellItem {
+            key: button.key.clone(),
+            price: button.price,
+            is_equipped: button.is_equipped,
+            slot: None,
+        },
+        &mut play_audio_msg,
+    );
 }
 
 /// Handles equipment card click.
@@ -3695,9 +3754,9 @@ pub fn spawn_equipment_card<'a>(
     cmd.observe(cursor::<Out>(SystemCursorIcon::Default));
     cmd.observe(handle_equipment_card_click);
     cmd.with_children(|parent| {
-        // Top-right corner: equipped badge (if equipped) + price display
-        parent
-            .spawn((Node {
+        // Top-right corner: equipped badge plus a touch-accessible sell button.
+        let mut sell_cmd = parent.spawn((
+            Node {
                 position_type: PositionType::Absolute,
                 right: Val::Px(4.),
                 top: Val::Px(4.),
@@ -3705,45 +3764,66 @@ pub fn spawn_equipment_card<'a>(
                 align_items: AlignItems::Center,
                 column_gap: Val::Px(4.),
                 overflow: Overflow::clip(),
+                padding: UiRect::axes(Val::Px(5.0), Val::Px(3.0)),
+                border: UiRect::all(Val::Px(1.0)),
+                border_radius: BorderRadius::all(Val::Px(4.0)),
                 ..default()
-            },))
-            .with_children(|parent| {
-                // Equipped badge (left of price)
-                if is_equipped {
-                    parent.spawn((
-                        Node {
-                            width: ICON_BADGE,
-                            height: ICON_BADGE,
-                            ..default()
-                        },
-                        ImageNode::new(assets.image("equipped")).with_mode(NodeImageMode::Stretch),
-                        ResponsiveSquare {
-                            desktop_size: ICON_BADGE,
-                            phone_size: 18.,
-                        },
-                    ));
-                }
-
-                // Gold icon (same size as equipped badge)
+            },
+            BackgroundColor(Color::srgba_u8(8, 14, 30, 230)),
+            BorderColor::all(BUTTON_BORDER_COLOR),
+            ZIndex(10),
+            Button,
+            Interaction::default(),
+            Pickable::default(),
+            SellItemButton {
+                key: card_key.clone(),
+                is_equipped,
+                price,
+            },
+        ));
+        sell_cmd
+            .observe(handle_sell_item_button_click)
+            .observe(recolor::<Over>(NORMAL_BUTTON_COLOR))
+            .observe(recolor::<Out>(Color::srgba_u8(8, 14, 30, 230)))
+            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+            .observe(cursor::<Out>(SystemCursorIcon::Default));
+        sell_cmd.with_children(|parent| {
+            // Equipped badge (left of price)
+            if is_equipped {
                 parent.spawn((
                     Node {
                         width: ICON_BADGE,
                         height: ICON_BADGE,
                         ..default()
                     },
-                    ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                    ImageNode::new(assets.image("equipped")).with_mode(NodeImageMode::Stretch),
                     ResponsiveSquare {
                         desktop_size: ICON_BADGE,
                         phone_size: 18.,
                     },
                 ));
+            }
 
-                // Price number (same color as weapon name)
-                parent.spawn((
-                    add_text(format!("{}", price), "bold", 2.3, assets),
-                    TextColor(BUTTON_TEXT_COLOR),
-                ));
-            });
+            // Gold icon (same size as equipped badge)
+            parent.spawn((
+                Node {
+                    width: ICON_BADGE,
+                    height: ICON_BADGE,
+                    ..default()
+                },
+                ImageNode::new(assets.image("gold")).with_mode(NodeImageMode::Stretch),
+                ResponsiveSquare {
+                    desktop_size: ICON_BADGE,
+                    phone_size: 18.,
+                },
+            ));
+
+            // Price number (same color as weapon name)
+            parent.spawn((
+                add_text(format!("{}", price), "bold", 2.3, assets),
+                TextColor(BUTTON_TEXT_COLOR),
+            ));
+        });
 
         spawn_placeholder(parent, assets, &image_path, ICON_ITEM);
 

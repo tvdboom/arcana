@@ -7,6 +7,7 @@ use crate::core::menu::utils::{add_text, spawn_rich_text_row};
 use crate::core::player::Player;
 use crate::core::settings::Language;
 use crate::core::ui::responsive::responsive_font_size;
+use crate::core::ui::utils::uses_compact_viewport;
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -35,6 +36,27 @@ pub struct TooltipContent {
     pub extra_width: f32,
 }
 
+/// Makes a tooltip subtree transparent to pointer picking.
+fn ignore_tooltip_subtree(commands: &mut Commands, entity: Entity, children_q: &Query<&Children>) {
+    commands.entity(entity).try_insert(Pickable::IGNORE);
+    if let Ok(children) = children_q.get(entity) {
+        for child in children.iter() {
+            ignore_tooltip_subtree(commands, child, children_q);
+        }
+    }
+}
+
+/// Prevents phone tooltips from intercepting the tap meant for their source control.
+pub fn disable_tooltip_picking(
+    mut commands: Commands,
+    added_q: Query<Entity, Added<TooltipNode>>,
+    children_q: Query<&Children>,
+) {
+    for entity in &added_q {
+        ignore_tooltip_subtree(&mut commands, entity, &children_q);
+    }
+}
+
 #[derive(Clone, Copy)]
 struct TooltipMetrics {
     compact: bool,
@@ -50,7 +72,7 @@ struct TooltipMetrics {
 
 /// Resolves tooltip geometry from the actual viewport and rendered text scale.
 fn tooltip_metrics(window_width: f32, window_height: f32, extra_width: f32) -> TooltipMetrics {
-    let compact = window_width < 720.0 || window_height > window_width * 1.15;
+    let compact = uses_compact_viewport(window_width, window_height);
     let viewport_width = (window_width - 24.0).max(1.0);
     let max_width = if compact {
         viewport_width.min(420.0)
@@ -227,6 +249,7 @@ pub fn spawn_tooltip(
             },
             BackgroundColor(Color::srgba_u8(10, 18, 45, 245)),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            Pickable::IGNORE,
             GlobalZIndex(1000),
             TooltipNode {
                 width: tooltip_width,
@@ -667,6 +690,11 @@ mod tests {
         assert_eq!(metrics.min_width, 260.0);
         assert_eq!(metrics.image_size, 72.0);
         assert_eq!(metrics.badge_icon_size, 20.0);
+
+        let landscape_metrics = tooltip_metrics(844.0, 390.0, 100.0);
+        assert!(landscape_metrics.compact);
+        assert_eq!(landscape_metrics.max_width, 420.0);
+        assert_eq!(landscape_metrics.image_size, 72.0);
     }
 
     #[test]

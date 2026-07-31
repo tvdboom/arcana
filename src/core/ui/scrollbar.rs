@@ -43,6 +43,7 @@ pub fn scroll_system(
     mut mouse_wheel_events: MessageReader<bevy::input::mouse::MouseWheel>,
     mut query: Query<
         (
+            Entity,
             &mut ScrollPosition,
             &ComputedNode,
             &Interaction,
@@ -53,23 +54,43 @@ pub fn scroll_system(
     >,
 ) {
     for event in mouse_wheel_events.read() {
-        for (mut scroll, computed, interaction, cursor, horizontal_wheel) in &mut query {
-            if horizontal_wheel.is_some() || is_scroll_target(interaction, cursor) {
-                // Scroll offset speed factor
-                let max_scroll_y = (computed.content_size().y - computed.size().y).max(0.0);
-                let max_scroll_x = (computed.content_size().x - computed.size().x).max(0.0);
+        let target = {
+            let mut target = None;
 
-                if horizontal_wheel.is_some() || (max_scroll_x > 0.0 && max_scroll_y <= 0.0) {
-                    scroll.x -= event.y * 200.0;
-                    scroll.x = scroll.x.clamp(0.0, max_scroll_x);
-                } else {
-                    scroll.y -= event.y * 200.0;
-                    scroll.y = scroll.y.clamp(0.0, max_scroll_y);
-                    if max_scroll_x > 0.0 {
-                        scroll.x += event.x * 200.0;
-                        scroll.x = scroll.x.clamp(0.0, max_scroll_x);
-                    }
+            for (entity, _, computed, interaction, cursor, _) in &mut query {
+                if !is_scroll_target(interaction, cursor) {
+                    continue;
                 }
+
+                let area = computed.size().x * computed.size().y;
+                if target.is_none_or(|(_, current_area)| area < current_area) {
+                    target = Some((entity, area));
+                }
+            }
+
+            target.map(|(entity, _)| entity)
+        };
+
+        let Some(target) = target else {
+            continue;
+        };
+        let Ok((_, mut scroll, computed, _, _, horizontal_wheel)) = query.get_mut(target) else {
+            continue;
+        };
+
+        // Scroll offset speed factor
+        let max_scroll_y = (computed.content_size().y - computed.size().y).max(0.0);
+        let max_scroll_x = (computed.content_size().x - computed.size().x).max(0.0);
+
+        if horizontal_wheel.is_some() || (max_scroll_x > 0.0 && max_scroll_y <= 0.0) {
+            scroll.x -= event.y * 200.0;
+            scroll.x = scroll.x.clamp(0.0, max_scroll_x);
+        } else {
+            scroll.y -= event.y * 200.0;
+            scroll.y = scroll.y.clamp(0.0, max_scroll_y);
+            if max_scroll_x > 0.0 {
+                scroll.x += event.x * 200.0;
+                scroll.x = scroll.x.clamp(0.0, max_scroll_x);
             }
         }
     }
@@ -299,5 +320,6 @@ mod tests {
         };
 
         assert!(is_scroll_target(&Interaction::None, Some(&cursor)));
+        assert!(!is_scroll_target(&Interaction::None, None));
     }
 }

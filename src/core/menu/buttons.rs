@@ -11,6 +11,7 @@ use crate::core::persistence::{LoadCharacterMsg, SaveCharacterMsg};
 use crate::core::player::Player;
 use crate::core::settings::Language;
 use crate::core::states::{AppState, GameState};
+use crate::core::ui::utils::ResponsiveButtonSize;
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::prelude::*;
@@ -163,6 +164,10 @@ pub fn spawn_menu_button(
     };
 
     let margin = UiRect::all(Val::VMin(0.89));
+    let (compact_min_width, compact_height) = match btn {
+        MenuBtn::Back => (Val::Px(120.0), Val::Px(44.0)),
+        _ => (Val::Px(220.0), Val::Px(48.0)),
+    };
 
     parent
         .spawn((
@@ -181,6 +186,12 @@ pub fn spawn_menu_button(
             },
             BackgroundColor(NORMAL_BUTTON_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            ResponsiveButtonSize {
+                desktop_min_width: min_width,
+                desktop_height: height,
+                compact_min_width,
+                compact_height,
+            },
             btn.clone(),
         ))
         .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))

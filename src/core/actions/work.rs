@@ -501,7 +501,8 @@ pub fn handle_work_slider_clicks_track(
     };
 
     let relative_x = slider_relative_x_from_cursor(track_transform, window, cursor_pos.x);
-    let stage = slider_stage_from_relative_x(relative_x, 3);
+    let slider_width = responsive_slider_width(window.width(), window.height());
+    let stage = slider_stage_from_relative_x(relative_x, 3, slider_width);
     slider_state.0 = stage;
 }
 
@@ -510,6 +511,7 @@ pub fn handle_work_slider_drag(
     ev: On<Pointer<Drag>>,
     localization: Res<Localization>,
     settings: Res<Settings>,
+    windows: Query<&Window>,
     mut handle_q: Query<&mut Node, (With<WorkSliderHandle>, Without<WorkSliderTrack>)>,
     mut value_node_q: Query<
         &mut Node,
@@ -526,13 +528,17 @@ pub fn handle_work_slider_drag(
             _ => -12.,
         }
     };
-    let relative_x = (current_left + 12. + ev.delta.x).clamp(0., SLIDER_WIDTH);
+    let Ok(window) = windows.single() else {
+        return;
+    };
+    let slider_width = responsive_slider_width(window.width(), window.height());
+    let relative_x = (current_left + 12. + ev.delta.x).clamp(0., slider_width);
     if let Ok(mut h) = handle_q.single_mut() {
         if let Ok(mut v) = value_node_q.single_mut() {
-            update_slider_visuals(relative_x, &mut h, &mut v);
+            update_slider_visuals(relative_x, slider_width, &mut h, &mut v);
         }
     }
-    let stage = slider_stage_from_relative_x(relative_x, 3);
+    let stage = slider_stage_from_relative_x(relative_x, 3, slider_width);
     if let Ok(mut text) = text_q.single_mut() {
         let stage_names = ["light", "regular", "heavy"];
         text.0 = localization.get(stage_names[stage as usize], settings.language);
@@ -542,6 +548,7 @@ pub fn handle_work_slider_drag(
 /// Handles work slider release.
 pub fn handle_work_slider_release(
     _ev: On<Pointer<DragEnd>>,
+    windows: Query<&Window>,
     handle_q: Query<&Node, (With<WorkSliderHandle>, Without<WorkSliderTrack>)>,
     mut slider_state: ResMut<WorkSliderState>,
 ) {
@@ -552,6 +559,10 @@ pub fn handle_work_slider_release(
         Val::Px(px) => px + 12.,
         _ => 0.0,
     };
-    let stage = slider_stage_from_relative_x(relative_x, 3);
+    let Ok(window) = windows.single() else {
+        return;
+    };
+    let slider_width = responsive_slider_width(window.width(), window.height());
+    let stage = slider_stage_from_relative_x(relative_x, 3, slider_width);
     slider_state.0 = stage;
 }

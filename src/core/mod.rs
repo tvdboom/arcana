@@ -228,7 +228,7 @@ impl Plugin for GamePlugin {
                     update_level_up_responsive_layout,
                     update_shop_responsive_layout,
                     (update_responsive_typography, update_responsive_element_sizes),
-                    touch_scroll_system,
+                    (disable_tooltip_picking, touch_scroll_system),
                     apply_level_up_system,
                     modal_input_system,
                     update_localized_text.run_if(resource_changed::<Settings>),

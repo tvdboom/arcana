@@ -63,6 +63,32 @@ pub struct ResponsiveWidth {
 }
 
 #[derive(Component, Clone, Copy)]
+pub struct ResponsiveButtonSize {
+    pub desktop_min_width: Val,
+    pub desktop_height: Val,
+    pub compact_min_width: Val,
+    pub compact_height: Val,
+}
+
+#[derive(Component, Clone, Copy)]
+pub enum ResponsiveSliderElement {
+    Track,
+    Notch {
+        fraction: f32,
+    },
+    StageRegion {
+        left_fraction: f32,
+        width_fraction: f32,
+    },
+    Handle {
+        last_width: f32,
+    },
+    Value {
+        last_width: f32,
+    },
+}
+
+#[derive(Component, Clone, Copy)]
 pub struct ResponsiveOverlayCard {
     pub desktop_width: Val,
     pub desktop_height: Val,
@@ -92,6 +118,20 @@ pub struct PlayingActionBar;
 
 pub const SLIDER_WIDTH: f32 = 280.0;
 pub const SLIDER_VALUE_WIDTH: f32 = 120.0;
+
+/// Returns whether the viewport needs the compact phone layout in either orientation.
+pub fn uses_compact_viewport(width: f32, height: f32) -> bool {
+    width < 720.0 || height > width * 1.15 || (height <= 500.0 && width <= 1000.0)
+}
+
+/// Returns a bounded intensity-slider width for the current viewport.
+pub fn responsive_slider_width(width: f32, height: f32) -> f32 {
+    if uses_compact_viewport(width, height) {
+        (width * 0.62).clamp(190.0, 240.0)
+    } else {
+        SLIDER_WIDTH
+    }
+}
 
 // Generic helper to despawn an entity and all its descendants manually
 /// Despawns recursive manual.
@@ -140,23 +180,27 @@ pub fn cleanup_panel_ui(
 /// Performs the global click listener operation.
 pub fn global_click_listener(
     trigger: On<Pointer<Click>>,
+    time: Res<Time>,
+    gesture: Res<crate::core::ui::creation::SelectionGestureState>,
     state: Res<State<GameState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut play_audio_msg: MessageWriter<crate::core::audio::PlayAudioMsg>,
     parent_q: Query<&ChildOf>,
-    panel_q: Query<&Interaction, With<PanelCmp>>,
+    panel_q: Query<(), With<PanelCmp>>,
     action_btn_q: Query<&crate::core::actions::ActionButton>,
 ) {
     let current_state = state.get();
-    if !is_panel_state(*current_state) {
+    if !is_panel_state(*current_state) || gesture.suppresses_click(time.elapsed_secs_f64()) {
         return;
     }
 
-    // 1. If clicked entity or its ancestors is an ActionButton, let its own handler transition immediately
+    // If the click originated inside the panel, or on an action button, it is
+    // never an outside click. Checking ancestry is reliable even when a child
+    // captures hover/press state or the pointer moved during a touch gesture.
     let clicked_entity = trigger.original_event_target();
     let mut current = clicked_entity;
     loop {
-        if action_btn_q.get(current).is_ok() {
+        if panel_q.get(current).is_ok() || action_btn_q.get(current).is_ok() {
             return;
         }
         if let Ok(parent) = parent_q.get(current) {
@@ -166,14 +210,7 @@ pub fn global_click_listener(
         }
     }
 
-    // 2. If the panel itself is hovered or pressed, the click is inside the panel
-    for interaction in &panel_q {
-        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
-            return;
-        }
-    }
-
-    // 3. Otherwise, click is outside! Close panel.
+    // Otherwise, the click truly originated outside the active panel.
     play_audio_msg.write(crate::core::audio::PlayAudioMsg::new("button"));
     next_game_state.set(GameState::Playing);
 }
@@ -228,23 +265,29 @@ pub fn slider_relative_x_from_cursor(
     window: &Window,
     cursor_x: f32,
 ) -> f32 {
+    let slider_width = responsive_slider_width(window.width(), window.height());
     let track_center_x = track_transform.translation().x + window.width() / 2.0;
-    let track_left = track_center_x - SLIDER_WIDTH / 2.0;
-    (cursor_x - track_left).clamp(0., SLIDER_WIDTH)
+    let track_left = track_center_x - slider_width / 2.0;
+    (cursor_x - track_left).clamp(0., slider_width)
 }
 
 /// Performs the slider stage from relative x operation.
-pub fn slider_stage_from_relative_x(relative_x: f32, stages_count: u32) -> u32 {
-    let frac = relative_x / SLIDER_WIDTH;
+pub fn slider_stage_from_relative_x(relative_x: f32, stages_count: u32, slider_width: f32) -> u32 {
+    let frac = relative_x / slider_width;
     ((frac * (stages_count - 1) as f32).round() as u32).clamp(0, stages_count - 1)
 }
 
 /// Updates slider visuals.
-pub fn update_slider_visuals(relative_x: f32, handle_node: &mut Node, value_node: &mut Node) {
-    let relative_x = relative_x.clamp(0., SLIDER_WIDTH);
+pub fn update_slider_visuals(
+    relative_x: f32,
+    slider_width: f32,
+    handle_node: &mut Node,
+    value_node: &mut Node,
+) {
+    let relative_x = relative_x.clamp(0., slider_width);
     handle_node.left = Val::Px(relative_x - 12.);
-    let stage = slider_stage_from_relative_x(relative_x, 3);
-    let notch_x = (stage as f32 / 2.0) * SLIDER_WIDTH;
+    let stage = slider_stage_from_relative_x(relative_x, 3, slider_width);
+    let notch_x = (stage as f32 / 2.0) * slider_width;
     value_node.left = Val::Px(notch_x - SLIDER_VALUE_WIDTH / 2.);
 }
 
@@ -300,6 +343,7 @@ pub fn spawn_intensity_slider<
                     Interaction::default(),
                     Pickable::default(),
                     BackgroundColor(Color::srgba(0., 0., 0., 0.01)),
+                    ResponsiveSliderElement::Track,
                     track_marker,
                 ))
                 .observe(cursor::<Over>(SystemCursorIcon::Pointer))
@@ -333,6 +377,9 @@ pub fn spawn_intensity_slider<
                             },
                             BackgroundColor(crate::core::constants::BUTTON_BORDER_COLOR),
                             Pickable::IGNORE,
+                            ResponsiveSliderElement::Notch {
+                                fraction: i as f32 / (stages_count - 1) as f32,
+                            },
                         ));
                     }
 
@@ -366,6 +413,10 @@ pub fn spawn_intensity_slider<
                                 Interaction::default(),
                                 Pickable::default(),
                                 BackgroundColor(Color::srgba(0., 0., 0., 0.01)),
+                                ResponsiveSliderElement::StageRegion {
+                                    left_fraction: left / SLIDER_WIDTH,
+                                    width_fraction: width / SLIDER_WIDTH,
+                                },
                                 btn_marker_fn(i),
                             ))
                             .observe(cursor::<Over>(SystemCursorIcon::Pointer))
@@ -392,6 +443,9 @@ pub fn spawn_intensity_slider<
                             Button,
                             Interaction::default(),
                             Pickable::default(),
+                            ResponsiveSliderElement::Handle {
+                                last_width: SLIDER_WIDTH,
+                            },
                             handle_marker,
                         ))
                         .observe(cursor::<Over>(SystemCursorIcon::Pointer))
@@ -411,6 +465,9 @@ pub fn spawn_intensity_slider<
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
                         ..default()
+                    },
+                    ResponsiveSliderElement::Value {
+                        last_width: SLIDER_WIDTH,
                     },
                     vnode_marker,
                 ))

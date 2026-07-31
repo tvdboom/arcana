@@ -25,6 +25,7 @@ use crate::core::ui::scrollbar::{
     on_scrollbar_thumb_drag_x, HorizontalWheelScroll, ScrollableContainer, ScrollbarThumbX,
     ScrollbarTrackX,
 };
+use crate::core::ui::utils::ResponsiveButtonSize;
 use crate::core::utils::cursor;
 use crate::utils::NameFromEnum;
 use bevy::input::keyboard::{Key, KeyboardInput};
@@ -636,8 +637,8 @@ fn spawn_continue_button(
     parent
         .spawn((
             Node {
-                min_width: Val::Px(200.),
-                height: Val::Px(45.),
+                min_width: Val::VMin(22.22),
+                height: Val::VMin(5.0),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 padding: UiRect::horizontal(Val::Px(16.)),
@@ -648,6 +649,12 @@ fn spawn_continue_button(
             },
             BackgroundColor(NORMAL_BUTTON_COLOR),
             BorderColor::all(BUTTON_BORDER_COLOR),
+            ResponsiveButtonSize {
+                desktop_min_width: Val::VMin(22.22),
+                desktop_height: Val::VMin(5.0),
+                compact_min_width: Val::Px(120.0),
+                compact_height: Val::Px(44.0),
+            },
             CreateCharacterContinueBtn,
         ))
         .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
@@ -2329,6 +2336,10 @@ pub fn setup_deity_selection(
             ImageNode::new(assets.image("bg2")).with_mode(NodeImageMode::Stretch),
             MenuCmp,
             CreationLayoutNode::DeityScreen,
+            ScrollableContainer,
+            ScrollPosition::default(),
+            Interaction::default(),
+            bevy::ui::RelativeCursorPosition::default(),
         ))
         .with_children(|parent| {
             parent.spawn((
@@ -2515,9 +2526,11 @@ fn spawn_deity_alignment_card(
                                 flex_direction: FlexDirection::Column,
                                 row_gap: Val::Px(4.),
                                 margin: UiRect::top(Val::Auto),
-                                padding: UiRect::bottom(percent(4.)),
+                                padding: UiRect::bottom(percent(8.)),
+                                bottom: Val::Px(16.),
                                 ..default()
                             })
+                            .insert(ZIndex(1))
                             .with_children(|choices| {
                                 for ethical in [
                                     EthicalAlignment::Lawful,

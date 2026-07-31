@@ -21,13 +21,15 @@ use crate::core::ui::level_up::{
     LevelUpAbilityChoiceBtn, LevelUpAttrMinusBtn, LevelUpAttrPlusBtn, LevelUpLayoutNode,
     LevelUpPerkChoiceBtn,
 };
+use crate::core::ui::playing::{PlayingRightColumn, RightTabStrip};
 use crate::core::ui::scrollbar::{HorizontalWheelScroll, ScrollableContainer};
 use crate::core::ui::utils::{
-    PanelCard, PanelCardCostBadge, PanelCardCostIcon, PanelCardCostRow, PanelCardRow, PanelCmp,
-    PanelHeader, PanelIntensitySlider, PanelResources, PanelTitle, PlayScreenColumns2And3,
-    PlayScreenColumnsContainer, PlayingActionBar, PlayingContentFrame, PlayingPrimaryColumn,
-    ResponsiveOverlayCard, ResponsiveProgressBar, ResponsiveSettingsPanel, ResponsiveSquare,
-    ResponsiveWidth, SLIDER_WIDTH,
+    responsive_slider_width, uses_compact_viewport, PanelCard, PanelCardCostBadge,
+    PanelCardCostIcon, PanelCardCostRow, PanelCardRow, PanelCmp, PanelHeader, PanelIntensitySlider,
+    PanelResources, PanelTitle, PlayScreenColumns2And3, PlayScreenColumnsContainer,
+    PlayingActionBar, PlayingContentFrame, PlayingPrimaryColumn, ResponsiveButtonSize,
+    ResponsiveOverlayCard, ResponsiveProgressBar, ResponsiveSettingsPanel, ResponsiveSliderElement,
+    ResponsiveSquare, ResponsiveWidth, SLIDER_VALUE_WIDTH,
 };
 
 /// Width below which the interface switches from three columns to a vertical flow.
@@ -35,13 +37,13 @@ const PORTRAIT_BREAKPOINT: f32 = 720.0;
 
 /// Returns whether the viewport needs the vertically flowing phone layout.
 fn uses_portrait_layout(width: f32, height: f32) -> bool {
-    width < PORTRAIT_BREAKPOINT || height > width * 1.15
+    width < PORTRAIT_BREAKPOINT || uses_compact_viewport(width, height)
 }
 
 /// Resolves a design text size to the pixels used by the responsive typography system.
 pub fn responsive_font_size(width: f32, height: f32, design_size: f32) -> f32 {
     if uses_portrait_layout(width, height) {
-        let phone_scale = (width / 390.0).clamp(0.9, 1.15);
+        let phone_scale = (width.min(height) / 390.0).clamp(0.85, 1.05);
         (design_size * 5.0 * phone_scale).clamp(11.0, 26.0)
     } else {
         width.min(height) * design_size / 100.0
@@ -69,6 +71,8 @@ pub fn update_responsive_layout(
             Option<&CombatColumns>,
             Option<&CombatSidePanel>,
             Option<&CombatConsumablesRow>,
+            Option<&PlayingRightColumn>,
+            Option<&RightTabStrip>,
         ),
         Or<(
             With<PlayingContentFrame>,
@@ -80,6 +84,8 @@ pub fn update_responsive_layout(
             With<CombatColumns>,
             With<CombatSidePanel>,
             With<CombatConsumablesRow>,
+            With<PlayingRightColumn>,
+            With<RightTabStrip>,
         )>,
     >,
 ) {
@@ -99,6 +105,8 @@ pub fn update_responsive_layout(
         combat_columns,
         combat_panel,
         combat_consumables,
+        right_column,
+        tab_strip,
     ) in &mut nodes
     {
         if frame.is_some() {
@@ -260,6 +268,37 @@ pub fn update_responsive_layout(
                 Overflow::visible()
             };
         }
+        if right_column.is_some() {
+            node.height = if portrait {
+                Val::Px((window.height() * 0.82).clamp(320.0, 520.0))
+            } else {
+                percent(97.0)
+            };
+            node.min_height = if portrait {
+                Val::Px(320.0)
+            } else {
+                Val::Auto
+            };
+            node.padding = if portrait {
+                UiRect::axes(Val::Px(8.0), Val::Px(6.0))
+            } else {
+                UiRect {
+                    left: Val::Px(8.),
+                    right: Val::Px(22.),
+                    top: Val::Px(8.),
+                    bottom: Val::Px(0.),
+                }
+            };
+        }
+        if tab_strip.is_some() {
+            node.width = percent(100.0);
+            node.justify_content = JustifyContent::FlexStart;
+            node.overflow = if portrait {
+                Overflow::scroll_x()
+            } else {
+                Overflow::clip()
+            };
+        }
     }
 }
 
@@ -294,6 +333,7 @@ pub fn update_responsive_element_sizes(
             Option<&PanelCardCostBadge>,
             Option<&PanelCardCostIcon>,
             Option<&ResponsiveWidth>,
+            Option<&ResponsiveButtonSize>,
         ),
         Or<(
             With<ResponsiveProgressBar>,
@@ -302,6 +342,7 @@ pub fn update_responsive_element_sizes(
             With<PanelCardCostBadge>,
             With<PanelCardCostIcon>,
             With<ResponsiveWidth>,
+            With<ResponsiveButtonSize>,
         )>,
     >,
 ) {
@@ -310,8 +351,16 @@ pub fn update_responsive_element_sizes(
     };
     let portrait = uses_portrait_layout(window.width(), window.height());
 
-    for (mut node, progress, square, cost_row, cost_badge, cost_icon, responsive_width) in
-        &mut nodes
+    for (
+        mut node,
+        progress,
+        square,
+        cost_row,
+        cost_badge,
+        cost_icon,
+        responsive_width,
+        responsive_button,
+    ) in &mut nodes
     {
         if let Some(progress) = progress {
             node.width = if portrait {
@@ -339,6 +388,18 @@ pub fn update_responsive_element_sizes(
                 responsive_width.phone_width
             } else {
                 responsive_width.desktop_width
+            };
+        }
+        if let Some(button) = responsive_button {
+            node.min_width = if portrait {
+                button.compact_min_width
+            } else {
+                button.desktop_min_width
+            };
+            node.height = if portrait {
+                button.compact_height
+            } else {
+                button.desktop_height
             };
         }
         if cost_row.is_some() {
@@ -416,16 +477,23 @@ pub fn update_panel_responsive_layout(
             Option<&ResponsiveSettingsPanel>,
             Option<&ResponsiveOverlayCard>,
         ),
-        Or<(
-            With<PanelHeader>,
-            With<PanelTitle>,
-            With<PanelResources>,
-            With<PanelIntensitySlider>,
-            With<PanelCardRow>,
-            With<PanelCard>,
-            With<ResponsiveSettingsPanel>,
-            With<ResponsiveOverlayCard>,
-        )>,
+        (
+            Or<(
+                With<PanelHeader>,
+                With<PanelTitle>,
+                With<PanelResources>,
+                With<PanelIntensitySlider>,
+                With<PanelCardRow>,
+                With<PanelCard>,
+                With<ResponsiveSettingsPanel>,
+                With<ResponsiveOverlayCard>,
+            )>,
+            Without<ResponsiveSliderElement>,
+        ),
+    >,
+    mut slider_elements: Query<
+        (&mut Node, &mut ResponsiveSliderElement),
+        With<ResponsiveSliderElement>,
     >,
 ) {
     let Ok(window) = window_q.single() else {
@@ -433,6 +501,7 @@ pub fn update_panel_responsive_layout(
     };
     let portrait = uses_portrait_layout(window.width(), window.height());
     let phone_card_size = phone_panel_card_size(window.width(), window.height());
+    let slider_width = responsive_slider_width(window.width(), window.height());
 
     for (mut node, header, title, resources, slider, card_row, card, settings, overlay) in
         &mut nodes
@@ -495,8 +564,12 @@ pub fn update_panel_responsive_layout(
             };
         }
         if slider.is_some() {
-            node.width = Val::Px(SLIDER_WIDTH);
-            node.height = Val::Px(76.);
+            node.width = Val::Px(slider_width);
+            node.height = Val::Px(if portrait {
+                66.
+            } else {
+                76.
+            });
             node.flex_shrink = 0.;
         }
         if card_row.is_some() {
@@ -591,6 +664,48 @@ pub fn update_panel_responsive_layout(
             };
         }
     }
+
+    for (mut node, mut element) in &mut slider_elements {
+        match &mut *element {
+            ResponsiveSliderElement::Track => {
+                node.width = Val::Px(slider_width);
+            },
+            ResponsiveSliderElement::Notch {
+                fraction,
+            } => {
+                node.left = Val::Px(*fraction * slider_width - 2.0);
+            },
+            ResponsiveSliderElement::StageRegion {
+                left_fraction,
+                width_fraction,
+            } => {
+                node.left = Val::Px(*left_fraction * slider_width);
+                node.width = Val::Px(*width_fraction * slider_width);
+            },
+            ResponsiveSliderElement::Handle {
+                last_width,
+            } => {
+                let fraction = match node.left {
+                    Val::Px(left) => ((left + 12.0) / *last_width).clamp(0.0, 1.0),
+                    _ => 0.5,
+                };
+                node.left = Val::Px(fraction * slider_width - 12.0);
+                *last_width = slider_width;
+            },
+            ResponsiveSliderElement::Value {
+                last_width,
+            } => {
+                let fraction = match node.left {
+                    Val::Px(left) => {
+                        ((left + SLIDER_VALUE_WIDTH / 2.0) / *last_width).clamp(0.0, 1.0)
+                    },
+                    _ => 0.5,
+                };
+                node.left = Val::Px(fraction * slider_width - SLIDER_VALUE_WIDTH / 2.0);
+                *last_width = slider_width;
+            },
+        }
+    }
 }
 
 /// Turns the three crafting workspaces into a readable horizontal carousel on phones.
@@ -676,22 +791,17 @@ pub fn update_level_up_responsive_layout(
             },
             LevelUpLayoutNode::Panel => {
                 node.width = if portrait {
-                    percent(96.)
+                    percent(98.)
                 } else {
                     Val::Vw(88.)
                 };
                 node.height = if portrait {
-                    percent(96.)
+                    percent(98.)
                 } else {
                     Val::VMin(100.)
                 };
                 node.padding = if portrait {
-                    UiRect {
-                        left: Val::Px(24.),
-                        right: Val::Px(24.),
-                        top: Val::Px(24.),
-                        bottom: Val::Px(28.),
-                    }
+                    UiRect::all(Val::Px(12.))
                 } else {
                     UiRect {
                         left: Val::Px(84.),
@@ -716,8 +826,8 @@ pub fn update_level_up_responsive_layout(
             LevelUpLayoutNode::Header => {
                 node.margin = if portrait {
                     UiRect {
-                        top: Val::Px(16.),
-                        bottom: Val::Px(12.),
+                        top: Val::Px(8.),
+                        bottom: Val::Px(8.),
                         ..default()
                     }
                 } else {
@@ -776,7 +886,7 @@ pub fn update_level_up_responsive_layout(
                     Val::Px(70.)
                 };
                 node.margin = UiRect::bottom(if portrait {
-                    Val::Px(12.)
+                    Val::Px(8.)
                 } else {
                     Val::Px(48.)
                 });
@@ -787,19 +897,19 @@ pub fn update_level_up_responsive_layout(
 
     for mut node in &mut attr_buttons {
         node.width = Val::Px(if portrait {
-            40.
+            36.
         } else {
             20.
         });
         node.height = Val::Px(if portrait {
-            40.
+            36.
         } else {
             20.
         });
     }
     for mut node in &mut choice_buttons {
         node.min_height = if portrait {
-            Val::Px(72.)
+            Val::Px(64.)
         } else {
             Val::Auto
         };
@@ -985,12 +1095,17 @@ pub fn update_creation_responsive_layout(
     let portrait = uses_portrait_layout(window.width(), window.height());
 
     for (mut node, layout) in &mut nodes {
-        apply_creation_layout(&mut node, *layout, portrait);
+        apply_creation_layout(&mut node, *layout, portrait, window.height());
     }
 }
 
 /// Applies one responsive creation rule to a UI node.
-fn apply_creation_layout(node: &mut Node, layout: CreationLayoutNode, portrait: bool) {
+fn apply_creation_layout(
+    node: &mut Node,
+    layout: CreationLayoutNode,
+    portrait: bool,
+    viewport_height: f32,
+) {
     let zero_rect = UiRect::all(Val::Px(0.));
 
     match layout {
@@ -1203,7 +1318,7 @@ fn apply_creation_layout(node: &mut Node, layout: CreationLayoutNode, portrait: 
         },
         CreationLayoutNode::DeityScreen => {
             node.overflow = if portrait {
-                Overflow::clip()
+                Overflow::scroll_y()
             } else {
                 Overflow::visible()
             };
@@ -1226,7 +1341,7 @@ fn apply_creation_layout(node: &mut Node, layout: CreationLayoutNode, portrait: 
                 percent(90.)
             };
             node.height = if portrait {
-                percent(78.)
+                Val::Px((viewport_height * 0.72).clamp(420.0, 560.0))
             } else {
                 percent(76.)
             };
@@ -1250,6 +1365,11 @@ fn apply_creation_layout(node: &mut Node, layout: CreationLayoutNode, portrait: 
             } else {
                 Overflow::visible()
             };
+            node.flex_shrink = if portrait {
+                0.
+            } else {
+                1.
+            };
         },
         CreationLayoutNode::DeityCard => {
             node.width = if portrait {
@@ -1258,7 +1378,7 @@ fn apply_creation_layout(node: &mut Node, layout: CreationLayoutNode, portrait: 
                 percent(26.)
             };
             node.height = if portrait {
-                percent(90.)
+                percent(96.)
             } else {
                 percent(94.)
             };
@@ -1357,6 +1477,9 @@ mod tests {
     /// Selects compact flow for phones while retaining the desktop layout.
     fn viewport_classification_matches_phone_and_desktop() {
         assert!(uses_portrait_layout(390.0, 844.0));
+        assert!(uses_portrait_layout(844.0, 390.0));
+        assert!(uses_portrait_layout(667.0, 375.0));
+        assert!(!uses_portrait_layout(1024.0, 768.0));
         assert!(!uses_portrait_layout(1280.0, 720.0));
     }
 
@@ -1365,7 +1488,17 @@ mod tests {
     fn responsive_font_size_is_bounded_on_phones() {
         assert_eq!(responsive_font_size(390.0, 844.0, 1.4), 11.0);
         assert_eq!(responsive_font_size(390.0, 844.0, 5.0), 25.0);
+        assert_eq!(responsive_font_size(844.0, 390.0, 5.0), 25.0);
         assert_eq!(responsive_font_size(1280.0, 720.0, 2.0), 14.4);
+    }
+
+    #[test]
+    /// Keeps intensity sliders bounded while preserving their desktop design width.
+    fn slider_width_is_compact_in_both_phone_orientations() {
+        assert!((responsive_slider_width(320.0, 568.0) - 198.4).abs() < 0.01);
+        assert_eq!(responsive_slider_width(390.0, 844.0), 240.0);
+        assert_eq!(responsive_slider_width(844.0, 390.0), 240.0);
+        assert_eq!(responsive_slider_width(1280.0, 720.0), 280.0);
     }
 
     #[test]
@@ -1382,14 +1515,19 @@ mod tests {
     /// Verifies character creation stacks vertically and selection cards remain touch-sized.
     fn phone_creation_layout_uses_vertical_full_width_content() {
         let mut content = Node::default();
-        apply_creation_layout(&mut content, CreationLayoutNode::CharacterContent, true);
+        apply_creation_layout(&mut content, CreationLayoutNode::CharacterContent, true, 844.0);
         assert_eq!(content.width, percent(100.));
         assert_eq!(content.height, Val::Auto);
         assert_eq!(content.flex_direction, FlexDirection::Column);
 
         let mut card = Node::default();
-        apply_creation_layout(&mut card, CreationLayoutNode::SelectionCard, true);
+        apply_creation_layout(&mut card, CreationLayoutNode::SelectionCard, true, 844.0);
         assert_eq!(card.width, percent(78.));
         assert_eq!(card.height, percent(90.));
+
+        let mut landscape_deities = Node::default();
+        apply_creation_layout(&mut landscape_deities, CreationLayoutNode::DeityCards, true, 390.0);
+        assert_eq!(landscape_deities.height, Val::Px(420.0));
+        assert_eq!(landscape_deities.flex_shrink, 0.0);
     }
 }
