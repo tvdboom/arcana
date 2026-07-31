@@ -807,7 +807,25 @@ fn category_attack_style(category: Category) -> AttackStyle {
     }
 }
 
-/// Builds basic attacks for a player without letting shields or books auto-attack.
+/// Builds the physical fallback used when no offensive weapon is equipped.
+fn unarmed_combat_weapon(player: &Player) -> CombatWeapon {
+    CombatWeapon {
+        name: "Unarmed".to_string(),
+        kind: Kind::Physical,
+        category: Category::Melee,
+        attack_speed: player.attack_speed(),
+        attack_timer: 0.0,
+        attack: player.attack().max(1) as f32,
+        crit_chance: player.non_weapon_crit_chance().clamp(0.0, 1.0),
+        effects: Vec::new(),
+        attack_style: AttackStyle::Other,
+    }
+}
+
+/// Builds basic attacks without letting a missing weapon soft-lock PvE combat.
+///
+/// Shields and books remain non-attacking equipment. When neither hand contains an offensive
+/// weapon, the character uses a separate physical unarmed attack instead.
 fn player_combat_weapons(player: &Player) -> Vec<CombatWeapon> {
     let equipped = player.equipped_equipment();
     let attacking_weapons = equipped
@@ -822,7 +840,7 @@ fn player_combat_weapons(player: &Player) -> Vec<CombatWeapon> {
         })
         .collect::<Vec<_>>();
     if attacking_weapons.is_empty() {
-        return Vec::new();
+        return vec![unarmed_combat_weapon(player)];
     }
 
     let weapon_attack_total =
@@ -5499,6 +5517,16 @@ mod tests {
         step_combat(&mut state, 3.0, &mut play_audio_msg);
     }
 
+    /// Resolves one guaranteed player hit for the unarmed PvE regression test.
+    fn resolve_test_player_basic_attack(
+        mut state: ResMut<CombatState>,
+        mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+    ) {
+        let outcome =
+            resolve_basic_attack(&mut state, Who::Player, Who::Enemy, 0, &mut play_audio_msg);
+        assert!(matches!(outcome, Some((AttackStyle::Other, AttackOutcome::Hit))));
+    }
+
     #[test]
     /// Verifies a telegraphed move is announced before it resolves damage.
     fn enemy_moves_telegraph_before_resolving() {
@@ -5705,8 +5733,8 @@ mod tests {
     }
 
     #[test]
-    /// Verifies defensive shields and books never create a basic auto-attack.
-    fn shields_and_books_do_not_auto_attack() {
+    /// Verifies shield- and book-only loadouts attack unarmed instead of soft-locking PvE.
+    fn defensive_loadouts_fall_back_to_unarmed_attacks() {
         for category in [Category::Shield, Category::Book] {
             let weapon = all_weapons()
                 .iter()
@@ -5717,8 +5745,38 @@ mod tests {
                 ..default()
             };
 
-            assert!(player_combat_weapons(&player).is_empty());
+            let attacks = player_combat_weapons(&player);
+            assert_eq!(attacks.len(), 1);
+            assert_eq!(attacks[0].name, "Unarmed");
+            assert_eq!(attacks[0].kind, Kind::Physical);
+            assert_ne!(attacks[0].category, category);
+            assert!(attacks[0].effects.is_empty());
         }
+    }
+
+    #[test]
+    /// Verifies an unarmed player can reduce a monster's health in live combat resolution.
+    fn unarmed_player_damages_pve_monster() {
+        let player = Player::default();
+        let mut state = test_combat_state();
+        state.player.weapons = player_combat_weapons(&player);
+        state.enemy.effects.push(TimedEffect {
+            effect: Effect::Immobilize {
+                duration: 1.0,
+            },
+            remaining: 1.0,
+            tick_acc: 0.0,
+            magnitude_multiplier: 1.0,
+        });
+        let starting_health = state.enemy.health;
+        let mut app = App::new();
+        app.add_message::<PlayAudioMsg>()
+            .insert_resource(state)
+            .add_systems(Update, resolve_test_player_basic_attack);
+
+        app.update();
+
+        assert!(app.world().resource::<CombatState>().enemy.health < starting_health);
     }
 
     #[test]
@@ -5730,6 +5788,19 @@ mod tests {
         assert!(with_intelligence < without_intelligence);
         assert!((without_intelligence - 0.252).abs() < 0.0001);
         assert!((with_intelligence - 0.162).abs() < 0.0001);
+    }
+
+    #[test]
+    /// Verifies Initiative changes accuracy and evasion without changing attack cadence.
+    fn initiative_affects_dodge_but_not_attack_period() {
+        let mut fighter = test_fighter();
+        let attack_period = fighter.attack_period_for(1.2);
+        fighter.base_initiative += 10.0;
+
+        assert_eq!(fighter.attack_period_for(1.2), attack_period);
+        assert!(dodge_chance(14.0, 10.0) < dodge_chance(10.0, 14.0));
+        assert!((dodge_chance(14.0, 10.0) - 0.108).abs() < 0.0001);
+        assert!((dodge_chance(10.0, 14.0) - 0.252).abs() < 0.0001);
     }
 
     #[test]

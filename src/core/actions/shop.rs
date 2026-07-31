@@ -51,6 +51,9 @@ pub struct ShopHeaderGold;
 pub struct ShopFiltersPanel;
 
 #[derive(Component)]
+pub struct ShopClearFiltersButton;
+
+#[derive(Component)]
 pub struct ShopItemRow;
 
 #[derive(Resource, Clone, Serialize, Deserialize, Default, Debug)]
@@ -111,6 +114,16 @@ impl Default for ShopFilters {
             weapon_category: None,
             kind: None,
         }
+    }
+}
+
+impl ShopFilters {
+    /// Returns whether any value filter differs from its unfiltered state.
+    pub fn has_active_filters(self) -> bool {
+        self.weapon_hand.is_some()
+            || self.weapon_type != WeaponTypeFilter::All
+            || self.weapon_category.is_some()
+            || self.kind.is_some()
     }
 }
 
@@ -664,6 +677,41 @@ pub fn build_shop_content_inner(
                     } else if filters.tab == ShopTab::Artifacts {
                         spawn_dropdown_kind(parent, assets, filters.kind, open_dropdown);
                     }
+
+                    if filters.has_active_filters() {
+                        parent
+                            .spawn((
+                                Node {
+                                    width: percent(100.),
+                                    min_height: Val::Px(38.),
+                                    padding: UiRect::axes(Val::Px(8.), Val::Px(6.)),
+                                    border: UiRect::all(Val::Px(1.)),
+                                    border_radius: BorderRadius::all(Val::Px(4.)),
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::Center,
+                                    flex_shrink: 0.,
+                                    ..default()
+                                },
+                                BackgroundColor(NORMAL_BUTTON_COLOR),
+                                BorderColor::all(BUTTON_BORDER_COLOR),
+                                Button,
+                                Interaction::default(),
+                                Pickable::default(),
+                                ShopClearFiltersButton,
+                            ))
+                            .observe(handle_clear_shop_filters)
+                            .observe(recolor::<Over>(HOVERED_BUTTON_COLOR))
+                            .observe(recolor::<Out>(NORMAL_BUTTON_COLOR))
+                            .observe(cursor::<Over>(SystemCursorIcon::Pointer))
+                            .observe(cursor::<Out>(SystemCursorIcon::Default))
+                            .with_children(|button| {
+                                button.spawn((
+                                    add_text("Clear filters", "bold", 1.6, assets),
+                                    TextColor(BUTTON_TEXT_COLOR),
+                                    Pickable::IGNORE,
+                                ));
+                            });
+                    }
                 });
 
             parent
@@ -817,6 +865,30 @@ fn spawn_shop_item_card(
 
 #[derive(Component, Clone, Copy)]
 pub struct ShopTabButton(pub ShopTab);
+
+/// Restores every filter on the active shop tab to its default value.
+pub fn handle_clear_shop_filters(
+    mut event: On<Pointer<Click>>,
+    mut shop_ui_state: ResMut<ShopUiState>,
+    mut open_dropdown: ResMut<OpenDropdown>,
+    mut scroll_q: Query<&mut ScrollPosition, With<ShopItemsScroll>>,
+    mut play_audio_msg: MessageWriter<PlayAudioMsg>,
+) {
+    event.propagate(false);
+    let active_tab = shop_ui_state.active_tab;
+    let state = shop_ui_state.state_for_mut(active_tab);
+    state.weapon_hand = None;
+    state.weapon_type = WeaponTypeFilter::All;
+    state.weapon_category = None;
+    state.kind = None;
+    state.scroll_y = 0.;
+
+    for mut scroll in &mut scroll_q {
+        scroll.0 = Vec2::ZERO;
+    }
+    *open_dropdown = OpenDropdown::None;
+    play_audio_msg.write(PlayAudioMsg::new("button"));
+}
 
 /// Handles shop tab click.
 pub fn handle_shop_tab_click(
@@ -1020,5 +1092,30 @@ pub fn shop_tab_button_system(
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ShopFilters, ShopTab, WeaponTypeFilter};
+    use crate::core::catalog::weapons::Hand;
+
+    #[test]
+    fn clear_filters_button_only_appears_for_non_default_values() {
+        let mut filters = ShopFilters {
+            tab: ShopTab::Weapons,
+            weapon_hand: None,
+            weapon_type: WeaponTypeFilter::All,
+            weapon_category: None,
+            kind: None,
+        };
+        assert!(!filters.has_active_filters());
+
+        filters.weapon_hand = Some(Hand::TwoHand);
+        assert!(filters.has_active_filters());
+
+        filters.weapon_hand = None;
+        filters.tab = ShopTab::Artifacts;
+        assert!(!filters.has_active_filters());
     }
 }

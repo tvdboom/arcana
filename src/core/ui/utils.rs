@@ -42,6 +42,10 @@ pub struct PanelCardCostBadge;
 #[derive(Component)]
 pub struct PanelCardCostIcon;
 
+/// Marks the equipment-card price and equipped control for breakpoint-specific styling.
+#[derive(Component)]
+pub struct ResponsiveItemBadge;
+
 #[derive(Component, Clone, Copy)]
 pub struct ResponsiveProgressBar {
     pub desktop_width: Val,

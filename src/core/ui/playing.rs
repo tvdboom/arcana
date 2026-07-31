@@ -31,7 +31,7 @@ use crate::core::ui::scrollbar::{
 };
 pub use crate::core::ui::toast::ToastContainer;
 pub use crate::core::ui::tooltip::*;
-use crate::core::ui::utils::{ResponsiveProgressBar, ResponsiveSquare};
+use crate::core::ui::utils::{ResponsiveItemBadge, ResponsiveProgressBar, ResponsiveSquare};
 use crate::core::utils::cursor;
 use crate::utils::{capitalize_words, NameFromEnum};
 use bevy::window::{CursorIcon, SystemCursorIcon};
@@ -3764,17 +3764,15 @@ pub fn spawn_equipment_card<'a>(
                 align_items: AlignItems::Center,
                 column_gap: Val::Px(4.),
                 overflow: Overflow::clip(),
-                padding: UiRect::axes(Val::Px(5.0), Val::Px(3.0)),
-                border: UiRect::all(Val::Px(1.0)),
-                border_radius: BorderRadius::all(Val::Px(4.0)),
                 ..default()
             },
-            BackgroundColor(Color::srgba_u8(8, 14, 30, 230)),
-            BorderColor::all(BUTTON_BORDER_COLOR),
+            BackgroundColor(Color::NONE),
+            BorderColor::all(Color::NONE),
             ZIndex(10),
             Button,
             Interaction::default(),
             Pickable::default(),
+            ResponsiveItemBadge,
             SellItemButton {
                 key: card_key.clone(),
                 is_equipped,
@@ -3783,8 +3781,6 @@ pub fn spawn_equipment_card<'a>(
         ));
         sell_cmd
             .observe(handle_sell_item_button_click)
-            .observe(recolor::<Over>(NORMAL_BUTTON_COLOR))
-            .observe(recolor::<Out>(Color::srgba_u8(8, 14, 30, 230)))
             .observe(cursor::<Over>(SystemCursorIcon::Pointer))
             .observe(cursor::<Out>(SystemCursorIcon::Default));
         sell_cmd.with_children(|parent| {

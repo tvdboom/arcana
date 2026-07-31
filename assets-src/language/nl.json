@@ -2264,7 +2264,7 @@
   "general.ice": "IJs",
   "general.init": "Init.",
   "general.initiative": "Initiatief",
-  "general.initiative_desc": "Bepaalt hoe snel basisaanvallen plaatsvinden. Een hoger Initiatief betekent minder tijd tussen aanvallen.",
+  "general.initiative_desc": "Wordt vergeleken met het Initiatief van de tegenstander om de ontwijkingskans te bepalen. Een hoger Initiatief maakt jouw aanvallen moeilijker te ontwijken en vijandelijke aanvallen makkelijker te ontwijken. Het aanvalstempo wordt afzonderlijk bepaald door de Aanvalsnelheid van elk wapen.",
   "general.intermediate": "Gemiddeld",
   "general.inventory": "Inventaris",
   "general.juvenile": "Jeugdig",

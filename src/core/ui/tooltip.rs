@@ -127,7 +127,6 @@ pub fn spawn_tooltip(
     };
 
     let metrics = tooltip_metrics(window_width, window_height, content.extra_width);
-    let char_width_desc = metrics.description_font_size * 0.60;
     let char_width_desc_for_width = metrics.description_font_size * 0.68;
     let line_height_title = metrics.title_font_size * 1.35;
     let line_height_desc = metrics.description_font_size * 1.35;
@@ -138,7 +137,11 @@ pub fn spawn_tooltip(
         text_allowed_width -= metrics.image_size + metrics.image_gap;
     }
 
-    let max_chars_per_line = (text_allowed_width / char_width_desc).floor().max(12.0) as usize;
+    // Use the same conservative glyph-width estimate for wrapping and sizing. A smaller wrapping
+    // estimate can create a line that fits our manual character limit but is then wrapped again by
+    // Bevy, leaving a misplaced orphan word on image tooltips.
+    let max_chars_per_line =
+        (text_allowed_width / char_width_desc_for_width).floor().max(12.0) as usize;
 
     // Wrap the description lines
     let mut wrapped_lines = Vec::new();
@@ -707,5 +710,20 @@ mod tests {
             assert!(top >= 12.0);
             assert!(top + 500.0 <= 832.0);
         }
+    }
+
+    #[test]
+    /// Prevents stance descriptions from receiving a second, orphaning layout wrap.
+    fn stance_tooltip_wrap_keeps_final_phrase_together() {
+        let metrics = tooltip_metrics(1280.0, 720.0, 0.0);
+        let text_width =
+            metrics.max_width - metrics.padding * 2.0 - metrics.image_size - metrics.image_gap;
+        let max_chars = (text_width / (metrics.description_font_size * 0.68)).floor() as usize;
+        let lines = wrap_tooltip_line(
+            "Basic attacks deal 20% more damage, but you take 12% more damage. Each hit deals 6 Stability damage.",
+            max_chars,
+        );
+
+        assert_eq!(lines.last().map(String::as_str), Some("Stability damage."));
     }
 }

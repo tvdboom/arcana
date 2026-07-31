@@ -2264,7 +2264,7 @@
   "general.ice": "Ice",
   "general.init": "Init.",
   "general.initiative": "Initiative",
-  "general.initiative_desc": "Determines how quickly basic attacks occur. Higher Initiative means a shorter delay between attacks.",
+  "general.initiative_desc": "Compared with the opponent's Initiative to determine dodge chance. Higher Initiative makes your attacks harder to dodge and enemy attacks easier to dodge. Attack timing is controlled separately by each weapon's Attack Speed.",
   "general.intermediate": "Intermediate",
   "general.inventory": "Inventory",
   "general.juvenile": "Juvenile",

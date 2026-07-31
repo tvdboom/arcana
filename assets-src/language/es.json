@@ -2264,7 +2264,7 @@
   "general.ice": "Hielo",
   "general.init": "Inic.",
   "general.initiative": "Iniciativa",
-  "general.initiative_desc": "Determina la rapidez de los ataques básicos. Una Iniciativa mayor reduce el tiempo entre ataques.",
+  "general.initiative_desc": "Se compara con la Iniciativa del oponente para determinar la probabilidad de esquivar. Una Iniciativa mayor hace que tus ataques sean más difíciles de esquivar y facilita esquivar los ataques enemigos. El ritmo de ataque se determina por separado mediante la Velocidad de ataque de cada arma.",
   "general.intermediate": "Intermedio",
   "general.inventory": "Inventario",
   "general.juvenile": "Juvenil",

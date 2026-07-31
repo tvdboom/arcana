@@ -276,6 +276,17 @@ mod tests {
         }
     }
 
+    /// Asserts that one item does not repeat the same effect variant at different strengths.
+    fn assert_unique_effect_variants(item_name: &str, effects: &[Effect]) {
+        let mut variants = HashSet::new();
+        for effect in effects {
+            assert!(
+                variants.insert(std::mem::discriminant(effect)),
+                "{item_name} repeats the {effect:?} effect variant"
+            );
+        }
+    }
+
     /// Asserts that a catalog image resolves inside the generated asset tree.
     fn assert_image_exists(image: &str) {
         assert!(Path::new("assets").join(image).is_file(), "catalog image is missing: {image}");
@@ -483,6 +494,20 @@ mod tests {
                 "{} costs the same as another consumable at its level",
                 item.name
             );
+        }
+    }
+
+    #[test]
+    /// Verifies no equipment item repeats an effect variant at multiple strengths.
+    fn equipment_items_have_unique_effect_variants() {
+        for weapon in all_weapons() {
+            assert_unique_effect_variants(&weapon.name, &weapon.effects);
+        }
+        for wearable in all_wearables() {
+            assert_unique_effect_variants(&wearable.name, &wearable.effects);
+        }
+        for consumable in all_consumables() {
+            assert_unique_effect_variants(&consumable.name, &consumable.effects);
         }
     }
 

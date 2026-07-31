@@ -2580,6 +2580,66 @@ fn consumable_effects(filename: &str, level: u32) -> Vec<String> {
     }
 }
 
+/// Returns whether a generated effect list already contains the named effect variant.
+fn has_effect_variant(effects: &[String], variant: &str) -> bool {
+    effects.iter().any(|effect| {
+        effect == variant || effect.strip_prefix(variant).is_some_and(|rest| rest.starts_with('('))
+    })
+}
+
+/// Builds one complementary effect used to distinguish an otherwise duplicate consumable.
+///
+/// The specialty is selected from a semantic order based on the item's primary effect and always
+/// uses a variant that is not already present on the item.
+fn consumable_profile_specialty(effects: &[String], level: u32, collision: u32) -> String {
+    let has = |variant| has_effect_variant(effects, variant);
+    let candidates = if has("Heal") {
+        ["Fortify", "Haste", "Focus", "Clearcasting", "Regen", "ManaFlow"]
+    } else if has("InstantMana") {
+        ["Clearcasting", "Focus", "Haste", "Fortify", "ManaFlow", "Regen"]
+    } else if has("Haste") {
+        ["Focus", "Clearcasting", "Fortify", "Empower", "Regen", "ManaFlow"]
+    } else if has("Focus") {
+        ["Haste", "Empower", "Clearcasting", "Fortify", "Regen", "ManaFlow"]
+    } else {
+        ["Focus", "Haste", "Fortify", "Clearcasting", "Regen", "ManaFlow"]
+    };
+    let variant = candidates
+        .into_iter()
+        .find(|candidate| !has(candidate))
+        .expect("consumable specialty candidates must include an unused effect variant");
+    let potency = collision as f32 * 0.1;
+
+    match variant {
+        "Regen" => {
+            format!("Regen(heal: {}, duration: {:.1})", 1 + level.div_ceil(5), 4.0 + potency)
+        },
+        "Fortify" => format!(
+            "Fortify(defense_pct: {:.1}, duration: 5.0)",
+            6.0 + level as f32 * 0.5 + potency
+        ),
+        "Haste" => format!(
+            "Haste(initiative_pct: {:.1}, duration: 5.0)",
+            6.0 + level as f32 * 0.5 + potency
+        ),
+        "Focus" => format!(
+            "Focus(crit_chance_pct: {:.1}, duration: 5.0)",
+            1.0 + level as f32 * 0.25 + potency
+        ),
+        "Clearcasting" => format!(
+            "Clearcasting(reduction_pct: {:.1}, duration: 5.0)",
+            6.0 + level as f32 * 0.4 + potency
+        ),
+        "ManaFlow" => {
+            format!("ManaFlow(amount: {}, duration: {:.1})", 1 + level.div_ceil(5), 4.0 + potency)
+        },
+        "Empower" => {
+            format!("Empower(damage_pct: {:.1}, duration: 5.0)", 5.0 + level as f32 * 0.5 + potency)
+        },
+        _ => unreachable!("specialty candidates are exhaustive"),
+    }
+}
+
 /// Calculates archetype-adjusted monster stats from level and monster family.
 fn monster_stats(name: &str, level: u32, kind: &str) -> (u32, u32, u32, u32, f32, i32) {
     let lower = name.to_lowercase();
@@ -3304,13 +3364,16 @@ pub fn run(src_images: &str, out_inventory: &str, img_ext: &str) {
             price += 1;
         }
         let mut effects = consumable_effects(filename, level);
+        let base_effects = effects.clone();
         let mut collision = 0u32;
-        while !consumable_profiles.insert(effects.join(",")) {
+        loop {
+            if consumable_profiles.insert(effects.join(",")) {
+                break;
+            }
             collision += 1;
-            effects.push(format!(
-                "Focus(crit_chance_pct: {:.1}, duration: 5.0)",
-                1.0 + collision as f32
-            ));
+            effects.clone_from(&base_effects);
+            let specialty = consumable_profile_specialty(&effects, level, collision);
+            effects.push(specialty);
         }
 
         consumables_ron.push_str(&format!(

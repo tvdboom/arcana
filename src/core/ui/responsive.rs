@@ -28,8 +28,8 @@ use crate::core::ui::utils::{
     PanelCardCostIcon, PanelCardCostRow, PanelCardRow, PanelCmp, PanelHeader, PanelIntensitySlider,
     PanelResources, PanelTitle, PlayScreenColumns2And3, PlayScreenColumnsContainer,
     PlayingActionBar, PlayingContentFrame, PlayingPrimaryColumn, ResponsiveButtonSize,
-    ResponsiveOverlayCard, ResponsiveProgressBar, ResponsiveSettingsPanel, ResponsiveSliderElement,
-    ResponsiveSquare, ResponsiveWidth, SLIDER_VALUE_WIDTH,
+    ResponsiveItemBadge, ResponsiveOverlayCard, ResponsiveProgressBar, ResponsiveSettingsPanel,
+    ResponsiveSliderElement, ResponsiveSquare, ResponsiveWidth, SLIDER_VALUE_WIDTH,
 };
 
 /// Width below which the interface switches from three columns to a vertical flow.
@@ -433,12 +433,12 @@ pub fn update_responsive_element_sizes(
             node.padding = if portrait {
                 UiRect::axes(Val::Px(6.), Val::Px(3.))
             } else {
-                UiRect::axes(Val::Px(8.), Val::Px(4.))
+                UiRect::all(Val::Px(0.))
             };
             node.border_radius = BorderRadius::all(Val::Px(if portrait {
                 5.
             } else {
-                6.
+                0.
             }));
         }
         if cost_icon.is_some() {
@@ -449,6 +449,48 @@ pub fn update_responsive_element_sizes(
             });
             node.width = size;
             node.height = size;
+        }
+    }
+}
+
+/// Keeps compact touch badges boxed while restoring the unobtrusive desktop presentation.
+pub fn update_responsive_badge_styles(
+    window_q: Query<&Window, With<PrimaryWindow>>,
+    mut cost_badges: Query<
+        &mut BackgroundColor,
+        (With<PanelCardCostBadge>, Without<ResponsiveItemBadge>),
+    >,
+    mut item_badges: Query<
+        (&mut Node, &mut BackgroundColor, &mut BorderColor),
+        (With<ResponsiveItemBadge>, Without<PanelCardCostBadge>),
+    >,
+) {
+    let Ok(window) = window_q.single() else {
+        return;
+    };
+    let compact = uses_portrait_layout(window.width(), window.height());
+
+    for mut background in &mut cost_badges {
+        background.0 = if compact {
+            Color::srgba(0., 0., 0., 0.85)
+        } else {
+            Color::NONE
+        };
+    }
+
+    for (mut node, mut background, mut border) in &mut item_badges {
+        if compact {
+            node.padding = UiRect::axes(Val::Px(5.), Val::Px(3.));
+            node.border = UiRect::all(Val::Px(1.));
+            node.border_radius = BorderRadius::all(Val::Px(4.));
+            background.0 = Color::srgba_u8(8, 14, 30, 230);
+            *border = BorderColor::all(crate::core::constants::BUTTON_BORDER_COLOR);
+        } else {
+            node.padding = UiRect::all(Val::Px(0.));
+            node.border = UiRect::all(Val::Px(0.));
+            node.border_radius = BorderRadius::ZERO;
+            background.0 = Color::NONE;
+            *border = BorderColor::all(Color::NONE);
         }
     }
 }
@@ -530,7 +572,7 @@ pub fn update_panel_responsive_layout(
             node.justify_content = if portrait {
                 JustifyContent::FlexStart
             } else {
-                JustifyContent::SpaceBetween
+                JustifyContent::Center
             };
             node.align_items = AlignItems::Center;
             node.row_gap = if portrait {
